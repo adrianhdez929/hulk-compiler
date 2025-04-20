@@ -31,16 +31,22 @@ any AttributeProduction::Execute(const vector<any>& inherited, const vector<any>
 NonTerminal::NonTerminal(const std::string& name, Grammar& grammar) : Symbol(name, grammar) {}
 bool NonTerminal::IsNonTerminal() const { return true; }
 
-NonTerminal& NonTerminal::operator%=(const std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>& rhs) {
-    auto production = std::make_unique<AttributeProduction>(this->grammar.GetStartSymbol(), rhs.first, rhs.second);
-    productions.push_back(*production);
-    this->grammar.AddProduction(*production);
-    return *this;
-}
+// NonTerminal& NonTerminal::operator%=(const std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>& rhs) {
+//     auto production = std::make_unique<AttributeProduction>(this->grammar.GetStartSymbol(), rhs.first, rhs.second);
+//     productions.push_back(*production);
+//     this->grammar.AddProduction(*production);
+//     return *this;
+// }
 
-NonTerminal& NonTerminal::operator%=(const Sentence& rhs) {
-    auto production = std::make_unique<Production>(this->grammar.GetStartSymbol(), rhs);
+// NonTerminal& NonTerminal::operator%=(const Sentence& rhs) {
+//     auto production = std::make_unique<Production>(this->grammar.GetStartSymbol(), rhs);
+//     productions.push_back(*production);
+//     this->grammar.AddProduction(*production);
+//     return *this;
+// }
+
+void NonTerminal::operator%=(AttributeProduction::ProdDef rhs) {
+    auto production = std::make_unique<AttributeProduction>(this->grammar.GetStartSymbol(), rhs.sentence, rhs.actions);
     productions.push_back(*production);
     this->grammar.AddProduction(*production);
-    return *this;
 }

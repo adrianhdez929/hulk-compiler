@@ -12,10 +12,10 @@ int main() {
     auto pipe = g.SetTerminal("|");
     auto symbol = g.SetTerminal("symbol");
 
-    // Producción con atributos
-    E %= std::make_pair(
+    // Crear producciones
+    E %= {
         E + plus + T,
-        std::vector<AttributeProduction::SemanticAction>{
+        {
             // Acción para E (heredado, sintetizado)
             [](auto h, auto s) { 
                 auto left = std::any_cast<double>(s[0]);
@@ -29,7 +29,27 @@ int main() {
             // Acción para LHS (E)
             [](auto h, auto s) { return s[0]; }
         }
-    );
+    };
+        
+
+    // Producción con atributos
+    // E %= std::make_pair(
+    //     E + plus + T,
+    //     std::vector<AttributeProduction::SemanticAction>{
+    //         // Acción para E (heredado, sintetizado)
+    //         [](auto h, auto s) { 
+    //             auto left = std::any_cast<double>(s[0]);
+    //             auto right = std::any_cast<double>(s[2]);
+    //             return left + right; 
+    //         },
+    //         // Acción para '+'
+    //         [](auto h, auto s) { return 0.0; }, 
+    //         // Acción para T
+    //         [](auto h, auto s) { return s[3]; },
+    //         // Acción para LHS (E)
+    //         [](auto h, auto s) { return s[0]; }
+    //     }
+    // );
 
     // Producción sin atributos
     // E %= T + plus + T;

@@ -26,6 +26,7 @@ private:
 
 class AttributeProduction : public Production {
 public:
+    // Funcion semántica que toma un vector de atributos heredados y un vector de atributos sintetizados
     using SemanticAction = function<any(const vector<any> inherited, const vector<any>& synthesized)>;
     
     AttributeProduction(const NonTerminal& left, 
@@ -35,6 +36,14 @@ public:
     const vector<SemanticAction>& Attributes() const;
     any Execute(const vector<any>& inherited, //const any& inherited, 
         const vector<any>& synthesized) const;
+
+    // ProdDef es una estructura que contiene una producción y sus acciones semánticas
+    // Para mejorar la legibilidad y evitar el uso de std::pair y std::vector<std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>>
+    struct ProdDef {
+        Sentence sentence;
+        vector<SemanticAction> actions;
+    };
+
 private:
     vector<SemanticAction> attributes;
 };
@@ -45,20 +54,11 @@ class NonTerminal : public Symbol {
         bool IsNonTerminal() const override;
      
         vector<Production> productions;
-        NonTerminal& operator%=(const std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>& rhs);
-        NonTerminal& operator%=(const Sentence& rhs);
+        // NonTerminal& operator%=(const std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>& rhs);
+        // NonTerminal& operator%=(const Sentence& rhs);
+
+        // Sobrecarga del operador %= para agregar producciones con atributos
+        void operator%=(AttributeProduction::ProdDef rhs);
 };
-
-
-// class NonTerminal {
-// public:
-//     NonTerminal(const std::string& name, Grammar& grammar);
-//     bool IsTerminal() const override;
-//     NonTerminal& operator%=(const std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>& rhs);
-//     std::vector<Production> productions;
-// private:
-//     std::string name;
-//     Grammar& grammar;
-// }
 
 #endif
