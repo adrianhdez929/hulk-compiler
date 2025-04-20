@@ -1,130 +1,52 @@
 #include <iostream>
-#include "Gramatica2/grammar.h"
+// #include "Gramatica2/grammar.h"
+#include "Automata/nfa.h"
+#include "Automata/dfa.h"
 
 using namespace std;
 
 int main() {
-    Grammar g;
-    auto E = g.SetNonTerminal("E", true);
-    auto T = g.SetNonTerminal("T");
-    auto plus = g.SetTerminal("+");
-    auto num = g.SetTerminal("num");
-    auto pipe = g.SetTerminal("|");
-    auto symbol = g.SetTerminal("symbol");
 
-    // Crear producciones
-    E %= {
-        E + plus + T,
-        {
-            // Acción para E (heredado, sintetizado)
-            [](auto h, auto s) { 
-                auto left = std::any_cast<double>(s[0]);
-                auto right = std::any_cast<double>(s[2]);
-                return left + right; 
-            },
-            // Acción para '+'
-            [](auto h, auto s) { return 0.0; }, 
-            // Acción para T
-            [](auto h, auto s) { return s[3]; },
-            // Acción para LHS (E)
-            [](auto h, auto s) { return s[0]; }
-        }
+    // Definición de un autómata no determinista (NFA)
+    NFA::Transitions transitions = {
+        {{0, "a"}, {1, 2}},
+        {{1, "b"}, {3}},
+        {{2, "c"}, {4}},
+        {{3, ""}, {5}}, // Epsilon transition
+        {{4, "d"}, {5}}
     };
-        
+    NFA nfa(6, {5}, transitions, 0);
 
-    // Producción con atributos
-    // E %= std::make_pair(
-    //     E + plus + T,
-    //     std::vector<AttributeProduction::SemanticAction>{
-    //         // Acción para E (heredado, sintetizado)
-    //         [](auto h, auto s) { 
-    //             auto left = std::any_cast<double>(s[0]);
-    //             auto right = std::any_cast<double>(s[2]);
-    //             return left + right; 
-    //         },
-    //         // Acción para '+'
-    //         [](auto h, auto s) { return 0.0; }, 
-    //         // Acción para T
-    //         [](auto h, auto s) { return s[3]; },
-    //         // Acción para LHS (E)
-    //         [](auto h, auto s) { return s[0]; }
-    //     }
-    // );
+    DFA::Transitions transitions2 = {
+        {{0, "a"}, {0}},
+        {{0, "b"}, {1}},
+        {{1, "a"}, {2}},
+        {{1, "b"}, {1}},
+        {{2, "a"}, {0}},
+        {{2, "b"}, {1}}
+    };
+    DFA dfa(3, {2}, transitions2, 0);//Reconoce cadenas sobre {a,b}* q terminan en "ba"
 
-    // Producción sin atributos
-    // E %= T + plus + T;
+    std::cout << dfa.recognize("ba") << std::endl; // 1
+    std::cout << dfa.recognize("aababbaba") << std::endl; // 1
 
-    string grammar_string = g.ToString();
-    std::cout << grammar_string << std::endl;
+    std::cout << dfa.recognize("") << std::endl; // 0
+    std::cout << dfa.recognize("aabaa") << std::endl; // 0
+    std::cout << dfa.recognize("aababb") << std::endl; // 0
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-    //ATTEMPT 1
-    // Grammar g;
-    
-    // // Crear símbolos
-    // Symbol* E = g.createSymbol(Symbol::NON_TERMINAL, "E");
-    // Symbol* T = g.createSymbol(Symbol::NON_TERMINAL, "T");
-    // Symbol* pipe = g.createSymbol(Symbol::TERMINAL, "|");
-    // Symbol* symb = g.createSymbol(Symbol::TERMINAL, "symbol");
-    
-    // // Añadir producciones con acciones semánticas
-    // g.addProduction(
-    //     E,
-    //     {E, pipe, T},
-    //     [](const std::vector<std::unique_ptr<Node>>& children) {
-    //         return std::make_unique<UnionNode>(
-    //             std::move(children[0]), 
-    //             std::move(children[2])
-    //         );
-    //     }
-    // );
-    
-    // g.addProduction(
-    //     T,
-    //     {symb},
-    //     [](const std::vector<std::unique_ptr<Node>>& children) {
-    //         return std::make_unique<SymbolNode>(
-    //             std::move(children[0])
-    //         );
-    //     }
-    // );
-    // std::any a;
-    // std::cout << a.type().name() << std::endl;
-    
-    // Crear un nodo raiz
-
-
-
-
-
-
-
-
-
-    //ATTEMPT 2
-    
     // Grammar g;
     // auto E = g.SetNonTerminal("E", true);
     // auto T = g.SetNonTerminal("T");
     // auto plus = g.SetTerminal("+");
     // auto num = g.SetTerminal("num");
+    // auto pipe = g.SetTerminal("|");
+    // auto symbol = g.SetTerminal("symbol");
 
-    // // Producción con atributos
-    // E %= std::make_pair(
+    // // Crear producciones
+    // E %= {
     //     E + plus + T,
-    //     std::vector<AttributeProduction::SemanticAction>{
+    //     {
     //         // Acción para E (heredado, sintetizado)
     //         [](auto h, auto s) { 
     //             auto left = std::any_cast<double>(s[0]);
@@ -138,6 +60,10 @@ int main() {
     //         // Acción para LHS (E)
     //         [](auto h, auto s) { return s[0]; }
     //     }
-    // );
+    // };
+
+    // string grammar_string = g.ToString();
+    // std::cout << grammar_string << std::endl;
+
     return 0;
 }
