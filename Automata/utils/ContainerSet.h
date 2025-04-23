@@ -9,6 +9,7 @@ using namespace std;
 #ifndef CONTAINER_SET_H
 #define CONTAINER_SET_H
 
+
 class ContainerSet {
     public:
         ContainerSet(bool contains_epsilon = false);

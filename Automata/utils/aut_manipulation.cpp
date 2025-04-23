@@ -1,16 +1,14 @@
-#include "dfa.h"
-#include "nfa.h"
-#include "utils/ContainerSet.h"
+#include "../dfa.h"
+#include "../nfa.h"
+#include "ContainerSet.h"
 #include <algorithm>
 #include <map>
+#include "aut_manipulation.h"
 
-//Funciones para operar entre automatas
-
-
-
+// namespace manipulation {
 //The move function computes the set of states that can be reached from the given set of states with the given symbol.
 set<NFA::State> move(const NFA& automaton, const unordered_set<NFA::State>& states, NFA::Symbol symbol) {
-    NFA::Transitions moves;
+    set<NFA::State> moves;
     for (const auto& state : states) {
         try {
             const auto& next_states = automaton.getTransitions().at(state).at(symbol);
@@ -19,28 +17,17 @@ set<NFA::State> move(const NFA& automaton, const unordered_set<NFA::State>& stat
             // No transition for this state and symbol
         }
     }
-    // Extraer los states
-    set<NFA::State> move_states_set;
-    for (const auto& transition : moves) {
-        move_states_set.insert(transition.second.begin(), transition.second.end());
-    }
-    return move_states_set;
+    return moves;
 }
 set<NFA::State> move(const NFA& automaton, const NFA::State& state, const NFA::Symbol& symbol) {
-    NFA::Transitions moves;
+    set<NFA::State> moves;
     try {
         const auto& next_states = automaton.getTransitions().at(state).at(symbol);
         moves.insert(next_states.begin(), next_states.end());
     } catch (const std::out_of_range&) {
         // No transition for this state and symbol
     }
-    // Extraer los states
-    set<NFA::State> move_states_set;
-    for (const auto& transition : moves) {
-        move_states_set.insert(transition.second.begin(), transition.second.end());
-    }
-    return move_states_set;
-
+    return moves;
 }
 
 ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states) {
@@ -49,8 +36,8 @@ ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states
     while (!pending.empty()) {
         NFA::State state = pending.back();
         pending.pop_back();
-       
-        for (NFA::State next_state : automaton.epsilon_transition(state)) {
+    
+        for (NFA::State next_state : automaton.epsilon_transitions(state)) {
             if (closure.insert(next_state).second) { // Si se inserta, significa que no estaba en closure
                 pending.push_back(next_state);
             }
@@ -58,15 +45,6 @@ ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states
     }
     return ContainerSet(closure);
 }
-
-struct DFAState {
-    ContainerSet states;
-    int id;
-    bool is_final;
-
-    DFAState(const ContainerSet& states, int id, bool is_final)
-        : states(states), id(id), is_final(is_final) {}
-};
 
 DFA nfa_to_dfa(const NFA& automaton) {
     // Crear un conjunto de estados para el DFA
@@ -122,9 +100,10 @@ DFA nfa_to_dfa(const NFA& automaton) {
             else {
                 // Si ya existe, actualizar el estado actual
                 current_dfa_state = *it;
+            }
 
             // Agregar la transición al mapa de transiciones del DFA
-            dfa_transitions[{current_dfa_state.id, symbol}] = it->id;
+            dfa_transitions[{current_dfa_state.id, std::string(symbol)}] = it->id;
         }
     }
 
@@ -144,3 +123,23 @@ DFA nfa_to_dfa(const NFA& automaton) {
     return dfa;
 }
 
+bool nfa_recognize(const NFA& automaton, const string& input) {
+    // Crear un conjunto de estados iniciales
+    ContainerSet current_states = epsilon_closure(automaton, {automaton.startState()});
+
+    // Procesar cada símbolo de la cadena de entrada
+    for (const auto& symbol : input) {
+        // Moverse a los siguientes estados
+        set<NFA::State> next_states = move(automaton, current_states.get_set(), string(1, symbol));
+        current_states = epsilon_closure(automaton, next_states);
+    }
+
+    // Verificar si alguno de los estados finales está en el conjunto actual
+    for (const auto& final_state : automaton.finalStates()) {
+        if (current_states.contains(final_state)) {
+            return true; // La cadena es aceptada
+        }
+    }
+    return false; // La cadena no es aceptada
+}
+// }

@@ -25,7 +25,7 @@ public:
         const Transitions& transitions,
         State initialState);
 
-    vector<State> epsilon_transition(State state) const;
+    vector<State> epsilon_transitions(State state) const;
     const set<Symbol>& getVocab() const;
 
     // Getters

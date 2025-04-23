@@ -31,11 +31,11 @@ void NFA::build_transitions() {
     }
 }
 
-vector<NFA::State> NFA::epsilon_transition(State state) const {
+vector<NFA::State> NFA::epsilon_transitions(State state) const {
     validate_state(state);
     vector<State> result;
     for (const auto& [symbol, destinations] : transitions_.at(state)) {
-        if (symbol.empty()) { // Epsilon transition
+        if (symbol == "") { // Epsilon transition
             result.insert(result.end(), destinations.begin(), destinations.end());
         }
     }
