@@ -48,7 +48,7 @@ ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states
 
 DFA nfa_to_dfa(const NFA& automaton) {
     // Crear un conjunto de estados para el DFA
-    vector<DFAState> dfa_states;
+    vector<DFAStates> dfa_states;
     int dfa_state_id = 0;
 
     // Crear el estado inicial del DFA
@@ -65,9 +65,9 @@ DFA nfa_to_dfa(const NFA& automaton) {
     // Crear un mapa para las transiciones del DFA
     map<pair<int, NFA::Symbol>, int> dfa_transitions;
     // Crear un conjunto de estados pendientes para procesar
-    vector<DFAState> pending_states = {dfa_states[0]};
+    vector<DFAStates> pending_states = {dfa_states[0]};
     while (!pending_states.empty()) {
-        DFAState current_dfa_state = pending_states.back();
+        DFAStates current_dfa_state = pending_states.back();
         pending_states.pop_back();
 
         // Iterar sobre el vocabulario del NFA
@@ -82,7 +82,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
 
             // Verificar si el conjunto de estados ya existe en el DFA
             auto it = find_if(dfa_states.begin(), dfa_states.end(),
-                [&next_closure](const DFAState& state) { return state.states == next_closure; });
+                [&next_closure](const DFAStates& state) { return state.states == next_closure; });
 
             if (it == dfa_states.end()) {
                 // Si no existe, crear un nuevo estado en el DFA
@@ -93,17 +93,23 @@ DFA nfa_to_dfa(const NFA& automaton) {
                         break;
                     }
                 }
-                dfa_states.emplace_back(next_closure, dfa_state_id++, is_final);
+                DFAStates new_state = DFAStates(next_closure, dfa_state_id++, is_final);
+                dfa_states.emplace_back(new_state);
                 it = dfa_states.end() - 1; // Obtener el iterador del nuevo estado
                 pending_states.push_back(*it); // Agregar el nuevo estado a los pendientes
+
+                // Agregar la transición al mapa de transiciones del DFA
+                dfa_transitions[{current_dfa_state.id, std::string(symbol)}] = new_state.id;
             }
             else {
                 // Si ya existe, actualizar el estado actual
-                current_dfa_state = *it;
+                DFAStates new_state = *it;
+                
+                // Agregar la transición al mapa de transiciones del DFA
+                dfa_transitions[{current_dfa_state.id, std::string(symbol)}] = new_state.id;
             }
 
-            // Agregar la transición al mapa de transiciones del DFA
-            dfa_transitions[{current_dfa_state.id, std::string(symbol)}] = it->id;
+            
         }
     }
 
@@ -113,7 +119,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
             final_states.insert(dfa_state.id);
         }
     }
-    // Crear el DFA
+    // Crear un conjunto de transiciones para el DFA
     map<pair<int, NFA::Symbol>, vector<int>> dfa_transitions_map;
     for (const auto& transition : dfa_transitions) {
         dfa_transitions_map[transition.first].push_back(transition.second);

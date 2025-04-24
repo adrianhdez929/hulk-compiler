@@ -8,12 +8,12 @@
 set<NFA::State> move(const NFA& automaton, const unordered_set<NFA::State>& states, NFA::Symbol symbol);
 set<NFA::State> move(const NFA& automaton, const NFA::State& state, const NFA::Symbol& symbol);
 ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states);
-struct DFAState {
+struct DFAStates {
     ContainerSet states;
     int id;
     bool is_final;
 
-    DFAState(const ContainerSet& states, int id, bool is_final)
+    DFAStates(const ContainerSet& states, int id, bool is_final)
         : states(states), id(id), is_final(is_final) {}
 };
 DFA nfa_to_dfa(const NFA& automaton);
