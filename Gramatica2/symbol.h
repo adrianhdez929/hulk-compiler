@@ -30,6 +30,7 @@ class Symbol {
         std::string ToString() const {
             return name;
         }
+        Sentence GetSentence() const;
     protected:
         std::string name;
         // Type type;

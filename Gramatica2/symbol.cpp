@@ -31,6 +31,10 @@ Sentence Symbol::operator+(const Sentence& other) const {
     return Sentence(combinedSymbols);
 }
 
+Sentence Symbol::GetSentence() const {
+    return Sentence(this);
+}
+
 // Sentence Symbol::operator+(const std::vector<const Symbol*>& symbols) const {
 //     // symbol + sentence(symbol1, symbol2,...,symboln) = sentence(symbol, symbol1,...,symboln)
 //     std::vector<const Symbol*> combinedSymbols = {this};
