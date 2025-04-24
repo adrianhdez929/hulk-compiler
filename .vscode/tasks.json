@@ -11,6 +11,10 @@
                 "Gramatica2/production.cpp",
                 "Gramatica2/symbol.cpp",
                 "Gramatica2/sentence.cpp",
+                "Automata/dfa.cpp",
+                "Automata/nfa.cpp",
+                "Automata/utils/ContainerSet.cpp",
+                "Automata/utils/aut_manipulation.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
