@@ -17,7 +17,6 @@ int main(int argc, char **argv) {
 		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
 		root->print();
 		delete root;
-	}
-
+    
     return 0;
-}
+	}
