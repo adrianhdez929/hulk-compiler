@@ -1,5 +1,4 @@
 #include "../Ast/node.h"
-#include "visitor.h"
 
 #ifndef NODES_H
 #define NODES_H

@@ -1,4 +1,4 @@
-#include "../Ast/node.h";
+#include "../Ast/node.h"
 #include "nodes.h"
 
 #ifndef VISITOR_H
@@ -11,7 +11,7 @@ class Visitor {
 
 class SemanticCheckerVisitor : public Visitor {
     public:
-    void visit(Node* node) override;
+    virtual void visit(Node* node);
 
     void visit(VisitableAtomicNode* node, Context* context);
     void visit(VisitableUnaryNode* node, Context* context);
