@@ -33,7 +33,7 @@ $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.c
 $(BUILDDIR)/ast.o: $(SRC_DIR)/ast.cpp $(SRC_DIR)/ast.hpp
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ast.cpp -o $@
 
-$(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.tab.h $(SRC_DIR)/ast.hpp $(BUILDDIR)/parser.h
+$(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.tab.h $(SRC_DIR)/ast.hpp
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.cpp -o $@
 
 clean:
