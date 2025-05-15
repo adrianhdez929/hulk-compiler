@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "../ast.hpp"
+#include "../Ast/ast.hpp"
 
 extern "C" {
 	void yyerror(const char *);

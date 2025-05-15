@@ -1,4 +1,5 @@
 #include "visitor.h"
+#include "../Ast/ast.hpp"
 #include "context.h"
 #include <iostream>
 
@@ -12,34 +13,65 @@
  * @throw std::runtime_error Si el nodo es nulo
  */
 
-void SemanticCheckerVisitor::visit(Node* node, Context* context) {
-    if (node == nullptr) {
-        throw std::runtime_error("Node is null");
-    }
-    // Aquí iría la lógica para visitar el nodo y realizar la verificación semántica
-    // Por ejemplo, podrías usar un switch o un if-else para determinar el tipo de nodo
-    // y aplicar las reglas semánticas correspondientes.
-}
 
-void SemanticCheckerVisitor::visit(VisitableAtomicNode* node, Context* context) {
+void SemanticCheckerVisitor::visit(ASTNode* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Visiting Atomic Node: " << node->lex << endl;
+    node->accept(this, context);
 }
-void SemanticCheckerVisitor::visit(VisitableUnaryNode* node, Context* context) {
+
+void SemanticCheckerVisitor::visit(FloatNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Visiting Float Node: " << node->value << endl;
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Visita un nodo de tipo float y lo muestra en la consola de depuración.
+ *
+ * @param node Nodo de tipo float a visitar
+ * @param context Contexto en el que se visita el nodo
+ *
+ * @throw std::runtime_error Si el nodo es nulo
+ */
+/*******  e44fb964-8e56-4568-9d93-144fe618622a  *******/}
+
+void SemanticCheckerVisitor::visit(BoolNode* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
     }
     
-    this.visit(node->node.get());
+    cout << "Visiting Bool Node: " << node->value << endl;
 }
-void SemanticCheckerVisitor::visit(VisitableBinaryNode* node, Context* context) {
+
+void SemanticCheckerVisitor::visit(StringNode* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
     }
     
-    this.visit(node->left.get());
-    this.visit(node->right.get());
+    cout << "Visiting String Node: " << node->value << endl;
+}
+
+void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Visiting UnaryOp Node: " << node->op << endl;
+    
+    this->visit(node->node, context);
+}
+
+void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Visiting BinOp Node: " << node->op << endl;
+    
+    this->visit(node->left, context);
+    this->visit(node->right, context);
 }
