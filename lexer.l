@@ -10,9 +10,21 @@ extern "C"  {
 
 %%
 
+"true"		{ yylval.boolean = true; return BOOLEAN; }
+"false"		{ yylval.boolean = false; return BOOLEAN; }
+
+\"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
+[a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
+
 [0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
 "+"         { return PLUS; }
 "-"			{ return MINUS; }
+"*"			{ return TIMES; }
+"/"			{ return DIV; }
+"^"			{ return POW; }
+"("			{ return LPARENT; }
+")" 		{ return RPARENT; }		
+";"			{ return SEMICOLON; }
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }
 

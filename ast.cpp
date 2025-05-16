@@ -15,7 +15,7 @@ void BoolNode::print(int indent) const {
 StringNode::StringNode(const std::string& v) : ASTNode(), value(v) {}
 
 void StringNode::print(int indent) const {
-    std::cout << std::string(indent, ' ') << "STRING(\"" << value << "\")\n";
+    std::cout << std::string(indent, ' ') << "STRING(" << value << ")\n";
 }
 
 UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n) : ASTNode(), op(o), node(n) {}
@@ -42,3 +42,16 @@ BinOpNode::~BinOpNode() {
     delete right;
 }
 
+FunctionNode::FunctionNode(const std::string& name, ASTNode* arg): func_name(name), argument(arg) {}
+
+void FunctionNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "FunctionCall: " << func_name << std::endl;
+	std::cout << std::string(indent+2, ' ') << "Argument: " << std::endl;
+	argument->print(indent+4);
+}
+
+IDNode::IDNode(const std::string& name) : id_name(name) {}
+
+void IDNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "ID(" << id_name << ")" << std::endl;
+}

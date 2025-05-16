@@ -63,6 +63,22 @@ public:
     ~BinOpNode();
 };
 
+class FunctionNode : public ASTNode {
+public:
+	std::string func_name;
+	ASTNode* argument;
+
+	FunctionNode(const std::string& name, ASTNode* arg);
+	void print(int indent = 0) const override;
+};
+
+class IDNode : public ASTNode {
+public:
+	std::string id_name;
+	IDNode(const std::string& name);
+	void print(int indent =0 ) const override;
+};
+
 
 
 #endif
