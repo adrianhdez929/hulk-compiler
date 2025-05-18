@@ -8,9 +8,19 @@ extern int yyparse();
 ASTNode* root = nullptr;
 
 int main(int argc, char **argv) {
+	const char* filename = "script.txt"; //default
+
     if (argc > 1) {
-        yyin = fopen(argv[1], "r");
+		filename = argv[1];
     }
+		
+	yyin = fopen(filename, "r");
+
+	if (!yyin) {
+		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+		return 1;
+	}
+
     yyparse();
 
 	if (root) {
@@ -18,6 +28,8 @@ int main(int argc, char **argv) {
 		root->print();
 		delete root;
 	}
+
+	fclose(yyin);
 
     return 0;
 }

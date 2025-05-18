@@ -79,6 +79,14 @@ public:
 	void print(int indent =0 ) const override;
 };
 
+class BlockNode : public ASTNode {
+public:
+	std::vector<ASTNode*> children;
 
+	BlockNode(const std::vector<ASTNode*>& node);
+	void add_child(ASTNode* node);
+	void print(int indent = 0) const override;
+	~BlockNode();
+};
 
 #endif

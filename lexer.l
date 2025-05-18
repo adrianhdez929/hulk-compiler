@@ -25,6 +25,8 @@ extern "C"  {
 "("			{ return LPARENT; }
 ")" 		{ return RPARENT; }		
 ";"			{ return SEMICOLON; }
+"{"			{ return LKEY; }
+"}"			{ return RKEY; }
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }
 

@@ -55,3 +55,21 @@ IDNode::IDNode(const std::string& name) : id_name(name) {}
 void IDNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ID(" << id_name << ")" << std::endl;
 }
+
+BlockNode::BlockNode(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+void BlockNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "Block:" << std::endl;
+	for (const auto& child : children) {
+		child->print(indent + 2);
+	}
+}
+
+void BlockNode::add_child(ASTNode* node) {
+	children.push_back(node);
+}
+
+BlockNode::~BlockNode() {
+	for (auto child : children) {
+		delete child;
+	}
+}
