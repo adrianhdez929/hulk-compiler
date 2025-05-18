@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "../ast.hpp"
+#include "../Ast/ast.hpp"
 
 extern "C" {
 	void yyerror(const char *);
@@ -100,6 +100,8 @@ arit_op:
 	| expr POW expr { $$ = new BinOpNode( $1, "^", $3); }
 	| LPARENT expr RPARENT { $$ = $2; }
 	;
+
+
 
 
 
