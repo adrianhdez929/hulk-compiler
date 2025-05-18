@@ -63,6 +63,50 @@ public:
     ~BinOpNode();
 };
 
+class FunctionNode : public ASTNode {
+public:
+	std::string func_name;
+	ASTNode* argument;
 
+	FunctionNode(const std::string& name, ASTNode* arg);
+	void print(int indent = 0) const override;
+};
+
+class IDNode : public ASTNode {
+public:
+	std::string id_name;
+	IDNode(const std::string& name);
+	void print(int indent =0 ) const override;
+};
+
+class BlockNode : public ASTNode {
+public:
+	std::vector<ASTNode*> children;
+
+	BlockNode(const std::vector<ASTNode*>& node);
+	void add_child(ASTNode* node);
+	void print(int indent = 0) const override;
+	~BlockNode();
+};
+
+class ArgsList: public ASTNode {
+public:
+	std::vector<IDNode*> children;
+
+	ArgsList(const std::vector<IDNode*>& nodes);
+	void add_child(IDNode* node);
+	void print(int indent = 0) const override;
+	~ArgsList();
+};
+
+class AssignFuncNode: public ASTNode {
+public:
+	std::string func_name;
+	ArgsList* args;
+	ASTNode* body;
+
+	AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_);
+	void print(int indent = 0) const override;
+};
 
 #endif
