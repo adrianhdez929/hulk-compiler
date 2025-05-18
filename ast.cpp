@@ -73,3 +73,29 @@ BlockNode::~BlockNode() {
 		delete child;
 	}
 }
+
+ArgsList::ArgsList(const std::vector<IDNode*>& nodes) : children(nodes) {}
+void ArgsList::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "ArgsList:" << std::endl;
+	for (const auto& child : children) {
+		child->print(indent + 1);
+	}
+}
+
+void ArgsList::add_child(IDNode* node) {
+	children.push_back(node);
+}
+
+ArgsList::~ArgsList() {
+	for (auto child : children) {
+		delete child;
+	}
+}
+
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_) {}
+
+void AssignFuncNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "AssignFunction(" << func_name << ")" << std::endl;
+	args->print(indent + 2);
+	body->print(indent + 2);
+}

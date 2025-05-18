@@ -89,4 +89,24 @@ public:
 	~BlockNode();
 };
 
+class ArgsList: public ASTNode {
+public:
+	std::vector<IDNode*> children;
+
+	ArgsList(const std::vector<IDNode*>& nodes);
+	void add_child(IDNode* node);
+	void print(int indent = 0) const override;
+	~ArgsList();
+};
+
+class AssignFuncNode: public ASTNode {
+public:
+	std::string func_name;
+	ArgsList* args;
+	ASTNode* body;
+
+	AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_);
+	void print(int indent = 0) const override;
+};
+
 #endif
