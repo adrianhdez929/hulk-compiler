@@ -87,144 +87,76 @@ int grammar_test() {
 }
 
 int automata_tests() {
-
-    NFA::State startState = 0;
-    NFA::Transitions transitions = {
-        {{0, "a"}, {1}}
-    };
-    NFA::Transitions transitions2 = {
-        {{0, "b"}, {1}},
-    };
-    //Automata1
-    NFA nfa1(2, {1}, transitions, startState);
-    //Automata2
-    NFA nfa2(2, {1}, transitions2, startState);
-    //Automata3
-    // NFA nfa3 = union_nfa(nfa1, nfa2);
-    // NFA nfa3 = concat_nfa(nfa1, nfa2);
-    NFA nfa3 = closure_nfa(nfa1);
-
-    //Imprimir transiciones
-    cout << "Transiciones del automata 3:" << endl;
-    for (const auto& transition : nfa3.getTransitionsMap()) {
-        cout << "Estado: " << transition.first.first << ", Simbolo: " << transition.first.second << ", Destinos: ";
-        for (const auto& dest : transition.second) {
-            cout << dest << " ";
-        }
-        cout << endl;
-    }
-    cout << "Estados finales: ";
-    for (const auto& finalState : nfa3.finalStates()) {
-        cout << finalState << " ";
-    }
-    cout << endl;
-    cout << "Estado inicial: " << nfa3.startState() << endl;
-    cout << "Cantidad de estados: " << nfa3.states() << endl;
-    cout << endl;
-
     // NFA::State startState = 0;
-    // set<NFA::State> finalStates = {3, 5};
     // NFA::Transitions transitions = {
-    //     {{0,  ""}, {1,2}},
-    //     {{1,  ""}, {3}},
-    //     {{1, "b"}, {4}},
-    //     {{2, "a"}, {4}},
-    //     {{3, "c"}, {3}},
-    //     {{4,  ""}, {5}},
-    //     {{5, "d"}, {5}}
+    //     {{0, "a"}, {1}}
     // };
-    
-    // NFA nfa(6, finalStates, transitions, startState);
+    // NFA::Transitions transitions2 = {
+    //     {{0, "b"}, {1}},
+    // };
+    // //Automata1
+    // NFA nfa1(2, {1}, transitions, startState);
+    // //Automata2
+    // NFA nfa2(2, {1}, transitions2, startState);
+    // //Automata3
+    // // NFA nfa3 = union_nfa(nfa1, nfa2);
+    // // NFA nfa3 = concat_nfa(nfa1, nfa2);
+    // NFA nfa3 = closure_nfa(nfa1);
 
-    // // // Testeo de move
-    // // if (move(nfa, unordered_set<NFA::State>{1}, "a") == set<NFA::State>{}) {
-    // //     cout << "move funciona" << endl;
-    // // } else {
-    // //     cout << "move no funciona" << endl;
-    // // }
-    // // if (move(nfa, unordered_set<NFA::State>{2}, "a") == set<NFA::State>{4}) {
-    // //     cout << "move funciona" << endl;
-    // // } else {
-    // //     cout << "move no funciona" << endl;
-    // // }
-    // // if (move(nfa, unordered_set<NFA::State>{1, 5}, "d") == set<NFA::State>{5}) {
-    // //     cout << "move funciona" << endl;
-    // // } else {
-    // //     cout << "move no funciona" << endl;
-    // // }
-
-    // // // Testeo de epsilon_closure
-    // // if (epsilon_closure(nfa, set<NFA::State>{0}) == ContainerSet(vector<NFA::State>{0,1,2,3})) {
-    // //     cout << "epsilon_closure funciona" << endl;
-    // // } else {
-    // //     cout << "epsilon_closure no funciona" << endl;
-    // // }
-    // // if (epsilon_closure(nfa, set<NFA::State>{0,4}) == ContainerSet(vector<NFA::State>{0,1,2,3,4,5})) {
-    // //     cout << "epsilon_closure funciona" << endl;
-    // // } else {
-    // //     cout << "epsilon_closure no funciona" << endl;
-    // // }
-    // // if (epsilon_closure(nfa, set<NFA::State>{1,2,4}) == ContainerSet(vector<NFA::State>{1,2,3,4,5})) {
-    // //     cout << "epsilon_closure funciona" << endl;
-    // // } else {
-    // //     cout << "epsilon_closure no funciona" << endl;
-    // // }
-    
-    // // Convert NFA to DFA
-    // DFA dfa = nfa_to_dfa(nfa);
-    
-    // // Test the DFA with some input strings
-    // // vector<string> testStrings = {"abc", "ab", "a", "bc", "c"};
-    // //Cadenas q debe reconocer:
-    // vector<string> testStrings = {"", "a", "b", "cccccc", "adddd", "bdddd"};
-
-    // //Comparar las cadenas q reconoce el NFA con las q reconoce el DFA
-    // for (const auto& str : testStrings) {
-    //     cout << "Testing string: " << str << endl;
-    //     if (nfa_recognize(nfa, str)) {
-    //         cout << "Accepted" << endl;
-    //     } else {
-    //         cout << "Rejected" << endl;
+    // //Imprimir transiciones
+    // cout << "Transiciones del automata 3:" << endl;
+    // for (const auto& transition : nfa3.getTransitionsMap()) {
+    //     cout << "Estado: " << transition.first.first << ", Simbolo: " << transition.first.second << ", Destinos: ";
+    //     for (const auto& dest : transition.second) {
+    //         cout << dest << " ";
     //     }
+    //     cout << endl;
+    // }
+    // cout << "Estados finales: ";
+    // for (const auto& finalState : nfa3.finalStates()) {
+    //     cout << finalState << " ";
     // }
     // cout << endl;
-    // for (const auto& str : testStrings) {
-    //     cout << "Testing string: " << str << endl;
-    //     if (dfa.recognize(str)) {
-    //         cout << "Accepted" << endl;
-    //     } else {
-    //         cout << "Rejected" << endl;
-    //     }
-    // }
-
+    // cout << "Estado inicial: " << nfa3.startState() << endl;
+    // cout << "Cantidad de estados: " << nfa3.states() << endl;
     // cout << endl;
 
-    // //Cadenas q no debe reconocer
-    // // ('dddddd')
-    // // ('cdddd')
-    // // ('aa')
-    // // ('ab')
-    // // ('ddddc')
-    // vector<string> testStrings2 = {"dddddd", "cdddd", "aa", "ab", "ddddc"};
+    // automaton = DFA(states=5, finals=[4], transitions={
+    //     (0,'a'): 1,
+    //     (0,'b'): 2,
+    //     (1,'a'): 1,
+    //     (1,'b'): 3,
+    //     (2,'a'): 1,
+    //     (2,'b'): 2,
+    //     (3,'a'): 1,
+    //     (3,'b'): 4,
+    //     (4,'a'): 1,
+    //     (4,'b'): 2,
+    //     })
+    DFA::Transitions transitions = {
+        {{0, "a"}, {1}},
+        {{0, "b"}, {2}},
+        {{1, "a"}, {1}},
+        {{1, "b"}, {3}},
+        {{2, "a"}, {1}},
+        {{2, "b"}, {2}},
+        {{3, "a"}, {1}},
+        {{3, "b"}, {4}},
+        {{4, "a"}, {1}},
+        {{4, "b"}, {2}}
+    };
+    DFA dfa(5, {4}, transitions, 0);
+    DFA mini = automata_minimization(dfa);
+    cout << "Estados totales: " << mini.states() << endl;
+    string cadena1 = "abb";
+    string cadena2 = "ababbaabb";
+    cout << "Cadena: " << cadena1 << ", Reconocida: " << mini.recognize(cadena1) << endl;
+    cout << "Cadena: " << cadena2 << ", Reconocida: " << mini.recognize(cadena2) << endl;
 
-    // // Comparar las cadenas q no reconoce el NFA con las q no reconoce el DFA
-    // for (const auto& str : testStrings2) {
-    //     cout << "Testing string: " << str << endl;
-    //     if (nfa_recognize(nfa, str)) {
-    //         cout << "Accepted" << endl;
-    //     } else {
-    //         cout << "Rejected" << endl;
-    //     }
-    // }
-    // cout << endl;
-    // for (const auto& str : testStrings2) {
-    //     cout << "Testing string: " << str << endl;
-    //     if (dfa.recognize(str)) {
-    //         cout << "Accepted" << endl;
-    //     } else {
-    //         cout << "Rejected" << endl;
-    //     }
-    // }
+    vector<string> cadenas = {"", "ab", "aaaaa", "bbbbb", "abbabababa"};
+    for (string cadena : cadenas) {
+        cout << "Cadena: " << cadena << ", Reconocida: " << mini.recognize(cadena) << endl;
+    }
 
     return 0;
 }
