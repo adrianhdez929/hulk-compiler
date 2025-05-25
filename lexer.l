@@ -1,5 +1,5 @@
 %{
-#include "parser.tab.h"
+#include "parser.h"
 #include <stdlib.h>
 extern "C"  {
 	int yylex(void);

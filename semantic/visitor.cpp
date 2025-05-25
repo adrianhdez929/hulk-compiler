@@ -75,3 +75,56 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
     this->visit(node->left, context);
     this->visit(node->right, context);
 }
+
+void SemanticCheckerVisitor::visit(FunctionNode* node, Context* context) {
+	if (node == nullptr) {
+		throw std::runtime_error("Node is null");
+	}
+
+	cout << "Visiting FunctionNode: " << node->func_name << endl;
+
+	this->visit(node->argument, context);
+}
+
+void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
+	if (node == nullptr) {
+		throw std::runtime_error("Node is null");
+	}
+
+	cout << "Visiting IDNode: " << node->id_name << endl;
+}
+
+void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
+	if (node == nullptr) {
+		throw std::runtime_error("Node is null");
+	}
+
+	cout << "Visiting BlockNode: " << endl;
+
+	for (auto child : node->children) {
+		this->visit(child, context);
+	}
+}
+
+void SemanticCheckerVisitor::visit(ArgsList* node, Context* context) {
+	if (node == nullptr) {
+		throw std::runtime_error("Node is null");
+	}
+
+	cout << "Visiting ArgList: " << endl;
+
+	for (auto child : node->children) {
+		this->visit(child, context);
+	}
+}
+
+void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
+	if (node == nullptr) {
+		throw std::runtime_error("Node is null");
+	}
+
+	cout << "Visiting AssignFuncNode: " << node->func_name << endl;
+
+	this->visit(node->args, context);
+	this->visit(node->body, context);
+}

@@ -9,6 +9,11 @@ class BoolNode;
 class StringNode;
 class UnaryOpNode;
 class BinOpNode;
+class FunctionNode;
+class IDNode;
+class BlockNode;
+class ArgsList;
+class AssignFuncNode;
 
 class Visitor {
     public:
@@ -18,6 +23,12 @@ class Visitor {
     virtual void visit(StringNode* node, Context* context) {};
     virtual void visit(UnaryOpNode* node, Context* context) {};
     virtual void visit(BinOpNode* node, Context* context) {};
+	virtual void visit(FunctionNode* node, Context* context) {};
+	virtual void visit(IDNode* node, Context* context) {};
+	virtual void visit(BlockNode* node, Context* context) {};
+	virtual void visit(ArgsList* node, Context* context) {};
+	virtual void visit(AssignFuncNode* node, Context* context) {};
+
 };
 
 class SemanticCheckerVisitor : public Visitor {
@@ -28,6 +39,12 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(StringNode* node, Context* context) override;
     void visit(UnaryOpNode* node, Context* context) override;
     void visit(BinOpNode* node, Context* context) override;
+    void visit(FunctionNode* node, Context* context) override;
+    void visit(IDNode* node, Context* context) override;
+    void visit(BlockNode* node, Context* context) override;
+    void visit(ArgsList* node, Context* context) override;
+    void visit(AssignFuncNode* node, Context* context) override;
+
 };
 
 #endif
