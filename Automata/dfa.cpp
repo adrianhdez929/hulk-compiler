@@ -48,3 +48,12 @@ bool DFA::recognize(const string& input) {
     }
     return finalStates().count(current_) > 0;
 }
+
+NFA::State DFA::getTransition(State state, Symbol symbol) const {
+    NFA::Transitions transitions = getTransitionsMap();
+    auto it = transitions.find({state, symbol});
+    if (it != transitions.end()) {
+        return it->second[0]; // Retorna el primer estado de destino
+    }
+    return -1; // No hay transición válida
+}

@@ -3,6 +3,10 @@
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include <iostream>
+#include "test.h"
+
+using namespace std;
+// using namespace manipulation;
 
 extern FILE *yyin;
 extern int yyparse();
@@ -10,8 +14,11 @@ ASTNode* root = nullptr;
 
 SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
 
-int main(int argc, char **argv) {
-	const char* filename = "script.txt"; //default
+int main() {
+    //run tests
+    execute_test();
+    
+    const char* filename = "script.txt"; //default
 
     if (argc > 1) {
 		filename = argv[1];

@@ -20,6 +20,7 @@ class DFA : public NFA {
 
         void reset();
         bool recognize(const string& input);
+        NFA::State getTransition(State state, Symbol symbol) const;
 
     private:
         State current_;
