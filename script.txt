@@ -1,5 +1,3 @@
-{
-	5 + 5;
-	print(pi);
-	5*pi - 4^alpha;
-}
+function tan(x, y, z) { 
+	sin(x)/cos(x);
+};

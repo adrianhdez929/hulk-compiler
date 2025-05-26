@@ -51,8 +51,9 @@ extern ASTNode* root;
 
 input:    
 	line { root = $1; }
-	| func_asign { root = $1; }
 	| lines_block { root = $1; }
+	| func_asign SEMICOLON { root = $1; }
+	
     ;
 
 lines_block:
@@ -67,6 +68,7 @@ lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
+
 	;
 
 expr: 
@@ -78,7 +80,8 @@ expr:
     ;
 
 func_asign:
-	FUNCTION ID LPARENT args_list RPARENT INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	FUNCTION ID LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
 	;
 
 args_list:
