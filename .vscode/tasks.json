@@ -16,6 +16,7 @@
                 "Automata/utils/ContainerSet.cpp",
                 "Automata/utils/aut_manipulation.cpp",
                 "Automata/operations/operations.cpp",
+                "Automata/state.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"

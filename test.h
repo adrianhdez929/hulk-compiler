@@ -7,6 +7,7 @@
 #include <vector>
 #include "Automata/operations/operations.h"
 #include "Gramatica2/grammar.h"
+#include "Automata/state.h"
 
 int grammar_test() {
     Grammar g;
@@ -161,14 +162,40 @@ int automata_tests() {
     return 0;
 }
 
+int state_automata_test() {
+    DFA::Transitions transitions ={
+        {{0, "a"}, {0}},
+        {{0, "b"}, {1}},
+        {{1, "a"}, {2}},
+        {{1, "b"}, {1}},
+        {{2, "a"}, {0}},
+        {{2, "b"}, {1}}
+    };
+    DFA dfa(3, {2}, transitions, 0); // Reconoce cadenas sobre {a,b}* que terminan en "ba"
+    State* start = State::from_nfa(dfa);
+    // std::cout << "Estado inicial: " << start->id() << std::endl;
+    // std::cout << "Transiciones del estado inicial:" << std::endl;
+    // for (const auto& [symbol, states] : start->transitions()) {
+    //     std::cout << "  Símbolo: " << symbol << " -> Estados: ";
+    //     for (const auto* state : states) {
+    //         std::cout << state->id() << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    std::cout << start->ToString() << std::endl;
+
+    return 0;
+}
+
 int execute_all_tests() {
     grammar_test();
     automata_tests();
+    state_automata_test();
     return 0;
 }
 
 int execute_test() {
     // execute_all_tests();
-    automata_tests();
+    state_automata_test();
     return 0; 
 }
