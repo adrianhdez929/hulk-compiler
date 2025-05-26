@@ -8,11 +8,10 @@ extern FILE *yyin;
 extern int yyparse();
 ASTNode* root = nullptr;
 
-//SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
+SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
 
 int main(int argc, char **argv) {
 	const char* filename = "script.txt"; //default
-	std::cout << "hola" << std::endl;
 		
 	yyin = fopen(filename, "r");
 
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
 		root->print();
 
         std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
-    //    root->accept(visitor, nullptr);
+        root->accept(visitor, nullptr);
         std::cout << "Semantic check completed." << std::endl;
 
 		delete root;
