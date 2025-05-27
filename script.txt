@@ -1,6 +1,1 @@
-
-let a = 42 in {
-	a := 30;
-	print(a + a);
-	let a = 20 in print(a);
-};
+let _abc = 42 in print(_abc);
