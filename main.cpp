@@ -16,7 +16,7 @@ ASTNode* root = nullptr;
 SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
-int main() {
+int main(int argc, char* argv[]) {
     //run tests
     execute_test();
     
