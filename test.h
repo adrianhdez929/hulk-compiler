@@ -87,31 +87,62 @@ int lexer_node_test() {
     // }
 
     //Porbar el RangeNode
-    auto first = std::make_unique<SymbolNode>("a");
-    auto last = std::make_unique<SymbolNode>("z");
-    std::unique_ptr<Node> rangeNode = std::make_unique<RangeNode>(std::move(first), std::move(last));
-    // std::unique_ptr<Node> closure = std::make_unique<ClosureNode>(std::move(rangeNode));
-    std::shared_ptr<NFA> range_nfa = rangeNode->evaluate();
-    // std::shared_ptr<NFA> closure_nfa = closure->evaluate();
-    DFA dfa = nfa_to_dfa(*range_nfa);
-    dfa = automata_minimization(dfa);
-    std::cout << "Range NFA States: " << dfa.states() << std::endl;
-    std::cout << "Range NFA Start State: " << dfa.startState() << std::endl;
-    std::cout << "Range NFA Final States: ";
-    for (const auto& finalState : dfa.finalStates()) {
-        std::cout << finalState << " ";
-    }
-    std::cout << std::endl;
-    const auto& rangeTransitions = dfa.getTransitionsMap();
-    for (const auto& transition : rangeTransitions) {
-        std::cout << "Transition from state " << transition.first.first 
-                  << " with symbol '" << transition.first.second 
-                  << "' to states: ";
-        for (const auto& dest : transition.second) {
-            std::cout << dest << " ";
-        }
-        std::cout << std::endl;
-    }
+    // auto first = std::make_unique<SymbolNode>("a");
+    // auto last = std::make_unique<SymbolNode>("z");
+    // std::unique_ptr<Node> rangeNode = std::make_unique<RangeNode>(std::move(first), std::move(last));
+    // // std::unique_ptr<Node> closure = std::make_unique<ClosureNode>(std::move(rangeNode));
+    // std::shared_ptr<NFA> range_nfa = rangeNode->evaluate();
+    // // std::shared_ptr<NFA> closure_nfa = closure->evaluate();
+    // DFA dfa = nfa_to_dfa(*range_nfa);
+    // dfa = automata_minimization(dfa);
+    // std::cout << "Range NFA States: " << dfa.states() << std::endl;
+    // std::cout << "Range NFA Start State: " << dfa.startState() << std::endl;
+    // std::cout << "Range NFA Final States: ";
+    // for (const auto& finalState : dfa.finalStates()) {
+    //     std::cout << finalState << " ";
+    // }
+    // std::cout << std::endl;
+    // const auto& rangeTransitions = dfa.getTransitionsMap();
+    // for (const auto& transition : rangeTransitions) {
+    //     std::cout << "Transition from state " << transition.first.first 
+    //               << " with symbol '" << transition.first.second 
+    //               << "' to states: ";
+    //     for (const auto& dest : transition.second) {
+    //         std::cout << dest << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    //probar el zero or one y el positive closure node
+    // auto child = std::make_unique<SymbolNode>("a");
+    // auto child2 = std::make_unique<SymbolNode>("b");
+    // std::unique_ptr<Node> concatNode = std::make_unique<ConcatNode>(std::move(child), std::move(child2));
+    // std::unique_ptr<Node> zeroOrOneNode = std::make_unique<ZeroOrOneNode>(std::move(concatNode));
+    // std::unique_ptr<Node> positive_closure = std::make_unique<PositiveClosure>(std::move(zeroOrOneNode));
+
+    // std::shared_ptr<NFA> pos_clo_nfa = positive_closure->evaluate();
+    // // std::shared_ptr<NFA> zeroOrOneNfa = zeroOrOneNode->evaluate();
+
+    // DFA dfa = nfa_to_dfa(*pos_clo_nfa);
+    // dfa = automata_minimization(dfa);
+    // std::cout << "Range NFA States: " << dfa.states() << std::endl;
+    // std::cout << "Range NFA Start State: " << dfa.startState() << std::endl;
+    // std::cout << "Range NFA Final States: ";
+    // for (const auto& finalState : dfa.finalStates()) {
+    //     std::cout << finalState << " ";
+    // }
+    // std::cout << std::endl;
+    // const auto& rangeTransitions = dfa.getTransitionsMap();
+    // for (const auto& transition : rangeTransitions) {
+    //     std::cout << "Transition from state " << transition.first.first 
+    //               << " with symbol '" << transition.first.second 
+    //               << "' to states: ";
+    //     for (const auto& dest : transition.second) {
+    //         std::cout << dest << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    
 
     return 0;
 }
