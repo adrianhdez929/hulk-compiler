@@ -20,10 +20,10 @@ all: $(PROGRAM)
 $(PROGRAM): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) -lfl $(LDFLAGS)
 
-$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.tab.h: $(SRC_DIR)/parser.y
+$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.h: $(SRC_DIR)/parser.y
 	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
 
-$(BUILDDIR)/lex.yy.c: $(SRC_DIR)/lexer.l $(BUILDDIR)/parser.tab.h
+$(BUILDDIR)/lex.yy.c: $(SRC_DIR)/lexer.l $(BUILDDIR)/parser.h
 	$(LEX) -o $(BUILDDIR)/lex.yy.c $(SRC_DIR)/lexer.l
 
 $(BUILDDIR)/%.o: $(BUILDDIR)/%.cpp

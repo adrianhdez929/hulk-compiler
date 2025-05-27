@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "build/parser.tab.h"
+#include "build/parser.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include "codegen/visitor.h"
