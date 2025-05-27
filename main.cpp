@@ -4,6 +4,10 @@
 #include "semantic/visitor.h"
 #include "codegen/visitor.h"
 #include <iostream>
+#include "test.h"
+
+using namespace std;
+// using namespace manipulation;
 
 extern FILE *yyin;
 extern int yyparse();
@@ -12,10 +16,23 @@ ASTNode* root = nullptr;
 SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
-int main(int argc, char **argv) {
+int main() {
+    //run tests
+    execute_test();
+    
+    const char* filename = "script.txt"; //default
+
     if (argc > 1) {
-        yyin = fopen(argv[1], "r");
+		filename = argv[1];
     }
+		
+	yyin = fopen(filename, "r");
+
+	if (!yyin) {
+		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+		return 1;
+	}
+
     yyparse();
 
 	if (root) {
@@ -31,9 +48,9 @@ int main(int argc, char **argv) {
         std::cout << "Code generation completed." << std::endl;
 
 		delete root;
-    
-    return 0;
 	}
 
-    return 1;
+	fclose(yyin);
+
+    return 0;
 }
