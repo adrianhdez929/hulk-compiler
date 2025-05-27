@@ -140,10 +140,69 @@ AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func
 
 void AssignFuncNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "AssignFunction(" << func_name << ")" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "Args:" << std::endl;
 	args->print(indent + 2);
+	std::cout << std::string(indent+1, ' ') << "Body:" << std::endl;
 	body->print(indent + 2);
 }
 
 void AssignFuncNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+LetAssign::LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_) : assigns(assigns_), body(body_) {}
+
+void LetAssign::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "LetAssign" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "VarAssigns:" << std::endl;
+	for (const auto& assign : assigns) {
+		assign->print(indent+2);
+	}
+	std::cout << std::string(indent+1, ' ') << "Body:" << std::endl;
+	body->print(indent + 2);
+}
+
+void LetAssign::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_name(id->id_name), value(value_) {}
+
+void VarAssign::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "VarAssign(" << var_name << ")" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "Value" << std::endl;
+	value->print(indent + 2);
+}
+
+void VarAssign::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context); 
+}
+
+VarAssignList::VarAssignList(const std::vector<VarAssign*>& assigns_) : assigns(assigns_) {}
+
+void VarAssignList::add_child(VarAssign* node) {
+	assigns.push_back(node);
+}
+
+void VarAssignList::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "VarAssignList:" << std::endl;
+	for (const auto& assign : assigns) {
+		assign->print(indent + 2);
+	}
+}
+
+void VarAssignList::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+VarDesAssign::VarDesAssign(IDNode* id_, ASTNode* value_) : id(id_), value(value_) {}
+
+void VarDesAssign::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "VarDesAssign(" << id->id_name << ")" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "Value:" << std::endl;
+	value->print(indent+2);
+}
+
+void VarDesAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }

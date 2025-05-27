@@ -13,6 +13,8 @@ extern "C"  {
 "true"		{ yylval.boolean = true; return BOOLEAN; }
 "false"		{ yylval.boolean = false; return BOOLEAN; }
 "function" 	{ return FUNCTION; }
+"let"		{ return LET; }
+"in"		{ return IN; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
@@ -30,6 +32,8 @@ extern "C"  {
 "{"			{ return LKEY; }
 "}"			{ return RKEY; }
 "=>"		{ return INLINE; }
+"="			{ return EQUAL; }
+":="		{ return ASS_DES; }
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }
 

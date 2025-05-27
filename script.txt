@@ -1,3 +1,6 @@
-function tan(x, y, z) { 
-	sin(x)/cos(x);
+
+let a = 42 in {
+	a := 30;
+	print(a + a);
+	let a = 20 in print(a);
 };

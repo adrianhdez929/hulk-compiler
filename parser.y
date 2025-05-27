@@ -22,13 +22,17 @@ extern ASTNode* root;
 	class BlockNode* b_node;
 	class ArgsList* args_l;
 	class AssignFuncNode* ass_f_node;
+	class LetAssign* ass_var;
+	class VarAssignList* v_ass_l;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE EQUAL ASS_DES
+%token LET
+%token IN
 
 %token <num> NUMBER
 %token <str> ID
@@ -39,7 +43,8 @@ extern ASTNode* root;
 %type <b_node> lines
 %type <args_l> args_list
 %type <ass_f_node> func_asign
-
+%type <ass_var> let_assign
+%type <v_ass_l> var_assign_list
 
 %left PLUS
 %left MINUS
@@ -77,6 +82,8 @@ expr:
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
+	| let_assign { $$ = $1; }
+	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
     ;
 
 func_asign:
@@ -88,6 +95,16 @@ args_list:
 	/* empty */ { $$ = new ArgsList({}); }
 	| ID { $$ = new ArgsList({new IDNode($1)}); }
 	| args_list COLON ID { $1->add_child(new IDNode($3)); $$ = $1; }
+	;
+
+let_assign:
+	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
+	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4); }
+	;
+
+var_assign_list:
+	ID EQUAL expr { $$ = new VarAssignList({ new VarAssign(new IDNode($1), $3) });}
+	| var_assign_list COLON ID EQUAL expr { $1->add_child(new VarAssign(new IDNode($3), $5)); $$ = $1; }
 	;
 
 func_call:

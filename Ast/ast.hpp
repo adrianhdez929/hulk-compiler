@@ -132,4 +132,44 @@ public:
 	void accept(Visitor* visitor, Context* Context) override;
 };
 
+class VarAssign: public ASTNode {
+public:
+	std::string var_name;
+	ASTNode* value;
+
+	VarAssign(IDNode* id, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class VarAssignList: public ASTNode {
+public:
+	std::vector<VarAssign*> assigns;
+
+	VarAssignList(const std::vector<VarAssign*>& assigns_);
+	void add_child(VarAssign* assign);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class LetAssign: public ASTNode {
+public:
+	std::vector<VarAssign*> assigns;
+	ASTNode* body;
+
+	LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* Context) override;
+};
+
+class VarDesAssign: public ASTNode {
+public:
+	IDNode* id;
+	ASTNode* value;
+
+	VarDesAssign(IDNode* id_, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
 #endif
