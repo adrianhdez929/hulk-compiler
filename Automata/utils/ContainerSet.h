@@ -18,7 +18,7 @@ class ContainerSet {
         ~ContainerSet();
 
         bool add(int value);
-        bool extend(const vector<int> values);
+        bool extend(const vector<int>& values);
         bool set_epsilon(bool value = true);
         bool update(const ContainerSet& other);
         bool epsilon_update(const ContainerSet& other);

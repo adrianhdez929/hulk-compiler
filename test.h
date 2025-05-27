@@ -32,36 +32,36 @@ int lexer_node_test() {
     // std::shared_ptr<NFA> nfa2 = unionNode->evaluate();
     // std::shared_ptr<NFA> nfa3 = concatNode->evaluate();
 
-    Node* regex = new PositiveClosure(
-        new UnionNode(
-            std::make_unique<SymbolNode>("a"),
-            std::make_unique<SymbolNode>("b")
-        )
-    );
-    std::shared_ptr<NFA> nfa = regex->evaluate();
-    //convert to dfa
+    // Node* regex = new PositiveClosure(
+    //     new UnionNode(
+    //         std::make_unique<SymbolNode>("a"),
+    //         std::make_unique<SymbolNode>("b")
+    //     )
+    // );
+    // std::shared_ptr<NFA> nfa = regex->evaluate();
+    // //convert to dfa
 
-    DFA dfa = nfa_to_dfa(*nfa);
-    dfa = automata_minimization(dfa);
+    // DFA dfa = nfa_to_dfa(*nfa);
+    // dfa = automata_minimization(dfa);
 
-    std::cout << "NFA States: " << dfa.states() << std::endl;
-    std::cout << "NFA Start State: " << dfa.startState() << std::endl;
-    std::cout << "NFA Final States: ";
-    for (const auto& finalState : dfa.finalStates()) {
-        std::cout << finalState << " ";
-    }
-    std::cout << std::endl;
-    const auto& transitions = dfa.getTransitionsMap();
-    for (const auto& transition : transitions) {
-        std::cout << "Transition from state " << transition.first.first 
-                  << " with symbol '" << transition.first.second 
-                  << "' to states: ";
-        for (const auto& dest : transition.second) {
-            std::cout << dest << " ";
-        }
-        std::cout << std::endl;
-    }
-    delete regex;  // Limpiar memoria del nodo
+    // std::cout << "NFA States: " << dfa.states() << std::endl;
+    // std::cout << "NFA Start State: " << dfa.startState() << std::endl;
+    // std::cout << "NFA Final States: ";
+    // for (const auto& finalState : dfa.finalStates()) {
+    //     std::cout << finalState << " ";
+    // }
+    // std::cout << std::endl;
+    // const auto& transitions = dfa.getTransitionsMap();
+    // for (const auto& transition : transitions) {
+    //     std::cout << "Transition from state " << transition.first.first 
+    //               << " with symbol '" << transition.first.second 
+    //               << "' to states: ";
+    //     for (const auto& dest : transition.second) {
+    //         std::cout << dest << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // delete regex;  // Limpiar memoria del nodo
 
     // std::vector<std::shared_ptr<NFA>> nfas = {nfa, nfa2, nfa3};
 
@@ -85,6 +85,33 @@ int lexer_node_test() {
     //         std::cout << std::endl;
     //     }
     // }
+
+    //Porbar el RangeNode
+    auto first = std::make_unique<SymbolNode>("a");
+    auto last = std::make_unique<SymbolNode>("z");
+    std::unique_ptr<Node> rangeNode = std::make_unique<RangeNode>(std::move(first), std::move(last));
+    // std::unique_ptr<Node> closure = std::make_unique<ClosureNode>(std::move(rangeNode));
+    std::shared_ptr<NFA> range_nfa = rangeNode->evaluate();
+    // std::shared_ptr<NFA> closure_nfa = closure->evaluate();
+    DFA dfa = nfa_to_dfa(*range_nfa);
+    dfa = automata_minimization(dfa);
+    std::cout << "Range NFA States: " << dfa.states() << std::endl;
+    std::cout << "Range NFA Start State: " << dfa.startState() << std::endl;
+    std::cout << "Range NFA Final States: ";
+    for (const auto& finalState : dfa.finalStates()) {
+        std::cout << finalState << " ";
+    }
+    std::cout << std::endl;
+    const auto& rangeTransitions = dfa.getTransitionsMap();
+    for (const auto& transition : rangeTransitions) {
+        std::cout << "Transition from state " << transition.first.first 
+                  << " with symbol '" << transition.first.second 
+                  << "' to states: ";
+        for (const auto& dest : transition.second) {
+            std::cout << dest << " ";
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }

@@ -20,7 +20,7 @@ bool ContainerSet::add(int value) {
     return set_.insert(value).second;
 }
 
-bool ContainerSet::extend(const vector<int> values) {
+bool ContainerSet::extend(const vector<int>& values) {
     bool changed = false;
     for (int value : values) {
         changed |= add(value);

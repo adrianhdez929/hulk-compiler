@@ -105,9 +105,13 @@ public:
 };
 
 class StringClassNode : public Node {
-    std::vector<SymbolNode*> symbols_;
+    std::vector<std::unique_ptr<SymbolNode>> symbols_;  // Vector de símbolos que componen la clase de cadenas
 public:
-    explicit StringClassNode(const std::vector<SymbolNode*>& symbols) : symbols_(symbols) {}
+    explicit StringClassNode(std::vector<unique_ptr<SymbolNode>> symbols) : symbols_(std::move(symbols)) {
+        if (symbols_.empty()) {
+            throw std::invalid_argument("StringClassNode must have at least one symbol.");
+        }
+    }
     /// @brief Evaluates the string class node by creating an NFA that accepts any of the symbols in the class.
     /// This node represents a set of symbols that can be accepted by the NFA.
     /// @return A shared pointer to an NFA that accepts any of the symbols in the class.
@@ -119,39 +123,35 @@ public:
         }
         return result;
     }
-    ~StringClassNode() {
-        for(auto symbol : symbols_) {
-            delete symbol;  // Limpiar memoria de los símbolos
-        }
-    }
 };
 
 class RangeNode : public Node {
-    SymbolNode* first_;  // Primer símbolo del rango
-    SymbolNode* last_;
+    std::unique_ptr<SymbolNode> first_;  // Usar unique_ptr
+    std::unique_ptr<SymbolNode> last_;
 public:
-    RangeNode(SymbolNode* first, SymbolNode* last) : first_(first), last_(last) {}
-    ~RangeNode() {
-        delete first_;
-        delete last_;
+    RangeNode(std::unique_ptr<SymbolNode> first, std::unique_ptr<SymbolNode> last) 
+        : first_(std::move(first)), last_(std::move(last)) {
+        if (!first_ || !last_) {
+            throw std::invalid_argument("RangeNode: símbolos no pueden ser nullptr");
+        }
     }
     
     /// @brief Evaluates the range from first_ to last_ and returns an NFA that accepts all symbols in that range.
     /// @return A shared pointer to an NFA that accepts the range of symbols.
     std::shared_ptr<NFA> evaluate() override {
-        std::vector<SymbolNode*> symbols;
-        char first_char = first_->lex().front();  // Asumiendo método lex() en SymbolNode
-        char last_char = last_->lex().front();
-        
-        for(char c = first_char; c <= last_char; ++c) {
-            symbols.push_back(new SymbolNode(std::string(1, c)));
+        if (first_->lex().empty() || last_->lex().empty()) {
+            throw std::invalid_argument("RangeNode: los símbolos no pueden estar vacíos");
         }
-        
-        StringClassNode range(symbols);
-        auto result = range.evaluate();
-        // Limpiar memoria de símbolos creados
-        for(auto symbol : symbols) {
-            delete symbol;
+        std::shared_ptr<NFA> result = first_->evaluate();
+        char start = first_->lex()[0];
+        char end = last_->lex()[0];
+        if (start > end) {
+            throw std::invalid_argument("RangeNode: el primer símbolo debe ser menor o igual al segundo");
+        }
+        for (char c = start + 1; c <= end; ++c) {
+            std::string symbol(1, c);
+            std::shared_ptr<NFA> next_nfa = std::make_shared<SymbolNode>(symbol)->evaluate();
+            result = std::make_shared<NFA>(union_nfa(*result, *next_nfa));
         }
         return result;
     }
@@ -159,7 +159,8 @@ public:
 
 class ZeroOrOneNode : public UnaryNode {
 public:
-    explicit ZeroOrOneNode(Node* child) : UnaryNode(std::unique_ptr<Node>(child)) {}
+    explicit ZeroOrOneNode(std::unique_ptr<Node> child)  // Recibir unique_ptr
+        : UnaryNode(std::move(child)) {}
     /// @brief Evaluates the child node and returns an NFA that accepts the child NFA or an epsilon transition.
     /// @return A shared pointer to an NFA that accepts the child NFA or an epsilon transition.
 
@@ -174,7 +175,8 @@ public:
 
 class PositiveClosure : public UnaryNode {
 public:
-    explicit PositiveClosure(Node* child) : UnaryNode(std::unique_ptr<Node>(child)) {}
+    explicit PositiveClosure(std::unique_ptr<Node> child)  // Recibir unique_ptr
+        : UnaryNode(std::move(child)) {}
     
     /// @brief Evaluates the child node and returns an NFA that accepts one or more occurrences of the child NFA.
     /// @return A shared pointer to an NFA that accepts one or more occurrences of the child NFA.

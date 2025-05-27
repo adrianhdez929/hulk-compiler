@@ -4,28 +4,30 @@
 #include <algorithm>
 #include <map>
 #include "aut_manipulation.h"
+#include <queue>
 
 // namespace manipulation {
 //The move function computes the set of states that can be reached from the given set of states with the given symbol.
 set<NFA::State> move(const NFA& automaton, const unordered_set<NFA::State>& states, NFA::Symbol symbol) {
     set<NFA::State> moves;
     for (const auto& state : states) {
-        try {
-            const auto& next_states = automaton.getTransitions().at(state).at(symbol);
-            moves.insert(next_states.begin(), next_states.end());
-        } catch (const std::out_of_range&) {
-            // No transition for this state and symbol
+        auto& next_states = automaton.getTransitions().at(state);
+        auto it = next_states.find(symbol);
+        if (it != next_states.end()) {
+            const auto& reachable_states = it->second;
+            moves.insert(reachable_states.begin(), reachable_states.end());
         }
     }
     return moves;
 }
 set<NFA::State> move(const NFA& automaton, const NFA::State& state, const NFA::Symbol& symbol) {
     set<NFA::State> moves;
-    try {
-        const auto& next_states = automaton.getTransitions().at(state).at(symbol);
-        moves.insert(next_states.begin(), next_states.end());
-    } catch (const std::out_of_range&) {
-        // No transition for this state and symbol
+
+    auto& next_states = automaton.getTransitions().at(state);
+    auto it = next_states.find(symbol);
+    if (it != next_states.end()) {
+        const auto& reachable_states = it->second;
+        moves.insert(reachable_states.begin(), reachable_states.end());
     }
     return moves;
 }
@@ -65,13 +67,18 @@ DFA nfa_to_dfa(const NFA& automaton) {
     // Crear un mapa para las transiciones del DFA
     map<pair<int, NFA::Symbol>, int> dfa_transitions;
     // Crear un conjunto de estados pendientes para procesar
-    vector<DFAStates> pending_states = {dfa_states[0]};
+    std::queue<DFAStates> pending_states;
+    pending_states.push(dfa_states[0]);
+    // vector<DFAStates> pending_states = {dfa_states[0]};
     while (!pending_states.empty()) {
-        DFAStates current_dfa_state = pending_states.back();
-        pending_states.pop_back();
+        DFAStates current_dfa_state = pending_states.front();
+        pending_states.pop();
 
         // Iterar sobre el vocabulario del NFA
         for (const auto& symbol : automaton.getVocab()) {
+            if (symbol.empty()) {
+                continue; // Ignorar transiciones epsilon
+            }
             // Obtener los estados alcanzables desde el conjunto de estados del DFA actual
             set<NFA::State> next_states = move(automaton, current_dfa_state.states.get_set(), symbol);
             ContainerSet next_closure = epsilon_closure(automaton, next_states);
@@ -96,7 +103,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
                 DFAStates new_state = DFAStates(next_closure, dfa_state_id++, is_final);
                 dfa_states.emplace_back(new_state);
                 it = dfa_states.end() - 1; // Obtener el iterador del nuevo estado
-                pending_states.push_back(*it); // Agregar el nuevo estado a los pendientes
+                pending_states.push(*it); // Agregar el nuevo estado a los pendientes
 
                 // Agregar la transición al mapa de transiciones del DFA
                 dfa_transitions[{current_dfa_state.id, std::string(symbol)}] = new_state.id;
@@ -148,4 +155,4 @@ bool nfa_recognize(const NFA& automaton, const string& input) {
     }
     return false; // La cadena no es aceptada
 }
-// }
+
