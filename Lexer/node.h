@@ -1,0 +1,189 @@
+#include <memory>
+#include "../Automata/nfa.h"
+#include "../Automata/operations/operations.h"
+
+//BASIC NODES
+class Node {
+public:
+    virtual ~Node() = default;
+    virtual std::shared_ptr<NFA> evaluate() = 0;
+};
+
+class AtomicNode : public Node {
+
+};
+
+class UnaryNode : public Node {
+protected:
+    std::unique_ptr<Node> child_;  // Hijo único
+public:
+    explicit UnaryNode(std::unique_ptr<Node> child) : child_(std::move(child)) {}
+    virtual ~UnaryNode() = default;
+};
+
+class BinaryNode : public Node {
+protected:
+    std::unique_ptr<Node> left;  // Hijo izquierdo
+    std::unique_ptr<Node> right;  // Hijo derecho
+public:
+    BinaryNode(std::unique_ptr<Node> l, std::unique_ptr<Node> r) : left(std::move(l)), right(std::move(r)) {}
+    virtual ~BinaryNode() = default;
+};
+
+//LEXER NODES/////////////////////////////////////////////////////////////////////
+class EpsilonNode : public AtomicNode {
+public:
+    /// @brief Evaluates the epsilon node and returns an NFA that accepts epsilon transitions.
+    /// @return A shared pointer to an NFA that accepts epsilon transitions.
+    std::shared_ptr<NFA> evaluate() override {
+        NFA::Transitions transitions;
+        transitions[{0, ""}] = {1};  // Transición epsilon desde el estado 0 al estado 1
+        return std::make_shared<NFA>(2, std::initializer_list<int>{1}, transitions, 0);  // Automata con 2 estados, estado final 1, transiciones y estado inicial 0
+    }
+};
+
+class SymbolNode : public AtomicNode {
+    std::string symbol_;
+public:
+    explicit SymbolNode(const std::string& symbol) : symbol_(symbol) {}
+    const std::string& lex() const {
+        return symbol_;
+    }
+    /// @brief Evaluates the symbol node and returns an NFA that accepts the symbol.
+    /// @return A shared pointer to an NFA that accepts the symbol.
+    std::shared_ptr<NFA> evaluate() override {
+        NFA::Transitions transitions;
+        transitions[{0, symbol_}] = {1};
+        return std::make_shared<NFA>(2, std::initializer_list<int>{1}, transitions, 0);  // Automata con 2 estados, estado final 1, transiciones y estado inicial 0
+    }
+        
+};
+
+class ClosureNode : public UnaryNode {
+public:
+    explicit ClosureNode(std::unique_ptr<Node> child) : UnaryNode(std::move(child)) {}
+    /// @brief Evaluates the closure of the child NFA node.
+    /// This node represents the Kleene star operation, which allows for zero or more occurrences of the child NFA.
+    /// @return A shared pointer to an NFA that represents the closure of the child NFA node.
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> child_nfa = child_->evaluate();
+        NFA closure = closure_nfa(*child_nfa);
+        return std::make_shared<NFA>(closure);
+    }
+    ~ClosureNode() override = default;  // Ensure proper cleanup of child node
+};
+
+class UnionNode : public BinaryNode {
+public:
+    UnionNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right) 
+        : BinaryNode(std::move(left), std::move(right)) {}
+    /// @brief Evaluates the union of two NFA nodes.
+    /// This node represents the union operation between two NFA nodes.
+    /// @return A shared pointer to an NFA that represents the union of the two NFA nodes.
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> left_nfa = left->evaluate();
+        std::shared_ptr<NFA> right_nfa = right->evaluate();
+        NFA automata_union = union_nfa(*left_nfa, *right_nfa);
+        return std::make_shared<NFA>(automata_union);
+    }
+    ~UnionNode() override = default;  // Ensure proper cleanup of child nodes
+};
+
+class ConcatNode : public BinaryNode {
+public:
+    ConcatNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right) 
+        : BinaryNode(std::move(left), std::move(right)) {}
+    /// @brief Evaluates the concatenation of two NFA nodes.
+    /// @return A shared pointer to an NFA that represents the concatenation of the two NFA nodes.
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> left_nfa = left->evaluate();
+        std::shared_ptr<NFA> right_nfa = right->evaluate();
+        NFA automata_concat = concat_nfa(*left_nfa, *right_nfa);
+        return std::make_shared<NFA>(automata_concat);
+    }
+    ~ConcatNode() override = default;  // Ensure proper cleanup of child nodes
+};
+
+class StringClassNode : public Node {
+    std::vector<SymbolNode*> symbols_;
+public:
+    explicit StringClassNode(const std::vector<SymbolNode*>& symbols) : symbols_(symbols) {}
+    /// @brief Evaluates the string class node by creating an NFA that accepts any of the symbols in the class.
+    /// This node represents a set of symbols that can be accepted by the NFA.
+    /// @return A shared pointer to an NFA that accepts any of the symbols in the class.
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> result = symbols_[0]->evaluate();
+        for(size_t i = 1; i < symbols_.size(); ++i) {
+            std::shared_ptr<NFA> next_nfa = symbols_[i]->evaluate();
+            result = std::make_shared<NFA>(union_nfa(*result, *next_nfa));
+        }
+        return result;
+    }
+    ~StringClassNode() {
+        for(auto symbol : symbols_) {
+            delete symbol;  // Limpiar memoria de los símbolos
+        }
+    }
+};
+
+class RangeNode : public Node {
+    SymbolNode* first_;  // Primer símbolo del rango
+    SymbolNode* last_;
+public:
+    RangeNode(SymbolNode* first, SymbolNode* last) : first_(first), last_(last) {}
+    ~RangeNode() {
+        delete first_;
+        delete last_;
+    }
+    
+    /// @brief Evaluates the range from first_ to last_ and returns an NFA that accepts all symbols in that range.
+    /// @return A shared pointer to an NFA that accepts the range of symbols.
+    std::shared_ptr<NFA> evaluate() override {
+        std::vector<SymbolNode*> symbols;
+        char first_char = first_->lex().front();  // Asumiendo método lex() en SymbolNode
+        char last_char = last_->lex().front();
+        
+        for(char c = first_char; c <= last_char; ++c) {
+            symbols.push_back(new SymbolNode(std::string(1, c)));
+        }
+        
+        StringClassNode range(symbols);
+        auto result = range.evaluate();
+        // Limpiar memoria de símbolos creados
+        for(auto symbol : symbols) {
+            delete symbol;
+        }
+        return result;
+    }
+};
+
+class ZeroOrOneNode : public UnaryNode {
+public:
+    explicit ZeroOrOneNode(Node* child) : UnaryNode(std::unique_ptr<Node>(child)) {}
+    /// @brief Evaluates the child node and returns an NFA that accepts the child NFA or an epsilon transition.
+    /// @return A shared pointer to an NFA that accepts the child NFA or an epsilon transition.
+
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> child_nfa = child_->evaluate();
+        std::shared_ptr<NFA> epsilon_nfa = std::make_shared<EpsilonNode>()->evaluate();
+        NFA union_nfa_result = union_nfa(*child_nfa, *epsilon_nfa);
+        return std::make_shared<NFA>(union_nfa_result);
+    }
+    ~ZeroOrOneNode() override = default;  // Ensure proper cleanup of child node
+};
+
+class PositiveClosure : public UnaryNode {
+public:
+    explicit PositiveClosure(Node* child) : UnaryNode(std::unique_ptr<Node>(child)) {}
+    
+    /// @brief Evaluates the child node and returns an NFA that accepts one or more occurrences of the child NFA.
+    /// @return A shared pointer to an NFA that accepts one or more occurrences of the child NFA.
+    std::shared_ptr<NFA> evaluate() override {
+        std::shared_ptr<NFA> child_nfa = child_->evaluate();
+        // Concatenation of child NFA with its closure
+        NFA closure = closure_nfa(*child_nfa);
+        NFA concat_nfa_result = concat_nfa(*child_nfa, closure);
+        return std::make_shared<NFA>(concat_nfa_result);
+    }
+    ~PositiveClosure() override = default;  // Ensure proper cleanup of child node
+};

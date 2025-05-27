@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "build/parser.tab.h"
+// #include "build/parser.tab.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include <iostream>
@@ -8,43 +8,46 @@
 using namespace std;
 // using namespace manipulation;
 
-extern FILE *yyin;
-extern int yyparse();
-ASTNode* root = nullptr;
+//NO BORRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRR
+// extern FILE *yyin;
+// extern int yyparse();
+// ASTNode* root = nullptr;
 
-SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
+// SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
 
 int main() {
     //run tests
     execute_test();
+
     
-    const char* filename = "script.txt"; //default
+    //NOTE: NO BORRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRR
+    // const char* filename = "script.txt"; //default
 
-    if (argc > 1) {
-		filename = argv[1];
-    }
+    // if (argc > 1) {
+	// 	filename = argv[1];
+    // }
 		
-	yyin = fopen(filename, "r");
+	// yyin = fopen(filename, "r");
 
-	if (!yyin) {
-		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-		return 1;
-	}
+	// if (!yyin) {
+	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+	// 	return 1;
+	// }
 
-    yyparse();
+    // yyparse();
 
-	if (root) {
-		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-		root->print();
+	// if (root) {
+	// 	std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+	// 	root->print();
 
-        std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
-        root->accept(visitor, nullptr);
-        std::cout << "Semantic check completed." << std::endl;
+    //     std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
+    //     root->accept(visitor, nullptr);
+    //     std::cout << "Semantic check completed." << std::endl;
 
-		delete root;
-	}
+	// 	delete root;
+	// }
 
-	fclose(yyin);
+	// fclose(yyin);
 
     return 0;
 }

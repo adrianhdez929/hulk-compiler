@@ -8,7 +8,86 @@
 #include "Automata/operations/operations.h"
 #include "Gramatica2/grammar.h"
 #include "Automata/state.h"
+#include "Lexer/node.h"
 
+int lexer_node_test() {
+    // Crear nodo simbolo
+    // std::unique_ptr<Node> symbolNode = std::make_unique<SymbolNode>("a");
+    // std::unique_ptr<Node> symbolNode2 = std::make_unique<SymbolNode>("b");
+    // // std::unique_ptr<Node> epsilonNode = std::make_unique<EpsilonNode>();
+
+    // std::unique_ptr<Node> symbolNode = std::make_unique<SymbolNode>("a");
+    // std::unique_ptr<Node> symbolNode2 = std::make_unique<SymbolNode>("b");
+    // std::unique_ptr<Node> unionNode = std::make_unique<UnionNode>(std::move(symbolNode), std::move(symbolNode2));
+
+    // std::unique_ptr<Node> symbolNode3 = std::make_unique<SymbolNode>("a");
+    // std::unique_ptr<Node> symbolNode4 = std::make_unique<SymbolNode>("b");
+    // std::unique_ptr<Node> concatNode = std::make_unique<ConcatNode>(std::move(symbolNode3), std::move(symbolNode4));
+
+    // std::unique_ptr<Node> symbolNode5 = std::make_unique<SymbolNode>("a");
+    // std::unique_ptr<Node> closureNode = std::make_unique<ClosureNode>(std::move(symbolNode5));
+
+    // //Automatas
+    // std::shared_ptr<NFA> nfa = closureNode->evaluate();
+    // std::shared_ptr<NFA> nfa2 = unionNode->evaluate();
+    // std::shared_ptr<NFA> nfa3 = concatNode->evaluate();
+
+    Node* regex = new PositiveClosure(
+        new UnionNode(
+            std::make_unique<SymbolNode>("a"),
+            std::make_unique<SymbolNode>("b")
+        )
+    );
+    std::shared_ptr<NFA> nfa = regex->evaluate();
+    //convert to dfa
+
+    DFA dfa = nfa_to_dfa(*nfa);
+    dfa = automata_minimization(dfa);
+
+    std::cout << "NFA States: " << dfa.states() << std::endl;
+    std::cout << "NFA Start State: " << dfa.startState() << std::endl;
+    std::cout << "NFA Final States: ";
+    for (const auto& finalState : dfa.finalStates()) {
+        std::cout << finalState << " ";
+    }
+    std::cout << std::endl;
+    const auto& transitions = dfa.getTransitionsMap();
+    for (const auto& transition : transitions) {
+        std::cout << "Transition from state " << transition.first.first 
+                  << " with symbol '" << transition.first.second 
+                  << "' to states: ";
+        for (const auto& dest : transition.second) {
+            std::cout << dest << " ";
+        }
+        std::cout << std::endl;
+    }
+    delete regex;  // Limpiar memoria del nodo
+
+    // std::vector<std::shared_ptr<NFA>> nfas = {nfa, nfa2, nfa3};
+
+    // for (const auto& nfa : nfas) {
+    //     std::cout << "NFA States: " << nfa->states() << std::endl;
+    //     std::cout << "NFA Start State: " << nfa->startState() << std::endl;
+    //     std::cout << "NFA Final States: ";
+    //     for (const auto& finalState : nfa->finalStates()) {
+    //         std::cout << finalState << " ";
+    //     }
+    //     std::cout << std::endl;
+
+    //     const auto& transitions = nfa->getTransitionsMap();
+    //     for (const auto& transition : transitions) {
+    //         std::cout << "Transition from state " << transition.first.first 
+    //                   << " with symbol '" << transition.first.second 
+    //                   << "' to states: ";
+    //         for (const auto& dest : transition.second) {
+    //             std::cout << dest << " ";
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    // }
+
+    return 0;
+}
 int grammar_test() {
     Grammar g;
     auto E = g.SetNonTerminal("E", true);
@@ -196,6 +275,6 @@ int execute_all_tests() {
 
 int execute_test() {
     // execute_all_tests();
-    state_automata_test();
+    lexer_node_test();
     return 0; 
 }
