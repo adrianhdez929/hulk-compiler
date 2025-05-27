@@ -2,6 +2,7 @@
 #include "build/parser.tab.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
+#include "codegen/visitor.h"
 #include <iostream>
 
 extern FILE *yyin;
@@ -9,6 +10,7 @@ extern int yyparse();
 ASTNode* root = nullptr;
 
 SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
+CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char **argv) {
     if (argc > 1) {
@@ -23,6 +25,10 @@ int main(int argc, char **argv) {
         std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
         root->accept(visitor, nullptr);
         std::cout << "Semantic check completed." << std::endl;
+
+        std::cout << "Generating code with CodegenVisitor" << std::endl;
+        root->accept(codegenVisitor, nullptr);
+        std::cout << "Code generation completed." << std::endl;
 
 		delete root;
     
