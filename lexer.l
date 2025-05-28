@@ -15,6 +15,9 @@ extern "C"  {
 "function" 	{ return FUNCTION; }
 "let"		{ return LET; }
 "in"		{ return IN; }
+"if" 		{ return IF; }
+"elif" 		{ return ELIF; }
+"else" 		{ return ELSE; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
@@ -32,8 +35,16 @@ extern "C"  {
 "{"			{ return LKEY; }
 "}"			{ return RKEY; }
 "=>"		{ return INLINE; }
-"="			{ return EQUAL; }
+"="			{ return ASSIGN; }
 ":="		{ return ASS_DES; }
+
+">="		{ return GREATER_EQUAL; }
+">" 		{ return GREATER; }
+"<="		{ return LESS_EQUAL; }
+"<"			{ return LESS; }
+"=="		{ return EQUAL; }
+"!=" 		{ return DISTINCT; }
+
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }
 

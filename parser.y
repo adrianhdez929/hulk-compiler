@@ -24,13 +24,16 @@ extern ASTNode* root;
 	class AssignFuncNode* ass_f_node;
 	class LetAssign* ass_var;
 	class VarAssignList* v_ass_l;
+	class BoolExprNode* b_expr_node;
+	class Conditional* cond;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE EQUAL ASS_DES
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF 
+%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
 %token LET
 %token IN
 
@@ -45,6 +48,8 @@ extern ASTNode* root;
 %type <ass_f_node> func_asign
 %type <ass_var> let_assign
 %type <v_ass_l> var_assign_list
+%type <b_expr_node> bool_expr
+%type <cond> conditional
 
 %left PLUS
 %left MINUS
@@ -78,12 +83,13 @@ line:
 
 expr: 
 	arit_op { $$ = $1; }
-	| BOOLEAN { $$ = new BoolNode($1); }
+	| bool_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
 	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
+	| IF conditional { $$ = $2; }
     ;
 
 func_asign:
@@ -103,8 +109,8 @@ let_assign:
 	;
 
 var_assign_list:
-	ID EQUAL expr { $$ = new VarAssignList({ new VarAssign(new IDNode($1), $3) });}
-	| var_assign_list COLON ID EQUAL expr { $1->add_child(new VarAssign(new IDNode($3), $5)); $$ = $1; }
+	ID ASSIGN expr { $$ = new VarAssignList({ new VarAssign(new IDNode($1), $3) });}
+	| var_assign_list COLON ID ASSIGN expr { $1->add_child(new VarAssign(new IDNode($3), $5)); $$ = $1; }
 	;
 
 func_call:
@@ -121,9 +127,24 @@ arit_op:
 	| LPARENT expr RPARENT { $$ = $2; }
 	;
 
+bool_expr:
+	BOOLEAN { $$ = new BoolExprNode(new BoolNode($1)); }
+	| expr GREATER_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, ">=", $3)); }
+	| expr GREATER expr { $$ = new BoolExprNode(new BinOpNode($1, ">", $3)); }
+	| expr LESS_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "<=", $3)); }
+	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
+	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
+	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
+	;
 
-
-
+conditional:
+	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT lines_block ELSE expr { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6); }
+	;
+	//pendiente elif
 
 %%
 

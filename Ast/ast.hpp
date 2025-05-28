@@ -49,6 +49,15 @@ public:
 
 };
 
+class BoolExprNode : public ASTNode {
+public: 
+	ASTNode* expr;
+
+	BoolExprNode(ASTNode* expr_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
 class StringNode : public ASTNode {
 public:
     std::string value;
@@ -168,6 +177,17 @@ public:
 	ASTNode* value;
 
 	VarDesAssign(IDNode* id_, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class Conditional: public ASTNode {
+public:
+	BoolExprNode* bool_expr;
+	ASTNode* if_body;
+	ASTNode* else_body;
+
+	Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

@@ -1,1 +1,8 @@
-let _abc = 42 in print(_abc);
+{
+	if (a > 35) print(a + b) 
+	elif (a < 20) {
+		print(b);
+		print(a + b);
+	} else print(a);
+
+}

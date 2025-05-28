@@ -28,6 +28,17 @@ void BoolNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
+BoolExprNode::BoolExprNode(ASTNode* expr_) : expr(expr_) {}
+
+void BoolExprNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "BoolExprNode:" << std::endl;
+	expr->print(indent + 2);
+}
+
+void BoolExprNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
 StringNode::StringNode(const std::string& v) : ASTNode(), value(v) {}
 
 void StringNode::print(int indent) const {
@@ -204,5 +215,20 @@ void VarDesAssign::print(int indent) const {
 }
 
 void VarDesAssign::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+Conditional::Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_) : bool_expr(bool_expr_), if_body(if_body_), else_body(else_body_) {}
+
+void Conditional::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "Conditional:" << std::endl;
+	bool_expr->print(indent + 2);
+	std::cout << std::string(indent + 1, ' ') << "IfBody:" << std::endl;
+	if_body->print(indent + 2);
+	std::cout << std::string(indent + 1, ' ') << "ElseBody:" << std::endl; 
+	else_body->print(indent + 2);
+}
+
+void Conditional::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
