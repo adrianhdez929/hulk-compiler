@@ -18,6 +18,8 @@ extern "C"  {
 "if" 		{ return IF; }
 "elif" 		{ return ELIF; }
 "else" 		{ return ELSE; }
+"while"		{ return WHILE; }
+"for" 		{ return FOR; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }

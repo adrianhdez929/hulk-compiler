@@ -26,13 +26,15 @@ extern ASTNode* root;
 	class VarAssignList* v_ass_l;
 	class BoolExprNode* b_expr_node;
 	class Conditional* cond;
+	class WhileNode* while_node;
+	class ForNode* for_node;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF 
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
 %token LET
 %token IN
@@ -50,6 +52,8 @@ extern ASTNode* root;
 %type <v_ass_l> var_assign_list
 %type <b_expr_node> bool_expr
 %type <cond> conditional
+%type <while_node> while_expr
+//%type <for_node> for_expr
 
 %left PLUS
 %left MINUS
@@ -84,6 +88,7 @@ line:
 expr: 
 	arit_op { $$ = $1; }
 	| bool_expr { $$ = $1; }
+	| while_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
@@ -102,6 +107,7 @@ args_list:
 	| ID { $$ = new ArgsList({new IDNode($1)}); }
 	| args_list COLON ID { $1->add_child(new IDNode($3)); $$ = $1; }
 	;
+
 
 let_assign:
 	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
@@ -144,7 +150,18 @@ conditional:
 	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6); }
 	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6); }
 	;
-	//pendiente elif
+
+while_expr:
+	WHILE LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($3, $5); }
+	| WHILE LPARENT bool_expr RPARENT expr { $$ = new WhileNode($3, $5); }
+	;
+
+//for_expr:
+//	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	;
 
 %%
 

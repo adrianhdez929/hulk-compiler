@@ -119,7 +119,7 @@ public:
 	~BlockNode();
 };
 
-class ArgsList: public ASTNode {
+class ArgsList: public ASTNode { // lista de IDNode solamente
 public:
 	std::vector<IDNode*> children;
 
@@ -128,6 +128,17 @@ public:
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 	~ArgsList();
+};
+
+class ExprsList : public ASTNode {
+public:
+	std::vector<ASTNode*> children;
+
+	ExprsList(const std::vector<ASTNode*>& nodes);
+	void add_child(ASTNode* node);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context);
+	~ExprsList();
 };
 
 class AssignFuncNode: public ASTNode {
@@ -188,6 +199,27 @@ public:
 	ASTNode* else_body;
 
 	Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class WhileNode: public ASTNode {
+public:
+	BoolExprNode* bool_expr;
+	ASTNode* body;
+
+	WhileNode(BoolExprNode* bool_expr_, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class ForNode: public ASTNode {
+public:
+	IDNode* id;
+	ASTNode* group;
+	ASTNode* body;
+
+	ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

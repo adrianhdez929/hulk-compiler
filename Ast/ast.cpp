@@ -147,6 +147,24 @@ ArgsList::~ArgsList() {
 	}
 }
 
+ExprsList::ExprsList(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+void ExprsList::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "ArgsList(exprs):" << std::endl;
+	for (const auto& child : children) {
+		child->print(indent + 1);
+	}
+}
+
+void ExprsList::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+ExprsList::~ExprsList() {
+	for (auto child : children) {
+		delete child;
+	}
+}
+
 AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_) {}
 
 void AssignFuncNode::print(int indent) const {
@@ -230,5 +248,34 @@ void Conditional::print(int indent) const {
 }
 
 void Conditional::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+WhileNode::WhileNode(BoolExprNode* bool_expr_, ASTNode* body_) : bool_expr(bool_expr_), body(body_) {}
+
+void WhileNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "WhileNode:" << std::endl;
+	std::cout << std::string(indent + 1, ' ') << "BoolExpr:" << std::endl;
+	bool_expr->print(indent + 2);
+	std::cout << std::string(indent + 1, ' ') << "Body:" << std::endl;
+	body->print(indent + 2);
+}
+
+void WhileNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+ForNode::ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_) : id(id_), group(group_), body(body_) {}
+
+void ForNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "ForNode:" << std::endl;
+	std::cout << std::string(indent + 2, ' ') << "ID(" << id->id_name << ")" << std::endl;
+	std::cout << std::string(indent + 1, ' ') << "Group:" << std::endl;
+	group->print(indent + 2);
+	std::cout << std::string(indent + 1, ' ') << "Body:" << std::endl;
+	body->print(indent + 2); 
+}
+
+void ForNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
