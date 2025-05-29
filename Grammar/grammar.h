@@ -29,31 +29,36 @@ class EndOfFile : public Symbol {
 class Grammar {
     public:
         Grammar();
-        NonTerminal& SetNonTerminal(const std::string& name, bool isStart = false);
-        vector<NonTerminal>& NonTerminals();
-        Terminal& SetTerminal(const std::string& name);
-        vector<Terminal>& Terminals();
+        std::shared_ptr<NonTerminal> SetNonTerminal(const std::string& name, bool isStart = false);
+        std::shared_ptr<Terminal> SetTerminal(const std::string& name);
+        std::shared_ptr<Epsilon> SetEpsilon();
+        std::shared_ptr<EndOfFile> SetEndOfFile();
+
+        vector<std::shared_ptr<NonTerminal>> NonTerminals();
+        vector<std::shared_ptr<Terminal>> Terminals();
+
         // void AddProduction(const AttributeProduction& production);
-        using ProductionVariant = std::variant<Production, AttributeProduction>;
-        void AddProduction(const AttributeProduction& production);
+        using ProductionVariant = std::variant<Production, AttrProd>;
+        void AddProduction(const AttrProd& production);
         void AddProduction(const Production& production);
         const std::vector<ProductionVariant>& Productions() const;
-        const NonTerminal& GetStartSymbol() const;
-        const Epsilon& GetEpsilon() const;
-        const EndOfFile& GetEndOfFile() const;
+        const std::shared_ptr<NonTerminal>& GetStartSymbol() const;
+        const std::shared_ptr<Epsilon>& GetEpsilon() const;
+        const std::shared_ptr<EndOfFile>& GetEndOfFile() const;
+        const std::vector<std::shared_ptr<Symbol>>& Symbols() const;
         //Metodo para obtener todos los simbolos
         // const std::vector<const Symbol*>& Symbols() const;
         //Sobreescribir el .tostring
         std::string ToString() const;
     private:
-        std::vector<std::unique_ptr<Symbol>> symbols;
-        std::vector<NonTerminal> nonTerminals;
-        std::vector<Terminal> terminals;
+        std::vector<std::shared_ptr<Symbol>> symbols;
+        std::vector<std::shared_ptr<NonTerminal>> nonTerminals;
+        std::vector<std::shared_ptr<Terminal>> terminals;
         std::vector<ProductionVariant> productions;
         std::type_index productionType;
-        const NonTerminal* startSymbol = nullptr;
-        std::unique_ptr<Epsilon> epsilon;
-        std::unique_ptr<EndOfFile> eof;
+        std::shared_ptr<NonTerminal> startSymbol;
+        std::shared_ptr<Epsilon> epsilon;
+        std::shared_ptr<EndOfFile> eof;
         std::unordered_map<std::string, Symbol*> symbolMap;
 };
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <memory>
 #include "../Automata/nfa.h"
 #include "../Automata/operations/operations.h"
@@ -15,18 +16,18 @@ class AtomicNode : public Node {
 
 class UnaryNode : public Node {
 protected:
-    std::unique_ptr<Node> child_;  // Hijo único
+    std::shared_ptr<Node> child_;  // Hijo único
 public:
-    explicit UnaryNode(std::unique_ptr<Node> child) : child_(std::move(child)) {}
+    explicit UnaryNode(std::shared_ptr<Node> child) : child_(std::move(child)) {}
     virtual ~UnaryNode() = default;
 };
 
 class BinaryNode : public Node {
 protected:
-    std::unique_ptr<Node> left;  // Hijo izquierdo
-    std::unique_ptr<Node> right;  // Hijo derecho
+    std::shared_ptr<Node> left;  // Hijo izquierdo
+    std::shared_ptr<Node> right;  // Hijo derecho
 public:
-    BinaryNode(std::unique_ptr<Node> l, std::unique_ptr<Node> r) : left(std::move(l)), right(std::move(r)) {}
+    BinaryNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : left(std::move(l)), right(std::move(r)) {}
     virtual ~BinaryNode() = default;
 };
 
@@ -61,7 +62,11 @@ public:
 
 class ClosureNode : public UnaryNode {
 public:
-    explicit ClosureNode(std::unique_ptr<Node> child) : UnaryNode(std::move(child)) {}
+    explicit ClosureNode(std::shared_ptr<Node> child) : UnaryNode(std::move(child)) {
+        if (!child_) {
+            throw std::invalid_argument("ClosureNode must have a child node.");
+        }
+    }
     /// @brief Evaluates the closure of the child NFA node.
     /// This node represents the Kleene star operation, which allows for zero or more occurrences of the child NFA.
     /// @return A shared pointer to an NFA that represents the closure of the child NFA node.
@@ -75,7 +80,7 @@ public:
 
 class UnionNode : public BinaryNode {
 public:
-    UnionNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right) 
+    UnionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right) 
         : BinaryNode(std::move(left), std::move(right)) {}
     /// @brief Evaluates the union of two NFA nodes.
     /// This node represents the union operation between two NFA nodes.
@@ -91,7 +96,7 @@ public:
 
 class ConcatNode : public BinaryNode {
 public:
-    ConcatNode(std::unique_ptr<Node> left, std::unique_ptr<Node> right) 
+    ConcatNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right) 
         : BinaryNode(std::move(left), std::move(right)) {}
     /// @brief Evaluates the concatenation of two NFA nodes.
     /// @return A shared pointer to an NFA that represents the concatenation of the two NFA nodes.
@@ -105,9 +110,9 @@ public:
 };
 
 class StringClassNode : public Node {
-    std::vector<std::unique_ptr<SymbolNode>> symbols_;  // Vector de símbolos que componen la clase de cadenas
+    std::vector<std::shared_ptr<SymbolNode>> symbols_;  // Vector de símbolos que componen la clase de cadenas
 public:
-    explicit StringClassNode(std::vector<unique_ptr<SymbolNode>> symbols) : symbols_(std::move(symbols)) {
+    explicit StringClassNode(std::vector<shared_ptr<SymbolNode>> symbols) : symbols_(std::move(symbols)) {
         if (symbols_.empty()) {
             throw std::invalid_argument("StringClassNode must have at least one symbol.");
         }
@@ -126,10 +131,10 @@ public:
 };
 
 class RangeNode : public Node {
-    std::unique_ptr<SymbolNode> first_;  // Usar unique_ptr
-    std::unique_ptr<SymbolNode> last_;
+    std::shared_ptr<SymbolNode> first_;  // Usar unique_ptr
+    std::shared_ptr<SymbolNode> last_;
 public:
-    RangeNode(std::unique_ptr<SymbolNode> first, std::unique_ptr<SymbolNode> last) 
+    RangeNode(std::shared_ptr<SymbolNode> first, std::shared_ptr<SymbolNode> last) 
         : first_(std::move(first)), last_(std::move(last)) {
         if (!first_ || !last_) {
             throw std::invalid_argument("RangeNode: símbolos no pueden ser nullptr");
@@ -159,7 +164,7 @@ public:
 
 class ZeroOrOneNode : public UnaryNode {
 public:
-    explicit ZeroOrOneNode(std::unique_ptr<Node> child)  // Recibir unique_ptr
+    explicit ZeroOrOneNode(std::shared_ptr<Node> child)  // Recibir unique_ptr
         : UnaryNode(std::move(child)) {}
     /// @brief Evaluates the child node and returns an NFA that accepts the child NFA or an epsilon transition.
     /// @return A shared pointer to an NFA that accepts the child NFA or an epsilon transition.
@@ -175,7 +180,7 @@ public:
 
 class PositiveClosure : public UnaryNode {
 public:
-    explicit PositiveClosure(std::unique_ptr<Node> child)  // Recibir unique_ptr
+    explicit PositiveClosure(std::shared_ptr<Node> child)  // Recibir unique_ptr
         : UnaryNode(std::move(child)) {}
     
     /// @brief Evaluates the child node and returns an NFA that accepts one or more occurrences of the child NFA.

@@ -9,7 +9,7 @@
 class Grammar;
 class Sentence;
 
-class Symbol {
+class Symbol : public std::enable_shared_from_this<Symbol> {
     public:
         // enum Type { TERMINAL, NON_TERMINAL };
         Symbol(const std::string& name, Grammar& grammar);
@@ -23,8 +23,11 @@ class Symbol {
     
         bool operator==(const Symbol& other) const;
         //sobrecargar operador +
-        Sentence operator+(const Symbol& other) const;
-        Sentence operator+(const Sentence& other) const;
+        // friend Sentence operator+(std::shared_ptr<const Symbol> lhs, 
+        //                         std::shared_ptr<const Symbol> rhs);
+
+        // friend Sentence operator+(std::shared_ptr<const Symbol> lhs, 
+        //                         const Sentence& rhs);
         // Sentence operator+(const std::vector<const Symbol*>& symbols);
 
         std::string ToString() const {

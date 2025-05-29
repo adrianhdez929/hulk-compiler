@@ -1,0 +1,140 @@
+#include "grammar.h"
+#include "symbol.h"
+#include <typeindex>
+#include <stdexcept>
+
+Epsilon::Epsilon(Grammar& grammar) : Symbol("epsilon", grammar) {}
+bool Epsilon::IsEpsilon() const { return true; }
+
+EndOfFile::EndOfFile(Grammar& grammar) : Symbol("EOF", grammar) {}
+bool EndOfFile::IsEndOfFile() const { return true; }
+
+Grammar::Grammar() : productionType(typeid(void)) {
+    // Initialize epsilon and EOF symbols
+    epsilon = std::make_shared<Epsilon>(*this);
+    eof = std::make_shared<EndOfFile>(*this);
+    
+    // Add epsilon and EOF to the symbol map
+    symbolMap["epsilon"] = epsilon.get();
+    symbolMap["EOF"] = eof.get();
+    
+    // Add epsilon and EOF to the symbols vector
+    symbols.push_back(epsilon);
+    symbols.push_back(eof);
+};
+
+const std::shared_ptr<Epsilon>& Grammar::GetEpsilon() const { return epsilon; }
+const std::shared_ptr<EndOfFile>& Grammar::GetEndOfFile() const { return eof; }
+const std::vector<std::shared_ptr<Symbol>>& Grammar::Symbols() const {
+    return symbols;
+}
+
+std::shared_ptr<NonTerminal> Grammar::SetNonTerminal(const std::string& name, bool isStart) {
+    if(symbolMap.find(name) != symbolMap.end()) {
+        throw std::runtime_error("Symbol already defined: " + name);
+    }
+    auto ptr = std::make_shared<NonTerminal>(name, *this);
+    
+    if(isStart) {
+        if(startSymbol) throw std::runtime_error("Start symbol already defined");
+        startSymbol = ptr;
+    }
+    
+    this->symbolMap[name] = ptr.get();
+    this->symbols.push_back(ptr);
+    this->nonTerminals.push_back(ptr);
+    return ptr;
+}
+
+std::shared_ptr<Terminal> Grammar::SetTerminal(const std::string& name) {
+    if(symbolMap.find(name) != symbolMap.end()) {
+        throw std::runtime_error("Symbol already defined: " + name);
+    }
+    auto ptr = std::make_shared<Terminal>(name, *this);
+    
+    this->symbolMap[name] = ptr.get();
+    this->symbols.push_back(ptr);
+    this->terminals.push_back(ptr);
+    return ptr;
+}
+
+std::shared_ptr<Epsilon> Grammar::SetEpsilon() {
+    if(!epsilon) {
+        epsilon = std::make_shared<Epsilon>(*this);
+        symbols.push_back(epsilon);
+        symbolMap["epsilon"] = epsilon.get();
+    }
+    return epsilon;
+}
+std::shared_ptr<EndOfFile> Grammar::SetEndOfFile() {
+    if(!eof) {
+        eof = std::make_shared<EndOfFile>(*this);
+        symbols.push_back(eof);
+        symbolMap["EOF"] = eof.get();
+    }
+    return eof;
+}
+
+void Grammar::AddProduction(const Production& production) {
+    if(productions.empty()) {
+        productionType = typeid(Production);
+    }
+    productions.emplace_back(production);
+}
+
+void Grammar::AddProduction(const AttrProd& production) {
+    if(productions.empty()) {
+        productionType = typeid(AttrProd);
+    }
+    productions.emplace_back(production);
+}
+
+const std::vector<Grammar::ProductionVariant>& Grammar::Productions() const {
+    return productions;
+}
+
+const std::shared_ptr<NonTerminal>& Grammar::GetStartSymbol() const {
+    if(!startSymbol) throw std::runtime_error("Start symbol not defined");
+    return startSymbol;
+}
+
+// const std::vector<const Symbol*>& Grammar::Symbols() const {
+//     return symbols;
+// }
+
+std::vector<std::shared_ptr<NonTerminal>> Grammar::NonTerminals() {
+    return nonTerminals;
+}
+std::vector<std::shared_ptr<Terminal>> Grammar::Terminals() {
+    return terminals;
+}
+std::string Grammar::ToString() const {
+    //Formato:
+    // NonTerminals:
+    //     NonTerminal1, NonTerminal2, ...
+    // Terminals:
+    //     Terminal1, Terminal2, ...
+    // Productions:
+    //     Production1, Production2, ...
+    std::string result;
+    result += "NonTerminals:\n";
+    for (const auto& nt : nonTerminals) {
+        result += nt->ToString() + ", ";
+    }
+    result += "\n";
+    result += "Terminals:\n";
+    for (const auto& t : terminals) {
+        result += t->ToString() + ", ";
+    }
+    result += "\n";
+    result += "Productions:\n";
+    for (const auto& p : productions) {
+        if (std::holds_alternative<Production>(p)) {
+            result += "  " + std::get<Production>(p).ToString() + ", ";
+        } else {
+            result += "  " + std::get<AttrProd>(p).ToString() + ", ";
+        }
+    }
+    result += "\n";
+    return result;
+}

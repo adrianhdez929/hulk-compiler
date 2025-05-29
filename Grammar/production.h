@@ -4,38 +4,47 @@
 #include <functional>
 #include <vector>
 #include <any>
+#include <variant>
+#include <initializer_list>
 
 #ifndef PRODUCTION_H
 #define PRODUCTION_H
 
 using namespace std;
 
+class Node;
 class NonTerminal;
 
 class Production {
 public:
-    Production(const NonTerminal& left, const Sentence& right);
-    const NonTerminal& Left() const;
+    Production(std::shared_ptr<NonTerminal> left, const Sentence& right);
+    std::shared_ptr<NonTerminal> Left() const;
     const Sentence& Right() const;
 
     std::string ToString() const;
 private:
-    const NonTerminal& left;
+    std::shared_ptr<NonTerminal> left;
     Sentence right;
 };
 
-class AttributeProduction : public Production {
+class AttrProd : public Production {
 public:
     // Funcion semántica que toma un vector de atributos heredados y un vector de atributos sintetizados
-    using SemanticAction = function<any(const vector<any> inherited, const vector<any>& synthesized)>;
+    // using SemanticAction = function<any(const vector<any>& inherited, const vector<any>& synthesized)>;
+
+    using NodePtr = std::shared_ptr<Node>;
+    using SemanticAction = std::function<
+        NodePtr(const std::vector<NodePtr>& h,
+                const std::vector<NodePtr>& s)
+        >;
     
-    AttributeProduction(const NonTerminal& left, 
+    AttrProd(std::shared_ptr<NonTerminal> left,
                         const Sentence& right, 
                         const vector<SemanticAction>& actions);
 
-    const vector<SemanticAction>& Attributes() const;
-    any Execute(const vector<any>& inherited, //const any& inherited, 
-        const vector<any>& synthesized) const;
+    const vector<SemanticAction>& Attributes() const;//CONVERTIR EN UN SOLO ATRIBUTO
+    NodePtr Execute(const vector<NodePtr>& inherited, //const any& inherited, 
+                    const vector<NodePtr>& synthesized) const;
 
     // ProdDef es una estructura que contiene una producción y sus acciones semánticas
     // Para mejorar la legibilidad y evitar el uso de std::pair y std::vector<std::pair<Sentence, std::vector<AttributeProduction::SemanticAction>>>
@@ -45,7 +54,7 @@ public:
     };
 
 private:
-    vector<SemanticAction> attributes;
+    vector<SemanticAction> attributes; //CONVERTIR EN UN SOLO ATRIBUTO
 };
 
 class NonTerminal : public Symbol {
@@ -58,7 +67,8 @@ class NonTerminal : public Symbol {
         // NonTerminal& operator%=(const Sentence& rhs);
 
         // Sobrecarga del operador %= para agregar producciones con atributos
-        void operator%=(AttributeProduction::ProdDef rhs);
+        // void operator%=(AttrProd::ProdDef rhs);
+        // void operator%=(std::initializer_list<std::variant<Sentence, std::vector<AttrProd::SemanticAction>>> list);
 };
 
 #endif

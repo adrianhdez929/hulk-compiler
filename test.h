@@ -6,9 +6,10 @@
 #include <iostream>
 #include <vector>
 #include "Automata/operations/operations.h"
-#include "Gramatica2/grammar.h"
+#include "Grammar/grammar.h"
 #include "Automata/state.h"
 #include "Lexer/node.h"
+#include "Automata/utils/utils.h"
 
 int lexer_node_test() {
     // Crear nodo simbolo
@@ -147,80 +148,145 @@ int lexer_node_test() {
     return 0;
 }
 int grammar_test() {
-    Grammar g;
-    auto E = g.SetNonTerminal("E", true);
-    auto T = g.SetNonTerminal("T");
-    auto plus = g.SetTerminal("+");
-    auto num = g.SetTerminal("num");
-    auto pipe = g.SetTerminal("|");
-    auto symbol = g.SetTerminal("symbol");
-
-    // Crear producciones
-    E %= {
-        E + plus + T,
-        {
-            // Acción para E (heredado, sintetizado)
-            [](auto h, auto s) { 
-                auto left = std::any_cast<double>(s[0]);
-                auto right = std::any_cast<double>(s[2]);
-                return left + right; 
-            },
-            // Acción para '+'
-            [](auto h, auto s) { return 0.0; }, 
-            // Acción para T
-            [](auto h, auto s) { return s[3]; },
-            // Acción para LHS (E)
-            [](auto h, auto s) { return s[0]; }
-        }
-    };
-    E %= {T.GetSentence(),
-        {
-            // Acción para E (heredado, sintetizado)
-            [](auto h, auto s) { 
-                auto left = std::any_cast<double>(s[0]);
-                return left; 
-            }
-        }
-    };
-
-    string grammar_string = g.ToString();
-    std::cout << grammar_string << std::endl;
-
-    //ATTEMPT 2
-    
     // Grammar g;
     // auto E = g.SetNonTerminal("E", true);
     // auto T = g.SetNonTerminal("T");
     // auto plus = g.SetTerminal("+");
     // auto num = g.SetTerminal("num");
+    // auto pipe = g.SetTerminal("|");
+    // auto symbol = g.SetTerminal("symbol");
 
-    // Definición de un autómata no determinista (NFA)
-    // NFA::Transitions transitions = {
-    //     {{0, "a"}, {1, 2}},
-    //     {{1, "b"}, {3}},
-    //     {{2, "c"}, {4}},
-    //     {{3, ""}, {5}}, // Epsilon transition
-    //     {{4, "d"}, {5}}
+    // // Crear producciones
+    // E %= {
+    //     E + plus + T,
+    //     {
+    //         // Acción para E (heredado, sintetizado)
+    //         [](auto h, auto s) { 
+    //             auto left = std::any_cast<double>(s[0]);
+    //             auto right = std::any_cast<double>(s[2]);
+    //             return left + right;  
+    //         }
+    //     }
     // };
-    // NFA nfa(6, {5}, transitions, 0);
-
-    // DFA::Transitions transitions2 = {
-    //     {{0, "a"}, {0}},
-    //     {{0, "b"}, {1}},
-    //     {{1, "a"}, {2}},
-    //     {{1, "b"}, {1}},
-    //     {{2, "a"}, {0}},
-    //     {{2, "b"}, {1}}
+    // E %= {T.GetSentence(),
+    //     {
+    //         // Acción para E (heredado, sintetizado)
+    //         [](auto h, auto s) { 
+    //             auto left = std::any_cast<double>(s[0]);
+    //             return left; 
+    //         }
+    //     }
     // };
-    // DFA dfa(3, {2}, transitions2, 0);//Reconoce cadenas sobre {a,b}* q terminan en "ba"
 
-    // std::cout << dfa.recognize("ba") << std::endl; // 1
-    // std::cout << dfa.recognize("aababbaba") << std::endl; // 1
+    // string grammar_string = g.ToString();
+    // std::cout << grammar_string << std::endl;
 
-    // std::cout << dfa.recognize("") << std::endl; // 0
-    // std::cout << dfa.recognize("aabaa") << std::endl; // 0
-    // std::cout << dfa.recognize("aababb") << std::endl; // 0
+    // AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Grammar g;
+    // auto E = g.SetNonTerminal("E", true);
+    // auto T = g.SetNonTerminal("T");
+    // auto F = g.SetNonTerminal("F");
+    // auto A = g.SetNonTerminal("A");
+    // auto S = g.SetNonTerminal("S");
 
+    // auto pipe = g.SetTerminal("|");
+    // auto star = g.SetTerminal("*");
+    // auto opar = g.SetTerminal("(");
+    // auto cpar = g.SetTerminal(")");
+    // auto symbol = g.SetTerminal("symbol");
+    // auto epsilon = g.SetTerminal("ε");
+    // auto quest = g.SetTerminal("?");
+    // auto plus = g.SetTerminal("+");
+    // auto minus = g.SetTerminal("-");
+    // auto obra = g.SetTerminal("[");
+    // auto cbra = g.SetTerminal("]");
+
+    // E %= {
+    //     E + pipe + T, 
+    //     { 
+    //         [](auto h, auto s){ 
+    //             return std::make_shared<UnionNode>(std::move(s[1]),std::move(s[3]));
+    //         }
+    //     }
+    // };
+    // E %= AttributeProduction::ProdDef{
+        // E + pipe + T, 
+        // { [](auto h, auto s) { 
+        //     return unique_ptr<Node>(make_unique<UnionNode>(std::move(s[1]), std::move(s[3]))); 
+        // }}
+    // };
+    // E %= { T.GetSentence(), { [](auto h, auto s) { return s[1]; }}};
+    // E %= { 
+    //     E + pipe + T, 
+    //     { 
+    //         [](auto h, auto s) { 
+    //             return unique_ptr<Node>(make_unique<UnionNode>(std::move(s[1]), std::move(s[3]))); 
+    //         }
+    //     }
+    // };
+
+    // T %= { F.GetSentence(), { [](auto h, auto s) { return s[1]; }}};
+    // T %= { T + F, { [](auto h, auto s) { return unique_ptr<Node>(make_unique<ConcatNode>(std::move(s[1]), std::move(s[2]))); }}};
+
+    // F %= { A.GetSentence(), { [](auto h, auto s) { return s[1]; }}};
+    // F %= { A + star, { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<ClosureNode>(std::move(s[1]))); }}};
+    // F %= { A + quest, { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<ZeroOrOneNode>(std::move(s[1]))); }}};
+    // F %= { A + plus, { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<PositiveClosure>(std::move(s[1]))); }}};
+
+    // A %= { symbol.GetSentence(), { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<SymbolNode>(s[1]->Name())); }}};
+    // A %= { epsilon.GetSentence(), { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<EpsilonNode>()); }}};
+    // A %= { opar + E + cpar, { [](auto h, auto s) { return s[2]; }}};
+    // A %= { obra + S + cbra, { [](auto h, auto s) { return unique_ptr<Node>(std::make_unique<StringClassNode>(s[2])); }}};
+
+    // S %= { symbol.GetSentence(), { [](auto h, auto s) { 
+    //     auto symbols = vector<unique_ptr<SymbolNode>>();
+    //     symbols.push_back(std::make_unique<SymbolNode>(s[1]->Name()));
+    //     return symbols;
+    // }}};
+    // S %= { S + symbol, { [](auto h, auto s) { 
+    //     auto symbols = vector<unique_ptr<SymbolNode>>();
+    //     symbols.push_back(std::make_unique<SymbolNode>(s[2]->Name()));
+    //     auto new_vector = vector_concat(std::move(s[1]), std::move(symbols));
+    //     return new_vector;
+    // }}};
+    // S %= { symbol + minus + symbol, { [](auto h, auto s) { 
+    //     std::unique_ptr<SymbolNode> start = std::make_unique<SymbolNode>(s[1]->Name());
+    //     std::unique_ptr<SymbolNode> end = std::make_unique<SymbolNode>(s[3]->Name());
+    //     auto symbols = vector<unique_ptr<SymbolNode>>();
+    //     for (char c = start->Name()[0]; c <= end->Name()[0]; ++c) {
+    //         symbols.push_back(std::make_unique<SymbolNode>(std::string(1, c)));
+    //     }
+    //     return symbols;
+    // }}};
+    // S %= { S + symbol + minus + symbol, { [](auto h, auto s) { 
+    //     std::unique_ptr<SymbolNode> start = std::make_unique<SymbolNode>(s[1]->Name());
+    //     std::unique_ptr<SymbolNode> end = std::make_unique<SymbolNode>(s[3]->Name());
+    //     auto symbols = vector<unique_ptr<SymbolNode>>();
+    //     for (char c = start->Name()[0]; c <= end->Name()[0]; ++c) {
+    //         symbols.push_back(std::make_unique<SymbolNode>(std::string(1, c)));
+    //     }
+    //     auto new_vector = vector_concat(std::move(s[0]), std::move(symbols));
+    //     return new_vector;
+    // }}};
+
+
+
+
+
+
+
+
+    //concatenar vectores
+    // std::unique_ptr<Node> symbolNode = std::make_unique<SymbolNode>("a");
+    // std::unique_ptr<Node> symbolNode2 = std::make_unique<SymbolNode>("b");
+    // vector<unique_ptr<Node>> vec1;
+    // vec1.push_back(std::move(symbolNode));
+    // vector<unique_ptr<Node>> vec2;
+    // vec2.push_back(std::move(symbolNode2));
+    // vector<unique_ptr<Node>> c = concatenar_vectores(std::move(vec1), std::move(vec2));
+    // Imprimir los elementos del vector resultante
+
+    
     return 0;
 }
 
@@ -333,6 +399,7 @@ int execute_all_tests() {
 
 int execute_test() {
     // execute_all_tests();
-    lexer_node_test();
+    // lexer_node_test();
+    grammar_test();
     return 0; 
 }

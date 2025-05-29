@@ -1,5 +1,5 @@
 #include "symbol.h"
-#include "sentence.h" // Ensure Sentence is fully declared
+#include "sentence.h" 
 
 Symbol::Symbol(const std::string& name, Grammar& grammar) 
     : name(name), grammar(grammar) {}
@@ -21,18 +21,20 @@ Terminal::Terminal(const std::string& name, Grammar& grammar)
 
 bool Terminal::IsTerminal() const { return true; }
 
-Sentence Symbol::operator+(const Symbol& other) const {
-    return Sentence(this, &other);
-}
+// Sentence operator+(std::shared_ptr<const Symbol> lhs, std::shared_ptr<const Symbol> rhs) {
+//     // symbol + symbol = sentence(symbol, symbol)
+//     return Sentence(lhs, rhs);
+// }
 
-Sentence Symbol::operator+(const Sentence& other) const {
-    std::vector<const Symbol*> combinedSymbols = {this};
-    combinedSymbols.insert(combinedSymbols.end(), other.Symbols().begin(), other.Symbols().end());
-    return Sentence(combinedSymbols);
-}
+// Sentence operator+(std::shared_ptr<const Symbol> lhs, const Sentence& rhs) {
+//     // symbol + sentence = sentence(symbol, symbols...)
+//     std::vector<std::shared_ptr<const Symbol>> combinedSymbols = {lhs};
+//     combinedSymbols.insert(combinedSymbols.end(), rhs.Symbols().begin(), rhs.Symbols().end());
+//     return Sentence(combinedSymbols);
+// }
 
 Sentence Symbol::GetSentence() const {
-    return Sentence(this);
+    return Sentence(shared_from_this());
 }
 
 // Sentence Symbol::operator+(const std::vector<const Symbol*>& symbols) const {
