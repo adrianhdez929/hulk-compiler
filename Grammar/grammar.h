@@ -38,23 +38,29 @@ class Grammar {
         vector<std::shared_ptr<Terminal>> Terminals();
 
         // void AddProduction(const AttributeProduction& production);
-        using ProductionVariant = std::variant<Production, AttrProd>;
+        // using ProductionVariant = std::variant<Production, AttrProd>;
         void AddProduction(const AttrProd& production);
         void AddProduction(const Production& production);
-        const std::vector<ProductionVariant>& Productions() const;
+        // const std::vector<ProductionVariant>& Productions() const;
+        const std::vector<Production>& Productions() const;
         const std::shared_ptr<NonTerminal>& GetStartSymbol() const;
         const std::shared_ptr<Epsilon>& GetEpsilon() const;
         const std::shared_ptr<EndOfFile>& GetEndOfFile() const;
         const std::vector<std::shared_ptr<Symbol>>& Symbols() const;
         //Metodo para obtener todos los simbolos
         // const std::vector<const Symbol*>& Symbols() const;
+
+        void Augment();
+        bool IsAugmented() const;
         //Sobreescribir el .tostring
         std::string ToString() const;
     private:
         std::vector<std::shared_ptr<Symbol>> symbols;
         std::vector<std::shared_ptr<NonTerminal>> nonTerminals;
         std::vector<std::shared_ptr<Terminal>> terminals;
-        std::vector<ProductionVariant> productions;
+        std::shared_ptr<NonTerminal> augmentedStartSymbol;
+        // std::vector<ProductionVariant> productions;
+        std::vector<Production> productions;
         std::type_index productionType;
         std::shared_ptr<NonTerminal> startSymbol;
         std::shared_ptr<Epsilon> epsilon;

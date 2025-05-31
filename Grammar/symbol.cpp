@@ -21,20 +21,23 @@ Terminal::Terminal(const std::string& name, Grammar& grammar)
 
 bool Terminal::IsTerminal() const { return true; }
 
-// Sentence operator+(std::shared_ptr<const Symbol> lhs, std::shared_ptr<const Symbol> rhs) {
+// Sentence operator+(std::shared_ptr<Symbol> lhs, std::shared_ptr<Symbol> rhs) {
 //     // symbol + symbol = sentence(symbol, symbol)
 //     return Sentence(lhs, rhs);
 // }
 
-// Sentence operator+(std::shared_ptr<const Symbol> lhs, const Sentence& rhs) {
+// Sentence operator+(std::shared_ptr<Symbol> lhs, const Sentence& rhs) {
 //     // symbol + sentence = sentence(symbol, symbols...)
-//     std::vector<std::shared_ptr<const Symbol>> combinedSymbols = {lhs};
+//     std::vector<std::shared_ptr<Symbol>> combinedSymbols = {lhs};
 //     combinedSymbols.insert(combinedSymbols.end(), rhs.Symbols().begin(), rhs.Symbols().end());
 //     return Sentence(combinedSymbols);
 // }
 
+// Sentence Symbol::GetSentence() const {
+//     return Sentence(shared_from_this());
+// }
 Sentence Symbol::GetSentence() const {
-    return Sentence(shared_from_this());
+    return Sentence(const_cast<Symbol*>(this)->shared_from_this());
 }
 
 // Sentence Symbol::operator+(const std::vector<const Symbol*>& symbols) const {

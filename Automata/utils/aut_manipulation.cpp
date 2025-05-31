@@ -32,7 +32,7 @@ set<NFA::State> move(const NFA& automaton, const NFA::State& state, const NFA::S
     return moves;
 }
 
-ContainerSet epsilon_closure(const NFA& automaton, const set<NFA::State>& states) {
+ContainerSet<NFA::State> epsilon_closure(const NFA& automaton, const set<NFA::State>& states) {
     vector<NFA::State> pending (states.begin(), states.end());
     unordered_set<NFA::State> closure(states.begin(), states.end());
     while (!pending.empty()) {
@@ -54,7 +54,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
     int dfa_state_id = 0;
 
     // Crear el estado inicial del DFA
-    ContainerSet initial_states = epsilon_closure(automaton, {automaton.startState()});
+    ContainerSet<NFA::State> initial_states = epsilon_closure(automaton, {automaton.startState()});
     bool is_final = false;
     for (const auto& final_state : automaton.finalStates()) {
         if (initial_states.contains(final_state)) {
@@ -81,7 +81,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
             }
             // Obtener los estados alcanzables desde el conjunto de estados del DFA actual
             set<NFA::State> next_states = move(automaton, current_dfa_state.states.get_set(), symbol);
-            ContainerSet next_closure = epsilon_closure(automaton, next_states);
+            ContainerSet<NFA::State> next_closure = epsilon_closure(automaton, next_states);
 
             if (next_closure.empty()) {
                 continue; // No hay transiciones para este símbolo
@@ -138,7 +138,7 @@ DFA nfa_to_dfa(const NFA& automaton) {
 
 bool nfa_recognize(const NFA& automaton, const string& input) {
     // Crear un conjunto de estados iniciales
-    ContainerSet current_states = epsilon_closure(automaton, {automaton.startState()});
+    ContainerSet<NFA::State> current_states = epsilon_closure(automaton, {automaton.startState()});
 
     // Procesar cada símbolo de la cadena de entrada
     for (const auto& symbol : input) {

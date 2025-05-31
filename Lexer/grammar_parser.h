@@ -115,7 +115,7 @@ private:
         }
 
         // Construir Sentence
-        std::vector<shared_ptr<const Symbol>> rightSymbols;
+        std::vector<shared_ptr<Symbol>> rightSymbols;
         auto tokens = split(rightStr, ' ');
         for (const auto& token : tokens) {
             std::string trim_token = trim(token, "\" ");

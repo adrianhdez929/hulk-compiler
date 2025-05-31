@@ -17,6 +17,7 @@
                 "Automata/utils/aut_manipulation.cpp",
                 "Automata/operations/operations.cpp",
                 "Automata/state.cpp",
+                "Parser/Item.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"

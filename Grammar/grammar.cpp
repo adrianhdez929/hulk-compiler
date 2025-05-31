@@ -10,6 +10,8 @@ EndOfFile::EndOfFile(Grammar& grammar) : Symbol("EOF", grammar) {}
 bool EndOfFile::IsEndOfFile() const { return true; }
 
 Grammar::Grammar() : productionType(typeid(void)) {
+    // augmentedStartSymbol = nullptr;
+    
     // Initialize epsilon and EOF symbols
     epsilon = std::make_shared<Epsilon>(*this);
     eof = std::make_shared<EndOfFile>(*this);
@@ -89,7 +91,10 @@ void Grammar::AddProduction(const AttrProd& production) {
     productions.emplace_back(production);
 }
 
-const std::vector<Grammar::ProductionVariant>& Grammar::Productions() const {
+// const std::vector<Grammar::ProductionVariant>& Grammar::Productions() const {
+//     return productions;
+// }
+const std::vector<Production>& Grammar::Productions() const {
     return productions;
 }
 
@@ -107,6 +112,31 @@ std::vector<std::shared_ptr<NonTerminal>> Grammar::NonTerminals() {
 }
 std::vector<std::shared_ptr<Terminal>> Grammar::Terminals() {
     return terminals;
+}
+
+void Grammar::Augment() {
+    if (augmentedStartSymbol) return;
+
+    augmentedStartSymbol = SetNonTerminal("SS", true);
+
+    auto startProduction = std::make_shared<Production>(
+        augmentedStartSymbol,
+        Sentence(GetStartSymbol())
+    );
+
+    AddProduction(*startProduction);
+}
+
+bool Grammar::IsAugmented() const {
+    if (!augmentedStartSymbol) return false;
+
+    int count = 0;
+    for (const auto& prod : productions) {
+        if (prod.Left()->Name() == "SS") {
+            count++;
+        }
+    }
+    return count == 1;
 }
 std::string Grammar::ToString() const {
     //Formato:
@@ -129,12 +159,20 @@ std::string Grammar::ToString() const {
     result += "\n";
     result += "Productions:\n";
     for (const auto& p : productions) {
-        if (std::holds_alternative<Production>(p)) {
-            result += "  " + std::get<Production>(p).ToString() + ", ";
-        } else {
-            result += "  " + std::get<AttrProd>(p).ToString() + ", ";
-        }
+        result += "  " + p.ToString() + ", ";
     }
+    // for (const auto& p : productions) {
+    //     if (std::holds_alternative<AttrProd>(p)) {
+    //         result += "  " + std::get<AttrProd>(p).ToString() + ", ";
+    //     }
+    // }
+    // for (const auto& p : productions) {
+    //     if (std::holds_alternative<Production>(p)) {
+    //         result += "  " + std::get<Production>(p).ToString() + ", ";
+    //     } else {
+    //         result += "  " + std::get<AttrProd>(p).ToString() + ", ";
+    //     }
+    // }
     result += "\n";
     return result;
 }
