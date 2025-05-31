@@ -1,5 +1,7 @@
 {
+	print("Hello, world!");
 	5 + 5;
+	print("Value of pi: ");
 	print(pi);
 	5*pi - 4^alpha;
 }

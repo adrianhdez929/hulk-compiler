@@ -81,12 +81,12 @@ public:
     ~BinOpNode();
 };
 
-class FunctionNode : public ASTNode {
+class FunctionCallNode : public ASTNode {
 public:
 	std::string func_name;
 	ASTNode* argument;
 
-	FunctionNode(const std::string& name, ASTNode* arg);
+	FunctionCallNode(const std::string& name, ASTNode* arg);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 };

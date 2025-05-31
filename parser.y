@@ -88,7 +88,7 @@ args_list:
 	;
 
 func_call:
-	ID LPARENT expr RPARENT { $$ = new FunctionNode($1, $3); free($1); }
+	ID LPARENT expr RPARENT { $$ = new FunctionCallNode($1, $3); free($1); }
 	;
 
 arit_op:

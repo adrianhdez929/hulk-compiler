@@ -70,15 +70,15 @@ BinOpNode::~BinOpNode() {
     delete right;
 }
 
-FunctionNode::FunctionNode(const std::string& name, ASTNode* arg): func_name(name), argument(arg) {}
+FunctionCallNode::FunctionCallNode(const std::string& name, ASTNode* arg): func_name(name), argument(arg) {}
 
-void FunctionNode::print(int indent) const {
+void FunctionCallNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "FunctionCall: " << func_name << std::endl;
 	std::cout << std::string(indent+2, ' ') << "Argument: " << std::endl;
 	argument->print(indent+4);
 }
 
-void FunctionNode::accept(Visitor* visitor, Context* context) {
+void FunctionCallNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
