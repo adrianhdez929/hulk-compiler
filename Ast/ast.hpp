@@ -25,6 +25,17 @@ public:
 	virtual void accept(Visitor* visitor, Context* context) = 0;
 };	
 
+class ASTNodeVector : public ASTNode { 
+public:
+	std::vector<ASTNode*> children;
+
+	ASTNodeVector(const std::vector<ASTNode*>& nodes);
+	void add_child(ASTNode* node);
+	void print(int indent=0) const override;
+	void accept(Visitor* visitor, Context* context);
+	~ASTNodeVector();
+};
+
 class ProgramNode : public ASTNode {
 	ASTNode* node;
 	ProgramNode(ASTNode* n);
@@ -222,6 +233,23 @@ public:
 	ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
+};
+
+class TypeDeclNode: public ASTNode {
+public:
+	IDNode* id;
+	ArgsList* args;
+	std::vector<ASTNode*> body;
+
+	TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class AccessNode: public ASTNode {
+public:
+	IDNode* accesed_var;
+	
 };
 
 #endif

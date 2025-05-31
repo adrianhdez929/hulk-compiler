@@ -20,6 +20,7 @@ extern "C"  {
 "else" 		{ return ELSE; }
 "while"		{ return WHILE; }
 "for" 		{ return FOR; }
+"type"		{ return TYPE; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
@@ -46,6 +47,7 @@ extern "C"  {
 "<"			{ return LESS; }
 "=="		{ return EQUAL; }
 "!=" 		{ return DISTINCT; }
+"."			{ return ACCESS; }
 
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }

@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+#include <utility>
 #include "../Ast/ast.hpp"
 
 extern "C" {
@@ -28,16 +32,20 @@ extern ASTNode* root;
 	class Conditional* cond;
 	class WhileNode* while_node;
 	class ForNode* for_node;
+	class TypeDeclNode* t_node_decl;
+	class ASTNodeVector* ast_node_v; 
+	class VarAssign* var_ass;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR
-%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS
+%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
+%token TYPE
 
 %token <num> NUMBER
 %token <str> ID
@@ -47,13 +55,16 @@ extern ASTNode* root;
 %type <node> expr func_call arit_op lines_block line
 %type <b_node> lines
 %type <args_l> args_list
-%type <ass_f_node> func_asign
+%type <ass_f_node> func_asign method
 %type <ass_var> let_assign
 %type <v_ass_l> var_assign_list
 %type <b_expr_node> bool_expr
 %type <cond> conditional
 %type <while_node> while_expr
-//%type <for_node> for_expr
+%type <for_node> for_expr
+%type <t_node_decl> type_node_decl
+%type <ast_node_v> type_body_elements
+%type <var_ass> attribute
 
 %left PLUS
 %left MINUS
@@ -67,7 +78,7 @@ input:
 	line { root = $1; }
 	| lines_block { root = $1; }
 	| func_asign SEMICOLON { root = $1; }
-	
+	| type_node_decl { root = $1; }
     ;
 
 lines_block:
@@ -89,12 +100,14 @@ expr:
 	arit_op { $$ = $1; }
 	| bool_expr { $$ = $1; }
 	| while_expr { $$ = $1; }
+	| for_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
 	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
 	| IF conditional { $$ = $2; }
+	| ID ACCESS expr { $$}
     ;
 
 func_asign:
@@ -156,12 +169,32 @@ while_expr:
 	| WHILE LPARENT bool_expr RPARENT expr { $$ = new WhileNode($3, $5); }
 	;
 
-//for_expr:
-//	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-//	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-//	;
+for_expr:
+	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
+	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
+	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+	;
+	//pendiente que acepte argumentos de cualquier tipo
+
+type_node_decl:
+	TYPE ID args_list LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $5->children); }
+	;
+
+type_body_elements:
+	/* empty */ { $$ = new ASTNodeVector({}); }
+	| type_body_elements attribute { $1->add_child($2); $$ = $1; }
+	| type_body_elements method { $1->add_child($2); $$ = $1; }
+	;
+
+attribute:
+	ID ASSIGN expr SEMICOLON { $$ = new VarAssign(new IDNode($1), $3); }
+	;
+
+method:
+	ID LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	;
 
 %%
 

@@ -1,5 +1,27 @@
 #include "ast.hpp"
 
+ASTNodeVector::ASTNodeVector(const std::vector<ASTNode*>& nodes): children(nodes) {}
+
+void ASTNodeVector::add_child(ASTNode* node) {
+	children.push_back(node);
+}
+
+void ASTNodeVector::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "ASTNodeList" << std::endl;
+	for (const auto& child : children) {
+		child->print(indent + 2);
+	}
+}
+
+void ASTNodeVector::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+ASTNodeVector::~ASTNodeVector() {
+	for (auto& child : children) {
+		delete child;
+	}
+}
 
 ProgramNode::ProgramNode(ASTNode* n) : ASTNode(), node(n) {}
 
@@ -277,5 +299,21 @@ void ForNode::print(int indent) const {
 }
 
 void ForNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_): id(id_), args(args_), body(body_) {}
+
+void TypeDeclNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "TypeDeclNode(" << id->id_name << ")" << std::endl;
+	std::cout << std::string(indent + 1, ' ') << "Args:" << std::endl;
+	args->print(indent + 2);
+	std::cout << std::string(indent + 1, ' ') << "Body:" << std::endl;
+	for ( const auto element : body) {
+		element->print(indent + 2);
+	}
+}
+
+void TypeDeclNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
