@@ -3,6 +3,7 @@
 #include "../Grammar/grammar.h"
 #include "Item.h"
 #include "../Automata/utils/ContainerSet.h"
+#include "../Automata/state.h"
 #include <map>
 #include <queue>
 
@@ -42,23 +43,26 @@ public:
 private:
     
     pair<map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>, map<Sentence, ContainerSet<shared_ptr<Symbol>>>> compute_firsts();
-    
-    std::map<std::shared_ptr<NonTerminal>, ContainerSet> compute_follows(
-        const std::map<std::shared_ptr<Symbol>, ContainerSet>& firsts);
-    
+    ContainerSet<shared_ptr<Symbol>> compute_local_firsts(const Sentence& sentence, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
+
+    std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>> compute_follows(
+        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
+
     std::vector<Item> expand(
         const Item& item,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet>& firsts);
+        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
     
     std::set<Item> compress(const std::vector<Item>& items);
     
     std::vector<Item> closure_lr1(
         const std::vector<Item>& items,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet>& firsts);
-    
+        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts);
+
     std::vector<Item> goto_lr1(
         const std::vector<Item>& items,
         std::shared_ptr<Symbol> symbol,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet>& firsts,
+        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts,
         bool just_kernel = false);
+
+    State BuildLR1Automaton();
 };

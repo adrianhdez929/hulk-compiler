@@ -53,6 +53,9 @@ public:
     // ToString
     std::string ToString() const;
 
+    void set_id(int id) { id_ = id; }
+    int get_id() const { return id_; }
+
 private:
     int id_;
     bool is_final_;

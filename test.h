@@ -15,41 +15,41 @@
 
 
 int Item_test() {
-    Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
-    // Crear un objeto Production
-    auto productions = g.Productions();
-    // Extract Production from variant
-    // std::shared_ptr<Production> prod;
-    Production prod = productions[0];
-    // if (std::holds_alternative<Production>(productions[0])) {
-    //     prod = std::make_shared<Production>(std::get<Production>(productions[0]));
-    // } else if (std::holds_alternative<AttrProd>(productions[0])) {
-    //     // If you want to handle AttrProd, add code here
-    //     std::cerr << "First production is AttrProd, not Production." << std::endl;
-    //     return -1;
-    // }
-    std::shared_ptr<Production> production = std::make_shared<Production>(prod);
+    // Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
+    // // Crear un objeto Production
+    // auto productions = g.Productions();
+    // // Extract Production from variant
+    // // std::shared_ptr<Production> prod;
+    // //Production prod = productions[0];
+    // // if (std::holds_alternative<Production>(productions[0])) {
+    // //     prod = std::make_shared<Production>(std::get<Production>(productions[0]));
+    // // } else if (std::holds_alternative<AttrProd>(productions[0])) {
+    // //     // If you want to handle AttrProd, add code here
+    // //     std::cerr << "First production is AttrProd, not Production." << std::endl;
+    // //     return -1;
+    // // }
+    // std::shared_ptr<Production> production = std::make_shared<Production>(std::get<Production>(productions[0]));
 
-    // Crear un objeto Item
-    Item item(production, 0, std::set<std::shared_ptr<Terminal>>());
+    // // Crear un objeto Item
+    // Item item(production, 0, ContainerSet<std::shared_ptr<Symbol>>());
 
-    // Probar el método Center
-    std::shared_ptr<Item> centerItem = item.Center();
-    std::cout << "Center Item: " << centerItem->ToString() << std::endl;
+    // // Probar el método Center
+    // std::shared_ptr<Item> centerItem = item.Center();
+    // std::cout << "Center Item: " << centerItem->ToString() << std::endl;
 
-    // Probar el método operator==
-    Item otroItem(production, 0, std::set<std::shared_ptr<Terminal>>());
-    std::cout << "Son iguales? " << (item == otroItem) << std::endl;
+    // // Probar el método operator==
+    // Item otroItem(production, 0, ContainerSet<std::shared_ptr<Symbol>>());
+    // std::cout << "Son iguales? " << (item == otroItem) << std::endl;
 
-    // Probar el método hash
-    std::cout << "Hash: " << item.hash() << std::endl;
+    // // Probar el método hash
+    // std::cout << "Hash: " << item.hash() << std::endl;
 
-    // Probar el método ToString
-    std::cout << "ToString: " << item.ToString() << std::endl;
+    // // Probar el método ToString
+    // std::cout << "ToString: " << item.ToString() << std::endl;
 
-    // Probar NextItem
-    std::cout << "NextItem: " << item.NextItem()->ToString() << std::endl;
-    std::cout << "NextItem: " << item.NextItem()->NextItem()->ToString() << std::endl;
+    // // Probar NextItem
+    // std::cout << "NextItem: " << item.NextItem()->ToString() << std::endl;
+    // std::cout << "NextItem: " << item.NextItem()->NextItem()->ToString() << std::endl;
     return 0;
 }
 int lexer_node_test() {

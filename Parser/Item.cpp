@@ -2,7 +2,7 @@
 #include <sstream>
 
 Item::Item(std::shared_ptr<Production> production, int pos, 
-           std::set<std::shared_ptr<Terminal>> lookaheads)
+           ContainerSet<std::shared_ptr<Symbol>> lookaheads)
     : production_(production), pos_(pos), lookaheads_(lookaheads) {}
 
 bool Item::IsReduceItem() const {
@@ -48,13 +48,13 @@ std::vector<std::vector<std::shared_ptr<Symbol>>> Item::Preview(int skip) const 
 }
 
 std::shared_ptr<Item> Item::Center() const {
-    return std::make_shared<Item>(production_, pos_);
+    return std::make_shared<Item>(production_, pos_, lookaheads_);
 }
 
-bool Item::operator==(const Item& other) const {
-    return production_ == other.production_ && 
-           pos_ == other.pos_ && 
-           lookaheads_ == other.lookaheads_;
+bool Item::operator==(std::shared_ptr<Item> other) const {
+    return production_ == other->production_ && 
+           pos_ == other->pos_ && 
+           lookaheads_ == other->lookaheads_;
 }
 
 size_t Item::hash() const {

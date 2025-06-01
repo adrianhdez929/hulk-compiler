@@ -11,16 +11,18 @@ using namespace std;
 template <typename T>
 class ContainerSet {
     public:
-        ContainerSet(bool contains_epsilon = false) : contains_epsilon(contains_epsilon) {}
-        ContainerSet(const vector<T>& values, bool contains_epsilon = false) : contains_epsilon(contains_epsilon) { 
+        ContainerSet(bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) {}
+        ContainerSet(const vector<T>& values, bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) { 
             for (const T& value : values) {
                 set_.insert(value);
             }
         }
-        ContainerSet(const unordered_set<T, std::hash<T>, std::equal_to<T>>& values, bool contains_epsilon = false) : contains_epsilon(contains_epsilon) {
+        ContainerSet(const unordered_set<T, std::hash<T>, std::equal_to<T>>& values, bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) {
             set_.insert(values.begin(), values.end());
         }
-        ~ContainerSet();
+        ~ContainerSet() {
+            set_.clear();
+        }
 
         bool add(const T& value) {
             return set_.insert(value).second;
@@ -34,8 +36,8 @@ class ContainerSet {
         }
 
         bool set_epsilon(bool value = true) {
-            bool changed = contains_epsilon != value;
-            contains_epsilon = value;
+            bool changed = contains_epsilon_ != value;
+            contains_epsilon_ = value;
             return changed;
         }
         bool update(const ContainerSet& other){
@@ -45,8 +47,8 @@ class ContainerSet {
         }
         bool epsilon_update(const ContainerSet& other) {
             bool previous = contains_epsilon;
-            contains_epsilon = contains_epsilon || other.contains_epsilon;
-            return previous != contains_epsilon;
+            contains_epsilon_ = contains_epsilon_ || other.contains_epsilon_;
+            return previous != contains_epsilon_;
         }
         bool hard_update(const ContainerSet& other) {
             bool set_updated = update(other);
@@ -69,7 +71,7 @@ class ContainerSet {
         }
 
         bool operator==(const ContainerSet& other) const {
-            return set_ == other.set_ && contains_epsilon == other.contains_epsilon;
+            return set_ == other.set_ && contains_epsilon_ == other.contains_epsilon_;
         }
         bool operator!=(const ContainerSet& other) const {
             return !(*this == other);
@@ -89,39 +91,46 @@ class ContainerSet {
         }
 
         string str() const {
-            std::stringstream ss;
-            ss << "{";
+            // std::stringstream ss;
+            // ss << "{";
+            // for (auto it = set_.begin(); it != set_.end(); ++it) {
+            //     if (it != set_.begin()) ss << ", ";
+            //     ss << *it; // Requiere que T tenga operator<< implementado
+            // }
+            // ss << "} - " << (contains_epsilon_ ? "true" : "false");
+            // return ss.str();
+            std::string result = "{";
             for (auto it = set_.begin(); it != set_.end(); ++it) {
-                if (it != set_.begin()) ss << ", ";
-                ss << *it; // Requiere que T tenga operator<< implementado
+                if (it != set_.begin()) result += ", ";
+                result += std::to_string(*it);
             }
-            ss << "} - " << (contains_epsilon ? "true" : "false");
-            return ss.str();
+            result += "} - " + std::to_string(contains_epsilon_);
+            return result;
     
         }
 
-    auto begin() -> decltype(set_.begin()) {
+    auto begin() {
         return set_.begin();
     }
     
-    auto end() -> decltype(set_.end()) {
+    auto end() {
         return set_.end();
     }
     
-    auto begin() const -> decltype(set_.begin()) {
+    auto begin() const {
         return set_.begin();
     }
     
-    auto end() const -> decltype(set_.end()) {
+    auto end() const {
         return set_.end();
     }
     bool contains_epsilon() const {
-        return contains_epsilon;
+        return contains_epsilon_;
     }
 
     private:
         std::unordered_set<T, std::hash<T>, std::equal_to<T>> set_;
-        bool contains_epsilon;
+        bool contains_epsilon_;
 };
 
 // inline bool operator==(const ContainerSet& lhs, const unordered_set<int>& rhs) { return lhs.operator==(rhs); } // { return lhs == rhs; }
