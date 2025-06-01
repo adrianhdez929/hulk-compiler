@@ -246,10 +246,56 @@ public:
 	void accept(Visitor* visitor, Context* context) override;
 };
 
+
+
+class TypeAssMember : public ASTNode {
+public:
+	enum class Form { Attribute, Method };
+
+	TypeAssMember(TypeAssMember::Form form_);
+	TypeAssMember::Form get_form();
+	virtual std::string get_name() const = 0;
+	virtual void print(int indent = 0) const override = 0;
+	virtual void accept(Visitor* visitor, Context* context) override = 0;
+	virtual ~TypeAssMember() = default;
+
+private:
+	Form form;
+};
+
+class AttributeMember : public TypeAssMember {
+public:
+	std::string name;
+	
+	AttributeMember(std::string name_);
+	std::string get_name() const override;
+	void print(int indent) const override;
+	void accept(Visitor* visitor, Context* context);
+	~AttributeMember();
+};
+
+class MethodMember : public TypeAssMember {
+public:
+	std::string name;
+	ASTNode* arg;
+
+	MethodMember(std::string name_, ASTNode* arg_); //por ahora las llamadas de funcion solo aceptan un parametro, arreglar luego
+	std::string get_name() const override;
+	void print(int indent) const override;
+	void accept(Visitor* visitor, Context* context);
+	~MethodMember();
+};
+
 class AccessNode: public ASTNode {
 public:
-	IDNode* accesed_var;
+	const std::string var_name;
+	TypeAssMember* member;
 	
+	AccessNode(const std::string var_name_, TypeAssMember* member_);
+	std::string get_name() const;
+	TypeAssMember::Form get_form() const;
+	void print(int indent) const override;
+	void accept(Visitor* visitor, Context* context);
 };
 
 #endif

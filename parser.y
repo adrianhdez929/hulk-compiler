@@ -35,6 +35,9 @@ extern ASTNode* root;
 	class TypeDeclNode* t_node_decl;
 	class ASTNodeVector* ast_node_v; 
 	class VarAssign* var_ass;
+	class AttributeMember* att_member;
+	class MethodMember* meth_member;
+	class AccessNode* acc_node;
 }
 
 %token NUMBER
@@ -65,6 +68,7 @@ extern ASTNode* root;
 %type <t_node_decl> type_node_decl
 %type <ast_node_v> type_body_elements
 %type <var_ass> attribute
+%type <acc_node> member_access_expr
 
 %left PLUS
 %left MINUS
@@ -107,7 +111,7 @@ expr:
 	| let_assign { $$ = $1; }
 	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
 	| IF conditional { $$ = $2; }
-	| ID ACCESS expr { $$}
+	| member_access_expr { $$ = $1; }
     ;
 
 func_asign:
@@ -194,6 +198,11 @@ attribute:
 method:
 	ID LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
 	| ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	;
+
+member_access_expr:
+	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
+	| ID ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } // por ahora solo acepta los argumentos como ID
 	;
 
 %%

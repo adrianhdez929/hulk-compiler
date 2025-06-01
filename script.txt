@@ -1,12 +1,1 @@
-type point {
-    x = 0;
-    y = 0;
-
-    getX() => self;
-    getY() => self;
-
-    setX(x) => self := x;
-    setY(y) {
-		 self := y;
-	}
-}
+form.form(a);

@@ -317,3 +317,59 @@ void TypeDeclNode::print(int indent) const {
 void TypeDeclNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
+
+TypeAssMember::TypeAssMember(TypeAssMember::Form form_) : form(form_) {}
+
+TypeAssMember::Form TypeAssMember::get_form() {
+	return form;
+}
+
+AttributeMember::AttributeMember(std::string name_) : TypeAssMember(TypeAssMember::Form::Attribute), name(name_) {}
+	
+std::string AttributeMember::get_name() const { return name; }
+
+void AttributeMember::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "AtributeMember(" << name << "):" << std::endl;
+}
+
+void AttributeMember::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+AttributeMember::~AttributeMember() {}
+
+MethodMember::MethodMember(std::string name_, ASTNode* arg_): TypeAssMember(TypeAssMember::Form::Method), name(name_), arg(arg_) {}
+
+std::string MethodMember::get_name() const { return name; }
+
+void MethodMember::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "MethodMember(" << name << "):" << std::endl;
+	arg->print(indent + 2);
+}
+
+void MethodMember::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+MethodMember::~MethodMember() {
+	delete arg;
+}
+
+AccessNode::AccessNode(const std::string var_name_, TypeAssMember* member_): var_name(var_name_), member(member_) {}
+
+std::string AccessNode::get_name() const {
+	return var_name;
+}
+
+TypeAssMember::Form AccessNode::get_form() const {
+	return member->get_form();
+}
+
+void AccessNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "TypeAssignMember:" << std::endl;
+	member->print(indent+2);
+}
+
+void AccessNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
