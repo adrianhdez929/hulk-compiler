@@ -1,1 +1,3 @@
-form.form(a);
+{
+	while (true) 25 + 4;
+}

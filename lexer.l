@@ -22,6 +22,7 @@ extern "C"  {
 "for" 		{ return FOR; }
 "type"		{ return TYPE; }
 
+
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
 
@@ -31,6 +32,7 @@ extern "C"  {
 "*"			{ return TIMES; }
 "/"			{ return DIV; }
 "^"			{ return POW; }
+
 "("			{ return LPARENT; }
 ")" 		{ return RPARENT; }		
 ";"			{ return SEMICOLON; }

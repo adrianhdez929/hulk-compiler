@@ -44,7 +44,7 @@ extern ASTNode* root;
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -55,8 +55,8 @@ extern ASTNode* root;
 %token <str> STRING
 %token <boolean> BOOLEAN
 
-%type <node> expr func_call arit_op lines_block line
-%type <b_node> lines
+%type <node> expr arit_op lines_block line func_call 
+%type <b_node> lines non_empty_lines
 %type <args_l> args_list
 %type <ass_f_node> func_asign method
 %type <ass_var> let_assign
@@ -64,17 +64,22 @@ extern ASTNode* root;
 %type <b_expr_node> bool_expr
 %type <cond> conditional
 %type <while_node> while_expr
-%type <for_node> for_expr
+//%type <for_node> for_expr
 %type <t_node_decl> type_node_decl
 %type <ast_node_v> type_body_elements
 %type <var_ass> attribute
 %type <acc_node> member_access_expr
 
-%left PLUS
-%left MINUS
-%left TIMES
-%left DIV
+
+%nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
+%nonassoc ELSE ELIF
+%nonassoc ASSIGN IN ASS_DES
+%nonassoc WHILE LET IF
+
+%left PLUS MINUS
+%left TIMES DIV
 %right POW
+%left UMINUS
 
 %%
 
@@ -91,20 +96,23 @@ lines_block:
 
 lines:
 	/* empty */	 { $$ = new BlockNode({}); }
-	| line { $$ = new BlockNode({$1}); }
-	| lines line { $1->add_child($2); $$ = $1; }
+	| non_empty_lines { $$ = $1; }
+	;
+
+non_empty_lines:
+	line { $$ = new BlockNode({$1}); }
+	| non_empty_lines line { $1->add_child($2); $$ = $1; }
 	;
 
 line:
 	expr SEMICOLON { $$ = $1; }
-
 	;
 
 expr: 
 	arit_op { $$ = $1; }
 	| bool_expr { $$ = $1; }
 	| while_expr { $$ = $1; }
-	| for_expr { $$ = $1; }
+//	| for_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
@@ -142,12 +150,13 @@ func_call:
 
 arit_op:
 	NUMBER { $$ = new FloatNode($1); }
+	| LPARENT expr RPARENT { $$ = $2; }
 	| expr PLUS expr { $$ = new BinOpNode( $1, "+", $3); }
 	| expr MINUS expr { $$ = new BinOpNode( $1, "-", $3); }
 	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3); }
 	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3); }
 	| expr POW expr { $$ = new BinOpNode( $1, "^", $3); }
-	| LPARENT expr RPARENT { $$ = $2; }
+	| MINUS expr %prec UMINUS { $$ = new UnaryOpNode("-", $2); }
 	;
 
 bool_expr:
@@ -173,14 +182,14 @@ while_expr:
 	| WHILE LPARENT bool_expr RPARENT expr { $$ = new WhileNode($3, $5); }
 	;
 
-for_expr:
-	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
-	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
-	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-	;
-	//pendiente que acepte argumentos de cualquier tipo
-
+//for_expr:
+//	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	;
+//	//pendiente que acepte argumentos de cualquier tipo
+//
 type_node_decl:
 	TYPE ID args_list LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $5->children); }
 	;
