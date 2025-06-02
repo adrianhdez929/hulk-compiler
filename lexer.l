@@ -13,6 +13,14 @@ extern "C"  {
 "true"		{ yylval.boolean = true; return BOOLEAN; }
 "false"		{ yylval.boolean = false; return BOOLEAN; }
 "function" 	{ return FUNCTION; }
+"let"		{ return LET; }
+"in"		{ return IN; }
+"if" 		{ return IF; }
+"elif" 		{ return ELIF; }
+"else" 		{ return ELSE; }
+"while"		{ return WHILE; }
+"for" 		{ return FOR; }
+"type"		{ return TYPE; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
@@ -30,6 +38,17 @@ extern "C"  {
 "{"			{ return LKEY; }
 "}"			{ return RKEY; }
 "=>"		{ return INLINE; }
+"="			{ return ASSIGN; }
+":="		{ return ASS_DES; }
+
+">="		{ return GREATER_EQUAL; }
+">" 		{ return GREATER; }
+"<="		{ return LESS_EQUAL; }
+"<"			{ return LESS; }
+"=="		{ return EQUAL; }
+"!=" 		{ return DISTINCT; }
+"."			{ return ACCESS; }
+
 [ \t\n]     ; /* skip whitespace */
 .           { yyerror("Caracter invalido"); }
 

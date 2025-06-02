@@ -4,4 +4,15 @@
 	print("Value of pi: ");
 	print(pi);
 	5*pi - 4^alpha;
+type point {
+    x = 0;
+    y = 0;
+
+    getX() => self;
+    getY() => self;
+
+    setX(x) => self := x;
+    setY(y) {
+		 self := y;
+	}
 }

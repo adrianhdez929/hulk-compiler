@@ -39,9 +39,9 @@ int main(int argc, char* argv[]) {
 		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
 		root->print();
 
-        std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
-        root->accept(visitor, nullptr);
-        std::cout << "Semantic check completed." << std::endl;
+        //std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
+        //root->accept(visitor, nullptr);
+        //std::cout << "Semantic check completed." << std::endl;
 
         std::cout << "Generating code with CodegenVisitor" << std::endl;
         // Initialize the codegen visitor

@@ -25,6 +25,17 @@ public:
 	virtual void accept(Visitor* visitor, Context* context) = 0;
 };	
 
+class ASTNodeVector : public ASTNode { 
+public:
+	std::vector<ASTNode*> children;
+
+	ASTNodeVector(const std::vector<ASTNode*>& nodes);
+	void add_child(ASTNode* node);
+	void print(int indent=0) const override;
+	void accept(Visitor* visitor, Context* context);
+	~ASTNodeVector();
+};
+
 class ProgramNode : public ASTNode {
 	ASTNode* node;
 	ProgramNode(ASTNode* n);
@@ -47,6 +58,15 @@ public:
     void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 
+};
+
+class BoolExprNode : public ASTNode {
+public: 
+	ASTNode* expr;
+
+	BoolExprNode(ASTNode* expr_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
 };
 
 class StringNode : public ASTNode {
@@ -110,7 +130,7 @@ public:
 	~BlockNode();
 };
 
-class ArgsList: public ASTNode {
+class ArgsList: public ASTNode { // lista de IDNode solamente
 public:
 	std::vector<IDNode*> children;
 
@@ -119,6 +139,17 @@ public:
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 	~ArgsList();
+};
+
+class ExprsList : public ASTNode {
+public:
+	std::vector<ASTNode*> children;
+
+	ExprsList(const std::vector<ASTNode*>& nodes);
+	void add_child(ASTNode* node);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context);
+	~ExprsList();
 };
 
 class AssignFuncNode: public ASTNode {
@@ -130,6 +161,95 @@ public:
 	AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
+};
+
+class VarAssign: public ASTNode {
+public:
+	std::string var_name;
+	ASTNode* value;
+
+	VarAssign(IDNode* id, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class VarAssignList: public ASTNode {
+public:
+	std::vector<VarAssign*> assigns;
+
+	VarAssignList(const std::vector<VarAssign*>& assigns_);
+	void add_child(VarAssign* assign);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class LetAssign: public ASTNode {
+public:
+	std::vector<VarAssign*> assigns;
+	ASTNode* body;
+
+	LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* Context) override;
+};
+
+class VarDesAssign: public ASTNode {
+public:
+	IDNode* id;
+	ASTNode* value;
+
+	VarDesAssign(IDNode* id_, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class Conditional: public ASTNode {
+public:
+	BoolExprNode* bool_expr;
+	ASTNode* if_body;
+	ASTNode* else_body;
+
+	Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class WhileNode: public ASTNode {
+public:
+	BoolExprNode* bool_expr;
+	ASTNode* body;
+
+	WhileNode(BoolExprNode* bool_expr_, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class ForNode: public ASTNode {
+public:
+	IDNode* id;
+	ASTNode* group;
+	ASTNode* body;
+
+	ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class TypeDeclNode: public ASTNode {
+public:
+	IDNode* id;
+	ArgsList* args;
+	std::vector<ASTNode*> body;
+
+	TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class AccessNode: public ASTNode {
+public:
+	IDNode* accesed_var;
+	
 };
 
 #endif

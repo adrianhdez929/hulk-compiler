@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+#include <utility>
 #include "../Ast/ast.hpp"
 
 extern "C" {
@@ -22,13 +26,26 @@ extern ASTNode* root;
 	class BlockNode* b_node;
 	class ArgsList* args_l;
 	class AssignFuncNode* ass_f_node;
+	class LetAssign* ass_var;
+	class VarAssignList* v_ass_l;
+	class BoolExprNode* b_expr_node;
+	class Conditional* cond;
+	class WhileNode* while_node;
+	class ForNode* for_node;
+	class TypeDeclNode* t_node_decl;
+	class ASTNodeVector* ast_node_v; 
+	class VarAssign* var_ass;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS
+%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
+%token LET
+%token IN
+%token TYPE
 
 %token <num> NUMBER
 %token <str> ID
@@ -38,8 +55,16 @@ extern ASTNode* root;
 %type <node> expr func_call arit_op lines_block line
 %type <b_node> lines
 %type <args_l> args_list
-%type <ass_f_node> func_asign
-
+%type <ass_f_node> func_asign method
+%type <ass_var> let_assign
+%type <v_ass_l> var_assign_list
+%type <b_expr_node> bool_expr
+%type <cond> conditional
+%type <while_node> while_expr
+%type <for_node> for_expr
+%type <t_node_decl> type_node_decl
+%type <ast_node_v> type_body_elements
+%type <var_ass> attribute
 
 %left PLUS
 %left MINUS
@@ -51,8 +76,9 @@ extern ASTNode* root;
 
 input:    
 	line { root = $1; }
-	| func_asign { root = $1; }
 	| lines_block { root = $1; }
+	| func_asign SEMICOLON { root = $1; }
+	| type_node_decl { root = $1; }
     ;
 
 lines_block:
@@ -67,24 +93,43 @@ lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
+
 	;
 
 expr: 
 	arit_op { $$ = $1; }
-	| BOOLEAN { $$ = new BoolNode($1); }
+	| bool_expr { $$ = $1; }
+	| while_expr { $$ = $1; }
+	| for_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
 	| ID { $$ = new IDNode($1); }
 	| func_call { $$ = $1; }
+	| let_assign { $$ = $1; }
+	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
+	| IF conditional { $$ = $2; }
+	| ID ACCESS expr { $$}
     ;
 
 func_asign:
-	FUNCTION ID LPARENT args_list RPARENT INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	FUNCTION ID LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
 	;
 
 args_list:
 	/* empty */ { $$ = new ArgsList({}); }
 	| ID { $$ = new ArgsList({new IDNode($1)}); }
 	| args_list COLON ID { $1->add_child(new IDNode($3)); $$ = $1; }
+	;
+
+
+let_assign:
+	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
+	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4); }
+	;
+
+var_assign_list:
+	ID ASSIGN expr { $$ = new VarAssignList({ new VarAssign(new IDNode($1), $3) });}
+	| var_assign_list COLON ID ASSIGN expr { $1->add_child(new VarAssign(new IDNode($3), $5)); $$ = $1; }
 	;
 
 func_call:
@@ -101,9 +146,55 @@ arit_op:
 	| LPARENT expr RPARENT { $$ = $2; }
 	;
 
+bool_expr:
+	BOOLEAN { $$ = new BoolExprNode(new BoolNode($1)); }
+	| expr GREATER_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, ">=", $3)); }
+	| expr GREATER expr { $$ = new BoolExprNode(new BinOpNode($1, ">", $3)); }
+	| expr LESS_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "<=", $3)); }
+	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
+	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
+	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
+	;
 
+conditional:
+	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT lines_block ELSE expr { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6); }
+	;
 
+while_expr:
+	WHILE LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($3, $5); }
+	| WHILE LPARENT bool_expr RPARENT expr { $$ = new WhileNode($3, $5); }
+	;
 
+for_expr:
+	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
+	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
+	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+	;
+	//pendiente que acepte argumentos de cualquier tipo
+
+type_node_decl:
+	TYPE ID args_list LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $5->children); }
+	;
+
+type_body_elements:
+	/* empty */ { $$ = new ASTNodeVector({}); }
+	| type_body_elements attribute { $1->add_child($2); $$ = $1; }
+	| type_body_elements method { $1->add_child($2); $$ = $1; }
+	;
+
+attribute:
+	ID ASSIGN expr SEMICOLON { $$ = new VarAssign(new IDNode($1), $3); }
+	;
+
+method:
+	ID LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	;
 
 %%
 
