@@ -3,31 +3,20 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <iostream> // Para debug
 
 State::State(int id, bool is_final) : id_(id), is_final_(is_final) {}
 
 State::~State() {
-    std::unordered_set<State*> deleted;
-    std::stack<State*> to_delete;
+    // El destructor no debería eliminar recursivamente todos los estados
+    // ya que esto puede causar problemas con ciclos y doble liberación
+    // Simplemente limpiamos nuestros propios datos
+    transitions_.clear();
+    epsilon_transitions_.clear();
+    items_.clear();
     
-    to_delete.push(this);
-    
-    while (!to_delete.empty()) {
-        State* current = to_delete.top();
-        to_delete.pop();
-        
-        if (deleted.insert(current).second) {
-            for (auto& pair : current->transitions_) {
-                for (State* state : pair.second) {
-                    to_delete.push(state);
-                }
-            }
-            for (State* state : current->epsilon_transitions_) {
-                to_delete.push(state);
-            }
-            delete current;
-        }
-    }
+    // No eliminamos otros estados aquí - esto debería ser manejado por
+    // el dueño del autómata completo
 }
 
 int State::id() const { return id_; }

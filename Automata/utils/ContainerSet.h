@@ -4,6 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <any>
+#include <algorithm>  // Para std::lexicographical_compare
 // #include <set>
 
 using namespace std;
@@ -46,7 +47,7 @@ class ContainerSet {
             return set_.size() != original_size;
         }
         bool epsilon_update(const ContainerSet& other) {
-            bool previous = contains_epsilon;
+            bool previous = contains_epsilon_;
             contains_epsilon_ = contains_epsilon_ || other.contains_epsilon_;
             return previous != contains_epsilon_;
         }
@@ -82,9 +83,40 @@ class ContainerSet {
         bool operator!=(const unordered_set<T>& other) const {
             return !(*this == other);
         }
+        
+        // Operador < para permitir que ContainerSet funcione en contenedores ordenados
+        bool operator<(const ContainerSet& other) const {
+            // Primero comparamos por tamaño
+            if (set_.size() != other.set_.size()) {
+                return set_.size() < other.set_.size();
+            }
+            
+            // Si tienen el mismo tamaño, convertimos a vectores y comparamos lexicográficamente
+            std::vector<T> this_vec(set_.begin(), set_.end());
+            std::vector<T> other_vec(other.set_.begin(), other.set_.end());
+            
+            // Ordenamos los vectores para una comparación consistente
+            std::sort(this_vec.begin(), this_vec.end(), [](const T& a, const T& b) {
+                return a.get() < b.get();  // Asumiendo que T es un tipo de puntero inteligente
+            });
+            
+            std::sort(other_vec.begin(), other_vec.end(), [](const T& a, const T& b) {
+                return a.get() < b.get();  // Asumiendo que T es un tipo de puntero inteligente
+            });
+            
+            // Comparamos elemento por elemento
+            for (size_t i = 0; i < this_vec.size(); ++i) {
+                if (this_vec[i].get() != other_vec[i].get()) {
+                    return this_vec[i].get() < other_vec[i].get();
+                }
+            }
+            
+            // Si los conjuntos son idénticos, decidimos por contains_epsilon_
+            return contains_epsilon_ < other.contains_epsilon_;
+        }
 
         vector<T> get_values() const {
-            return vector<int>(set_.begin(), set_.end());
+            return vector<T>(set_.begin(), set_.end());
         }
         const std::unordered_set<T, std::hash<T>, std::equal_to<T>>& get_set() const {
             return set_;

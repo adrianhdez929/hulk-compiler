@@ -22,6 +22,9 @@ class Symbol : public std::enable_shared_from_this<Symbol> {
         virtual bool IsEndOfFile() const;
     
         bool operator==(const Symbol& other) const;
+        bool operator<(const Symbol& other) const {
+            return name < other.name;
+        }
         //sobrecargar operador +
         // friend Sentence operator+(std::shared_ptr<Symbol> lhs, 
         //                         std::shared_ptr<Symbol> rhs);

@@ -69,3 +69,17 @@ Sentence Sentence::operator+(std::shared_ptr<Symbol> other) const {
     combinedSymbols.push_back(other);
     return Sentence(combinedSymbols);
 }
+std::string Sentence::ToString() const {
+    std::string result;
+    for (const auto& symbol : symbols) {
+        if (!result.empty()) {
+            result += " ";
+        }
+        result += symbol->Name();
+    }
+    return result;
+}
+std::ostream& operator<<(std::ostream& os, const Sentence& sentence) {
+    os << sentence.ToString();
+    return os;
+}

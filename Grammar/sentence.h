@@ -29,6 +29,12 @@ public:
     Sentence operator+(const std::vector<std::shared_ptr<Symbol>>& symbols) const;
     Sentence operator+(std::shared_ptr<Symbol> other) const;
 
+    // ToString
+    std::string ToString() const;
+    bool operator<(const Sentence& other) const {
+        return symbols < other.symbols;
+}
+
 private:
     std::vector<std::shared_ptr<Symbol>> symbols;  // Cambiado a Symbol
 };

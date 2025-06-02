@@ -3,6 +3,137 @@
 #include <iostream>
 #include "../Automata/state.h"
 
+LR1Parser::LR1Parser(Grammar& G, bool verbose)
+    : G_(G), verbose_(verbose) {
+    // Initialize action and goto tables
+    action_ = std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>>();
+    goto_ = std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int>();
+    BuildParsingTable();
+}
+
+//Parse
+std::pair<std::vector<std::shared_ptr<Production>>, std::vector<std::string>> LR1Parser::Parse(const std::vector<std::shared_ptr<Terminal>>& tokens) {
+    std::vector<std::shared_ptr<Production>> productions;
+    std::vector<std::string> actions;
+    
+    // Initialize stack and state
+    std::vector<int> state_stack = {0};
+    std::vector<std::shared_ptr<Terminal>> symbol_stack;
+    
+    int index = 0;
+    while (index < tokens.size() || !symbol_stack.empty()) {
+        if (index < tokens.size()) {
+            auto current_token = tokens[index];
+            auto action_key = std::make_pair(state_stack.back(), current_token);
+            if (action_.find(action_key) != action_.end()) {
+                auto action_value = action_[action_key];
+                if (action_value.first == SHIFT) {
+                    // Shift action
+                    state_stack.push_back(action_value.second);
+                    symbol_stack.push_back(current_token);
+                    actions.push_back(SHIFT);
+                    index++;
+                } else if (action_value.first == REDUCE) {
+                    // Reduce action
+                    auto production = G_.Productions()[action_value.second];
+                    productions.push_back(std::make_shared<Production>(production));
+                    actions.push_back(REDUCE);
+                    
+                    for (int i = 0; i < production.Right().Symbols().size(); i++) {
+                        state_stack.pop_back();
+                        symbol_stack.pop_back();
+                    }
+                    
+                    auto goto_key = std::make_pair(state_stack.back(), production.Left());
+                    if (goto_.find(goto_key) != goto_.end()) {
+                        state_stack.push_back(goto_[goto_key]);
+                        //actions.push_back(OK);//NOTE: ATENCIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONNNNNNNNNNNNNN
+                    } else {
+                        throw std::runtime_error("Goto not found for " + production.Left()->Name());
+                    }
+                } else if (action_value.first == OK) {
+                    // Accept action
+                    actions.push_back(OK);
+                    break;
+                } else {
+                    throw std::runtime_error("Unknown action: " + action_value.first);
+                }
+            } else {
+                throw std::runtime_error("Action not found for state " + std::to_string(state_stack.back()) + " and token " + current_token->Name());
+            }
+        } else {
+            // If no more tokens, check for reduce or accept
+            if (!symbol_stack.empty() && state_stack.back() == 0) {
+                actions.push_back(OK);
+            }
+        }
+    }
+    return std::make_pair(productions, actions);
+}
+
+//Register
+void LR1Parser::Register(std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>>& table, 
+                                 const std::pair<int, std::shared_ptr<Terminal>>& key, 
+                                 const std::pair<std::string, int>& value) {
+    if (verbose_) {
+        std::cout << "Registering action: " << key.first << ", " << key.second->Name() << " -> " << value.first << ", " << value.second << std::endl;
+    }
+    table[key] = value;
+}
+void LR1Parser::Register(std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int>& table, 
+                                 const std::pair<int, std::shared_ptr<NonTerminal>>& key, 
+                                 int value) {
+    if (verbose_) {
+        std::cout << "Registering goto: " << key.first << ", " << key.second->Name() << " -> " << value << std::endl;
+    }
+    table[key] = value;
+}
+
+//LR1PARSER BuildParsingTable
+void LR1Parser::BuildParsingTable() {
+    // Limpiar estados anteriores si existen
+    CleanupAutomatonStates();
+    
+    G_.Augment();
+    if (!G_.IsAugmented()) {
+        throw std::runtime_error("Grammar is not augmented");
+    }
+    auto automaton = BuildLR1Automaton();
+
+    for (const auto& state : automaton.get_all_states()) {
+        int state_id = state->id();
+        for (const auto& item : state->get_items()) {
+            
+            if (item.IsReduceItem()) {
+                // Reduce action
+                auto production = item.production();
+                if (production->Left() == G_.GetStartSymbol()) {
+                    // Accept action
+                    Register(action_, {state_id, std::dynamic_pointer_cast<Terminal>(G_.GetEndOfFile())}, {OK, 0});
+                } else {
+                    // Regular reduce action
+                    auto lookaheads = item.lookaheads().get_values();
+                    for (const auto& lookahead : lookaheads) {
+                        Register(action_, {state_id, std::dynamic_pointer_cast<Terminal>(lookahead)}, {REDUCE, production->get_id()});
+                    }
+                }
+            } else {
+                // Shift action
+                auto next_symbol = item.NextSymbol();
+                if (next_symbol && next_symbol->IsTerminal()) {
+                    auto next_state = automaton.transitions().at(next_symbol->Name())[0];// Assuming deterministic transitions
+                    // Shift action
+                    Register(action_, {state_id, std::static_pointer_cast<Terminal>(next_symbol)}, {SHIFT, next_state->id()});
+                } else if (next_symbol && next_symbol->IsNonTerminal()) {
+                    // Goto action
+                    auto next_state = automaton.transitions().at(next_symbol->Name())[0]; // Assuming deterministic transitions
+                    Register(goto_, {state_id, std::static_pointer_cast<NonTerminal>(next_symbol)}, next_state->id());
+                }
+            }
+        }
+    }
+}
+
 ContainerSet<shared_ptr<Symbol>> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts) {
     //Compute local first
     ContainerSet<shared_ptr<Symbol>> local_first = ContainerSet<shared_ptr<Symbol>>();
@@ -138,21 +269,22 @@ vector<Item> LR1Parser::expand(const Item& item, const map<shared_ptr<Symbol>, C
     }
     auto lookaheads = ContainerSet<shared_ptr<Symbol>>();
     for (const auto& preview : item.Preview()) {
-        for (const auto& lookahead : lookaheads) {
-            lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
-        }
-        
+        // for (const auto& lookahead : lookaheads) {
+        //     lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
+        // }
+        lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
     }
     if (lookaheads.contains_epsilon()) {
         throw std::runtime_error("Epsilon in lookaheads");
     }
-    // for (const auto& p : next_symbol->Productions()) {
-    //     expanded.push_back(Item(p, 0, lookaheads));
-    // }
-    for (auto prod : G_.Productions()) {
+    for (auto& prod : G_.Productions()) {
         if (prod.Left() == next_symbol) {
-            // Adjust the constructor arguments to match the Item definition
-            expanded.push_back(Item(std::make_shared<Production>(prod), 0, lookaheads));
+            // Usamos una referencia a la producción existente en lugar de crear una nueva
+            auto prod_ptr = std::make_shared<Production>(prod);
+            expanded.push_back(Item(prod_ptr, 0, lookaheads));
+            
+            // Añadimos debug para verificar si hay elementos duplicados
+            // std::cout << "Expandido: " << prod_ptr->ToString() << ", pos: 0, LA: " << lookaheads.str() << std::endl;
         }
     }
     return expanded;
@@ -225,7 +357,18 @@ std::vector<Item> LR1Parser::closure_lr1(const std::vector<Item>& items, const s
 
         // Agregar los nuevos elementos al cierre si no están ya presentes
         for (const auto& new_item : new_items) {
-            if (std::find(closure.begin(), closure.end(), new_item) == closure.end()) {
+            bool found = false;
+            for (const auto& existing_item : closure) {
+                // Comparamos manualmente usando los valores, no los punteros
+                if (existing_item.production()->ToString() == new_item.production()->ToString() &&
+                    existing_item.pos() == new_item.pos() &&
+                    existing_item.lookaheads() == new_item.lookaheads()) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
                 closure.push_back(new_item);
                 changed = true;
             }
@@ -272,6 +415,11 @@ State LR1Parser::BuildLR1Automaton() {
     auto closure = closure_lr1(start, symbol_firsts);
     int state_id = 0;
     auto automaton = State(state_id++, true);
+    
+    // Añadir los ítems al estado inicial
+    for (const auto& item : closure) {
+        automaton.add_item(item);
+    }
 
     // Map to associate states with their items
     std::map<std::set<Item>, State*> visited;
@@ -298,6 +446,9 @@ State LR1Parser::BuildLR1Automaton() {
             if (visited.find(next_set) == visited.end()) {
                 auto next_closure = closure_lr1(next_items, symbol_firsts);
                 next_state = new State(state_id++, true);
+                for (const auto& item : next_closure) {
+                    next_state->add_item(item);
+                }
                 visited[next_set] = next_state;
                 pending.push(next_set);
             } else {
@@ -319,6 +470,9 @@ State LR1Parser::BuildLR1Automaton() {
             if (visited.find(next_set) == visited.end()) {
                 auto next_closure = closure_lr1(next_items, symbol_firsts);
                 next_state = new State(state_id++, true);
+                for (const auto& item : next_closure) {
+                    next_state->add_item(item);
+                }
                 visited[next_set] = next_state;
                 pending.push(next_set);
             } else {
@@ -329,5 +483,33 @@ State LR1Parser::BuildLR1Automaton() {
         }
     }
 
+    // Guardar todos los estados creados para liberarlos después
+    for (auto& [items, state] : visited) {
+        if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
+            automaton_states_.push_back(state);
+        }
+    }
+    
     return automaton;
 }
+
+// Método para limpiar todos los estados creados
+void LR1Parser::CleanupAutomatonStates() {
+    // Crear un conjunto para evitar eliminar el mismo estado más de una vez
+    std::unordered_set<State*> visited;
+    
+    for (auto* state : automaton_states_) {
+        if (visited.find(state) == visited.end()) {
+            visited.insert(state);
+            delete state;
+        }
+    }
+    
+    automaton_states_.clear();
+}
+
+// Destructor de LR1Parser
+LR1Parser::~LR1Parser() {
+    CleanupAutomatonStates();
+}
+

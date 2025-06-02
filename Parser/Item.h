@@ -31,9 +31,33 @@ private:
 
 // Non-member operator== for Item
 inline bool operator==(const Item& lhs, const Item& rhs) {
-    return lhs.production() == rhs.production() &&
+    // Comparamos el contenido de las producciones, no solo los punteros
+    return (lhs.production() == rhs.production() || 
+           (lhs.production() && rhs.production() && 
+            lhs.production()->ToString() == rhs.production()->ToString())) &&
            lhs.pos() == rhs.pos() &&
            lhs.lookaheads() == rhs.lookaheads();
+}
+
+// Non-member operator< for Item
+inline bool operator<(const Item& lhs, const Item& rhs) {
+    // Primero comparamos las producciones por su contenido
+    if (lhs.production() && rhs.production()) {
+        if (lhs.production()->ToString() != rhs.production()->ToString()) {
+            return lhs.production()->ToString() < rhs.production()->ToString();
+        }
+    } else if (lhs.production().get() != rhs.production().get()) {
+        return lhs.production().get() < rhs.production().get();
+    }
+    
+    // Si son iguales, comparamos las posiciones
+    if (lhs.pos() != rhs.pos()) {
+        return lhs.pos() < rhs.pos();
+    }
+    
+    // Si todo lo anterior es igual, comparamos los lookaheads
+    // Ahora utilizamos el operador < de ContainerSet
+    return lhs.lookaheads() < rhs.lookaheads();
 }
 
 namespace std {

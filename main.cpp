@@ -19,10 +19,10 @@ using namespace std;
 
 int main() {
     //run tests
-    // execute_test();
-	Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
-	cout << "Lexer Grammar:" << endl;
-	cout << g.ToString() << endl;
+    execute_test();
+	// Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
+	// cout << "Lexer Grammar:" << endl;
+	// cout << g.ToString() << endl;
 
 
 

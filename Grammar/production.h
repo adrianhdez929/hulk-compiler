@@ -1,4 +1,3 @@
-
 #include "symbol.h"
 #include "sentence.h"
 #include <functional>
@@ -25,6 +24,11 @@ public:
 private:
     std::shared_ptr<NonTerminal> left;
     Sentence right;
+    int id_;
+
+public:
+    void set_id(int id) { id_ = id; }
+    int get_id() const { return id_; }
 };
 
 class AttrProd : public Production {

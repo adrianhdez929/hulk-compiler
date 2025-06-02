@@ -12,6 +12,8 @@
 #include "Automata/utils/utils.h"
 #include "Parser/Item.h"
 #include "Lexer/grammar_parser.h"
+#include "Parser/LR1Parser.h"
+#include <cassert>
 
 
 int Item_test() {
@@ -289,6 +291,52 @@ int state_automata_test() {
     return 0;
 }
 
+void test_firsts_and_follows() {
+    Grammar g = GrammarParser::Parse("Lexer/test_grammar.txt");
+    LR1Parser parser(g);
+    g.Augment();
+
+    // Compute firsts and follows
+    auto [firsts, sentence_firsts] = parser.compute_firsts();
+    auto follows = parser.compute_follows(firsts);
+
+    // Print firsts
+    std::cout << "Firsts:" << std::endl;
+    for (const auto& [symbol, first_set] : firsts) {
+        std::cout << symbol->Name() << ": ";
+        for (const auto& f : first_set.get_values()) {
+            std::cout << f->Name() << " ";
+        }
+        std::cout << std::endl;
+    }
+    // Print sentence firsts
+    std::cout << "Sentence Firsts:" << std::endl;
+    for (const auto& [sentence, first_set] : sentence_firsts) {
+        std::cout << sentence.ToString() << ": ";
+        for (const auto& f : first_set.get_values()) {
+            std::cout << f->Name() << " ";
+        }
+        std::cout << std::endl;
+    }
+    // Print follows
+    std::cout << "Follows:" << std::endl;
+    for (const auto& [symbol, follow_set] : follows) {
+        std::cout << symbol->Name() << ": ";
+        for (const auto& f : follow_set.get_values()) {
+            std::cout << f->Name() << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::vector<std::shared_ptr<Terminal>> terminals = g.Terminals();
+    std::vector<std::shared_ptr<NonTerminal>> non_terminals = g.NonTerminals();
+
+    // parser.Parse({
+    //     g.SetTerminal("a"),
+    //     g.SetTerminal("b"),
+    //     g.SetTerminal("c")
+    // });
+}
+
 int execute_all_tests() {
     Item_test();
     automata_tests();
@@ -297,9 +345,11 @@ int execute_all_tests() {
 }
 
 int execute_test() {
+    test_firsts_and_follows();
+    // test_grammar();
     // execute_all_tests();
     // lexer_node_test();
     // grammar_test();
-    Item_test();
+    // Item_test();
     return 0; 
 }
