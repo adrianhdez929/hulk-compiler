@@ -13,12 +13,15 @@ BUILDDIR = $(SRC_DIR)/build
 
 PROGRAM = parser
 
-OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/codegen.o
+OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
 
-all: $(PROGRAM)
+all: libstandard.so $(PROGRAM)
+
+libstandard.so: $(SRC_DIR)/codegen/standard.cpp
+	$(CC) -shared -fPIC -o libstandard.so $(SRC_DIR)/codegen/standard.cpp
 
 $(PROGRAM): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) -lfl $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) -lfl -L. -lstandard $(LDFLAGS)
 
 $(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.h: $(SRC_DIR)/parser.y
 	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
@@ -46,6 +49,9 @@ $(BUILDDIR)/visitor.o: $(SRC_DIR)/semantic/visitor.cpp $(SRC_DIR)/semantic/visit
 
 $(BUILDDIR)/codegen.o: $(SRC_DIR)/codegen/visitor.cpp $(SRC_DIR)/codegen/visitor.h
 	$(CC) $(CXXFLAGS) -c $(SRC_DIR)/codegen/visitor.cpp $(LDFLAGS) -o $@
+
+$(BUILDDIR)/jit.o: $(SRC_DIR)/codegen/jit.cpp $(SRC_DIR)/codegen/jit.h
+	$(CC) $(CXXFLAGS) -c $(SRC_DIR)/codegen/jit.cpp $(LDFLAGS) -o $@
 
 $(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.tab.h $(SRC_DIR)/Ast/ast.hpp $(SRC_DIR)/semantic/visitor.h $(SRC_DIR)/semantic/visitor.cpp
 	$(CC) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp $(LDFLAGS) -o $@

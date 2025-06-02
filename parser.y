@@ -17,6 +17,8 @@ extern ASTNode* root;
 
 %}
 
+%define parse.error verbose
+%define parse.lac full
 
 %union {
 	float num;
@@ -41,7 +43,7 @@ extern ASTNode* root;
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS
+%token PLUS MINUS TIMES DIV POW MOD LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -70,6 +72,7 @@ extern ASTNode* root;
 %left MINUS
 %left TIMES
 %left DIV
+%left MOD
 %right POW
 
 %%
@@ -107,7 +110,7 @@ expr:
 	| let_assign { $$ = $1; }
 	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
 	| IF conditional { $$ = $2; }
-	| ID ACCESS expr { $$}
+	| ID ACCESS expr { $$; }
     ;
 
 func_asign:
@@ -143,6 +146,7 @@ arit_op:
 	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3); }
 	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3); }
 	| expr POW expr { $$ = new BinOpNode( $1, "^", $3); }
+	| expr MOD expr { $$ = new BinOpNode( $1, "%", $3); }
 	| LPARENT expr RPARENT { $$ = $2; }
 	;
 

@@ -1,18 +1,5 @@
-{
-	print("Hello, world!");
-	5 + 5;
-	print("Value of pi: ");
+let a = 10 in while (a >= 0) {
+	print(a);
 	print(pi);
-	5*pi - 4^alpha;
-type point {
-    x = 0;
-    y = 0;
-
-    getX() => self;
-    getY() => self;
-
-    setX(x) => self := x;
-    setY(y) {
-		 self := y;
-	}
-}
+	a := a - 1;
+};
