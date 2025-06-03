@@ -30,6 +30,10 @@ void ProgramNode::print(int indent) const {
 	node->print(indent + 1);
 }
 
+void ProgramNode::accept(Visitor* visitor, Context* context) {
+    visitor->visit(this, context);
+}
+
 FloatNode::FloatNode(float v) : ASTNode(), value(v) {}
 
 void FloatNode::print(int indent) const {

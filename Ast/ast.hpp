@@ -37,9 +37,13 @@ public:
 };
 
 class ProgramNode : public ASTNode {
+private:
 	ASTNode* node;
+public:
 	ProgramNode(ASTNode* n);
 	void print(int indent=0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+	ASTNode* getNode() const { return node; }
 };
 
 class FloatNode : public ASTNode {
