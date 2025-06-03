@@ -1,14 +1,16 @@
 # Test Grammar for Parser Methods
-Start: S
+Start: E
 Epsilon: epsilon
 
 Terminals: 
-    a, b, c
+    "=", "+", "int"
 
 NonTerminals:
-    A, B
+    A
 
 Productions:
-S -> A B
-A -> a
-B -> b c
+E -> A "=" A
+E -> "int"
+A -> "int" "+" A
+A -> "int"
+

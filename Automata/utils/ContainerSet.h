@@ -15,6 +15,9 @@ class ContainerSet {
         ContainerSet(bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) {}
         ContainerSet(const vector<T>& values, bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) { 
             for (const T& value : values) {
+                if (value == nullptr) {
+                    // throw std::invalid_argument("ContainerSet cannot contain null values");
+                }
                 set_.insert(value);
             }
         }
@@ -57,10 +60,10 @@ class ContainerSet {
             return set_updated || epsilon_updated;
         }
 
-        bool contains(int value) const {
+        bool contains(T value) const {
             return set_.find(value) != set_.end();
         }
-        bool find_match(int value) const {
+        bool find_match(T value) const {
             return contains(value);
         }
 
@@ -83,7 +86,9 @@ class ContainerSet {
         bool operator!=(const unordered_set<T>& other) const {
             return !(*this == other);
         }
+        //operador == para si T es un tipo de puntero inteligente
         
+
         // Operador < para permitir que ContainerSet funcione en contenedores ordenados
         bool operator<(const ContainerSet& other) const {
             // Primero comparamos por tamaño

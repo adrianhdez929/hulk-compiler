@@ -20,6 +20,17 @@ public:
     std::shared_ptr<NonTerminal> Left() const;
     const Sentence& Right() const;
 
+    bool operator<(const Production& other) const {
+        string this_str = ToString();
+        string other_str = other.ToString();
+        return this_str < other_str;
+    }
+    bool operator==(const Production& other) const {
+        string this_str = ToString();
+        string other_str = other.ToString();
+        return this_str == other_str;
+    }
+
     std::string ToString() const;
 private:
     std::shared_ptr<NonTerminal> left;

@@ -10,6 +10,84 @@ LR1Parser::LR1Parser(Grammar& G, bool verbose)
     goto_ = std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int>();
     BuildParsingTable();
 }
+static bool compare_lookaheads(const ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    
+    // Para cada símbolo en lhs, debe existir un símbolo equivalente en rhs
+    for (const auto& lhs_symbol : lhs.get_values()) {
+        bool found = false;
+        for (const auto& rhs_symbol : rhs.get_values()) {
+            if (lhs_symbol->Name() == rhs_symbol->Name()) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;  // No se encontró un símbolo equivalente en rhs
+        }
+    }
+    return true;
+}
+static bool compare_items(const Item& lhs, const Item& rhs) {
+    string lhs_prod = lhs.production()->ToString();
+    string rhs_prod = rhs.production()->ToString();
+    if (lhs_prod != rhs_prod) {
+        return false; // Productions are not equal
+    }
+    if (lhs.pos() != rhs.pos()) {
+        return false;
+    }
+    if (!compare_lookaheads(lhs.lookaheads(), rhs.lookaheads())) {
+        return false;
+    }
+    return true;
+}
+static bool update_container_set(ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
+    bool updated = false;
+    
+    // Si lhs está vacío, simplemente agregamos todos los símbolos de rhs
+    if (lhs.get_values().empty()) {
+        for (const auto& symbol : rhs.get_values()) {
+            updated |= lhs.add(symbol);
+        }
+        return updated;
+    }
+    
+    // Si lhs no está vacío, comprobamos cada símbolo de rhs
+    for (const auto& symbol : rhs.get_values()) {
+        bool exists = false;
+        
+        // Verificar si el símbolo ya existe en lhs
+        for (const auto& existing_symbol : lhs.get_values()) {
+            if (symbol->Name() == existing_symbol->Name()) {
+                exists = true;
+                break;
+            }
+        }
+        
+        // Si no existe, lo agregamos
+        if (!exists) {
+            updated |= lhs.add(symbol);
+        }
+    }
+    
+    return updated;
+}
+
+// Realiza una actualización completa incluyendo epsilon
+static bool hard_update_container_set(ContainerSet<std::shared_ptr<Symbol>>& lhs, const ContainerSet<std::shared_ptr<Symbol>>& rhs) {
+    bool updated = update_container_set(lhs, rhs);
+    
+    // Actualizar epsilon solo si rhs lo tiene y lhs no
+    if (rhs.contains_epsilon() && !lhs.contains_epsilon()) {
+        lhs.set_epsilon(true);
+        updated = true;
+    }
+    
+    return updated;
+}
 
 //Parse
 std::pair<std::vector<std::shared_ptr<Production>>, std::vector<std::string>> LR1Parser::Parse(const std::vector<std::shared_ptr<Terminal>>& tokens) {
@@ -146,7 +224,8 @@ ContainerSet<shared_ptr<Symbol>> LR1Parser::compute_local_firsts(const Sentence&
         }
     }
     if (!local_first.contains_epsilon()){
-        local_first.update(firsts.at(symbols[0]));
+        // local_first.update(firsts.at(symbols[0]));
+        update_container_set(local_first, firsts.at(symbols[0]));
         int i = 0;
         std::shared_ptr<Symbol> s = symbols[i];
         while (firsts.at(s).contains_epsilon()) {
@@ -154,7 +233,7 @@ ContainerSet<shared_ptr<Symbol>> LR1Parser::compute_local_firsts(const Sentence&
                 i++;
                 s = symbols[i];
                 if (!firsts.at(s).contains_epsilon()) {
-                    local_first.update(firsts.at(s));
+                    update_container_set(local_first, firsts.at(s));
                     break;
                 }
             } else {
@@ -203,8 +282,10 @@ pair<map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>, map<Sentence, Co
 
             ContainerSet<shared_ptr<Symbol>> local_first = compute_local_firsts(alpha, firsts);
 
-            bool changed_alpha = first_alpha.hard_update(local_first);
-            bool changed_X = first_X.hard_update(local_first);
+            // bool changed_alpha = first_alpha.hard_update(local_first);
+            bool changed_alpha = hard_update_container_set(first_alpha, local_first);
+            // bool changed_X = first_X.hard_update(local_first);
+            bool changed_X = hard_update_container_set(first_X, local_first);
             changed = changed || changed_alpha || changed_X;
             
         }
@@ -220,9 +301,10 @@ std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>> LR1Parser::c
     for (const auto& nonterminal : G_.NonTerminals()) {
         follows[nonterminal] = ContainerSet<shared_ptr<Symbol>>();
     }
+    shared_ptr<Symbol> start_symbol = G_.GetStartSymbol();
     shared_ptr<Symbol> EOFile = G_.GetEndOfFile();
-    follows[EOFile] = ContainerSet<shared_ptr<Symbol>>();
-    follows[EOFile].add(EOFile);
+    follows[start_symbol] = ContainerSet<shared_ptr<Symbol>>();
+    follows[start_symbol].add(EOFile);
 
     while (changed == true) {
         changed = false;
@@ -245,13 +327,15 @@ std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>> LR1Parser::c
                 auto& beta = alpha.Symbols()[i + 1];
                 if (Y->IsNonTerminal()) {
                     if (symbol_firsts.find(beta) != symbol_firsts.end()) {
-                        changed |= follows[Y].update(symbol_firsts.at(beta));
+                        // changed |= follows[Y].update(symbol_firsts.at(beta));
+                        changed |= update_container_set(follows[Y], symbol_firsts.at(beta));
                         if (symbol_firsts.at(beta).contains_epsilon()) {
-                            changed |= follows[Y].update(follows_x);
+                            // changed |= follows[Y].update(follows_x);
+                            changed |= update_container_set(follows[Y], follows_x);
                         }
                     }
                     if (i == n-1 && beta->IsNonTerminal()) {
-                        changed |= follows.at(beta).update(follows_x);
+                        changed |= update_container_set(follows.at(beta), follows_x);
                     }
                 }
                 // auto& current_follow = follows[current_symbol]; // Remove or comment out if current_symbol is undefined
@@ -269,10 +353,9 @@ vector<Item> LR1Parser::expand(const Item& item, const map<shared_ptr<Symbol>, C
     }
     auto lookaheads = ContainerSet<shared_ptr<Symbol>>();
     for (const auto& preview : item.Preview()) {
-        // for (const auto& lookahead : lookaheads) {
-        //     lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
-        // }
-        lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
+        // lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
+        auto local_first = compute_local_firsts(Sentence(preview), firsts);
+        update_container_set(lookaheads, local_first);
     }
     if (lookaheads.contains_epsilon()) {
         throw std::runtime_error("Epsilon in lookaheads");
@@ -290,18 +373,19 @@ vector<Item> LR1Parser::expand(const Item& item, const map<shared_ptr<Symbol>, C
     return expanded;
 }
 set<Item> LR1Parser::compress(const vector<Item>& items) {
-    map<Item, ContainerSet<shared_ptr<Symbol>>> centers;
+    map<pair<string, int>, pair<shared_ptr<Production>, ContainerSet<shared_ptr<Symbol>>>> centers;
     for (const auto& item : items) {
-        auto center = item.Center();
-        if (centers.find(*center) == centers.end()) {
-            centers[*center] = item.lookaheads();
+        auto key = make_pair(item.production()->ToString(), item.pos());
+        if (centers.find(key) == centers.end()) {
+            centers[key] = make_pair(item.production(), item.lookaheads());
         } else {
-            centers[*center].update(item.lookaheads());
+            update_container_set(centers[key].second, item.lookaheads());
         }
+        
     }
     set<Item> compressed;
-    for (const auto& [item, lookaheads] : centers) {
-        compressed.insert(Item(item.production(), item.pos(), lookaheads));
+    for (const auto& [key, lookaheads] : centers) {
+        compressed.insert(Item(centers[key].first, key.second, centers[key].second));
     }
     return compressed;
 }
@@ -339,6 +423,7 @@ set<Item> LR1Parser::compress(const vector<Item>& items) {
 //     return closure;
 // }
 
+
 std::vector<Item> LR1Parser::closure_lr1(const std::vector<Item>& items, const std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>>& firsts) {
     // Inicializar el conjunto de cierre con los elementos iniciales
     std::vector<Item> closure = items;
@@ -350,6 +435,8 @@ std::vector<Item> LR1Parser::closure_lr1(const std::vector<Item>& items, const s
         // Crear un nuevo conjunto para los nuevos elementos
         std::vector<Item> new_items;
         for (const auto& item : closure) {
+            string item_str = item.production()->ToString() + " pos: " + std::to_string(item.pos());
+            auto lookaheads = item.lookaheads();
             // Expandir cada elemento y agregar los nuevos elementos al conjunto
             auto expanded_items = expand(item, firsts);
             new_items.insert(new_items.end(), expanded_items.begin(), expanded_items.end());
@@ -360,9 +447,7 @@ std::vector<Item> LR1Parser::closure_lr1(const std::vector<Item>& items, const s
             bool found = false;
             for (const auto& existing_item : closure) {
                 // Comparamos manualmente usando los valores, no los punteros
-                if (existing_item.production()->ToString() == new_item.production()->ToString() &&
-                    existing_item.pos() == new_item.pos() &&
-                    existing_item.lookaheads() == new_item.lookaheads()) {
+                if (compare_items(existing_item, new_item)) {
                     found = true;
                     break;
                 }
@@ -377,7 +462,8 @@ std::vector<Item> LR1Parser::closure_lr1(const std::vector<Item>& items, const s
 
     auto compressed_set = compress(closure);
     return std::vector<Item>(compressed_set.begin(), compressed_set.end());
-}
+} 
+
 
 vector<Item> LR1Parser::goto_lr1(const vector<Item>& items, shared_ptr<Symbol> symbol, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts, bool just_kernel) {
     vector<Item> goto_items;

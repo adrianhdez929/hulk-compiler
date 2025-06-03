@@ -130,11 +130,12 @@ std::vector<std::shared_ptr<Terminal>> Grammar::Terminals() {
 void Grammar::Augment() {
     if (augmentedStartSymbol) return;
 
+    auto previousStartSymbol = startSymbol;
     augmentedStartSymbol = SetNonTerminal("SS", true);
 
     auto startProduction = std::make_shared<Production>(
         augmentedStartSymbol,
-        Sentence(GetStartSymbol())
+        Sentence(previousStartSymbol)
     );
 
     AddProduction(*startProduction);
