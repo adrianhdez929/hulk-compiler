@@ -25,6 +25,7 @@ extern ASTNode* root;
 	class ASTNode* node; 
 	class BlockNode* b_node;
 	class ArgsList* args_l;
+	class IDNode* id_node;
 	class AssignFuncNode* ass_f_node;
 	class LetAssign* ass_var;
 	class VarAssignList* v_ass_l;
@@ -38,13 +39,14 @@ extern ASTNode* root;
 	class AttributeMember* att_member;
 	class MethodMember* meth_member;
 	class AccessNode* acc_node;
+	class VarAssignType* v_ass_t;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -58,6 +60,7 @@ extern ASTNode* root;
 %type <node> expr arit_op lines_block line func_call 
 %type <b_node> lines non_empty_lines
 %type <args_l> args_list
+%type <id_node> id_expr
 %type <ass_f_node> func_asign method
 %type <ass_var> let_assign
 %type <v_ass_l> var_assign_list
@@ -69,6 +72,7 @@ extern ASTNode* root;
 %type <ast_node_v> type_body_elements
 %type <var_ass> attribute
 %type <acc_node> member_access_expr
+%type <v_ass_t> var_ass_type
 
 
 %nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
@@ -86,8 +90,6 @@ extern ASTNode* root;
 input:    
 	line { root = $1; }
 	| lines_block { root = $1; }
-	| func_asign SEMICOLON { root = $1; }
-	| type_node_decl { root = $1; }
     ;
 
 lines_block:
@@ -106,6 +108,8 @@ non_empty_lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
+	| func_asign SEMICOLON { $$ = $1; } 
+	| type_node_decl { root = $1; }
 	;
 
 expr: 
@@ -114,10 +118,11 @@ expr:
 	| while_expr { $$ = $1; }
 //	| for_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
-	| ID { $$ = new IDNode($1); }
+	| id_expr { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
-	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
+	| var_ass_type { $$ = $1; }
+	| id_expr ASS_DES expr { $$ = new VarDesAssign($1, $3); }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
@@ -131,19 +136,27 @@ func_asign:
 
 args_list:
 	/* empty */ { $$ = new ArgsList({}); }
-	| ID { $$ = new ArgsList({new IDNode($1)}); }
-	| args_list COLON ID { $1->add_child(new IDNode($3)); $$ = $1; }
+	| id_expr { $$ = new ArgsList({$1}); }
+	| args_list COLON id_expr { $1->add_child($3); $$ = $1; }
 	;
 
+id_expr:
+	ID TWOPOINTS ID { $$ = new IDNode($1, $3); }
+	| ID { $$ = new IDNode($1); }
+	;
 
 let_assign:
 	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
 	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4); }
 	;
 
+var_ass_type:
+	LET ID ASSIGN NEW ID LPARENT args_list RPARENT { $$ = new VarAssignType($2, new IDNode($5)); }
+	;
+
 var_assign_list:
-	ID ASSIGN expr { $$ = new VarAssignList({ new VarAssign(new IDNode($1), $3) });}
-	| var_assign_list COLON ID ASSIGN expr { $1->add_child(new VarAssign(new IDNode($3), $5)); $$ = $1; }
+	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) });}
+	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
 	;
 
 func_call:
@@ -203,7 +216,7 @@ type_body_elements:
 	;
 
 attribute:
-	ID ASSIGN expr SEMICOLON { $$ = new VarAssign(new IDNode($1), $3); }
+	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3); }
 	;
 
 method:

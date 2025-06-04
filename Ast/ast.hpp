@@ -114,7 +114,9 @@ public:
 class IDNode : public ASTNode {
 public:
 	std::string id_name;
+	std::string id_type;
 	IDNode(const std::string& name);
+	IDNode(const std::string& name, const std::string& type);
 	void print(int indent =0 ) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 };
@@ -165,10 +167,20 @@ public:
 
 class VarAssign: public ASTNode {
 public:
-	std::string var_name;
+	IDNode* var_id;
 	ASTNode* value;
 
 	VarAssign(IDNode* id, ASTNode* value_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class VarAssignType : public ASTNode {
+public:
+	std::string var_name;
+	IDNode* id_type_name;
+
+	VarAssignType(const std::string name, IDNode* id_type);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };
