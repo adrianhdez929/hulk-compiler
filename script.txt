@@ -1,5 +1,10 @@
-let a = 10 in while (a >= 0) {
-	print(a);
-	print(pi);
-	a := a - 1;
-};
+type Point {
+    x = 0;
+    y = 0;
+
+    getX() => self.x;
+    getY() => self.y;
+
+	setX(x) => self.x = x;
+    setY(y) => self.y = y;
+}

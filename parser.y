@@ -122,6 +122,8 @@ expr:
 	| ID ASS_DES expr { $$ = new VarDesAssign(new IDNode($1), $3); }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
+	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
+	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
     ;
 
 func_asign:
