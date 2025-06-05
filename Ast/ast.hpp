@@ -183,8 +183,9 @@ class VarAssignType : public ASTNode {
 public:
 	std::string var_name;
 	IDNode* id_type_name;
+	ASTNode* body;
 
-	VarAssignType(const std::string name, IDNode* id_type);
+	VarAssignType(const std::string name, IDNode* id_type, ASTNode* body_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

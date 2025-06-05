@@ -153,7 +153,7 @@ let_assign:
 	;
 
 var_ass_type:
-	LET ID ASSIGN NEW ID LPARENT args_list RPARENT { $$ = new VarAssignType($2, new IDNode($5)); }
+	LET ID ASSIGN NEW ID LPARENT args_list RPARENT IN expr { $$ = new VarAssignType($2, new IDNode($5), $10); }
 	;
 
 var_assign_list:
