@@ -36,6 +36,7 @@ class Grammar {
         vector<std::shared_ptr<NonTerminal>> NonTerminals();
         vector<std::shared_ptr<Terminal>> Terminals();
 
+        shared_ptr<Symbol> GetSymbol(const string& name);
         // void AddProduction(const AttributeProduction& production);
         // using ProductionVariant = std::variant<Production, AttrProd>;
         void AddProduction(const AttrProd& production);

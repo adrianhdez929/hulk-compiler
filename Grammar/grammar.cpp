@@ -152,6 +152,15 @@ bool Grammar::IsAugmented() const {
     }
     return count == 1;
 }
+
+shared_ptr<Symbol> Grammar::GetSymbol(const string& name) {
+    for (const auto& symbol : symbols) {
+        if (name == symbol->Name()) {
+            return symbol;
+        }
+    }
+    return nullptr;
+}
 std::string Grammar::ToString() const {
     //Formato:
     // NonTerminals:

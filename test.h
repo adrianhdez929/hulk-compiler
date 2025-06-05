@@ -290,183 +290,206 @@ int state_automata_test() {
 
     return 0;
 }
-static bool compare_lookaheads(const ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
-    if (lhs.size() != rhs.size()) {
-        return false;
-    }
+// static bool compare_lookaheads(const ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
+//     if (lhs.size() != rhs.size()) {
+//         return false;
+//     }
 
-    // Para cada símbolo en lhs, debe existir un símbolo equivalente en rhs
-    for (const auto& lhs_symbol : lhs.get_values()) {
-        bool found = false;
-        for (const auto& rhs_symbol : rhs.get_values()) {
-            if (lhs_symbol->Name() == rhs_symbol->Name()) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            return false;  // No se encontró un símbolo equivalente en rhs
-        }
-    }
+//     // Para cada símbolo en lhs, debe existir un símbolo equivalente en rhs
+//     for (const auto& lhs_symbol : lhs.get_values()) {
+//         bool found = false;
+//         for (const auto& rhs_symbol : rhs.get_values()) {
+//             if (lhs_symbol->Name() == rhs_symbol->Name()) {
+//                 found = true;
+//                 break;
+//             }
+//         }
+//         if (!found) {
+//             return false;  // No se encontró un símbolo equivalente en rhs
+//         }
+//     }
 
-    // Si llegamos aquí, significa que todos los símbolos de lhs tienen equivalentes en rhs
-    // Como los tamaños son iguales, esto implica que ambos conjuntos son iguales
-    return true;
-}
-static bool compare_items(const Item& lhs, const Item& rhs) {
-    string lhs_prod = lhs.production()->ToString();
-    string rhs_prod = rhs.production()->ToString();
-    if (lhs_prod != rhs_prod) {
-        return false; // Productions are not equal
-    }
-    if (lhs.pos() != rhs.pos()) {
-        return false;
-    }
-    if (!compare_lookaheads(lhs.lookaheads(), rhs.lookaheads())) {
-        return false;
-    }
-    return true;
-}
-bool update_container_set(ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
-    bool updated = false;
+//     // Si llegamos aquí, significa que todos los símbolos de lhs tienen equivalentes en rhs
+//     // Como los tamaños son iguales, esto implica que ambos conjuntos son iguales
+//     return true;
+// }
+// static bool compare_items(const Item& lhs, const Item& rhs) {
+//     string lhs_prod = lhs.production()->ToString();
+//     string rhs_prod = rhs.production()->ToString();
+//     if (lhs_prod != rhs_prod) {
+//         return false; // Productions are not equal
+//     }
+//     if (lhs.pos() != rhs.pos()) {
+//         return false;
+//     }
+//     if (!compare_lookaheads(lhs.lookaheads(), rhs.lookaheads())) {
+//         return false;
+//     }
+//     return true;
+// }
+// bool update_container_set(ContainerSet<shared_ptr<Symbol>>& lhs, const ContainerSet<shared_ptr<Symbol>>& rhs) {
+//     bool updated = false;
     
-    // Si lhs está vacío, simplemente agregamos todos los símbolos de rhs
-    if (lhs.get_values().empty()) {
-        for (const auto& symbol : rhs.get_values()) {
-            updated |= lhs.add(symbol);
-        }
-        return updated;
-    }
+//     // Si lhs está vacío, simplemente agregamos todos los símbolos de rhs
+//     if (lhs.get_values().empty()) {
+//         for (const auto& symbol : rhs.get_values()) {
+//             updated |= lhs.add(symbol);
+//         }
+//         return updated;
+//     }
     
-    // Si lhs no está vacío, comprobamos cada símbolo de rhs
-    for (const auto& symbol : rhs.get_values()) {
-        bool exists = false;
+//     // Si lhs no está vacío, comprobamos cada símbolo de rhs
+//     for (const auto& symbol : rhs.get_values()) {
+//         bool exists = false;
         
-        // Verificar si el símbolo ya existe en lhs
-        for (const auto& existing_symbol : lhs.get_values()) {
-            if (symbol->Name() == existing_symbol->Name()) {
-                exists = true;
-                break;
-            }
-        }
+//         // Verificar si el símbolo ya existe en lhs
+//         for (const auto& existing_symbol : lhs.get_values()) {
+//             if (symbol->Name() == existing_symbol->Name()) {
+//                 exists = true;
+//                 break;
+//             }
+//         }
         
-        // Si no existe, lo agregamos
-        if (!exists) {
-            updated |= lhs.add(symbol);
-        }
-    }
+//         // Si no existe, lo agregamos
+//         if (!exists) {
+//             updated |= lhs.add(symbol);
+//         }
+//     }
     
-    return updated;
-}
+//     return updated;
+// }
 
-// Realiza una actualización completa incluyendo epsilon
-inline bool hard_update_container_set(ContainerSet<std::shared_ptr<Symbol>>& lhs, const ContainerSet<std::shared_ptr<Symbol>>& rhs) {
-    bool updated = update_container_set(lhs, rhs);
+// // Realiza una actualización completa incluyendo epsilon
+// inline bool hard_update_container_set(ContainerSet<std::shared_ptr<Symbol>>& lhs, const ContainerSet<std::shared_ptr<Symbol>>& rhs) {
+//     bool updated = update_container_set(lhs, rhs);
     
-    // Actualizar epsilon solo si rhs lo tiene y lhs no
-    if (rhs.contains_epsilon() && !lhs.contains_epsilon()) {
-        lhs.set_epsilon(true);
-        updated = true;
-    }
+//     // Actualizar epsilon solo si rhs lo tiene y lhs no
+//     if (rhs.contains_epsilon() && !lhs.contains_epsilon()) {
+//         lhs.set_epsilon(true);
+//         updated = true;
+//     }
     
-    return updated;
-}
-ContainerSet<shared_ptr<Symbol>> compute_local_firsts(const Sentence& alpha, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts, Grammar& G_) {
+//     return updated;
+// }
+ContainerSet<string> compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
     //Compute local first
-    ContainerSet<shared_ptr<Symbol>> local_first = ContainerSet<shared_ptr<Symbol>>();
+    ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
     // If alpha is epsilon, add epsilon to local first
+    bool alpha_is_epsilon = false;
     for (const auto& symbol : symbols) {
         if (symbol->IsEpsilon()) {
-            local_first.add(symbol);
-            local_first.set_epsilon(true);
+            alpha_is_epsilon = true;
+            break;
         }
     }
-    if (!local_first.contains_epsilon()){
+    if (alpha_is_epsilon) {
+        local_first.set_epsilon();
+    } else {
         // local_first.update(firsts.at(symbols[0]));
         if (symbols[0]->IsEndOfFile()){
-            local_first.add(G_.GetEndOfFile());
-            local_first.set_epsilon(true);
-            return local_first;
+            auto EOFile = G_.GetEndOfFile();
+            local_first.add(EOFile->Name());
+        } else {
+            local_first.update(firsts.at(Sentence(symbols[0])));
         }
-        update_container_set(local_first, firsts.at(symbols[0]));
+        // update_container_set(local_first, firsts.at(symbols[0]));
         int i = 0;
-        std::shared_ptr<Symbol> s = symbols[i];
+        // std::shared_ptr<Symbol> s = symbols[i];
+        Sentence s = Sentence(symbols[i]);
         while (firsts.at(s).contains_epsilon()) {
-            if (i < symbols.size() - 1) {
-                i++;
-                s = symbols[i];
-                if (!firsts.at(s).contains_epsilon()) {
-                    update_container_set(local_first, firsts.at(s));
-                    break;
-                }
-            } else {
-                local_first.add(G_.GetEpsilon());
-                local_first.set_epsilon(true);
+            if (i == symbols.size() - 1) {
+                local_first.set_epsilon();
                 break;
             }
+            i++;
+            s = Sentence(symbols[i]);
+                // i++;
+                // s = symbols[i];
+                // if (!firsts.at(Sentence(s)).contains_epsilon()) {
+                //     update_container_set(local_first, firsts.at(Sentence(s)));
+                //     break;
+                // }
+            
+            if (!firsts.at(s).contains_epsilon()) {
+                local_first.update(firsts.at(s));
+                break;
+            }
+            // } else {
+            //     local_first.add(G_.GetEpsilon());
+            //     local_first.set_epsilon(true);
+            //     break;
+            // }
         }
     }
     return local_first;
 }
-pair<map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>, map<Sentence, ContainerSet<shared_ptr<Symbol>>>> compute_firsts(Grammar& G_) {
-    std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>> firsts;
+
+map<Sentence, ContainerSet<string>> compute_firsts(Grammar& G_) {
+    map<Sentence, ContainerSet<string>> firsts;
     bool changed = true;
     
     // Inicializar primeros para terminales
     for (const auto& terminal : G_.Terminals()) {
-        ContainerSet<shared_ptr<Symbol>> cs;
-        cs.add(terminal);
-        firsts[terminal] = cs;
+        ContainerSet<string> cs;
+        cs.add(terminal->Name());
+        firsts[Sentence(terminal)] = cs;
     }
+    firsts[Sentence(G_.GetEndOfFile())] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
     
     // Inicializar primeros para no terminales
     for (const auto& nonterminal : G_.NonTerminals()) {
-        firsts[nonterminal] = ContainerSet<shared_ptr<Symbol>>();
+        firsts[Sentence(nonterminal)] = ContainerSet<string>();
     }
 
-    std::map<Sentence, ContainerSet<shared_ptr<Symbol>>> sentence_firsts;
-    for (const auto& prod : G_.Productions()) {
-        auto right = prod.Right();
-        sentence_firsts[right] = ContainerSet<shared_ptr<Symbol>>();
-    }
+    // for (const auto& prod : G_.Productions()) {
+    //     auto right = prod.Right();
+    //     firsts[right] = ContainerSet<string>();
+    // }
     while (changed == true) {
         changed = false;
 
         for (const auto& prod : G_.Productions()) {
-            const auto& X = prod.Left();
+            const auto& X = Sentence(prod.Left());
             const auto& alpha = prod.Right();
 
             // Firsts de X
             auto& first_X = firsts[X];
 
             // Firsts de alpha
-            auto& first_alpha = sentence_firsts[alpha];
+            auto& first_alpha = firsts[alpha];
 
-            ContainerSet<shared_ptr<Symbol>> local_first = compute_local_firsts(alpha, firsts, G_);
+            ContainerSet<string> local_first = compute_local_firsts(alpha, firsts, G_);
 
-            // bool changed_alpha = first_alpha.hard_update(local_first);
-            bool changed_alpha = hard_update_container_set(first_alpha, local_first);
-            // bool changed_X = first_X.hard_update(local_first);
-            bool changed_X = hard_update_container_set(first_X, local_first);
+            bool changed_alpha = first_alpha.hard_update(local_first);
+            // bool changed_alpha = hard_update_container_set(first_alpha, local_first);
+            bool changed_X = first_X.hard_update(local_first);
+            // bool changed_X = hard_update_container_set(first_X, local_first);
             changed = changed || changed_alpha || changed_X;
             
         }
     }
-    return std::make_pair(firsts, sentence_firsts);
+    return firsts;
 };
-
-vector<Item> expand(const Item& item, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts, Grammar& G_) {
+vector<std::shared_ptr<Symbol>> get_symbols(vector<string> symbols, Grammar G_) {
+    vector<std::shared_ptr<Symbol>> result;
+    for (const auto& symbol : symbols) {
+        result.push_back(G_.GetSymbol(symbol));
+    }
+    return result;
+}
+vector<Item> expand(const Item& item, const map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
     vector<Item> expanded;
     const auto& next_symbol = item.NextSymbol();
     if (next_symbol == nullptr || !next_symbol->IsNonTerminal()) {
         return expanded;
     }
-    auto lookaheads = ContainerSet<shared_ptr<Symbol>>();
+    auto lookaheads = ContainerSet<string>();
     for (const auto& preview : item.Preview()) {
         // lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
-        auto local_first = compute_local_firsts(Sentence(preview), firsts, G_);
-        update_container_set(lookaheads, local_first);
+        auto local_first = compute_local_firsts(Sentence(get_symbols(preview, G_)), firsts, G_);
+        // update_container_set(lookaheads, local_first);
+        lookaheads.update(local_first);
     }
     if (lookaheads.contains_epsilon()) {
         throw std::runtime_error("Epsilon in lookaheads");
@@ -484,13 +507,14 @@ vector<Item> expand(const Item& item, const map<shared_ptr<Symbol>, ContainerSet
     return expanded;
 }
 set<Item> compress(const vector<Item>& items) {
-    map<pair<string, int>, pair<shared_ptr<Production>, ContainerSet<shared_ptr<Symbol>>>> centers;
+    map<pair<string, int>, pair<shared_ptr<Production>, ContainerSet<string>>> centers;
     for (const auto& item : items) {
         auto key = make_pair(item.production()->ToString(), item.pos());
         if (centers.find(key) == centers.end()) {
             centers[key] = make_pair(item.production(), item.lookaheads());
         } else {
-            update_container_set(centers[key].second, item.lookaheads());
+            // hard_update_container_set(centers[key].second, item.lookaheads());
+            centers[key].second.update(item.lookaheads());
         }
         
     }
@@ -500,46 +524,56 @@ set<Item> compress(const vector<Item>& items) {
     }
     return compressed;
 }
-std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>>& firsts, Grammar& G_) {
+
+/// @brief Cierra un conjunto de ítems LR(1)
+/// @param items El conjunto de ítems
+/// @param firsts Los conjuntos FIRST
+/// @param G_ La gramática
+/// @return El conjunto de cierre
+std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
     // Inicializar el conjunto de cierre con los elementos iniciales
-    std::vector<Item> closure = items;
+    ContainerSet<Item> closure;
+    closure.add(items);
 
     bool changed = true;
     while (changed) {
         changed = false;
 
         // Crear un nuevo conjunto para los nuevos elementos
-        std::vector<Item> new_items;
+        ContainerSet<Item> new_items;
         for (const auto& item : closure) {
-            string item_str = item.production()->ToString() + " pos: " + std::to_string(item.pos());
+            // string item_str = item.production()->ToString() + " pos: " + std::to_string(item.pos());
             auto lookaheads = item.lookaheads();
             // Expandir cada elemento y agregar los nuevos elementos al conjunto
             auto expanded_items = expand(item, firsts, G_);
-            new_items.insert(new_items.end(), expanded_items.begin(), expanded_items.end());
+            new_items.add(expanded_items);
         }
 
-        // Agregar los nuevos elementos al cierre si no están ya presentes
-        for (const auto& new_item : new_items) {
-            bool found = false;
-            for (const auto& existing_item : closure) {
-                // Comparamos manualmente usando los valores, no los punteros
-                if (compare_items(existing_item, new_item)) {
-                    found = true;
-                    break;
-                }
-            }
+        changed = closure.update(new_items);
+
+        // // Agregar los nuevos elementos al cierre si no están ya presentes
+        // for (const auto& new_item : new_items) {
+        //     bool found = false;
+        //     for (const auto& existing_item : closure) {
+        //         // Comparamos manualmente usando los valores, no los punteros
+        //         if (compare_items(existing_item, new_item)) {
+        //             found = true;
+        //             break;
+        //         }
+        //     }
             
-            if (!found) {
-                closure.push_back(new_item);
-                changed = true;
-            }
-        }
+        //     if (!found) {
+        //         closure.push_back(new_item);
+        //         changed = true;
+        //     }
+        // }
     }
-
-    auto compressed_set = compress(closure);
+    auto closure_items = closure.get_set();
+    vector<Item> closure_items_vector(closure_items.begin(), closure_items.end());
+    auto compressed_set = compress(closure_items_vector);
     return std::vector<Item>(compressed_set.begin(), compressed_set.end());
 } 
-vector<Item> goto_lr1(const vector<Item>& items, shared_ptr<Symbol> symbol, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts, bool just_kernel, Grammar& G_) {
+vector<Item> goto_lr1(const vector<Item>& items, shared_ptr<Symbol> symbol, const map<Sentence, ContainerSet<string>>& firsts, bool just_kernel, Grammar& G_) {
     vector<Item> goto_items;
     for (const auto& item : items) {
         if (item.NextSymbol() == symbol) {
@@ -558,19 +592,20 @@ State BuildLR1Automaton(Grammar& G_) {
     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
 
     // Compute first sets
-    auto [symbol_firsts, sentence_firsts] = compute_firsts(G_);
-    symbol_firsts[G_.GetEndOfFile()] = ContainerSet<std::shared_ptr<Symbol>>();
-    symbol_firsts[G_.GetEndOfFile()].add(G_.GetEndOfFile());
+    auto firsts = compute_firsts(G_);
+    auto EOFile = Sentence(G_.GetEndOfFile());
+    firsts[EOFile] = ContainerSet<string>();
+    firsts[EOFile].add(G_.GetEndOfFile()->Name());
 
     // Initialize start production and item
     auto start_production = G_.GetStartSymbol()->productions[0];
-    ContainerSet<std::shared_ptr<Symbol>> lookahead_set;
-    lookahead_set.add(G_.GetEndOfFile());
+    ContainerSet<string> lookahead_set;
+    lookahead_set.add(G_.GetEndOfFile()->Name());
     auto start_item = Item(std::make_shared<Production>(start_production), 0, lookahead_set);
     std::vector<Item> start = {start_item};
 
     // Compute closure for the start state
-    auto closure = closure_lr1(start, symbol_firsts, G_);
+    auto closure = closure_lr1(start, firsts, G_);
     int state_id = 0;
     auto automaton = State(state_id++, true);
     
@@ -593,7 +628,7 @@ State BuildLR1Automaton(Grammar& G_) {
         auto current_state = visited[current];
 
         for (const auto& symbol : G_.Terminals()) {
-            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, symbol_firsts, true, G_);
+            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, firsts, true, G_);
             if (next_items.empty()) {
                 continue;
             }
@@ -602,7 +637,7 @@ State BuildLR1Automaton(Grammar& G_) {
             State* next_state;
 
             if (visited.find(next_set) == visited.end()) {
-                auto next_closure = closure_lr1(next_items, symbol_firsts, G_);
+                auto next_closure = closure_lr1(next_items, firsts, G_);
                 next_state = new State(state_id++, true);
                 for (const auto& item : next_closure) {
                     next_state->add_item(item);
@@ -617,7 +652,7 @@ State BuildLR1Automaton(Grammar& G_) {
         }
 
         for (const auto& symbol : G_.NonTerminals()) {
-            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, symbol_firsts, true, G_);
+            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, firsts, true, G_);
             if (next_items.empty()) {
                 continue;
             }
@@ -626,7 +661,7 @@ State BuildLR1Automaton(Grammar& G_) {
             State* next_state;
 
             if (visited.find(next_set) == visited.end()) {
-                auto next_closure = closure_lr1(next_items, symbol_firsts, G_);
+                auto next_closure = closure_lr1(next_items, firsts, G_);
                 next_state = new State(state_id++, true);
                 for (const auto& item : next_closure) {
                     next_state->add_item(item);
@@ -699,8 +734,8 @@ void test_firsts_and_follows() {
         }
     }
     shared_ptr<Symbol> eof = g.GetEndOfFile();
-    vector<std::shared_ptr<Symbol>> symbols = {eof, plus};
-    Item item = Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<std::shared_ptr<Symbol>>(symbols));
+    vector<string> symbols = {eof->Name(), plus->Name()};
+    Item item = Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols));
     std::cout << "Item: " << item.ToString() << std::endl;
     std::cout << "Next Symbol: " << item.NextSymbol()->Name() << std::endl;
     std::cout << "Next Item: " << item.NextItem()->ToString() << std::endl;
@@ -709,29 +744,29 @@ void test_firsts_and_follows() {
     for (const auto& preview : item.Preview()) {
         std::cout << "  ";
         for (const auto& sym : preview) {
-            std::cout << sym->Name() << " ";
+            std::cout << sym << " ";
         }
         std::cout << std::endl;
     }
     std::cout << "Is Reduce Item: " << item.IsReduceItem() << std::endl;
 
-    auto firsts_pair = compute_firsts(g);
-    auto expanded_item = expand(item, firsts_pair.first, g);
+    auto firsts = compute_firsts(g);
+    auto expanded_item = expand(item, firsts, g);
     std::cout << "Expanded Items: " << std::endl;
     for (const auto& expanded : expanded_item) {
         std::cout << "  " << expanded.ToString() << std::endl;
     }
 
-    
-    vector<std::shared_ptr<Symbol>> symbols1 = {eof};
-    vector<std::shared_ptr<Symbol>> symbols2 = {plus};
-    vector<std::shared_ptr<Symbol>> symbols3 = {plus, eof};
+
+    vector<string> symbols1 = {eof->Name()};
+    vector<string> symbols2 = {plus->Name()};
+    vector<string> symbols3 = {plus->Name(), eof->Name()};
     vector<Item> items = {
-        Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<std::shared_ptr<Symbol>>(symbols1)),
-        Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<std::shared_ptr<Symbol>>(symbols2)),
-        Item(std::make_shared<Production>(g.Productions()[0]), 1, ContainerSet<std::shared_ptr<Symbol>>(symbols2)),
-        Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<std::shared_ptr<Symbol>>(symbols2)),
-        Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<std::shared_ptr<Symbol>>(symbols3)),
+        Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols1)),
+        Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols2)),
+        Item(std::make_shared<Production>(g.Productions()[0]), 1, ContainerSet<string>(symbols2)),
+        Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols2)),
+        Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols3)),
     };
     set<Item> compressed = compress(items);
     std::cout << "Compressed Items: " << std::endl;
@@ -739,10 +774,12 @@ void test_firsts_and_follows() {
         std::cout << "  " << compressed_item.ToString() << std::endl;
     }
 
-    shared_ptr<Item> item2 = item.NextItem()->NextItem();
-    std::cout << "Item2: " << item2->ToString() << std::endl;
+    shared_ptr<Item> temp = item.NextItem()->NextItem();
+    Item item2 = *temp;
+    std::cout << "Item2: " << item2.ToString() << std::endl;
     // Test closure_lr1
-    std::vector<Item> closure_items = closure_lr1(items, firsts_pair.first, g);
+    vector<Item> clo_items = {item, item2};
+    std::vector<Item> closure_items = closure_lr1(clo_items, firsts, g);
     std::cout << "Closure Items: " << std::endl;
     for (const auto& closure_item : closure_items) {
         std::cout << "  " << closure_item.ToString() << std::endl;
@@ -754,7 +791,7 @@ void test_firsts_and_follows() {
             break;
         }
     }
-    auto goto_items = goto_lr1({item}, A, firsts_pair.first, false, g);
+    auto goto_items = goto_lr1({item}, A, firsts, false, g);
     std::cout << "Goto Items for A: " << std::endl;
     for (const auto& goto_item : goto_items) {
         std::cout << "  " << goto_item.ToString() << std::endl;
@@ -763,10 +800,15 @@ void test_firsts_and_follows() {
     State automaton = BuildLR1Automaton(g);
     //Cadenas
     std::vector<std::string> test_string1 = {"E"};
-    std::vector<std::string> test_string2 = {"int","+","int","+", "A"};
+    std::vector<std::string> test_string2 = {"int", "+", "int", "+", "A"};
     std::cout << "Testing automaton with strings: ";
+    // std::cout << "State item:" << std::endl;
+    // vector<Item> items2 = automaton.get_items();
+    // for (const auto& item : items2) {
+    //     std::cout << "  " << item.ToString() << std::endl;
+    // }
     // True si reconoce la cadena
-    std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
+    // std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
     std::cout << "Test String 2: " << automaton.recognizes(test_string2) << std::endl;
 
 }

@@ -2,7 +2,7 @@
 #include <sstream>
 
 Item::Item(std::shared_ptr<Production> production, int pos, 
-           ContainerSet<std::shared_ptr<Symbol>> lookaheads)
+           ContainerSet<string> lookaheads)
     : production_(production), pos_(pos), lookaheads_(lookaheads) {}
 
 bool Item::IsReduceItem() const {
@@ -24,8 +24,8 @@ std::shared_ptr<Item> Item::NextItem() const {
     return nullptr;
 }
 
-std::vector<std::vector<std::shared_ptr<Symbol>>> Item::Preview(int skip) const {
-    std::vector<std::vector<std::shared_ptr<Symbol>>> result;
+std::vector<std::vector<string>> Item::Preview(int skip) const {
+    std::vector<std::vector<string>> result;
     const auto& symbols = production_->Right().Symbols();
     
     if (pos_ + skip >= symbols.size()) {
@@ -33,9 +33,9 @@ std::vector<std::vector<std::shared_ptr<Symbol>>> Item::Preview(int skip) const 
             result.push_back({lookahead});
         }
     } else {
-        std::vector<std::shared_ptr<Symbol>> sequence;
+        std::vector<string> sequence;
         for (int i = pos_ + skip; i < symbols.size(); i++) {
-            sequence.push_back(symbols[i]);
+            sequence.push_back(symbols[i]->Name());
         }
         
         for (const auto& lookahead : lookaheads_) {
@@ -62,7 +62,7 @@ size_t Item::hash() const {
     seed ^= std::hash<void*>{}(production_.get()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     seed ^= std::hash<int>{}(pos_) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     for (const auto& la : lookaheads_) {
-        seed ^= std::hash<void*>{}(la.get()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<std::string>{}(la) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     return seed;
 }
@@ -80,7 +80,7 @@ std::string Item::ToString() const {
     
     ss << ", [";
     for (const auto& la : lookaheads_) {
-        ss << la->Name() << " ";
+        ss << la << " ";
     }
     ss << "]";
     return ss.str();

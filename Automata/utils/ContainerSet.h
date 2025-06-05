@@ -15,9 +15,9 @@ class ContainerSet {
         ContainerSet(bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) {}
         ContainerSet(const vector<T>& values, bool contains_epsilon = false) : contains_epsilon_(contains_epsilon) { 
             for (const T& value : values) {
-                if (value == nullptr) {
-                    // throw std::invalid_argument("ContainerSet cannot contain null values");
-                }
+                // if (value == nullptr) {
+                //     // throw std::invalid_argument("ContainerSet cannot contain null values");
+                // }
                 set_.insert(value);
             }
         }
@@ -30,6 +30,13 @@ class ContainerSet {
 
         bool add(const T& value) {
             return set_.insert(value).second;
+        }
+        bool add(const vector<T>& values) {
+            bool changed = false;
+            for (const T& value : values) {
+                changed |= add(value);
+            }
+            return changed;
         }
         bool extend(const vector<T>& values){
             bool changed = false;
@@ -45,8 +52,28 @@ class ContainerSet {
             return changed;
         }
         bool update(const ContainerSet& other){
+            if (other.empty()) {
+                return false; // No hay nada que actualizar
+            }
+            if (this->empty()) {
+                // Si el conjunto actual está vacío, simplemente insertamos todos los elementos de otro
+                set_.insert(other.set_.begin(), other.set_.end());
+                return true;
+            }
             const size_t original_size = set_.size();
-            set_.insert(other.set_.begin(), other.set_.end());
+            // set_.insert(other.set_.begin(), other.set_.end());
+            for (const T& other_value : other.set_) {
+                bool found = false;
+                for (const T& value : this->set_) {
+                    if (value == other_value) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    set_.insert(other_value);
+                }
+            }
             return set_.size() != original_size;
         }
         bool epsilon_update(const ContainerSet& other) {
@@ -91,32 +118,14 @@ class ContainerSet {
 
         // Operador < para permitir que ContainerSet funcione en contenedores ordenados
         bool operator<(const ContainerSet& other) const {
-            // Primero comparamos por tamaño
-            if (set_.size() != other.set_.size()) {
-                return set_.size() < other.set_.size();
-            }
-            
-            // Si tienen el mismo tamaño, convertimos a vectores y comparamos lexicográficamente
             std::vector<T> this_vec(set_.begin(), set_.end());
             std::vector<T> other_vec(other.set_.begin(), other.set_.end());
-            
-            // Ordenamos los vectores para una comparación consistente
-            std::sort(this_vec.begin(), this_vec.end(), [](const T& a, const T& b) {
-                return a.get() < b.get();  // Asumiendo que T es un tipo de puntero inteligente
-            });
-            
-            std::sort(other_vec.begin(), other_vec.end(), [](const T& a, const T& b) {
-                return a.get() < b.get();  // Asumiendo que T es un tipo de puntero inteligente
-            });
-            
-            // Comparamos elemento por elemento
-            for (size_t i = 0; i < this_vec.size(); ++i) {
-                if (this_vec[i].get() != other_vec[i].get()) {
-                    return this_vec[i].get() < other_vec[i].get();
-                }
-            }
-            
-            // Si los conjuntos son idénticos, decidimos por contains_epsilon_
+            std::sort(this_vec.begin(), this_vec.end());
+            std::sort(other_vec.begin(), other_vec.end());
+            if (std::lexicographical_compare(this_vec.begin(), this_vec.end(), other_vec.begin(), other_vec.end()))
+                return true;
+            if (std::lexicographical_compare(other_vec.begin(), other_vec.end(), this_vec.begin(), this_vec.end()))
+                return false;
             return contains_epsilon_ < other.contains_epsilon_;
         }
 
