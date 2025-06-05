@@ -1,10 +1,14 @@
-type Point {
-    x = 0;
-    y = 0;
+{
+	type Point {
+    	x:Number = 0;
+    	y = 0;
 
-    getX() => self.x;
-    getY() => self.y;
+    	getX() => self.x;
+    	getY() => self.y;
 
-	setX(x) => self.x = x;
-    setY(y) => self.y = y;
+		setX(x) => self.x = x;
+    	setY(y) => self.y = y;
+	}
+
+	let x = Point() in print(x);
 }

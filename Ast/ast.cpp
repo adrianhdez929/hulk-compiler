@@ -119,10 +119,14 @@ void FunctionCallNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-IDNode::IDNode(const std::string& name) : id_name(name) {}
+IDNode::IDNode(const std::string& name) : id_name(name), id_type("none") {}
+IDNode::IDNode(const std::string& name, const std::string& type) : id_name(name), id_type(type) {}
 
 void IDNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ID(" << id_name << ")" << std::endl;
+	if (id_type != "none") {
+		std::cout << std::string(indent+1, ' ') << "Type(" << id_type << ")" << std::endl;
+	}
 }
 
 void IDNode::accept(Visitor* visitor, Context* context) {
@@ -221,16 +225,29 @@ void LetAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_name(id->id_name), value(value_) {}
+VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_id(id), value(value_) {}
 
 void VarAssign::print(int indent) const {
-	std::cout << std::string(indent, ' ') << "VarAssign(" << var_name << ")" << std::endl;
+	std::cout << std::string(indent, ' ') << "VarAssign:" << std::endl;
+	var_id->print(indent+1);
 	std::cout << std::string(indent+1, ' ') << "Value" << std::endl;
 	value->print(indent + 2);
 }
 
 void VarAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context); 
+}
+
+VarAssignType::VarAssignType(const std::string name, IDNode* id_type) : var_name(name), id_type_name(id_type) {}
+
+void VarAssignType::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "VarAssignType(" << var_name << ")" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "Type:" << std::endl;
+	std::cout << std::string(indent+2, ' ') << id_type_name->id_name << std::endl;
+}
+
+void VarAssignType::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
 }
 
 VarAssignList::VarAssignList(const std::vector<VarAssign*>& assigns_) : assigns(assigns_) {}

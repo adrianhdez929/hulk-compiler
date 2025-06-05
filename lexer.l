@@ -21,6 +21,7 @@ extern "C"  {
 "while"		{ return WHILE; }
 "for" 		{ return FOR; }
 "type"		{ return TYPE; }
+"new" 		{ return NEW; }
 
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
@@ -36,6 +37,7 @@ extern "C"  {
 "("			{ return LPARENT; }
 ")" 		{ return RPARENT; }		
 ";"			{ return SEMICOLON; }
+":"			{ return TWOPOINTS; }
 ","			{ return COLON; }
 "{"			{ return LKEY; }
 "}"			{ return RKEY; }
