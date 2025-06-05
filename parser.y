@@ -48,7 +48,7 @@ extern ASTNode* root;
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW SELF
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -230,7 +230,9 @@ method:
 
 member_access_expr:
 	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } // por ahora solo acepta los argumentos como ID
+	| ID ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } 
+	| SELF ACCESS ID { $$ = new AccessNode("self", new AttributeMember($3)); }
+	| SELF ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode("self", new MethodMember($3, $5)); }
 	;
 
 %%

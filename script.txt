@@ -10,5 +10,6 @@
     	setY(y) => self.y = y;
 	}
 
-	let x = Point() in print(x);
+	
+	let x = new Point() in print(x);
 }
