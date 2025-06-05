@@ -234,12 +234,14 @@ void VarAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context); 
 }
 
-VarAssignType::VarAssignType(const std::string name, IDNode* id_type) : var_name(name), id_type_name(id_type) {}
+VarAssignType::VarAssignType(const std::string name, IDNode* id_type, ASTNode* body_) : var_name(name), id_type_name(id_type), body(body_){}
 
 void VarAssignType::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarAssignType(" << var_name << ")" << std::endl;
 	std::cout << std::string(indent+1, ' ') << "Type:" << std::endl;
 	std::cout << std::string(indent+2, ' ') << id_type_name->id_name << std::endl;
+	std::cout << std::string(indent+1, ' ') << "Body:" << std::endl;
+	body->print(indent+2);
 }
 
 void VarAssignType::accept(Visitor* visitor, Context* context) {
