@@ -72,6 +72,7 @@ extern ASTNode* root;
 //%type <for_node> for_expr
 %type <t_node_decl> type_node_decl
 %type <ast_node_v> type_body_elements
+%type <ast_node_v> expr_list
 %type <var_ass> attribute
 %type <acc_node> member_access_expr
 %type <v_ass_t> var_ass_type
@@ -161,8 +162,14 @@ var_assign_list:
 	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
 	;
 
+expr_list:
+	/* empty */ { $$ = new ASTNodeVector({}); }
+	| expr { $$ = new ASTNodeVector({$1}); }
+	| expr_list COLON expr { $1->add_child($3); $$ = $1; }
+	;
+
 func_call:
-	ID LPARENT expr RPARENT { $$ = new FunctionCallNode($1, $3); free($1); }
+	ID LPARENT expr_list RPARENT { $$ = new FunctionNode($1, $3); free($1); }
 	;
 
 arit_op:

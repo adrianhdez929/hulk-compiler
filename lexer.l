@@ -22,6 +22,7 @@ extern "C"  {
 "for" 		{ return FOR; }
 "type"		{ return TYPE; }
 "new" 		{ return NEW; }
+"self"		{ return SELF; }
 
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
