@@ -18,7 +18,7 @@
                 "Automata/operations/operations.cpp",
                 "Automata/state.cpp",
                 "Parser/Item.cpp",
-                "Parser/LR1Parser.cpp",
+                "Parser/SLR1Parser.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"

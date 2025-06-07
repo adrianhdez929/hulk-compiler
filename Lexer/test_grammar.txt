@@ -3,14 +3,16 @@ Start: E
 Epsilon: epsilon
 
 Terminals: 
-    "=", "+", "int"
+    "*", "+", "int", "(", ")"
 
 NonTerminals:
-    A
+    T, F
 
 Productions:
-E -> A "=" A
-E -> "int"
-A -> A "+" "int"
-A -> "int"
+E -> E "+" T 
+E -> T
+T -> T "*" F 
+T -> F 
+F -> "int"
+F -> "(" E ")"
 

@@ -4,7 +4,7 @@
 #include "semantic/visitor.h"
 #include <iostream>
 #include "test.h"
-#include "Lexer/lexer_grammar.h"
+// #include "Lexer/lexer_grammar.h"
 #include "Lexer/grammar_parser.h"
 
 using namespace std;

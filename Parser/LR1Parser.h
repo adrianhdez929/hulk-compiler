@@ -1,68 +1,68 @@
-#pragma once
-#include <cassert>
-#include "../Grammar/grammar.h"
-#include "Item.h"
-#include "../Automata/utils/ContainerSet.h"
-#include "../Automata/state.h"
-#include <map>
-#include <queue>
+// #pragma once
+// #include <cassert>
+// #include "../Grammar/grammar.h"
+// #include "Item.h"
+// #include "../Automata/utils/ContainerSet.h"
+// #include "../Automata/state.h"
+// #include <map>
+// #include <queue>
 
-class LR1Parser {
-public:
-    static constexpr const char* SHIFT = "SHIFT";
-    static constexpr const char* REDUCE = "REDUCE";
-    static constexpr const char* OK = "OK";
+// class LR1Parser {
+// public:
+//     static constexpr const char* SHIFT = "SHIFT";
+//     static constexpr const char* REDUCE = "REDUCE";
+//     static constexpr const char* OK = "OK";
     
-    LR1Parser(Grammar& G, bool verbose = false);
-    virtual ~LR1Parser();
+//     LR1Parser(Grammar& G, bool verbose = false);
+//     virtual ~LR1Parser();
     
-    void BuildParsingTable();
-    std::pair<std::vector<std::shared_ptr<Production>>, std::vector<std::string>> 
-    Parse(const std::vector<std::shared_ptr<Terminal>>& tokens);
+//     void BuildParsingTable();
+//     std::pair<std::vector<std::shared_ptr<Production>>, std::vector<std::string>> 
+//     Parse(const std::vector<std::shared_ptr<Terminal>>& tokens);
 
-    std::pair<std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>>, std::map<Sentence, ContainerSet<std::shared_ptr<Symbol>>>> compute_firsts();
-    ContainerSet<shared_ptr<Symbol>> compute_local_firsts(const Sentence& sentence, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
+//     std::pair<std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>>, std::map<Sentence, ContainerSet<std::shared_ptr<Symbol>>>> compute_firsts();
+//     ContainerSet<shared_ptr<Symbol>> compute_local_firsts(const Sentence& sentence, const map<shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
 
-    std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>> compute_follows(
-        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
+//     std::map<std::shared_ptr<Symbol>, ContainerSet<std::shared_ptr<Symbol>>> compute_follows(
+//         const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
 
-    std::vector<Item> expand(
-        const Item& item,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
+//     std::vector<Item> expand(
+//         const Item& item,
+//         const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& symbol_firsts);
     
-    std::set<Item> compress(const std::vector<Item>& items);
+//     std::set<Item> compress(const std::vector<Item>& items);
     
-    std::vector<Item> closure_lr1(
-        const std::vector<Item>& items,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts);
+//     std::vector<Item> closure_lr1(
+//         const std::vector<Item>& items,
+//         const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts);
 
-    std::vector<Item> goto_lr1(
-        const std::vector<Item>& items,
-        std::shared_ptr<Symbol> symbol,
-        const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts,
-        bool just_kernel = false);
+//     std::vector<Item> goto_lr1(
+//         const std::vector<Item>& items,
+//         std::shared_ptr<Symbol> symbol,
+//         const std::map<std::shared_ptr<Symbol>, ContainerSet<shared_ptr<Symbol>>>& firsts,
+//         bool just_kernel = false);
 
-    State BuildLR1Automaton();
+//     State BuildLR1Automaton();
 
-    void CleanupAutomatonStates();
+//     void CleanupAutomatonStates();
     
     
-protected:
-    Grammar& G_;
-    bool verbose_;
-    std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>> action_;
-    std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int> goto_;
+// protected:
+//     Grammar& G_;
+//     bool verbose_;
+//     std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>> action_;
+//     std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int> goto_;
     
-    void Register(std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>>& table, 
-                 const std::pair<int, std::shared_ptr<Terminal>>& key, 
-                 const std::pair<std::string, int>& value);
+//     void Register(std::map<std::pair<int, std::shared_ptr<Terminal>>, std::pair<std::string, int>>& table, 
+//                  const std::pair<int, std::shared_ptr<Terminal>>& key, 
+//                  const std::pair<std::string, int>& value);
     
-    void Register(std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int>& table, 
-                 const std::pair<int, std::shared_ptr<NonTerminal>>& key, 
-                 int value);
+//     void Register(std::map<std::pair<int, std::shared_ptr<NonTerminal>>, int>& table, 
+//                  const std::pair<int, std::shared_ptr<NonTerminal>>& key, 
+//                  int value);
 
-    std::vector<State*> automaton_states_;
-};
+//     std::vector<State*> automaton_states_;
+// };
 
 // class LR1Parser : public ShiftReduceParser {
 // public:

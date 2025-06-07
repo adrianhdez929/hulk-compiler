@@ -19,7 +19,7 @@ class Epsilon : public Symbol {
         bool IsEpsilon() const override;
 };
 
-class EndOfFile : public Symbol {
+class EndOfFile : public Terminal {
     public:
         EndOfFile(Grammar& grammar);
         bool IsEndOfFile() const override;

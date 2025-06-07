@@ -47,7 +47,7 @@ public:
     static State* from_nfa(const class NFA& nfa);
 
     // Conversion a determinista
-    static State* to_deterministic(State* nfa_start);
+    State* to_deterministic();
 
     // Saber si reconoce una cadena
     bool recognizes(const std::vector<Symbol>& input) const;

@@ -6,7 +6,7 @@
 Epsilon::Epsilon(Grammar& grammar) : Symbol("epsilon", grammar) {}
 bool Epsilon::IsEpsilon() const { return true; }
 
-EndOfFile::EndOfFile(Grammar& grammar) : Symbol("EOF", grammar) {}
+EndOfFile::EndOfFile(Grammar& grammar) : Terminal("EOF", grammar) {}
 bool EndOfFile::IsEndOfFile() const { return true; }
 
 Grammar::Grammar() : productionType(typeid(void)) {
