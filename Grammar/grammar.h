@@ -1,0 +1,71 @@
+#include <vector>
+#include <unordered_map>
+#include <memory>
+#include <variant>
+#include <typeindex>
+#include "symbol.h"
+#include "production.h"
+
+#ifndef GRAMMAR_H
+#define GRAMMAR_H
+
+using namespace std;
+
+// class Terminal;
+// class NonTerminal;
+class Epsilon : public Symbol {
+    public:
+        Epsilon(Grammar& grammar);
+        bool IsEpsilon() const override;
+};
+
+class EndOfFile : public Terminal {
+    public:
+        EndOfFile(Grammar& grammar);
+        bool IsEndOfFile() const override;
+};
+
+class Grammar {
+    public:
+        Grammar();
+        std::shared_ptr<NonTerminal> SetNonTerminal(const std::string& name, bool isStart = false);
+        std::shared_ptr<Terminal> SetTerminal(const std::string& name);
+        std::shared_ptr<Epsilon> SetEpsilon();
+        std::shared_ptr<EndOfFile> SetEndOfFile();
+
+        vector<std::shared_ptr<NonTerminal>> NonTerminals();
+        vector<std::shared_ptr<Terminal>> Terminals();
+
+        shared_ptr<Symbol> GetSymbol(const string& name);
+        // void AddProduction(const AttributeProduction& production);
+        // using ProductionVariant = std::variant<Production, AttrProd>;
+        void AddProduction(const AttrProd& production);
+        void AddProduction(const Production& production);
+        // const std::vector<ProductionVariant>& Productions() const;
+        const std::vector<Production>& Productions() const;
+        const std::shared_ptr<NonTerminal>& GetStartSymbol() const;
+        const std::shared_ptr<Epsilon>& GetEpsilon() const;
+        const std::shared_ptr<EndOfFile>& GetEndOfFile() const;
+        const std::vector<std::shared_ptr<Symbol>>& Symbols() const;
+        //Metodo para obtener todos los simbolos
+        // const std::vector<const Symbol*>& Symbols() const;
+
+        void Augment();
+        bool IsAugmented() const;
+        //Sobreescribir el .tostring
+        std::string ToString() const;
+    private:
+        std::vector<std::shared_ptr<Symbol>> symbols;
+        std::vector<std::shared_ptr<NonTerminal>> nonTerminals;
+        std::vector<std::shared_ptr<Terminal>> terminals;
+        std::shared_ptr<NonTerminal> augmentedStartSymbol;
+        // std::vector<ProductionVariant> productions;
+        std::vector<Production> productions;
+        std::type_index productionType;
+        std::shared_ptr<NonTerminal> startSymbol;
+        std::shared_ptr<Epsilon> epsilon;
+        std::shared_ptr<EndOfFile> eof;
+        std::unordered_map<std::string, Symbol*> symbolMap;
+};
+
+#endif

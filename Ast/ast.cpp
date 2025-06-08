@@ -55,13 +55,11 @@ UnaryOpNode::~UnaryOpNode() {
 
 BinOpNode::BinOpNode(ASTNode* l, const std::string& o, ASTNode* r) : ASTNode(), op(o), left(l), right(r) {}
 
-/*************  ✨ Windsurf Command ⭐  *************/
     /**
      * @brief Imprime el nodo de operaci n binaria como un string indentado
      *
      * @param indent Nivel de indentaci n para la impresi n
      */
-/*******  04711f06-7700-4b76-899c-dc8f97647e64  *******/
 void BinOpNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "BINOP(" << op << ")\n";
     left->print(indent + 1);

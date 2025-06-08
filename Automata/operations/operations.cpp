@@ -169,6 +169,9 @@ vector<vector<DFA::State>> distinguish_states(
         vector<DFA::State> destinations;
         for (const auto& symbol : vocabulary) {
             DFA::State dest = automaton.getTransition(state, symbol);
+            if (dest == -1) {//ATENCION PARCHE. REVISAR SI OCURRE ERROR##############################################################################################
+                continue; // Si no hay transición, omitimos
+            }
             DFA::State representative = partition.find(dest)->representative()->data;
             destinations.push_back(representative);
         }
@@ -247,6 +250,7 @@ DFA automata_minimization(const DFA& automaton) {
         DFA::State representative = group.first;
         for (const auto& symbol : automaton.getVocab()) {
             DFA::State old_dest = automaton.getTransition(representative, symbol);
+            if (old_dest == -1) continue; // Si no hay transición, omitimos //ATENCION PARCHE. REVISAR SI OCURRE ERROR##############################################################################
             new_transitions[{state_map[representative], symbol}].push_back(state_map[partition.find(old_dest)->representative()->data]); //[old_dest].findRepresentative()->value];
         }
     }

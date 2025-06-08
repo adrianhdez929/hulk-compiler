@@ -3,31 +3,20 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <iostream> // Para debug
 
 State::State(int id, bool is_final) : id_(id), is_final_(is_final) {}
 
 State::~State() {
-    std::unordered_set<State*> deleted;
-    std::stack<State*> to_delete;
+    // El destructor no debería eliminar recursivamente todos los estados
+    // ya que esto puede causar problemas con ciclos y doble liberación
+    // Simplemente limpiamos nuestros propios datos
+    transitions_.clear();
+    epsilon_transitions_.clear();
+    items_.clear();
     
-    to_delete.push(this);
-    
-    while (!to_delete.empty()) {
-        State* current = to_delete.top();
-        to_delete.pop();
-        
-        if (deleted.insert(current).second) {
-            for (auto& pair : current->transitions_) {
-                for (State* state : pair.second) {
-                    to_delete.push(state);
-                }
-            }
-            for (State* state : current->epsilon_transitions_) {
-                to_delete.push(state);
-            }
-            delete current;
-        }
-    }
+    // No eliminamos otros estados aquí - esto debería ser manejado por
+    // el dueño del autómata completo
 }
 
 int State::id() const { return id_; }
@@ -178,6 +167,120 @@ State* State::from_nfa(const NFA& nfa) {
     }
     
     return start;
+}
+
+State* State::to_deterministic() {
+    // Comparador para ordenar estados por ID
+    struct StatePtrCompare {
+        bool operator()(const State* a, const State* b) const {
+            return a->id() < b->id();
+        }
+    };
+    using StateSet = std::set<const State*, StatePtrCompare>;
+
+    // Función para convertir unordered_set a StateSet
+    auto set_from_unordered = [](const std::unordered_set<const State*>& uset) -> StateSet {
+        StateSet sset;
+        for (const State* ptr : uset) {
+            sset.insert(ptr);
+        }
+        return sset;
+    };
+
+    static int dfa_id_counter = 0;  // Contador de IDs para estados DFA
+
+    // Mapeos: StateSet <-> Estado DFA
+    std::map<StateSet, State*> state_map;
+    std::map<State*, StateSet> dfa_to_set_map;
+    std::stack<State*> pending;
+
+    // Paso 1: Calcular épsilon-clausura del estado inicial del NFA
+    std::unordered_set<const State*> initial_closure = epsilon_closure();
+    StateSet initial_set = set_from_unordered(initial_closure);
+
+    // Determinar si el estado inicial DFA es final
+    bool is_final = false;
+    for (const State* s : initial_set) {
+        if (s->is_final()) {
+            is_final = true;
+            break;
+        }
+    }
+
+    // Crear estado inicial DFA
+    State* start_dfa = new State(dfa_id_counter, is_final);
+    dfa_id_counter++;
+    for (const State* s : initial_set) {
+        // Añadir ítems del NFA al estado DFA
+        for (const Item& item : s->get_items()) {
+            start_dfa->add_item(item);
+        }
+    }
+    state_map[initial_set] = start_dfa;
+    dfa_to_set_map[start_dfa] = initial_set;
+    pending.push(start_dfa);
+
+    // Procesar estados pendientes
+    while (!pending.empty()) {
+        State* current_dfa = pending.top();
+        pending.pop();
+        const StateSet& current_set = dfa_to_set_map[current_dfa];
+
+        // Recolectar símbolos de transición
+        std::set<Symbol> symbols;
+        for (const State* state_nfa : current_set) {
+            for (const auto& pair : state_nfa->transitions()) {
+                symbols.insert(pair.first);
+            }
+        }
+
+        // Procesar cada símbolo
+        for (const Symbol& sym : symbols) {
+            std::unordered_set<const State*> moved_set;
+            // Calcular move(symbol)
+            for (const State* state_nfa : current_set) {
+                std::unordered_set<const State*> moved = state_nfa->move(sym);
+                moved_set.insert(moved.begin(), moved.end());
+            }
+
+            // Calcular épsilon-clausura del move
+            std::unordered_set<const State*> closure = moved_set.empty() ? 
+                moved_set : epsilon_closure(moved_set);
+            StateSet new_state_set = set_from_unordered(closure);
+
+            // Crear nuevo estado DFA si es necesario
+            State* next_dfa = nullptr;
+            auto it = state_map.find(new_state_set);
+            if (it == state_map.end()) {
+                bool new_final = false;
+                for (const State* s : new_state_set) {
+                    if (s->is_final()) {
+                        new_final = true;
+                        break;
+                    }
+                }
+                next_dfa = new State(dfa_id_counter++, new_final);
+                
+                //Actualizar los items del nuevo estado DFA
+                for (const State* s : new_state_set) {
+                    for (const Item& item : s->get_items()) {
+                        next_dfa->add_item(item);
+                    }
+                }
+
+                state_map[new_state_set] = next_dfa;
+                dfa_to_set_map[next_dfa] = new_state_set;
+                pending.push(next_dfa);
+            } else {
+                next_dfa = it->second;
+            }
+
+            // Añadir transición determinista
+            current_dfa->add_transition(sym, next_dfa);
+        }
+    }
+
+    return start_dfa;
 }
 
 std::string State::ToString() const {

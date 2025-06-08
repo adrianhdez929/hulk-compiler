@@ -54,6 +54,9 @@
 		"set": "cpp",
 		"unordered_set": "cpp",
 		"list": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"cassert": "cpp",
+		"queue": "cpp",
+		"stack": "cpp"
 	}
 }

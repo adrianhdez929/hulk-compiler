@@ -9,7 +9,7 @@
 class Grammar;
 class Sentence;
 
-class Symbol {
+class Symbol : public std::enable_shared_from_this<Symbol> {
     public:
         // enum Type { TERMINAL, NON_TERMINAL };
         Symbol(const std::string& name, Grammar& grammar);
@@ -22,9 +22,14 @@ class Symbol {
         virtual bool IsEndOfFile() const;
     
         bool operator==(const Symbol& other) const;
+        bool operator<(const Symbol& other) const {
+            return name < other.name;
+        }
         //sobrecargar operador +
-        Sentence operator+(const Symbol& other) const;
-        Sentence operator+(const Sentence& other) const;
+        // friend Sentence operator+(std::shared_ptr<Symbol> lhs, 
+        //                         std::shared_ptr<Symbol> rhs);
+        // friend Sentence operator+(std::shared_ptr<Symbol> lhs, 
+        //                         const Sentence& rhs);
         // Sentence operator+(const std::vector<const Symbol*>& symbols);
 
         std::string ToString() const {
@@ -48,5 +53,29 @@ class Terminal : public Symbol {
 //         bool IsNonTerminal() const override;
      
 // };
+
+namespace std {
+    template<> 
+    struct hash<Symbol> {
+        size_t operator()(const Symbol& sym) const {
+            return std::hash<std::string>{}(sym.Name());
+        }
+    };
+    
+    template<> 
+    struct hash<std::shared_ptr<Symbol>> {
+        size_t operator()(const std::shared_ptr<Symbol>& sym) const {
+            return std::hash<std::string>{}(sym->Name());
+        }
+    };
+    
+    template<> 
+    struct equal_to<std::shared_ptr<Symbol>> {
+        bool operator()(const std::shared_ptr<Symbol>& a, 
+                       const std::shared_ptr<Symbol>& b) const {
+            return a->Name() == b->Name();
+        }
+    };
+}
 
 #endif

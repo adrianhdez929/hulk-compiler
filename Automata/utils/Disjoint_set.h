@@ -24,8 +24,11 @@ class DisjointSet {
                 DisjointNode* root1 = representative();
                 DisjointNode* root2 = other->representative();
 
-                root2->parent = root1;
+                if (root1 != root2) { // Solo fusionar si son de conjuntos diferentes
+                    root2->parent = root1;
+                }
             }
+            //operador !=
         };
 
         std::unordered_map<T, std::unique_ptr<DisjointNode>> nodes_;
@@ -36,7 +39,9 @@ class DisjointSet {
         DisjointSet& operator=(const DisjointSet&) = delete; // No copy assignment operator
         DisjointSet(DisjointSet&&) = default; // Move constructor
         DisjointSet& operator=(DisjointSet&&) = default; // Move assignment operator
-        ~DisjointSet() = default; // Destructor
+        ~DisjointSet() {
+
+        }
         void addItem(const T& item) {
             if (nodes_.find(item) == nodes_.end()) {
                 nodes_[item] = std::make_unique<DisjointNode>(item);
@@ -45,7 +50,11 @@ class DisjointSet {
 
         void merge(const std::vector<T>& items) {
             if (items.empty()) return;
-
+            for (const auto& item : items) {
+                if (nodes_.find(item) == nodes_.end()) {
+                    throw std::invalid_argument("Item no existe en el conjunto");
+                }
+            }
             DisjointNode* root = nodes_[items[0]].get();
             for (size_t i = 1; i < items.size(); ++i) {
                 DisjointNode* other = nodes_[items[i]].get();
