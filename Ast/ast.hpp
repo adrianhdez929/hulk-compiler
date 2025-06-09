@@ -252,9 +252,11 @@ class TypeDeclNode: public ASTNode {
 public:
 	IDNode* id;
 	ArgsList* args;
+	std::vector<std::string> parents;
 	std::vector<ASTNode*> body;
 
-	TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_);
+	TypeDeclNode(IDNode* id, ArgsList* args_, const std::vector<ASTNode*>& body_);
+	TypeDeclNode(IDNode* id, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };
