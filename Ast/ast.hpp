@@ -292,9 +292,9 @@ public:
 class MethodMember : public TypeAssMember {
 public:
 	std::string name;
-	ASTNode* arg;
+	std::vector<ASTNode*> args;
 
-	MethodMember(std::string name_, ASTNode* arg_); //por ahora las llamadas de funcion solo aceptan un parametro, arreglar luego
+	MethodMember(std::string name_, std::vector<ASTNode*> args_); //por ahora las llamadas de funcion solo aceptan un parametro, arreglar luego
 	std::string get_name() const override;
 	void print(int indent) const override;
 	void accept(Visitor* visitor, Context* context);
