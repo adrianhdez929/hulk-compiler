@@ -4,5 +4,5 @@
   let x = new Point() in {
     x.setX(5);
     print(x.getX());
-  };
+  }
 }

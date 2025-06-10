@@ -109,6 +109,7 @@ non_empty_lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
+	| expr { $$ = $1; }
 	| func_asign SEMICOLON { $$ = $1; } 
 	| type_node_decl { root = $1; }
 	;
