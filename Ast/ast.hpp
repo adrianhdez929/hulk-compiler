@@ -19,8 +19,13 @@ class Visitor;
 
 class ASTNode {
 public:
-	ASTNode() {}
-	virtual ~ASTNode() {}
+	// Semantic attributes for attributed grammar
+	std::shared_ptr<TypeInfo> inferredType;
+	std::string semanticValue;
+	
+	ASTNode() : inferredType(nullptr), semanticValue("") {}
+	virtual ~ASTNode() = default;
+	
 	virtual void print(int indent=0) const=0;
 	virtual void accept(Visitor* visitor, Context* context) = 0;
 };	
@@ -154,7 +159,7 @@ public:
 	ExprsList(const std::vector<ASTNode*>& nodes);
 	void add_child(ASTNode* node);
 	void print(int indent = 0) const override;
-	void accept(Visitor* visitor, Context* context);
+	void accept(Visitor* visitor, Context* context) override;
 	~ExprsList();
 };
 
