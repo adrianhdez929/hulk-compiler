@@ -45,7 +45,11 @@ extern ASTNode* root;
 	class VarAssignType* v_ass_t;
 }
 
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW SELF
+%token NUMBER
+%token BOOLEAN
+%token STRING
+%token ID
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -226,6 +230,7 @@ while_expr:
 //
 type_node_decl:
 	TYPE ID args_list LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $5->children); }
+	| TYPE ID args_list INHERITS ID LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $7->children, {$5}); }
 	;
 
 type_body_elements:

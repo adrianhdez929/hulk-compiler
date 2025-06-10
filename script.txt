@@ -1,5 +1,5 @@
 {
-	type Point {
+	type Point inherits A {
     	x:Number = 0;
     	y = 0;
 
