@@ -178,6 +178,11 @@ ArgsList::~ArgsList() {
 }
 
 ExprsList::ExprsList(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+
+void ExprsList::add_child(ASTNode* node) {
+	children.push_back(node);
+}
+
 void ExprsList::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ArgsList(exprs):" << std::endl;
 	for (const auto& child : children) {
@@ -361,13 +366,15 @@ void AttributeMember::accept(Visitor* visitor, Context* context) {
 
 AttributeMember::~AttributeMember() {}
 
-MethodMember::MethodMember(std::string name_, ASTNode* arg_): TypeAssMember(TypeAssMember::Form::Method), name(name_), arg(arg_) {}
+MethodMember::MethodMember(std::string name_, ExprsList* args_): TypeAssMember(TypeAssMember::Form::Method), name(name_), args(args_) {}
 
 std::string MethodMember::get_name() const { return name; }
 
 void MethodMember::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "MethodMember(" << name << "):" << std::endl;
-	arg->print(indent + 2);
+	if (args) {
+		args->print(indent + 2);
+	}
 }
 
 void MethodMember::accept(Visitor* visitor, Context* context) {
@@ -375,7 +382,7 @@ void MethodMember::accept(Visitor* visitor, Context* context) {
 }
 
 MethodMember::~MethodMember() {
-	delete arg;
+	delete args;
 }
 
 AccessNode::AccessNode(const std::string var_name_, TypeAssMember* member_): var_name(var_name_), member(member_) {}
