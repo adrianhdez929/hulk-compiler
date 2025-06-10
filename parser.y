@@ -109,6 +109,7 @@ non_empty_lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
+	| expr { $$ = $1; }
 	| func_asign SEMICOLON { $$ = $1; } 
 	| type_node_decl { root = $1; }
 	;
@@ -153,6 +154,7 @@ let_assign:
 
 var_ass_type:
 	LET ID ASSIGN NEW ID LPARENT args_list RPARENT IN expr { $$ = new VarAssignType($2, new IDNode($5), $10); }
+	| LET ID ASSIGN NEW ID LPARENT args_list RPARENT IN lines_block { $$ = new VarAssignType($2, new IDNode($5), $10); }
 	;
 
 var_assign_list:
