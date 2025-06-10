@@ -13,7 +13,7 @@ SLR1Parser::SLR1Parser(Grammar& G, bool verbose)
 }
 
 //Parse method
-std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<std::string>& tokens) {
+std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<std::string>& tokens) {
     // Convert string tokens to Terminal objects
     std::vector<Terminal> terminal_tokens;
     for (const auto& token : tokens) {
@@ -21,8 +21,8 @@ std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(c
     }
     return Parse(terminal_tokens);
 }
-std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<Terminal>& tokens) {
-    std::vector<Production> productions;
+std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<Terminal>& tokens) {
+    std::vector<int> production_ids;
     std::vector<std::string> actions;
     
     // Initialize stack and state
@@ -47,7 +47,7 @@ std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(c
                 } else if (action_value.first == REDUCE) {
                     // Reduce action
                     auto production = G_.Productions()[action_value.second];
-                    productions.push_back(production);
+                    production_ids.push_back(production.get_id());
                     actions.push_back(REDUCE);
                     // index++;
                     for (int i = 0; i < production.Right().Symbols().size(); i++) {
@@ -82,7 +82,7 @@ std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(c
                         // If the grammar is augmented, we can consider the production as accepted
                         for (const auto& production : G_.Productions()) {
                             if (production.Left() == G_.GetStartSymbol()) {
-                                productions.push_back(production);
+                                production_ids.push_back(production.get_id());
                             }
                         }
                     } else {
@@ -112,7 +112,7 @@ std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(c
             }
         }
     }
-    return std::make_pair(productions, actions);
+    return std::make_pair(production_ids, actions);
 }
 
 void SLR1Parser::BuildParsingTable() {

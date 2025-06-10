@@ -5,15 +5,24 @@
 #include <stdexcept>
 #include <memory>
 
-Production::Production(std::shared_ptr<NonTerminal> left, const Sentence& right) : left(left), right(right) {}
+Production::Production() : left(nullptr), right(Sentence()), id_(-1) {}
+
+Production::Production(std::shared_ptr<NonTerminal> left, const Sentence& right) : left(left), right(right), id_(-1) {}
 
 std::shared_ptr<NonTerminal> Production::Left() const { return left; }
 const Sentence& Production::Right() const { return right; }
 
 std::string Production::ToString() const {
+    if (!left) {
+        return "[NULL] -> [INVALID]";
+    }
     std::string result = left->ToString() + " -> ";
     for (const auto& symbol : right.Symbols()) {
-        result += symbol->ToString() + " ";
+        if (symbol) {
+            result += symbol->ToString() + " ";
+        } else {
+            result += "[NULL] ";
+        }
     }
     return result;
 }

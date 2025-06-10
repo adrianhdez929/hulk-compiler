@@ -38,7 +38,7 @@ class Grammar {
         vector<std::shared_ptr<Terminal>> Terminals();
 
         shared_ptr<Symbol> GetSymbol(const string& name);
-        AttrProd GetProduction(const std::string& name) const {
+        const AttrProd& GetProduction(const std::string& name) const {
             for (const auto& production : productions) {
                 if (production.Left()->Name() == name) {
                     return production;
@@ -47,13 +47,34 @@ class Grammar {
             throw std::runtime_error("Production not found: " + name);
         }
         
-        AttrProd GetProductionByID(int id) const {
+        const AttrProd& GetProduction(int id) const {
             for (const auto& production : productions) {
                 if (production.get_id() == id) {
                     return production;
                 }
             }
-            throw std::runtime_error("Production not found with ID: " + std::to_string(id));
+            throw std::runtime_error("Production not found with id: " + std::to_string(id));
+        }
+        
+        const AttrProd& GetProduction(const Production& production) const {
+            // Use ID if available, otherwise fallback to string comparison
+            int prod_id = production.get_id();
+            if (prod_id >= 0) {
+                return GetProduction(prod_id);
+            }
+            
+            // Fallback to string comparison, but check for null pointers first
+            if (!production.Left()) {
+                throw std::runtime_error("Production has null left side");
+            }
+            
+            std::string prod_str = production.ToString();
+            for (const auto& prod : productions) {
+                if (prod.ToString() == prod_str) {
+                    return prod;
+                }
+            }
+            throw std::runtime_error("Production not found");
         }
         // void AddProduction(const AttributeProduction& production);
         // using ProductionVariant = std::variant<Production, AttrProd>;

@@ -17,6 +17,7 @@ class NonTerminal;
 
 class Production {
 public:
+    Production();  // Default constructor
     Production(std::shared_ptr<NonTerminal> left, const Sentence& right);
     std::shared_ptr<NonTerminal> Left() const;
     const Sentence& Right() const;

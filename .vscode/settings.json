@@ -57,6 +57,9 @@
 		"cinttypes": "cpp",
 		"cassert": "cpp",
 		"queue": "cpp",
-		"stack": "cpp"
+		"stack": "cpp",
+		"bitset": "cpp",
+		"ctime": "cpp",
+		"regex": "cpp"
 	}
 }

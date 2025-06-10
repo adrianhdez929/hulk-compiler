@@ -13,9 +13,9 @@ public:
     SLR1Parser(Grammar& G, bool verbose = false);
     virtual ~SLR1Parser();
 
-    std::pair<std::vector<Production>, std::vector<std::string>> 
+    std::pair<std::vector<int>, std::vector<std::string>> 
     Parse(const std::vector<Terminal>& tokens);
-    std::pair<std::vector<Production>, std::vector<std::string>>
+    std::pair<std::vector<int>, std::vector<std::string>>
     Parse(const std::vector<std::string>& tokens);
 
     void BuildParsingTable();
