@@ -200,7 +200,8 @@ ExprsList::~ExprsList() {
 	}
 }
 
-AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_) {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_), func_type("none") {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, std::string func_type_) : func_name(id->id_name), args(arg), body(body_), func_type(func_type_) {}
 
 void AssignFuncNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "AssignFunction(" << func_name << ")" << std::endl;
@@ -230,13 +231,17 @@ void LetAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_id(id), value(value_) {}
+VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_id(id), value(value_), treated_as_type("none") {}
+VarAssign::VarAssign(IDNode* id, ASTNode* value_, std::string treated_as_type_) : var_id(id), value(value_), treated_as_type(treated_as_type_) {}
 
 void VarAssign::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarAssign:" << std::endl;
 	var_id->print(indent+1);
 	std::cout << std::string(indent+1, ' ') << "Value" << std::endl;
 	value->print(indent + 2);
+	if ( treated_as_type != "none") {
+		std::cout << std::string(indent+1, ' ') << "TreatedAsType: " << treated_as_type << std::endl;
+	}
 }
 
 void VarAssign::accept(Visitor* visitor, Context* context) {
@@ -254,6 +259,20 @@ void VarAssignType::print(int indent) const {
 }
 
 void VarAssignType::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+NewTypeNode::NewTypeNode(std::string id, std::vector<ASTNode*> expr_list_) : id_type_name(id), expr_list(expr_list_) {}
+
+void NewTypeNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "NewTypeNode(" << id_type_name << ")" << std::endl;
+	std::cout << std::string(indent+1, ' ') << "ExprsArgsList:" << std::endl;
+	for (const auto& expr : expr_list) {
+		expr->print(indent+2);
+	}
+}
+
+void NewTypeNode::accept(Visitor* visitor, Context* context) { 
 	visitor->visit(this, context);
 }
 

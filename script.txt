@@ -1,4 +1,4 @@
-{
+{	
 	type Point {
     	x:Number = 0;
     	y:Number = 0;
@@ -16,25 +16,9 @@
 		getY() => self.y + 1;
 	}
 
-	
-	let x = new Point() in {
-		x.setX(5);
-		print(x.getX());
-	}
-
-	let y = new Point() in {
-		y.setX(3 + 4);
-		print(y.getX());
-		print(y.getY());
-		y.setY(6);
-		print(y.getY());
-	}
-
-	let z = new NewPoint() in {
-		print(z.getY());
-		z.setY(2);
-		print(z.getY());
-	}
-
-	print("Hello");
+  
+  let x = new Point() in {
+    x.setX(5);
+    print(x.getX());
+  }
 }
