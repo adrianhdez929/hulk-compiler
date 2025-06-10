@@ -44,6 +44,10 @@ Sentence::Sentence(const Sentence& sentence1, const Sentence& sentence2): symbol
     this->symbols.insert(this->symbols.end(), sentence2.symbols.begin(), sentence2.symbols.end());
 }
 
+size_t Sentence::Size() const {
+    return symbols.size();
+}   
+
 void Sentence::AddSymbol(std::shared_ptr<Symbol> symbol) {
     symbols.push_back(symbol);
 }

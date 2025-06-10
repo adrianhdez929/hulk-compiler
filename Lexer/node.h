@@ -134,13 +134,26 @@ class RangeNode : public Node {
     std::shared_ptr<SymbolNode> first_;  // Usar unique_ptr
     std::shared_ptr<SymbolNode> last_;
 public:
-    RangeNode(std::shared_ptr<SymbolNode> first, std::shared_ptr<SymbolNode> last) 
-        : first_(std::move(first)), last_(std::move(last)) {
-        if (!first_ || !last_) {
+    RangeNode(std::shared_ptr<Node> first, std::shared_ptr<Node> last) 
+        : first_(nullptr), last_(nullptr) {
+        // Verificar que first y last no sean nullptr
+        if (!first || !last) {
+            throw std::invalid_argument("RangeNode: ambos nodos deben ser SymbolNode");
+        }
+
+        // Si first y last no son SymbolNode, lanzar excepción
+        if (!std::dynamic_pointer_cast<SymbolNode>(first) || !std::dynamic_pointer_cast<SymbolNode>(last)) {
+            throw std::invalid_argument("RangeNode: ambos nodos deben ser SymbolNode");
+        }
+        auto new_first_ = std::dynamic_pointer_cast<SymbolNode>(first);
+        auto new_last_ = std::dynamic_pointer_cast<SymbolNode>(last);
+        if (!new_first_ || !new_last_) {
             throw std::invalid_argument("RangeNode: símbolos no pueden ser nullptr");
         }
+        first_ = new_first_;
+        last_ = new_last_;
     }
-    
+
     /// @brief Evaluates the range from first_ to last_ and returns an NFA that accepts all symbols in that range.
     /// @return A shared pointer to an NFA that accepts the range of symbols.
     std::shared_ptr<NFA> evaluate() override {

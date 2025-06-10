@@ -79,8 +79,8 @@ std::shared_ptr<EndOfFile> Grammar::SetEndOfFile() {
 
 static int production_counter = 0;
 
-void Grammar::AddProduction(const Production& production) {
-    Production new_production = production;
+void Grammar::AddProduction(const AttrProd& production) {
+    AttrProd new_production = production;
     new_production.set_id(production_counter++);
     productions.push_back(new_production);
     // Get the left non-terminal and add the production to its list
@@ -97,17 +97,21 @@ void Grammar::AddProduction(const Production& production) {
     }
 }
 
-void Grammar::AddProduction(const AttrProd& production) {
-    if(productions.empty()) {
-        productionType = typeid(AttrProd);
-    }
-    productions.emplace_back(production);
-}
+// void Grammar::AddProduction(const AttrProd& production) {
+//     if(productions.empty()) {
+//         productionType = typeid(AttrProd);
+//     }
+//     productions.emplace_back(production);
+
+// }
 
 // const std::vector<Grammar::ProductionVariant>& Grammar::Productions() const {
 //     return productions;
 // }
-const std::vector<Production>& Grammar::Productions() const {
+// const std::vector<Production>& Grammar::Productions() const {
+//     return productions;
+// }
+const std::vector<AttrProd>& Grammar::Productions() const {
     return productions;
 }
 
@@ -133,9 +137,16 @@ void Grammar::Augment() {
     auto previousStartSymbol = startSymbol;
     augmentedStartSymbol = SetNonTerminal("SS", true);
 
-    auto startProduction = std::make_shared<Production>(
+    // auto startProduction = std::make_shared<Production>(
+    //     augmentedStartSymbol,
+    //     Sentence(previousStartSymbol)
+    // );
+    auto startProduction = std::make_shared<AttrProd>(
         augmentedStartSymbol,
-        Sentence(previousStartSymbol)
+        Sentence(previousStartSymbol),
+        [](const std::vector<ElementType>& args) -> ElementType {
+            return args[0];
+        }
     );
 
     AddProduction(*startProduction);

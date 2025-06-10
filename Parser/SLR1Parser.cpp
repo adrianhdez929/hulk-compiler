@@ -78,6 +78,16 @@ std::pair<std::vector<Production>, std::vector<std::string>> SLR1Parser::Parse(c
                 } else if (action_value.first == OK) {
                     // Accept action
                     actions.push_back(OK);
+                    if (G_.IsAugmented()) {
+                        // If the grammar is augmented, we can consider the production as accepted
+                        for (const auto& production : G_.Productions()) {
+                            if (production.Left() == G_.GetStartSymbol()) {
+                                productions.push_back(production);
+                            }
+                        }
+                    } else {
+                        throw std::runtime_error("Grammar is not augmented, cannot accept.");
+                    }
                     break;
                 } else {
                     throw std::runtime_error("Unknown action: " + action_value.first);
