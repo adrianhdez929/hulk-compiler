@@ -17,8 +17,6 @@ extern ASTNode* root;
 
 %}
 
-%define parse.error verbose
-%define parse.lac full
 
 %union {
 	float num;
@@ -27,7 +25,6 @@ extern ASTNode* root;
 	class ASTNode* node; 
 	class BlockNode* b_node;
 	class ArgsList* args_l;
-	class ExprsList* exprs_l;
 	class IDNode* id_node;
 	class AssignFuncNode* ass_f_node;
 	class LetAssign* ass_var;
@@ -63,7 +60,6 @@ extern ASTNode* root;
 %type <node> expr arit_op lines_block line func_call 
 %type <b_node> lines non_empty_lines
 %type <args_l> args_list
-%type <exprs_l> exprs_list
 %type <id_node> id_expr
 %type <ass_f_node> func_asign method
 %type <ass_var> let_assign
@@ -86,7 +82,7 @@ extern ASTNode* root;
 %nonassoc WHILE LET IF
 
 %left PLUS MINUS
-%left TIMES DIV MOD
+%left TIMES DIV
 %right POW
 %left UMINUS
 
@@ -114,7 +110,7 @@ non_empty_lines:
 line:
 	expr SEMICOLON { $$ = $1; }
 	| func_asign SEMICOLON { $$ = $1; } 
-	| type_node_decl { $$ = $1; }
+	| type_node_decl { root = $1; }
 	;
 
 expr: 
@@ -126,11 +122,7 @@ expr:
 	| id_expr { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
-	| NEW ID LPARENT exprs_list RPARENT { 
-		ExprsList* args = $4;
-		$$ = new FunctionCallNode($2, (ASTNode*)args); 
-		free($2); 
-	}
+	| var_ass_type { $$ = $1; }
 	| id_expr ASS_DES expr { $$ = new VarDesAssign($1, $3); }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
@@ -147,12 +139,6 @@ args_list:
 	/* empty */ { $$ = new ArgsList({}); }
 	| id_expr { $$ = new ArgsList({$1}); }
 	| args_list COLON id_expr { $1->add_child($3); $$ = $1; }
-	;
-
-exprs_list:
-	/* empty */ { $$ = new ExprsList({}); }
-	| expr { $$ = new ExprsList({$1}); }
-	| exprs_list COLON expr { $1->add_child($3); $$ = $1; }
 	;
 
 id_expr:
@@ -192,8 +178,6 @@ arit_op:
 	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3); }
 	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3); }
 	| expr POW expr { $$ = new BinOpNode( $1, "^", $3); }
-	| expr MOD expr { $$ = new BinOpNode( $1, "%", $3); }
-	| LPARENT expr RPARENT { $$ = $2; }
 	| MINUS expr %prec UMINUS { $$ = new UnaryOpNode("-", $2); }
 	;
 
@@ -250,9 +234,7 @@ method:
 
 member_access_expr:
 	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID ACCESS ID LPARENT exprs_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } 
-	| SELF ACCESS ID { $$ = new AccessNode("self", new AttributeMember($3)); }
-	| SELF ACCESS ID LPARENT exprs_list RPARENT { $$ = new AccessNode("self", new MethodMember($3, $5)); }
+	| ID ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } // por ahora solo acepta los argumentos como ID
 	;
 
 %%
