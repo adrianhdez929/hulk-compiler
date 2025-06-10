@@ -234,7 +234,7 @@ method:
 
 member_access_expr:
 	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID ACCESS ID LPARENT args_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5)); } // por ahora solo acepta los argumentos como ID
+	| ID ACCESS ID LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } // por ahora solo acepta los argumentos como ID
 	;
 
 %%

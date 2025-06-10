@@ -371,14 +371,14 @@ void AttributeMember::accept(Visitor* visitor, Context* context) {
 
 AttributeMember::~AttributeMember() {}
 
-MethodMember::MethodMember(std::string name_, ExprsList* args_): TypeAssMember(TypeAssMember::Form::Method), name(name_), args(args_) {}
+MethodMember::MethodMember(std::string name_, std::vector<ASTNode*> args_): TypeAssMember(TypeAssMember::Form::Method), name(name_), args(args_) {}
 
 std::string MethodMember::get_name() const { return name; }
 
 void MethodMember::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "MethodMember(" << name << "):" << std::endl;
-	if (args) {
-		args->print(indent + 2);
+	for ( const auto arg : args){
+		arg->print(indent + 2);
 	}
 }
 
@@ -387,7 +387,9 @@ void MethodMember::accept(Visitor* visitor, Context* context) {
 }
 
 MethodMember::~MethodMember() {
-	delete args;
+	for ( const auto arg : args) {
+		delete arg;
+	}
 }
 
 AccessNode::AccessNode(const std::string var_name_, TypeAssMember* member_): var_name(var_name_), member(member_) {}
