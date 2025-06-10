@@ -40,13 +40,14 @@ extern ASTNode* root;
 	class MethodMember* meth_member;
 	class AccessNode* acc_node;
 	class VarAssignType* v_ass_t;
+	class NewTypeNode* new_t_n;
 }
 
 %token NUMBER
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -129,6 +130,7 @@ expr:
 	| member_access_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
+	| NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
     ;
 
 func_asign:
@@ -155,13 +157,15 @@ let_assign:
 	;
 
 var_ass_type:
-	LET ID ASSIGN NEW ID LPARENT args_list RPARENT IN expr { $$ = new VarAssignType($2, new IDNode($5), $10); }
-	| LET ID ASSIGN NEW ID LPARENT args_list RPARENT IN lines_block { $$ = new VarAssignType($2, new IDNode($5), $10); }
+	LET ID ASSIGN NEW ID LPARENT expr_list RPARENT IN expr { $$ = new VarAssignType($2, new IDNode($5), $10); }
+	| LET ID ASSIGN NEW ID LPARENT expr_list RPARENT IN lines_block { $$ = new VarAssignType($2, new IDNode($5), $10); }
 	;
 
 var_assign_list:
-	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) });}
+	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) }); }
+	| id_expr ASSIGN expr AS ID { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
 	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN expr AS ID { $1->add_child(new VarAssign($3, $5, $7)); }
 	;
 
 expr_list:
@@ -193,6 +197,8 @@ bool_expr:
 	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
 	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
 	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
+	| id_expr IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
+	| func_call IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	;
 
 conditional:
@@ -229,6 +235,7 @@ type_body_elements:
 
 attribute:
 	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3); }
+	| id_expr ASSIGN expr AS ID SEMICOLON { $$ = new VarAssign($1, $3, $5); }
 	;
 
 method:

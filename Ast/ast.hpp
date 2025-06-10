@@ -171,8 +171,10 @@ class VarAssign: public ASTNode {
 public:
 	IDNode* var_id;
 	ASTNode* value;
+	std::string treated_as_type;
 
 	VarAssign(IDNode* id, ASTNode* value_);
+	VarAssign(IDNode* id, ASTNode* value_, std::string treated_as_type_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };
@@ -184,6 +186,16 @@ public:
 	ASTNode* body;
 
 	VarAssignType(const std::string name, IDNode* id_type, ASTNode* body_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
+class NewTypeNode : public ASTNode {
+public:
+	std::string id_type_name;
+	std::vector<ASTNode*> expr_list;
+
+	NewTypeNode(std::string id, std::vector<ASTNode*> expr_list_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

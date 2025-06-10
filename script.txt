@@ -1,20 +1,9 @@
-{
-  type Point inherits A {
-      x:Number = 0;
-      y = 0;
+{	
 
-      getX() {
-      self.x;
-    }
-      getY() => self.y;
-
-    setX(x, y, z) : Number => self.x = x;
-      setY(y) => self.y = y;
-  }
-
-  
-  let x = new Point() in {
-    x.setX(5);
-    print(x.getX());
-  }
+let x : A = if (rand() < 5) new B() else new C() in
+    if (x is B)
+        let y : B = x as B in {
+        }
+    else {
+    };
 }

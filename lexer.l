@@ -23,7 +23,8 @@ extern "C"  {
 "type"		{ return TYPE; }
 "new" 		{ return NEW; }
 "inherits" 	{ return INHERITS; }
-
+"is"		{ return IS; }
+"as"		{ return AS; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
 [a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
