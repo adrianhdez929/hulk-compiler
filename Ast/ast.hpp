@@ -159,8 +159,10 @@ public:
 	std::string func_name;
 	ArgsList* args;
 	ASTNode* body;
+	std::string func_type;
 
 	AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_);
+	AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, std::string func_type_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 };

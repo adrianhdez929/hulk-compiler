@@ -133,7 +133,9 @@ expr:
 
 func_asign:
 	FUNCTION ID LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT TWOPOINTS ID INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); }
 	| FUNCTION ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT TWOPOINTS ID LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); } 
 	;
 
 args_list:
@@ -231,7 +233,9 @@ attribute:
 
 method:
 	ID LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT TWOPOINTS ID INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); } 
 	| ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT TWOPOINTS ID LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); }
 	;
 
 member_access_expr:

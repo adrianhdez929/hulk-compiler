@@ -191,7 +191,8 @@ ExprsList::~ExprsList() {
 	}
 }
 
-AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_) {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_), func_type("none") {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, std::string func_type_) : func_name(id->id_name), args(arg), body(body_), func_type(func_type_) {}
 
 void AssignFuncNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "AssignFunction(" << func_name << ")" << std::endl;
