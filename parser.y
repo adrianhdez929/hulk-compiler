@@ -47,7 +47,7 @@ extern ASTNode* root;
 %token BOOLEAN
 %token STRING
 %token ID
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS 
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
@@ -75,6 +75,7 @@ extern ASTNode* root;
 %type <var_ass> attribute
 %type <acc_node> member_access_expr
 %type <v_ass_t> var_ass_type
+%type <new_t_n> new_expr
 
 
 %nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
@@ -110,7 +111,6 @@ non_empty_lines:
 
 line:
 	expr SEMICOLON { $$ = $1; }
-	| expr { $$ = $1; }
 	| func_asign SEMICOLON { $$ = $1; } 
 	| type_node_decl { root = $1; }
 	;
@@ -118,10 +118,10 @@ line:
 expr: 
 	arit_op { $$ = $1; }
 	| bool_expr { $$ = $1; }
-	| while_expr { $$ = $1; }
+	| WHILE while_expr { $$ = $2; }
 //	| for_expr { $$ = $1; }
 	| STRING { $$ = new StringNode($1); }
-	| id_expr { $$ = $1; }
+	| id_expr %prec ASS_DES { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
 	| var_ass_type { $$ = $1; }
@@ -130,7 +130,6 @@ expr:
 	| member_access_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
-	| NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
     ;
 
 func_asign:
@@ -157,25 +156,33 @@ let_assign:
 	;
 
 var_ass_type:
-	LET ID ASSIGN NEW ID LPARENT expr_list RPARENT IN expr { $$ = new VarAssignType($2, new IDNode($5), $10); }
-	| LET ID ASSIGN NEW ID LPARENT expr_list RPARENT IN lines_block { $$ = new VarAssignType($2, new IDNode($5), $10); }
+	LET id_expr ASSIGN new_expr IN expr { $$ = new VarAssignType($2->id_name, $4, $6); }
+	| LET id_expr ASSIGN new_expr IN lines_block { $$ = new VarAssignType($2->id_name, $4, $6); }
+	;
+
+new_expr:
+	NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
 	;
 
 var_assign_list:
 	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) }); }
 	| id_expr ASSIGN expr AS ID { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
+	| id_expr ASSIGN new_expr { $$ = new VarAssignList({ new VarAssign($1, $3)}); }
 	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
-	| var_assign_list COLON id_expr ASSIGN expr AS ID { $1->add_child(new VarAssign($3, $5, $7)); }
+	| var_assign_list COLON id_expr ASSIGN expr AS ID { $1->add_child(new VarAssign($3, $5, $7)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
 	;
 
 expr_list:
 	/* empty */ { $$ = new ASTNodeVector({}); }
 	| expr { $$ = new ASTNodeVector({$1}); }
+	| new_expr { $$ = new ASTNodeVector({$1}); }
 	| expr_list COLON expr { $1->add_child($3); $$ = $1; }
+	| expr_list COLON new_expr { $1->add_child($3); $$ = $1; }
 	;
 
 func_call:
-	ID LPARENT expr_list RPARENT { $$ = new FunctionNode($1, $3); free($1); }
+	ID LPARENT expr_list RPARENT { $$ = new FunctionNode($1, $3); }
 	;
 
 arit_op:
@@ -210,8 +217,8 @@ conditional:
 	;
 
 while_expr:
-	WHILE LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($3, $5); }
-	| WHILE LPARENT bool_expr RPARENT expr { $$ = new WhileNode($3, $5); }
+	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4); }
+	| LPARENT bool_expr RPARENT expr { $$ = new WhileNode($2, $4); }
 	;
 
 //for_expr:
@@ -247,7 +254,7 @@ method:
 
 member_access_expr:
 	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID ACCESS ID LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } // por ahora solo acepta los argumentos como ID
+	| ID ACCESS ID LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } 
 	;
 
 %%
