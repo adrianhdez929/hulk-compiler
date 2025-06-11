@@ -5,17 +5,6 @@
 
 using namespace std;
 
-/**
- * Visita un nodo del árbol de sintaxis abstracto (AST) y verifica su
- * corrección semántica en función del contexto proporcionado.
- *
- * @param node Nodo del AST a visitar
- * @param context Contexto en el que se va a visitar el nodo
- *
- * @throw std::runtime_error Si el nodo es nulo
- */
-
-
 void SemanticCheckerVisitor::visit(ASTNode* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
@@ -30,6 +19,10 @@ void SemanticCheckerVisitor::visit(FloatNode* node, Context* context) {
     }
 
     cout << "Visiting Float Node: " << node->value << endl;
+    if (!node->inferredType) {
+        node->inferredType = Context::intType; 
+    }
+    node->semanticValue = "numeric_literal";
 }
 
 void SemanticCheckerVisitor::visit(BoolNode* node, Context* context) {
@@ -38,6 +31,10 @@ void SemanticCheckerVisitor::visit(BoolNode* node, Context* context) {
     }
     
     cout << "Visiting Bool Node: " << node->value << endl;
+    if (!node->inferredType) {
+        node->inferredType = Context::boolType;
+    }
+    node->semanticValue = node->value ? "true" : "false";
 }
 
 void SemanticCheckerVisitor::visit(StringNode* node, Context* context) {
@@ -46,6 +43,10 @@ void SemanticCheckerVisitor::visit(StringNode* node, Context* context) {
     }
     
     cout << "Visiting String Node: " << node->value << endl;
+    if (!node->inferredType) {
+        node->inferredType = Context::stringType;
+    }
+    node->semanticValue = "\"" + node->value + "\"";
 }
 
 void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
@@ -55,16 +56,22 @@ void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
 
     cout << "Visiting UnaryOp Node: " << node->op << endl;
     
-    // First visit the operand
     node->node->accept(this, context);
     
-    // Check if the unary operation is valid
     if (node->op == "!" || node->op == "not") {
-        // Boolean negation - operand should be boolean-like
-        cout << "Semantic check: Boolean negation operation" << endl;
+        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::boolType)) {
+            throw std::runtime_error("Type error: Boolean negation requires boolean operand, got " + 
+                                   node->node->inferredType->name);
+        }
+        node->inferredType = Context::boolType;
+        node->semanticValue = "bool_negation(" + node->node->semanticValue + ")";
     } else if (node->op == "-" || node->op == "+") {
-        // Arithmetic negation/positive - operand should be numeric
-        cout << "Semantic check: Arithmetic unary operation" << endl;
+        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::intType)) {
+            throw std::runtime_error("Type error: Arithmetic unary operation requires numeric operand, got " + 
+                                   node->node->inferredType->name);
+        }
+        node->inferredType = Context::intType;
+        node->semanticValue = "arithmetic_unary(" + node->op + ", " + node->node->semanticValue + ")";
     } else {
         throw std::runtime_error("Semantic error: Unknown unary operator: " + node->op);
     }
@@ -77,59 +84,98 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
 
     cout << "Visiting BinOp Node: " << node->op << endl;
     
-    // Visit both operands first
     node->left->accept(this, context);
     node->right->accept(this, context);
     
-    // Check semantic validity of the binary operation
     if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/" || node->op == "%" || node->op == "^") {
-        // Arithmetic operations - both operands should be numeric
-        cout << "Semantic check: Arithmetic binary operation" << endl;
+        checkTypeCompatibility(Context::intType, node->left->inferredType, "left operand of " + node->op);
+        checkTypeCompatibility(Context::intType, node->right->inferredType, "right operand of " + node->op);
+        
+        node->inferredType = Context::intType;
+        node->semanticValue = "arithmetic_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
+        
     } else if (node->op == "==" || node->op == "!=" || node->op == "<" || node->op == ">" || node->op == "<=" || node->op == ">=") {
-        // Comparison operations - operands should be compatible
-        cout << "Semantic check: Comparison operation" << endl;
+        if (node->left->inferredType && node->right->inferredType) {
+            auto commonType = context->findCommonSupertype(node->left->inferredType, node->right->inferredType);
+            if (!commonType || commonType->name == "void") {
+                throw std::runtime_error("Type error: Incompatible types in comparison: " + 
+                                       node->left->inferredType->name + " and " + node->right->inferredType->name);
+            }
+        }
+        node->inferredType = Context::boolType;
+        node->semanticValue = "comparison_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
+        
     } else if (node->op == "&&" || node->op == "||" || node->op == "and" || node->op == "or") {
-        // Logical operations - both operands should be boolean-like
-        cout << "Semantic check: Logical binary operation" << endl;
+        checkTypeCompatibility(Context::boolType, node->left->inferredType, "left operand of " + node->op);
+        checkTypeCompatibility(Context::boolType, node->right->inferredType, "right operand of " + node->op);
+        
+        node->inferredType = Context::boolType;
+        node->semanticValue = "logical_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
+        
+    } else if (node->op == "=" || node->op == ":=") {
+        if (node->left->inferredType && node->right->inferredType) {
+            if (!context->canAssign(node->right->inferredType, node->left->inferredType)) {
+                throw std::runtime_error("Type error: Cannot assign " + node->right->inferredType->name + 
+                                       " to " + node->left->inferredType->name);
+            }
+        }
+        node->inferredType = node->left->inferredType;
+        node->semanticValue = "assignment(" + node->left->semanticValue + ", " + node->right->semanticValue + ")";
+        
     } else {
         throw std::runtime_error("Semantic error: Unknown binary operator: " + node->op);
     }
 }
 
 void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting FunctionNode: " << node->func_name << endl;
+    cout << "Visiting FunctionNode: " << node->func_name << endl;
 
-	// Check if function is defined in context
-	// First count arguments (for now assume single argument)
-	int argCount = 1; // This is a simplification - in a real implementation you'd count the arguments properly
-	
-	if (!context->isDefined(node->func_name, argCount)) {
-		throw std::runtime_error("Semantic error: Function '" + node->func_name + "' with " + to_string(argCount) + " arguments is not defined");
-	}
-	
-	cout << "Semantic check: Function '" << node->func_name << "' is defined" << endl;
+    node->argument->accept(this, context);
+    
+    std::vector<std::shared_ptr<TypeInfo>> argTypes;
+    if (node->argument->inferredType) {
+        argTypes.push_back(node->argument->inferredType);
+    }
 
-	// Visit the argument
-	node->argument->accept(this, context);
+    auto returnType = context->getFuncReturnType(node->func_name, argTypes);
+    if (!returnType) {
+        int argCount = 1;
+        if (!context->isDefined(node->func_name, argCount)) {
+            throw std::runtime_error("Semantic error: Function '" + node->func_name + 
+                                   "' with compatible signature not found");
+        }
+        returnType = Context::voidType;
+    }
+    
+    node->inferredType = returnType;
+    node->semanticValue = "func_call(" + node->func_name + ", " + node->argument->semanticValue + ")";
+    
+    cout << "Semantic check: Function '" << node->func_name << "' returns " << returnType->name << endl;
 }
 
 void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting IDNode: " << node->id_name << endl;
-	
-	// Check if variable is defined in the current context
-	if (!context->isDefined(node->id_name)) {
-		throw std::runtime_error("Semantic error: Variable '" + node->id_name + "' is not defined");
-	}
-	
-	cout << "Semantic check: Variable '" << node->id_name << "' is defined" << endl;
+    cout << "Visiting IDNode: " << node->id_name << endl;
+    
+    auto varType = context->getVarType(node->id_name);
+    if (!varType) {
+        if (!context->isDefined(node->id_name)) {
+            throw std::runtime_error("Semantic error: Variable '" + node->id_name + "' is not defined");
+        }
+        varType = std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+    }
+    
+    node->inferredType = varType;
+    node->semanticValue = "var_ref(" + node->id_name + ")";
+    
+    cout << "Semantic check: Variable '" << node->id_name << "' has type " << varType->name << endl;
 }
 
 void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
@@ -139,10 +185,8 @@ void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
 
 	cout << "Visiting BlockNode" << endl;
 	
-	// Create a new child context for the block scope
 	Context* blockContext = context->createChildContext();
 	
-	// Visit all children in the block context
 	for (auto child : node->children) {
 		child->accept(this, blockContext);
 	}
@@ -157,7 +201,6 @@ void SemanticCheckerVisitor::visit(ArgsList* node, Context* context) {
 
 	cout << "Visiting ArgsList with " << node->children.size() << " arguments" << endl;
 
-	// Check for duplicate argument names
 	for (size_t i = 0; i < node->children.size(); i++) {
 		for (size_t j = i + 1; j < node->children.size(); j++) {
 			if (node->children[i]->id_name == node->children[j]->id_name) {
@@ -166,7 +209,6 @@ void SemanticCheckerVisitor::visit(ArgsList* node, Context* context) {
 		}
 	}
 
-	// Visit each argument (for semantic analysis of the identifiers)
 	for (auto child : node->children) {
 		cout << "Processing argument: " << child->id_name << endl;
 	}
@@ -175,86 +217,125 @@ void SemanticCheckerVisitor::visit(ArgsList* node, Context* context) {
 }
 
 void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting AssignFuncNode: " << node->func_name << endl;
+    cout << "Visiting AssignFuncNode: " << node->func_name << endl;
 
-	// Check if function is already defined in current scope
-	int argCount = node->args->children.size();
-	if (context->isLocal(node->func_name, argCount)) {
-		throw std::runtime_error("Semantic error: Function '" + node->func_name + "' with " + to_string(argCount) + " parameters is already defined in this scope");
-	}
+    int argCount = node->args->children.size();
+    
+    if (context->isLocal(node->func_name, argCount)) {
+        throw std::runtime_error("Semantic error: Function '" + node->func_name + 
+                               "' with " + to_string(argCount) + " parameters already defined");
+    }
 
-	// Define the function in the current context
-	if (!context->define(node->func_name, argCount)) {
-		throw std::runtime_error("Semantic error: Failed to define function '" + node->func_name + "'");
-	}
+    Context* functionContext = context->createChildContext();
 
-	// Create a new context for the function body
-	Context* functionContext = context->createChildContext();
+    std::vector<std::shared_ptr<TypeInfo>> paramTypes;
+    node->args->accept(this, context);
+    
+    for (auto* arg : node->args->children) {
+        auto paramType = Context::intType;
+        paramTypes.push_back(paramType);
+        
+        if (!functionContext->defineVar(arg->id_name, paramType)) {
+            throw std::runtime_error("Semantic error: Failed to define parameter '" + arg->id_name + "'");
+        }
+    }
 
-	// Add function parameters to the function context
-	node->args->accept(this, context); // Check arguments for semantic validity first
-	for (auto* arg : node->args->children) {
-		if (!functionContext->define(arg->id_name)) {
-			throw std::runtime_error("Semantic error: Failed to define parameter '" + arg->id_name + "'");
-		}
-	}
+    node->body->accept(this, functionContext);
+    auto returnType = node->body->inferredType ? node->body->inferredType : Context::voidType;
 
-	// Visit the function body in the function context
-	node->body->accept(this, functionContext);
-	
-	cout << "Semantic check: Function '" << node->func_name << "' defined successfully" << endl;
+    if (!context->defineFunc(node->func_name, returnType, paramTypes)) {
+        if (!context->define(node->func_name, argCount)) {
+            throw std::runtime_error("Semantic error: Failed to define function '" + node->func_name + "'");
+        }
+    }
+    
+    node->inferredType = returnType;
+    node->semanticValue = "func_def(" + node->func_name + ", params, " + node->body->semanticValue + ")";
+    
+    cout << "Function '" << node->func_name << "' defined with return type " << returnType->name << endl;
 }
 
 void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting LetAssign with " << node->assigns.size() << " variable assignments" << endl;
+    cout << "Visiting LetAssign with " << node->assigns.size() << " assignments" << endl;
 
-	// Create a new context for the let expression
-	Context* letContext = context->createChildContext();
+    Context* letContext = context->createChildContext();
 
-	// First pass: define all variables and check for duplicates within this let block
-	for (auto* assign : node->assigns) {
-		if (letContext->isLocal(assign->var_name)) {
-			throw std::runtime_error("Semantic error: Variable '" + assign->var_name + "' is already defined in this let block");
-		}
-		
-		// Define the variable in the let context
-		if (!letContext->define(assign->var_name)) {
-			throw std::runtime_error("Semantic error: Failed to define variable '" + assign->var_name + "'");
-		}
-	}
+    for (auto* assign : node->assigns) {
+        if (letContext->isLocal(assign->var_id->id_name)) {
+            throw std::runtime_error("Semantic error: Variable '" + assign->var_id->id_name + 
+                                   "' redefined in let block");
+        }
+        
+        assign->value->accept(this, letContext);
+        auto varType = assign->value->inferredType ? 
+                      assign->value->inferredType : 
+                      std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+        
+        if (!letContext->defineVar(assign->var_id->id_name, varType)) {
+            throw std::runtime_error("Semantic error: Failed to define variable '" + assign->var_id->id_name + "'");
+        }
+        
+        assign->var_id->inferredType = varType;
+        assign->var_id->semanticValue = "var_def(" + assign->var_id->id_name + ", " + assign->value->semanticValue + ")";
+    }
 
-	// Second pass: visit all variable assignments in the let context
-	for (auto* assign : node->assigns) {
-		assign->accept(this, letContext);
-	}
-
-	// Visit the body in the context with the new variables
-	node->body->accept(this, letContext);
-	
-	cout << "Semantic check: Let expression processed successfully" << endl;
+    node->body->accept(this, letContext);
+    
+    node->inferredType = node->body->inferredType;
+    node->semanticValue = "let_expr(bindings, " + node->body->semanticValue + ")";
+    
+    cout << "Let expression type: " << (node->inferredType ? node->inferredType->name : "void") << endl;
 }
 
 void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting VarAssign: " << node->var_name << endl;
+    cout << "Visiting VarAssign: " << node->var_id->id_name << endl;
 
-	// Visit the value expression first to ensure it's semantically valid
-	node->value->accept(this, context);
-	
-	// Note: The variable definition is handled by the parent context (LetAssign or VarAssignList)
-	// Here we just verify the assignment value is valid
-	cout << "Semantic check: Variable assignment '" << node->var_name << "' value is valid" << endl;
+    node->value->accept(this, context);
+    
+    if (!node->treated_as_type.empty() && node->treated_as_type != "none") {
+        auto castType = context->getType(node->treated_as_type);
+        if (!castType) {
+            throw std::runtime_error("Semantic error: Type '" + node->treated_as_type + "' not found for cast");
+        }
+        
+        auto valueType = node->value->inferredType;
+        if (!valueType) {
+            throw std::runtime_error("Semantic error: Cannot infer type of value for cast");
+        }
+        
+        if (!context->canAssign(valueType, castType)) {
+            throw std::runtime_error("Semantic error: Type '" + valueType->name + 
+                                   "' does not conform to '" + castType->name + "' for cast");
+        }
+        
+        node->var_id->inferredType = castType;
+        node->inferredType = castType;
+        
+        cout << "Semantic check: Type cast from '" << valueType->name << "' to '" << 
+                castType->name << "' is valid" << endl;
+    } else {
+        node->var_id->inferredType = node->value->inferredType;
+        node->inferredType = node->value->inferredType;
+    }
+    
+    if (!node->var_id->semanticValue.empty() || !node->value->semanticValue.empty()) {
+        node->semanticValue = "var_assign(" + node->var_id->id_name + ", " + node->value->semanticValue + ")";
+    }
+    
+    cout << "Semantic check: Variable assignment '" << node->var_id->id_name << "' with type " << 
+            (node->inferredType ? node->inferredType->name : "unknown") << endl;
 }
 
 void SemanticCheckerVisitor::visit(VarAssignList* node, Context* context) {
@@ -264,21 +345,48 @@ void SemanticCheckerVisitor::visit(VarAssignList* node, Context* context) {
 
 	cout << "Visiting VarAssignList with " << node->assigns.size() << " assignments" << endl;
 
-	// Check for duplicate variable names within this assignment list
 	for (size_t i = 0; i < node->assigns.size(); i++) {
 		for (size_t j = i + 1; j < node->assigns.size(); j++) {
-			if (node->assigns[i]->var_name == node->assigns[j]->var_name) {
-				throw std::runtime_error("Semantic error: Duplicate variable assignment '" + node->assigns[i]->var_name + "' in the same list");
+			if (node->assigns[i]->var_id == node->assigns[j]->var_id) {
+				throw std::runtime_error("Semantic error: Duplicate variable assignment '" + node->assigns[i]->var_id->id_name + "' in the same list");
 			}
 		}
 	}
 
-	// Visit all variable assignments
 	for (auto* assign : node->assigns) {
 		assign->accept(this, context);
 	}
 	
 	cout << "Semantic check: All variable assignments in list are unique and valid" << endl;
+}
+
+void SemanticCheckerVisitor::visit(VarAssignType* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Visiting VarAssignType: " << node->var_name << " := new " << node->id_type_name->id_name << endl;
+
+    auto instanceType = context->getType(node->id_type_name->id_name);
+    if (!instanceType) {
+        if (!context->isDefined(node->id_type_name->id_name, 0)) {
+            throw std::runtime_error("Semantic error: Type '" + node->id_type_name->id_name + "' is not defined");
+        }
+        instanceType = std::make_shared<TypeInfo>(node->id_type_name->id_name, TypeKind::CLASS);
+    }
+
+    if (!context->getVarType(node->var_name)) {
+        if (!context->defineVar(node->var_name, instanceType)) {
+            throw std::runtime_error("Semantic error: Variable '" + node->var_name + "' is already defined in this scope");
+        }
+    }
+
+    node->body->accept(this, context);
+    node->inferredType = node->body->inferredType;
+    
+    node->semanticValue = "type_instantiation(" + node->var_name + ", " + instanceType->name + ", " + node->body->semanticValue + ")";
+    
+    cout << "Semantic check: Type instantiation for '" << node->var_name << "' of type '" << instanceType->name << "' is valid" << endl;
 }
 
 void SemanticCheckerVisitor::visit(Conditional* node, Context* context) {
@@ -288,17 +396,13 @@ void SemanticCheckerVisitor::visit(Conditional* node, Context* context) {
 
 	cout << "Visiting Conditional (if-else)" << endl;
 
-	// Visit the boolean expression
 	node->bool_expr->accept(this, context);
 
-	// Create separate contexts for if and else branches to handle scoping
 	Context* ifContext = context->createChildContext();
 	Context* elseContext = context->createChildContext();
 
-	// Visit the if body
 	node->if_body->accept(this, ifContext);
 
-	// Visit the else body
 	node->else_body->accept(this, elseContext);
 	
 	cout << "Semantic check: Conditional statement processed successfully" << endl;
@@ -311,11 +415,8 @@ void SemanticCheckerVisitor::visit(BoolExprNode* node, Context* context) {
 
 	cout << "Visiting BoolExprNode" << endl;
 
-	// Visit the inner expression
 	node->expr->accept(this, context);
 	
-	// The expression should evaluate to a boolean value
-	// In a more sophisticated system, we would track types and verify this
 	cout << "Semantic check: Boolean expression processed" << endl;
 }
 
@@ -326,13 +427,10 @@ void SemanticCheckerVisitor::visit(WhileNode* node, Context* context) {
 
 	cout << "Visiting WhileNode" << endl;
 
-	// Visit the condition expression
 	node->bool_expr->accept(this, context);
 
-	// Create a new context for the while body to handle scoping
 	Context* whileContext = context->createChildContext();
 
-	// Visit the body in the while context
 	node->body->accept(this, whileContext);
 	
 	cout << "Semantic check: While loop processed successfully" << endl;
@@ -345,12 +443,10 @@ void SemanticCheckerVisitor::visit(VarDesAssign* node, Context* context) {
 
 	cout << "Visiting VarDesAssign: " << node->id->id_name << endl;
 
-	// Check if the variable exists in the context
 	if (!context->isDefined(node->id->id_name)) {
 		throw std::runtime_error("Variable '" + node->id->id_name + "' is not defined");
 	}
 
-	// Visit the expression to assign
 	this->visit(node->value, context);
 }
 
@@ -361,58 +457,192 @@ void SemanticCheckerVisitor::visit(ForNode* node, Context* context) {
 
 	cout << "Visiting ForNode with iterator: " << node->id->id_name << endl;
 
-	// Visit the group/collection expression
 	node->group->accept(this, context);
 
-	// Create a new context for the for loop body
 	Context* forContext = context->createChildContext();
 
-	// Define the iterator variable in the for context
 	if (!forContext->define(node->id->id_name)) {
 		throw std::runtime_error("Semantic error: Failed to define iterator variable '" + node->id->id_name + "'");
 	}
 
-	// Visit the body in the for context
 	node->body->accept(this, forContext);
 	
 	cout << "Semantic check: For loop processed successfully" << endl;
 }
 
 void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-	}
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
 
-	cout << "Visiting TypeDeclNode: " << node->id->id_name << endl;
+    cout << "Visiting TypeDeclNode: " << node->id->id_name << endl;
 
-	// Check if type is already defined in current scope
-	int argCount = node->args->children.size();
-	if (context->isLocal(node->id->id_name, argCount)) {
-		throw std::runtime_error("Semantic error: Type '" + node->id->id_name + "' with " + to_string(argCount) + " parameters is already defined in this scope");
-	}
+    auto typeDef = std::make_shared<TypeDef>(node->id->id_name);
+    
+    if (context->isTypeDefined(node->id->id_name)) {
+        throw std::runtime_error("Semantic error: Type '" + node->id->id_name + "' already defined");
+    }
 
-	// Define the type in the current context (treating it like a constructor function)
-	if (!context->define(node->id->id_name, argCount)) {
-		throw std::runtime_error("Semantic error: Failed to define type '" + node->id->id_name + "'");
-	}
+    if (!node->parents.empty()) {
+        const std::string& parentName = node->parents[0];
+        auto parentTypeDef = context->getTypeDef(parentName);
+        
+        if (!parentTypeDef) {
+            throw std::runtime_error("Semantic error: Parent type '" + parentName + "' not found for type '" + node->id->id_name + "'");
+        }
+        
+        typeDef->parentType = std::make_shared<TypeInfo>(parentName, TypeKind::CLASS);
+        typeDef->parentType->typeDef = parentTypeDef;
+        
+        for (const auto& prop : parentTypeDef->properties) {
+            typeDef->properties.push_back(prop);
+            cout << "Inherited property '" << prop.name << "' from parent type " << parentName << endl;
+        }
+        
+        for (const auto& method : parentTypeDef->methods) {
+            typeDef->methods.push_back(method);
+            cout << "Inherited method '" << method.name << "' from parent type " << parentName << endl;
+        }
+        
+        cout << "Type '" << node->id->id_name << "' inherits from '" << parentName << "'" << endl;
+    } else {
+        if (node->id->id_name != "Object") {
+            typeDef->parentType = Context::objectType;
+            cout << "Type '" << node->id->id_name << "' implicitly inherits from Object" << endl;
+        }
+    }
 
-	// Create a new context for the type body
-	Context* typeContext = context->createChildContext();
+    if (!context->defineType(node->id->id_name, typeDef)) {
+        throw std::runtime_error("Semantic error: Failed to define type '" + node->id->id_name + "'");
+    }
 
-	// Add type parameters to the type context
-	node->args->accept(this, context); // Check arguments for semantic validity first
-	for (auto* arg : node->args->children) {
-		if (!typeContext->define(arg->id_name)) {
-			throw std::runtime_error("Semantic error: Failed to define type parameter '" + arg->id_name + "'");
-		}
-	}
+    Context* typeContext = context->createChildContext();
+    auto selfType = std::make_shared<TypeInfo>(node->id->id_name, TypeKind::CLASS);
+    selfType->typeDef = typeDef;
+    
+    if (!typeContext->defineVar("self", selfType)) {
+        throw std::runtime_error("Semantic error: Failed to define 'self'");
+    }
 
-	// Visit the type body elements in the type context
-	for (auto* element : node->body) {
-		element->accept(this, typeContext);
-	}
-	
-	cout << "Semantic check: Type '" << node->id->id_name << "' defined successfully" << endl;
+    if (typeDef->parentType && typeDef->parentType->typeDef) {
+        for (const auto& prop : typeDef->parentType->typeDef->properties) {
+            if (!typeContext->defineVar(prop.name, prop.type)) {
+                cout << "Warning: Could not define inherited property '" << prop.name << "' in type context" << endl;
+            } else {
+                cout << "Added inherited property '" << prop.name << "' to type context for " << node->id->id_name << endl;
+            }
+        }
+    }
+
+    node->args->accept(this, context);
+    for (auto* arg : node->args->children) {
+        typeDef->genericParams.push_back(arg->id_name);
+        auto genericType = std::make_shared<TypeInfo>(arg->id_name, TypeKind::GENERIC);
+        if (!typeContext->defineVar(arg->id_name, genericType)) {
+            throw std::runtime_error("Semantic error: Failed to define type parameter '" + arg->id_name + "'");
+        }
+    }
+
+    for (auto* element : node->body) {
+        if (auto* varAssign = dynamic_cast<VarAssign*>(element)) {
+            varAssign->value->accept(this, typeContext);
+            auto memberType = varAssign->value->inferredType ? 
+                            varAssign->value->inferredType : 
+                            std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+            
+            if (!typeContext->defineVar(varAssign->var_id->id_name, memberType)) {
+                throw std::runtime_error("Semantic error: Failed to define member variable '" + 
+                                       varAssign->var_id->id_name + "' in type '" + node->id->id_name + "'");
+            }
+            
+            PropertyMemberInfo property(varAssign->var_id->id_name, memberType);
+            
+            bool found = false;
+            for (auto& existingProp : typeDef->properties) {
+                if (existingProp.name == varAssign->var_id->id_name) {
+                    existingProp = property;
+                    found = true;
+                    cout << "Overrode inherited property '" << varAssign->var_id->id_name << "' in type " << node->id->id_name << endl;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                typeDef->properties.push_back(property);
+                cout << "Added new member variable '" << varAssign->var_id->id_name << "' of type " << 
+                        memberType->name << " to type " << node->id->id_name << endl;
+            }
+                    
+        } else if (auto* varAssignType = dynamic_cast<VarAssignType*>(element)) {
+            auto instanceType = context->getType(varAssignType->id_type_name->id_name);
+            if (!instanceType) {
+                instanceType = std::make_shared<TypeInfo>(varAssignType->id_type_name->id_name, TypeKind::CLASS);
+            }
+            
+            if (!typeContext->defineVar(varAssignType->var_name, instanceType)) {
+                throw std::runtime_error("Semantic error: Failed to define member variable '" + 
+                                       varAssignType->var_name + "' in type '" + node->id->id_name + "'");
+            }
+            
+            PropertyMemberInfo property(varAssignType->var_name, instanceType);
+            
+            bool found = false;
+            for (auto& existingProp : typeDef->properties) {
+                if (existingProp.name == varAssignType->var_name) {
+                    existingProp = property;
+                    found = true;
+                    cout << "Overrode inherited typed property '" << varAssignType->var_name << "' in type " << node->id->id_name << endl;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                typeDef->properties.push_back(property);
+                cout << "Added new typed member variable '" << varAssignType->var_name << "' of type " << 
+                        instanceType->name << " to type " << node->id->id_name << endl;
+            }
+        }
+    }
+
+    for (auto* element : node->body) {
+        element->accept(this, typeContext);
+        
+        if (auto* funcNode = dynamic_cast<AssignFuncNode*>(element)) {
+            std::vector<std::shared_ptr<TypeInfo>> paramTypes;
+            for (auto* param : funcNode->args->children) {
+                paramTypes.push_back(Context::intType);
+            }
+            auto returnType = funcNode->body->inferredType ? 
+                            funcNode->body->inferredType : Context::voidType;
+            
+            MethodMemberInfo method(funcNode->func_name, returnType, paramTypes);
+            
+            bool found = false;
+            for (auto& existingMethod : typeDef->methods) {
+                if (existingMethod.name == funcNode->func_name && existingMethod.paramTypes.size() == paramTypes.size()) {
+                    existingMethod = method;
+                    found = true;
+                    cout << "Overrode inherited method '" << funcNode->func_name << "' in type " << node->id->id_name << endl;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                typeDef->methods.push_back(method);
+                cout << "Added new method '" << funcNode->func_name << "' with return type " << 
+                        returnType->name << " to type " << node->id->id_name << endl;
+            }
+        }
+    }
+    
+    node->inferredType = selfType;
+    node->semanticValue = "type_def(" + node->id->id_name + 
+                         ", properties:" + to_string(typeDef->properties.size()) +
+                         ", methods:" + to_string(typeDef->methods.size()) + ")";
+    
+    cout << "Type '" << node->id->id_name << "' defined with " << 
+            typeDef->properties.size() << " properties and " <<
+            typeDef->methods.size() << " methods" << endl;
 }
 
 void SemanticCheckerVisitor::visit(ASTNodeVector* node, Context* context) {
@@ -422,7 +652,6 @@ void SemanticCheckerVisitor::visit(ASTNodeVector* node, Context* context) {
 
 	cout << "Visiting ASTNodeVector with " << node->children.size() << " elements" << endl;
 
-	// Visit all children in the current context
 	for (auto* child : node->children) {
 		child->accept(this, context);
 	}
@@ -437,7 +666,6 @@ void SemanticCheckerVisitor::visit(ExprsList* node, Context* context) {
 
 	cout << "Visiting ExprsList with " << node->children.size() << " expressions" << endl;
 
-	// Visit all expressions in the current context
 	for (auto* expr : node->children) {
 		expr->accept(this, context);
 	}
@@ -452,7 +680,6 @@ void SemanticCheckerVisitor::visit(ProgramNode* node, Context* context) {
 
 	cout << "Visiting ProgramNode (root)" << endl;
 
-	// Visit the main program node using the public accessor
 	if (node->getNode()) {
 		node->getNode()->accept(this, context);
 	} else {
@@ -460,4 +687,114 @@ void SemanticCheckerVisitor::visit(ProgramNode* node, Context* context) {
 	}
 	
 	cout << "Semantic check: Program processed successfully" << endl;
+}
+
+void SemanticCheckerVisitor::visit(AccessNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+    
+    std::cout << "Visiting AccessNode: " << node->var_name << " accessing member" << std::endl;
+    
+    std::shared_ptr<TypeInfo> objectType;
+    
+    if (node->var_name == "self") {
+        objectType = context->getVarType("self");
+        if (!objectType) {
+            throw std::runtime_error("Semantic error: 'self' only valid in type context");
+        }
+    } else {
+        objectType = context->getVarType(node->var_name);
+        if (!objectType) {
+            throw std::runtime_error("Semantic error: Variable '" + node->var_name + "' not defined");
+        }
+    }
+
+    node->member->accept(this, context);
+    
+    if (objectType && objectType->typeDef) {
+        if (auto* attrMember = dynamic_cast<AttributeMember*>(node->member)) {
+            auto* prop = objectType->typeDef->findProperty(attrMember->name);
+            if (prop) {
+                node->inferredType = prop->type;
+                node->semanticValue = "attr_access(" + node->var_name + "." + attrMember->name + ")";
+            } else {
+                throw std::runtime_error("Semantic error: Property '" + attrMember->name + 
+                                       "' not found in type '" + objectType->name + "'");
+            }
+        } else if (auto* methodMember = dynamic_cast<MethodMember*>(node->member)) {
+            std::vector<std::shared_ptr<TypeInfo>> argTypes;
+            for (auto* arg : methodMember->args) {
+                arg->accept(this, context);
+                if (arg->inferredType) {
+                    argTypes.push_back(arg->inferredType);
+                }
+            }
+            
+            auto* method = context->resolveMethod(objectType, methodMember->name, argTypes);
+            if (method) {
+                node->inferredType = method->returnType;
+                node->semanticValue = "method_call(" + node->var_name + "." + methodMember->name + 
+                                    ", args:" + to_string(argTypes.size()) + ")";
+            } else {
+                throw std::runtime_error("Semantic error: Method '" + methodMember->name + 
+                                       "' not found or incompatible signature in type '" + objectType->name + "'");
+            }
+        }
+    } else {
+        node->inferredType = std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+        node->semanticValue = "member_access(" + node->var_name + ".member)";
+    }
+    
+    std::cout << "Member access resolved to type: " << 
+                (node->inferredType ? node->inferredType->name : "unknown") << std::endl;
+}
+
+void SemanticCheckerVisitor::visit(TypeAssMember* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+    std::cout << "Visiting TypeAssMember: " << node->get_name() << std::endl;
+    std::cout << "Semantic check: TypeAssMember processed" << std::endl;
+}
+
+void SemanticCheckerVisitor::visit(AttributeMember* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+    std::cout << "Visiting AttributeMember: " << node->name << std::endl;
+    
+    if (!node->inferredType) {
+        node->inferredType = std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+    }
+    node->semanticValue = "attribute(" + node->name + ")";
+    
+    std::cout << "AttributeMember '" << node->name << "' processed" << std::endl;
+}
+
+void SemanticCheckerVisitor::visit(MethodMember* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+    std::cout << "Visiting MethodMember: " << node->name << std::endl;
+	
+    std::vector<std::shared_ptr<TypeInfo>> argTypes;
+    std::string argsSemanticValue = "args(";
+    
+    for (size_t i = 0; i < node->args.size(); i++) {
+        node->args[i]->accept(this, context);
+        if (node->args[i]->inferredType) {
+            argTypes.push_back(node->args[i]->inferredType);
+        }
+        if (i > 0) argsSemanticValue += ", ";
+        argsSemanticValue += node->args[i]->semanticValue;
+    }
+    argsSemanticValue += ")";
+    
+    if (!node->inferredType) {
+        node->inferredType = std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+    }
+    node->semanticValue = "method(" + node->name + ", " + argsSemanticValue + ")";
+    
+    std::cout << "MethodMember '" << node->name << "' with " << argTypes.size() << " arguments" << std::endl;
 }

@@ -1,4 +1,6 @@
 #include "context.h"
+#include <stdexcept>
+#include <memory>
 
 #ifndef VISITOR_H
 #define VISITOR_H
@@ -16,6 +18,7 @@ class ArgsList;
 class AssignFuncNode;
 class LetAssign;
 class VarAssign;
+class VarAssignType;
 class VarAssignList;
 class Conditional;
 class BoolExprNode;
@@ -26,6 +29,10 @@ class TypeDeclNode;
 class ASTNodeVector;
 class ExprsList;
 class ProgramNode;
+class AccessNode;
+class TypeAssMember;
+class AttributeMember;
+class MethodMember;
 
 class Visitor {
     public:
@@ -40,10 +47,10 @@ class Visitor {
 	virtual void visit(IDNode* node, Context* context) = 0;
 	virtual void visit(BlockNode* node, Context* context) = 0;
 	virtual void visit(ArgsList* node, Context* context) = 0;
-	virtual void visit(AssignFuncNode* node, Context* context) = 0;
-	virtual void visit(LetAssign* node, Context* context) = 0;
-	virtual void visit(VarAssign* node, Context* context) = 0;
-	virtual void visit(VarAssignList* node, Context* context) = 0;
+	virtual void visit(AssignFuncNode* node, Context* context) = 0;    virtual void visit(LetAssign* node, Context* context) = 0;
+    virtual void visit(VarAssign* node, Context* context) = 0;
+    virtual void visit(VarAssignType* node, Context* context) = 0;
+    virtual void visit(VarAssignList* node, Context* context) = 0;
 	virtual void visit(Conditional* node, Context* context) = 0;
 	virtual void visit(BoolExprNode* node, Context* context) = 0;
 	virtual void visit(WhileNode* node, Context* context) = 0;
@@ -53,6 +60,10 @@ class Visitor {
 	virtual void visit(ASTNodeVector* node, Context* context) = 0;
 	virtual void visit(ExprsList* node, Context* context) = 0;
 	virtual void visit(ProgramNode* node, Context* context) = 0;
+	virtual void visit(AccessNode* node, Context* context) = 0;
+	virtual void visit(TypeAssMember* node, Context* context) = 0;
+	virtual void visit(AttributeMember* node, Context* context) = 0;
+	virtual void visit(MethodMember* node, Context* context) = 0;
 
 };
 
@@ -60,6 +71,20 @@ class SemanticCheckerVisitor : public Visitor {
     public:
     SemanticCheckerVisitor() {
         globalContext = new Context(nullptr);
+        // Initialize built-in types in global context
+        Context::initializeBuiltinTypes();
+        
+        // Register Object type in global context
+        if (Context::objectType && Context::objectType->typeDef) {
+            globalContext->defineType("Object", Context::objectType->typeDef);
+        }
+        
+        // Define built-in functions
+        std::vector<std::shared_ptr<TypeInfo>> printParams = {Context::stringType};
+        globalContext->defineFunc("print", Context::voidType, printParams);
+        
+        std::vector<std::shared_ptr<TypeInfo>> readParams;
+        globalContext->defineFunc("read", Context::stringType, readParams);
     }
     
     ~SemanticCheckerVisitor() {
@@ -80,6 +105,7 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(AssignFuncNode* node, Context* context) override;
     void visit(LetAssign* node, Context* context) override;
     void visit(VarAssign* node, Context* context) override;
+    void visit(VarAssignType* node, Context* context) override;
     void visit(VarAssignList* node, Context* context) override;
     void visit(Conditional* node, Context* context) override;
     void visit(BoolExprNode* node, Context* context) override;
@@ -90,8 +116,36 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(ASTNodeVector* node, Context* context) override;
     void visit(ExprsList* node, Context* context) override;
     void visit(ProgramNode* node, Context* context) override;
+    void visit(AccessNode* node, Context* context) override;
+    void visit(TypeAssMember* node, Context* context) override;
+    void visit(AttributeMember* node, Context* context) override;
+    void visit(MethodMember* node, Context* context) override;
     
     Context* getContext() { return globalContext; }
+    
+    // Helper methods for type checking
+    void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation) {
+        if (!expected || !actual) return;
+        
+        if (!globalContext->canAssign(actual, expected)) {
+            throw std::runtime_error("Type error in " + operation + ": Cannot assign " + 
+                                   actual->name + " to " + expected->name);
+        }
+    }
+    
+    std::shared_ptr<TypeInfo> inferBinaryOperationType(const std::string& op, 
+                                                      std::shared_ptr<TypeInfo> leftType, 
+                                                      std::shared_ptr<TypeInfo> rightType) {
+        if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^") {
+            return Context::intType;
+        } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=" ||
+                   op == "&&" || op == "||" || op == "and" || op == "or") {
+            return Context::boolType;
+        } else if (op == "=" || op == ":=") {
+            return leftType;
+        }
+        return Context::voidType;
+    }
     
 private:
     Context* globalContext;
