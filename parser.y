@@ -124,7 +124,6 @@ expr:
 	| id_expr %prec ASS_DES { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
-	| var_ass_type { $$ = $1; }
 	| id_expr ASS_DES expr { $$ = new VarDesAssign($1, $3); }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
@@ -160,10 +159,6 @@ var_ass_type:
 	| LET id_expr ASSIGN new_expr IN lines_block { $$ = new VarAssignType($2->id_name, $4, $6); }
 	;
 
-new_expr:
-	NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
-	;
-
 var_assign_list:
 	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) }); }
 	| id_expr ASSIGN expr AS ID { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
@@ -171,6 +166,10 @@ var_assign_list:
 	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
 	| var_assign_list COLON id_expr ASSIGN expr AS ID { $1->add_child(new VarAssign($3, $5, $7)); $$ = $1; }
 	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
+	;
+
+new_expr:
+	NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
 	;
 
 expr_list:
