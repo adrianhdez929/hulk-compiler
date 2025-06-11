@@ -365,14 +365,14 @@ void SemanticCheckerVisitor::visit(VarAssignType* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Visiting VarAssignType: " << node->var_name << " := new " << node->id_type_name->id_name << endl;
+    cout << "Visiting VarAssignType: " << node->var_name << " := new " << node->new_type->id_type_name << endl;
 
-    auto instanceType = context->getType(node->id_type_name->id_name);
+    auto instanceType = context->getType(node->new_type->id_type_name);
     if (!instanceType) {
-        if (!context->isDefined(node->id_type_name->id_name, 0)) {
-            throw std::runtime_error("Semantic error: Type '" + node->id_type_name->id_name + "' is not defined");
+        if (!context->isDefined(node->new_type->id_type_name, 0)) {
+            throw std::runtime_error("Semantic error: Type '" + node->new_type->id_type_name + "' is not defined");
         }
-        instanceType = std::make_shared<TypeInfo>(node->id_type_name->id_name, TypeKind::CLASS);
+        instanceType = std::make_shared<TypeInfo>(node->new_type->id_type_name, TypeKind::CLASS);
     }
 
     if (!context->getVarType(node->var_name)) {
@@ -574,9 +574,9 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
             }
                     
         } else if (auto* varAssignType = dynamic_cast<VarAssignType*>(element)) {
-            auto instanceType = context->getType(varAssignType->id_type_name->id_name);
+            auto instanceType = context->getType(varAssignType->new_type->id_type_name);
             if (!instanceType) {
-                instanceType = std::make_shared<TypeInfo>(varAssignType->id_type_name->id_name, TypeKind::CLASS);
+                instanceType = std::make_shared<TypeInfo>(varAssignType->new_type->id_type_name, TypeKind::CLASS);
             }
             
             if (!typeContext->defineVar(varAssignType->var_name, instanceType)) {

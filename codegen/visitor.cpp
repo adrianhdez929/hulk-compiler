@@ -638,9 +638,9 @@ void CodegenVisitor::visit(VarAssignType* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Generating code for VarAssignType: " << node->var_name << " := new " << node->id_type_name->id_name << endl;
+    cout << "Generating code for VarAssignType: " << node->var_name << " := new " << node->new_type->id_type_name << endl;
 
-    std::string typeName = node->id_type_name->id_name;
+    std::string typeName = node->new_type->id_type_name;
     
     std::string constructorName = "new_" + typeName;
     llvm::Function* constructorFunc = TheModule->getFunction(constructorName);

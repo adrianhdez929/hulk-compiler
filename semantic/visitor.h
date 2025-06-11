@@ -71,15 +71,12 @@ class SemanticCheckerVisitor : public Visitor {
     public:
     SemanticCheckerVisitor() {
         globalContext = new Context(nullptr);
-        // Initialize built-in types in global context
         Context::initializeBuiltinTypes();
         
-        // Register Object type in global context
         if (Context::objectType && Context::objectType->typeDef) {
             globalContext->defineType("Object", Context::objectType->typeDef);
         }
         
-        // Define built-in functions
         std::vector<std::shared_ptr<TypeInfo>> printParams = {Context::stringType};
         globalContext->defineFunc("print", Context::voidType, printParams);
         
@@ -123,7 +120,6 @@ class SemanticCheckerVisitor : public Visitor {
     
     Context* getContext() { return globalContext; }
     
-    // Helper methods for type checking
     void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation) {
         if (!expected || !actual) return;
         
