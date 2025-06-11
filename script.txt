@@ -1,25 +1,20 @@
-{	
-	type Point {
-    	x:Number = 0;
-    	y:Number = 0;
+{  
+  type Point {
+      x:Number = 0;
+      y:Number = 0;
 
-    	getX() {
-			self.x;
-		}
-    	getY() => self.y;
+      getX() {
+      self.x;
+    }
+      getY() => self.y;
 
-		setX(x) => self.x = x;
-    	setY(y) => self.y = y;
-	}
+    setX(x) => self.x = x;
+      setY(y) => self.y = y;
+  }
 
-	type NewPoint inherits Point {
-		getY() => self.y + 1;
-	}
-
-	type Circle {
-		radius:Number = 1;
-		getRadius() => self.radius;
-	}
+  type NewPoint inherits Point {
+    getY() => self.y + 1;
+  }
 
   
   let x = new Point() in {
@@ -28,13 +23,10 @@
   };
 
   let y = new NewPoint() in {
-	y.setY(5);
-	let z: Point = y as Point in {
-		print(z.getY());
-	}
+  y.setY(5);
+  print(y.getY());
+  let z = y as Point in {
+    print(z.getY());
   };
-
-  let c = new Circle() in {
-	print(c.getRadius());
   };
 }

@@ -248,12 +248,11 @@ void VarAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context); 
 }
 
-VarAssignType::VarAssignType(const std::string name, IDNode* id_type, ASTNode* body_) : var_name(name), id_type_name(id_type), body(body_){}
+VarAssignType::VarAssignType(const std::string name, NewTypeNode* new_type_, ASTNode* body_) : var_name(name), new_type(new_type_), body(body_){}
 
 void VarAssignType::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarAssignType(" << var_name << ")" << std::endl;
-	std::cout << std::string(indent+1, ' ') << "Type:" << std::endl;
-	std::cout << std::string(indent+2, ' ') << id_type_name->id_name << std::endl;
+	new_type->print(indent);
 	std::cout << std::string(indent+1, ' ') << "Body:" << std::endl;
 	body->print(indent+2);
 }
@@ -422,7 +421,7 @@ TypeAssMember::Form AccessNode::get_form() const {
 }
 
 void AccessNode::print(int indent) const {
-	std::cout << std::string(indent, ' ') << "TypeAssignMember:" << std::endl;
+	std::cout << std::string(indent, ' ') << "AccesMember(" << var_name << "):" << std::endl;
 	member->print(indent+2);
 }
 
