@@ -18,6 +18,7 @@
 #include <cassert>
 #include <stack>
 #include "Lexer/Regex.h"
+#include "Lexer/Lexer.h"
 
 int Item_test() {
     // Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
@@ -651,19 +652,20 @@ void test_parser() {
 // }
 
 void lexer_ast_test() {
-    using Token = std::pair<std::string, std::string>; // Pair of token type and value
-    vector<string> input = split("( 0 | [ 1 - 9 ] [ 0 - 9 ] * ) ( . [ 0 - 9 ] + ) ?", ' ');
-    // vector<string> input = split("( a | b )", ' ');
-    // vector<string> token_names = {"(", "symbol", "|", "symbol", ")", "EOF"};
-    vector<string> token_names = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
+    // using Token = std::pair<std::string, std::string>; // Pair of token type and value
+    // vector<string> input = split("( 0 | [ 1 - 9 ] [ 0 - 9 ] * ) ( . [ 0 - 9 ] + ) ?", ' ');
+    // // vector<string> input = split("( a | b )", ' ');
+    // // vector<string> token_names = {"(", "symbol", "|", "symbol", ")", "EOF"};
+    // vector<string> token_names = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
 
-    std::vector<Token> tokens;
-    assert(input.size() == token_names.size() - 1);
-    for (size_t i = 0; i < input.size(); ++i) {
-        tokens.emplace_back(token_names[i], input[i]);
-    }
-    
-    
+    // std::vector<Token> tokens;
+    // assert(input.size() == token_names.size() - 1);
+    // for (size_t i = 0; i < input.size(); ++i) {
+    //     tokens.emplace_back(token_names[i], input[i]);
+    // }
+    // tokens.emplace_back(make_pair("EOF", "EOF"));
+
+
     //= {
     //     {"(", "("},         // (
     //     {"symbol", "0"},    // 0
@@ -692,28 +694,47 @@ void lexer_ast_test() {
     //     {"?", "?"},         // ?
     //     {"EOF", "EOF"}      // EOF
     // };
+    std::vector<std::pair<std::string, std::string>> table = {
+        {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+        {"bool", "true|false"},  // Regular expression for boolean values
+        {"type_id", "[A-Z][_a-zA-Z0-9]*"},
+        {"var_id", "[_a-z][_a-zA-Z0-9]*"},
+        // {"str", "\"([\x00-!#-\x7f]|\\\")*\""}
+        {"space", " +"}, // Regular expression for spaces
+        // Regular expression for identifiers
+        {"(", "\\("},            // Left parenthesis
+        {")", "\\)"}            // Right parenthesis
+        // {"-", "-"},              // Minus sign
+        // {"EOF", "EOF"}           // End of file token
+    };
     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
     SLR1Parser parser(g, true);
-    Regex regex("(0|[1-9][0-9]*)(.[0-9]+)?", g, parser);
+    Lexer lexer(table, g, parser);
+    auto tokens = lexer.tokenize("func(345.67) true"); //( 1 - 2 )");
+    std::cout << "Tokens:" << std::endl;
+    for (const auto& token : tokens) {
+        std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
+    }
+    // Regex regex("(0|[1-9][0-9]*)(.[0-9]+)?", g, parser);
 
-    DFA dfa = regex.Automaton();
-    cout << "DFA States: " << dfa.states() << endl;
-    cout << "DFA Start State: " << dfa.startState() << endl;
-    cout << "DFA Final States: ";
-    for (const auto& finalState : dfa.finalStates()) {
-        cout << finalState << " ";
-    }
-    cout << endl;
-    const auto& transitions = dfa.getTransitionsMap();
-    for (const auto& transition : transitions) {
-        cout << "Transition from state " << transition.first.first 
-              << " with symbol '" << transition.first.second 
-              << "' to states: ";
-        for (const auto& dest : transition.second) {
-            cout << dest << " ";
-        }
-        std::cout << std::endl;
-    }
+    // DFA dfa = regex.Automaton();
+    // cout << "DFA States: " << dfa.states() << endl;
+    // cout << "DFA Start State: " << dfa.startState() << endl;
+    // cout << "DFA Final States: ";
+    // for (const auto& finalState : dfa.finalStates()) {
+    //     cout << finalState << " ";
+    // }
+    // cout << endl;
+    // const auto& transitions = dfa.getTransitionsMap();
+    // for (const auto& transition : transitions) {
+    //     cout << "Transition from state " << transition.first.first 
+    //           << " with symbol '" << transition.first.second 
+    //           << "' to states: ";
+    //     for (const auto& dest : transition.second) {
+    //         cout << dest << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     // auto [raw_productions, actions] = parser.Parse(token_names);
     // // Print productions

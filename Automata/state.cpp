@@ -216,6 +216,12 @@ State* State::to_deterministic() {
             start_dfa->add_item(item);
         }
     }
+    // Guardar los estados NFA correspondientes
+    // Convert initial_set (set<const State*>) to set<State*>
+    start_dfa->state_.clear();
+    for (const State* s : initial_set) {
+        start_dfa->state_.insert(const_cast<State*>(s));
+    }
     state_map[initial_set] = start_dfa;
     dfa_to_set_map[start_dfa] = initial_set;
     pending.push(start_dfa);
@@ -267,7 +273,11 @@ State* State::to_deterministic() {
                         next_dfa->add_item(item);
                     }
                 }
-
+                // Guardar los estados NFA correspondientes
+                next_dfa->state_.clear();
+                for (const State* s : new_state_set) {
+                    next_dfa->state_.insert(const_cast<State*>(s));
+                }
                 state_map[new_state_set] = next_dfa;
                 dfa_to_set_map[next_dfa] = new_state_set;
                 pending.push(next_dfa);
