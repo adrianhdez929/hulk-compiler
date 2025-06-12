@@ -74,7 +74,6 @@ extern ASTNode* root;
 %type <ast_node_v> expr_list
 %type <var_ass> attribute
 %type <acc_node> member_access_expr
-%type <v_ass_t> var_ass_type
 %type <new_t_n> new_expr
 
 
@@ -152,11 +151,6 @@ id_expr:
 let_assign:
 	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
 	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4); }
-	;
-
-var_ass_type:
-	LET id_expr ASSIGN new_expr IN expr { $$ = new VarAssignType($2->id_name, $4, $6); }
-	| LET id_expr ASSIGN new_expr IN lines_block { $$ = new VarAssignType($2->id_name, $4, $6); }
 	;
 
 var_assign_list:
