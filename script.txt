@@ -10,11 +10,6 @@
 		getY() => self.y;
 
 	}
-
-	type NewPoint inherits Point {
-    	getY() => self.y + 1;
-  	}
-
   
 	let a = new Point() in {
     	a.setX(5);
