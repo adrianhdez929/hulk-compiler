@@ -1,5 +1,5 @@
 %{
-#include "parser.tab.h"
+#include "parser.h"
 #include <stdlib.h>
 extern "C"  {
 	int yylex(void);
@@ -12,7 +12,7 @@ extern "C"  {
 
 "true"		{ yylval.boolean = true; return BOOLEAN; }
 "false"		{ yylval.boolean = false; return BOOLEAN; }
-"function" 	{ return FUNCTION; }
+"function" 	{ return FUNCTION_; }
 "let"		{ return LET; }
 "in"		{ return IN; }
 "if" 		{ return IF; }
@@ -24,10 +24,10 @@ extern "C"  {
 "new" 		{ return NEW; }
 "inherits" 	{ return INHERITS; }
 "is"		{ return IS; }
-"as"		{ return AS; }
+"as"		{ return AS_; }
 
 \"([^"\n]|\\.)*\"	  {yylval.str = strdup(yytext); return STRING; }
-[a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID; }
+[a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID_; }
 
 [0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
 "+"         { return PLUS; }
