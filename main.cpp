@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include "hulk/parser.tab.h"
-
+#include "hulk/parser.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include "semantic/context.h"
@@ -8,47 +7,39 @@
 #include <iostream>
 #include <exception>
 // #include "test.h"
-#include "Lexer/grammar_parser.h"
-
 
 using namespace std;
 // using namespace manipulation;
 
-//NO BORRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRR
-// extern FILE *yyin;
-// extern int yyparse();
-// ASTNode* root = nullptr;
+extern FILE *yyin;
+extern int yyparse();
+ASTNode* root = nullptr;
 
 SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
-// SemanticCheckerVisitor* visitor = new SemanticCheckerVisitor();
-
-
 int main(int argc, char* argv[]) {
     //run tests
     // execute_test();
-
     
-    //NOTE: NO BORRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRR
-    // const char* filename = "script.txt"; //default
+    const char* filename = "script.txt"; //default
 
-    // if (argc > 1) {
-	// 	filename = argv[1];
-    // }
+    if (argc > 1) {
+		filename = argv[1];
+    }
 		
-	// yyin = fopen(filename, "r");
+	yyin = fopen(filename, "r");
 
-	// if (!yyin) {
-	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-	// 	return 1;
-	// }
+	if (!yyin) {
+		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+		return 1;
+	}
 
-    // yyparse();
+    yyparse();
 
-	// if (root) {
-	// 	std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-	// 	root->print();
+	if (root) {
+		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+		root->print();
 
         std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
         // Create a global context for semantic analysis (with null parent for root context)
@@ -84,14 +75,8 @@ int main(int argc, char* argv[]) {
         delete globalContext;
 		delete root;
 	}
-    //     std::cout << "Visiting AST with SemanticCheckerVisitor" << std::endl;
-    //     root->accept(visitor, nullptr);
-    //     std::cout << "Semantic check completed." << std::endl;
 
-	// 	delete root;
-	// }
-
-	// fclose(yyin);
+	fclose(yyin);
 
     return 0;
 }
