@@ -30,6 +30,7 @@ public:
         const set<State>& finalStates,
         const Transitions& transitions,
         State initialState);
+    ~NFA();
 
     vector<State> epsilon_transitions(State state) const;
     const set<Symbol>& getVocab() const;

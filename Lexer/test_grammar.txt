@@ -1,0 +1,18 @@
+# Test Grammar for Parser Methods
+Start: E
+Epsilon: epsilon
+
+Terminals: 
+    "*", "+", "int", "(", ")"
+
+NonTerminals:
+    T, F
+
+Productions:
+E -> E "+" T 
+E -> T
+T -> T "*" F 
+T -> F 
+F -> "int"
+F -> "(" E ")"
+
