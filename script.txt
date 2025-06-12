@@ -1,3 +1,31 @@
 {  
-	let a = 42 in print(a);
-}
+	type Point {
+    	x:Number = 0;
+    	y:Number = 0;
+
+    	getX() {
+    		self.x;
+    	}
+    
+		getY() => self.y;
+
+	}
+
+	type NewPoint inherits Point {
+    	getY() => self.y + 1;
+  	}
+
+  
+	let a = new Point() in {
+    	a.setX(5);
+    	print(a.getX());
+  	};
+
+  	let b = new NewPoint() in {
+  		b.setY(5);
+  		print(y.getY());
+  		let z = b as Point in {
+    		print(b.getY());
+  		};
+  	};
+  }
