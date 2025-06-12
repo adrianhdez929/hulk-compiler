@@ -79,7 +79,8 @@ extern ASTNode* root;
 
 %nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
 %nonassoc ELSE ELIF
-%nonassoc ASSIGN IN ASS_DES
+%nonassoc ASSIGN IN 
+%nonassoc ASS_DES
 %nonassoc WHILE LET IF
 
 %left PLUS MINUS

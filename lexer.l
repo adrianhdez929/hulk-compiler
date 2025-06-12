@@ -39,13 +39,13 @@ extern "C"  {
 "("			{ return LPARENT; }
 ")" 		{ return RPARENT; }		
 ";"			{ return SEMICOLON; }
+":="		{ return ASS_DES; }
 ":"			{ return TWOPOINTS; }
 ","			{ return COLON; }
 "{"			{ return LKEY; }
 "}"			{ return RKEY; }
 "=>"		{ return INLINE; }
 "="			{ return ASSIGN; }
-":="		{ return ASS_DES; }
 
 ">="		{ return GREATER_EQUAL; }
 ">" 		{ return GREATER; }
