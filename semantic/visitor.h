@@ -18,6 +18,7 @@ class ArgsList;
 class AssignFuncNode;
 class LetAssign;
 class VarAssign;
+class NewTypeNode;
 class VarAssignType;
 class VarAssignList;
 class Conditional;
@@ -49,6 +50,7 @@ class Visitor {
 	virtual void visit(ArgsList* node, Context* context) = 0;
 	virtual void visit(AssignFuncNode* node, Context* context) = 0;    virtual void visit(LetAssign* node, Context* context) = 0;
     virtual void visit(VarAssign* node, Context* context) = 0;
+    virtual void visit(NewTypeNode* node, Context* context) = 0;
     virtual void visit(VarAssignType* node, Context* context) = 0;
     virtual void visit(VarAssignList* node, Context* context) = 0;
 	virtual void visit(Conditional* node, Context* context) = 0;
@@ -102,6 +104,7 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(AssignFuncNode* node, Context* context) override;
     void visit(LetAssign* node, Context* context) override;
     void visit(VarAssign* node, Context* context) override;
+    void visit(NewTypeNode* node, Context* context) override;
     void visit(VarAssignType* node, Context* context) override;
     void visit(VarAssignList* node, Context* context) override;
     void visit(Conditional* node, Context* context) override;

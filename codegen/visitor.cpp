@@ -184,6 +184,10 @@ void CodegenVisitor::visit(ASTNode* node, Context* context) {
         visit(letAssignNode, context);
     } else if (auto varAssignNode = dynamic_cast<VarAssign*>(node)) {
         visit(varAssignNode, context);
+    } else if (auto newTypeNode = dynamic_cast<NewTypeNode*>(node)) {
+        visit(newTypeNode, context);
+    } else if (auto varAssignTypeNode = dynamic_cast<VarAssignType*>(node)) {
+        visit(varAssignTypeNode, context);
     } else if (auto varAssignListNode = dynamic_cast<VarAssignList*>(node)) {
         visit(varAssignListNode, context);
     } else if (auto conditionalNode = dynamic_cast<Conditional*>(node)) {
@@ -619,6 +623,41 @@ void CodegenVisitor::visit(VarAssign* node, Context* context) {
     // For now, we'll just keep track of the value in our NamedValues map
     
     cout << "Variable '" << node->var_id->id_name << "' assigned value" << endl;
+}
+
+void CodegenVisitor::visit(NewTypeNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Generating code for NewTypeNode: new " << node->id_type_name << endl;
+
+    std::string typeName = node->id_type_name;
+    
+    // Find the constructor function for this type
+    std::string constructorName = "new_" + typeName;
+    llvm::Function* constructorFunc = TheModule->getFunction(constructorName);
+    
+    if (!constructorFunc) {
+        throw std::runtime_error("Constructor function not found: " + constructorName);
+    }
+    
+    // Process constructor arguments (if any)
+    std::vector<llvm::Value*> args;
+    for (auto* expr : node->expr_list) {
+        expr->accept(this, context);
+        if (currentValue) {
+            args.push_back(currentValue);
+        }
+    }
+    
+    // Call the constructor function to create new instance
+    llvm::Value* newInstance = Builder->CreateCall(constructorFunc, args, "new_instance");
+    
+    // Set the current value to the newly created instance
+    currentValue = newInstance;
+    
+    cout << "Created new instance of type " << typeName << " with " << args.size() << " arguments" << endl;
 }
 
 void CodegenVisitor::visit(VarAssignList* node, Context* context) {

@@ -274,7 +274,10 @@ void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
                                    "' redefined in let block");
         }
         
+        cout << "Visiting LetAssign value" << endl;
+        
         assign->value->accept(this, letContext);
+
         auto varType = assign->value->inferredType ? 
                       assign->value->inferredType : 
                       std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
@@ -287,6 +290,7 @@ void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
         assign->var_id->semanticValue = "var_def(" + assign->var_id->id_name + ", " + assign->value->semanticValue + ")";
     }
 
+    cout << "Entering LetAssign body" << endl;
     node->body->accept(this, letContext);
     
     node->inferredType = node->body->inferredType;
@@ -336,6 +340,32 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
     
     cout << "Semantic check: Variable assignment '" << node->var_id->id_name << "' with type " << 
             (node->inferredType ? node->inferredType->name : "unknown") << endl;
+}
+
+void SemanticCheckerVisitor::visit(NewTypeNode* node, Context* context) {
+    if (node == nullptr) {
+        throw std::runtime_error("Node is null");
+    }
+
+    cout << "Visiting NewTypeNode: new " << node->id_type_name << endl;
+
+    // Check if the type exists
+    auto typeInfo = context->getType(node->id_type_name);
+    if (!typeInfo) {
+        throw std::runtime_error("Semantic error: Type '" + node->id_type_name + "' is not defined");
+    }
+
+    // Visit constructor arguments
+    for (auto* expr : node->expr_list) {
+        expr->accept(this, context);
+    }
+
+    // For now, we assume all constructors are valid
+    // In a more complete implementation, we would check constructor signatures
+    node->inferredType = typeInfo;
+    node->semanticValue = "new_instance(" + node->id_type_name + ", args:" + to_string(node->expr_list.size()) + ")";
+    
+    cout << "Semantic check: Object instantiation of type '" << node->id_type_name << "' is valid" << endl;
 }
 
 void SemanticCheckerVisitor::visit(VarAssignList* node, Context* context) {
@@ -455,7 +485,7 @@ void SemanticCheckerVisitor::visit(ForNode* node, Context* context) {
 		throw std::runtime_error("Node is null");
 	}
 
-	cout << "Visiting ForNode with iterator: " << node->id->id_name << endl;
+	cout << "DEBUG: Visiting ForNode with iterator: " << node->id->id_name << endl;
 
 	node->group->accept(this, context);
 
@@ -475,7 +505,7 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Visiting TypeDeclNode: " << node->id->id_name << endl;
+    cout << "DEBUG: Visiting TypeDeclNode: " << node->id->id_name << endl;
 
     auto typeDef = std::make_shared<TypeDef>(node->id->id_name);
     
