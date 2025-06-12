@@ -213,6 +213,7 @@ conditional:
 	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6); }
 	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6); }
 	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6); }
+	| LPARENT bool_expr RPARENT lines_block ELIF conditional { $$ = new Conditional($2, $4, $6); }
 	;
 
 while_expr:
