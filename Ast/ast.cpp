@@ -345,6 +345,7 @@ void ForNode::print(int indent) const {
 }
 
 void ForNode::accept(Visitor* visitor, Context* context) {
+	std::cout << "DEBUG: ForNode::accept called for " << id->id_name << std::endl;
 	visitor->visit(this, context);
 }
 
@@ -366,6 +367,7 @@ void TypeDeclNode::print(int indent) const {
 }
 
 void TypeDeclNode::accept(Visitor* visitor, Context* context) {
+	std::cout << "DEBUG: TypeDeclNode::accept called for " << id->id_name << std::endl;
 	visitor->visit(this, context);
 }
 

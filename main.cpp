@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "build/parser.tab.h"
+#include "hulk/parser.tab.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include "semantic/context.h"

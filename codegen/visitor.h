@@ -29,6 +29,7 @@ class CodegenVisitor : public Visitor {
 	void visit(AssignFuncNode* node, Context* context) override;
 	void visit(LetAssign* node, Context* context) override;
 	void visit(VarAssign* node, Context* context) override;
+	void visit(NewTypeNode* node, Context* context) override;
 	void visit(VarAssignType* node, Context* context) override;
 	void visit(VarAssignList* node, Context* context) override;
 	void visit(Conditional* node, Context* context) override;
