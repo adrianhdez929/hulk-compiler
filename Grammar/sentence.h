@@ -24,6 +24,7 @@ public:
 
     void AddSymbol(std::shared_ptr<Symbol> symbol);
     const std::vector<std::shared_ptr<Symbol>>& Symbols() const;
+    size_t Size() const;
     
     Sentence operator+(const Sentence& other) const;
     Sentence operator+(const std::vector<std::shared_ptr<Symbol>>& symbols) const;

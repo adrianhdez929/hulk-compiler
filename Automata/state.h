@@ -16,6 +16,7 @@ public:
     using Symbol = std::string;
     
     // Constructor
+    State() : id_(-1), is_final_(false) {}
     State(int id, bool is_final = false);
     ~State();
     
@@ -23,7 +24,7 @@ public:
     int id() const;
     bool is_final() const;
     //tag setter
-    void set_tag(const std::string& tag) { tag_ = tag; }
+    void set_tag(const std::string& tag, const int n) { tag_ = tag; n_ = n; }
     // tag getter
     string tag() const;
 
@@ -89,6 +90,7 @@ public:
         
         return all_states;
     }
+    const int get_n() const { return n_; }
 
 private:
     int id_;
@@ -97,6 +99,12 @@ private:
     std::map<Symbol, std::vector<State*>> transitions_;
     std::set<State*> epsilon_transitions_;
     std::vector<Item> items_;
+    int n_;
+    // Set of NFA states represented by this DFA state
+    std::set<const State*> state_;
+public:
+    // Getter for the NFA states set
+    const std::set<const State*>& get_nfa_states() const { return state_; }
 };
 
 #endif

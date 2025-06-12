@@ -5,29 +5,37 @@
 #include <stdexcept>
 #include <memory>
 
-Production::Production(std::shared_ptr<NonTerminal> left, const Sentence& right) : left(left), right(right) {}
+Production::Production() : left(nullptr), right(Sentence()), id_(-1) {}
+
+Production::Production(std::shared_ptr<NonTerminal> left, const Sentence& right) : left(left), right(right), id_(-1) {}
 
 std::shared_ptr<NonTerminal> Production::Left() const { return left; }
 const Sentence& Production::Right() const { return right; }
 
 std::string Production::ToString() const {
+    if (!left) {
+        return "[NULL] -> [INVALID]";
+    }
     std::string result = left->ToString() + " -> ";
     for (const auto& symbol : right.Symbols()) {
-        result += symbol->ToString() + " ";
+        if (symbol) {
+            result += symbol->ToString() + " ";
+        } else {
+            result += "[NULL] ";
+        }
     }
     return result;
 }
 
-AttrProd::AttrProd(std::shared_ptr<NonTerminal> left, const Sentence& right, const vector<SemanticAction>& actions)
-    : Production(left, right), attributes(actions) {}
+AttrProd::AttrProd(std::shared_ptr<NonTerminal> left, const Sentence& right, SemanticAction attr)
+    : Production(left, right), attribute(attr) {}
 
-const vector<AttrProd::SemanticAction>& AttrProd::Attributes() const { return attributes; }
+const AttrProd::SemanticAction& AttrProd::Attribute() const { return attribute; }
 
-AttrProd::NodePtr AttrProd::Execute(const vector<NodePtr>& inherited, const vector<NodePtr>& synthesized) const {
-    // if(attributes.empty()) return {};
-    // return attributes[0](inherited, synthesized);
-    throw std::runtime_error("Not implemented");
-}
+// AttrProd::NodePtr AttrProd::Execute(const vector<NodePtr>& inherited, const vector<NodePtr>& synthesized) const {
+//     if (!action) return {};
+//     return action(inherited, synthesized);
+// }
 
 NonTerminal::NonTerminal(const std::string& name, Grammar& grammar) : Symbol(name, grammar) {}
 bool NonTerminal::IsNonTerminal() const { return true; }

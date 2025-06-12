@@ -3,25 +3,27 @@ Start: E
 Epsilon: epsilon
 
 Terminals: 
-    "|", "+", "*", "(", ")", "symbol", "[", "]", "?", "-",
+    "|", "+", "*", "(", ")", "symbol", "[", "]", "?", "-"
 
 NonTerminals:
-    T, F, A, S
+    T, F, A, S, P, R
 
 Productions:
 E -> T { $$ = $1; }
-E -> E "|" T { $$ = UnionNode($1, $2) }
+E -> E "|" T { $$ = UnionNode($1, $3) }
 T -> F { $$ = $1 }
 T -> T F { $$ = ConcatNode($1, $2)}
 F -> A { $$ = $1 }
 F -> A "*" { $$ = ClosureNode($1) }
 F -> A "?" { $$ = ZeroOrOneNode($1) }
 F -> A "+" { $$ = PositiveClosure($1) }
-A -> "symbol" { $$ = SymbolNode($1) }
+A -> P { $$ = $1 }
 A -> epsilon { $$ = EpsilonNode() } # No le paso $1 porq mi EpsilonNode no recibe nada
 A -> "(" E ")" { $$ = $2 }
 A -> "[" S "]" { $$ = $2 }
-S -> "symbol" { $$ = SymbolNode($1) }
-S -> S "symbol" { $$ = ConcatNode($1, SymbolNode($2)) }
-S -> "symbol" "-" "symbol" { $$ = RangeNode(SymbolNode($1), SymbolNode($3)) }
-S -> S "symbol" "-" "symbol" { $$ = ConcatNode($1, RangeNode($2, $4)) }
+P -> "symbol" { $$ = SymbolNode($1)}
+S -> P { $$ = $1 }
+S -> S P { $$ = UnionNode($1, $2) }
+S -> R { $$ = $1 }
+S -> S R { $$ = UnionNode($1, $2) }
+R -> P "-" P { $$ = RangeNode($1, $3)}

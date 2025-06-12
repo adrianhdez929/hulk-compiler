@@ -1,4 +1,4 @@
-
+#pragma once
 #include "../dfa.h"
 #include "../nfa.h"
 #include "../utils/ContainerSet.h"
