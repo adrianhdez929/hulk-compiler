@@ -3,7 +3,7 @@ Start: E
 Epsilon: epsilon
 
 Terminals: 
-    "|", "+", "*", "(", ")", "symbol", "[", "]", "?", "-",
+    "|", "+", "*", "(", ")", "symbol", "[", "]", "?", "-"
 
 NonTerminals:
     T, F, A, S, P, R

@@ -695,11 +695,11 @@ void lexer_ast_test() {
     //     {"EOF", "EOF"}      // EOF
     // };
     std::vector<std::pair<std::string, std::string>> table = {
+        {"string", "\"([\\x20-!#-\\x7e])*\""},
         {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
         {"bool", "true|false"},  // Regular expression for boolean values
         {"type_id", "[A-Z][_a-zA-Z0-9]*"},
         {"var_id", "[_a-z][_a-zA-Z0-9]*"},
-        // {"str", "\"([\x00-!#-\x7f]|\\\")*\""}
         {"space", " +"}, // Regular expression for spaces
         // Regular expression for identifiers
         {"(", "\\("},            // Left parenthesis
@@ -708,9 +708,9 @@ void lexer_ast_test() {
         // {"EOF", "EOF"}           // End of file token
     };
     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
-    SLR1Parser parser(g, true);
+    SLR1Parser parser(g);
     Lexer lexer(table, g, parser);
-    auto tokens = lexer.tokenize("func(345.67) true"); //( 1 - 2 )");
+    auto tokens = lexer.tokenize("Func fibonacci(\"soy el animal?\", 0.543)"); //( 1 - 2 )");
     std::cout << "Tokens:" << std::endl;
     for (const auto& token : tokens) {
         std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;

@@ -60,6 +60,7 @@
 		"stack": "cpp",
 		"bitset": "cpp",
 		"ctime": "cpp",
-		"regex": "cpp"
+		"regex": "cpp",
+		"iomanip": "cpp"
 	}
 }
