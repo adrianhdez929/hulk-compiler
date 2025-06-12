@@ -277,9 +277,11 @@ public:
 	ArgsList* args;
 	std::vector<std::string> parents;
 	std::vector<ASTNode*> body;
+	ArgsList* parent_args;
 
 	TypeDeclNode(IDNode* id, ArgsList* args_, const std::vector<ASTNode*>& body_);
 	TypeDeclNode(IDNode* id, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_);
+	TypeDeclNode(IDNode* id, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_, ArgsList* parent_args_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

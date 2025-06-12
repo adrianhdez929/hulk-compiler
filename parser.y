@@ -223,8 +223,10 @@ while_expr:
 //	//pendiente que acepte argumentos de cualquier tipo
 //
 type_node_decl:
-	TYPE ID_ args_list LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $5->children); }
-	| TYPE ID_ args_list INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $3, $7->children, {$5}); }
+	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), new ArgsList({}), $4->children); }
+	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $7->children); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $9->children, {$7}); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $12->children, {$7}, $9); }
 	;
 
 type_body_elements:

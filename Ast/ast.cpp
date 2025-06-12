@@ -348,8 +348,9 @@ void ForNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_): id(id_), args(args_), body(body_), parents() {}
-TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_): id(id_), args(args_), body(body_), parents(parents_) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_): id(id_), args(args_), body(body_), parents(), parent_args(new ArgsList({})) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_): id(id_), args(args_), body(body_), parents(parents_), parent_args(new ArgsList({})) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_, ArgsList* parent_args_) : id(id_), args(args_), body(body_), parents(parents_), parent_args(parent_args_) {}
 
 void TypeDeclNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "TypeDeclNode(" << id->id_name << ")" << std::endl;
@@ -359,6 +360,10 @@ void TypeDeclNode::print(int indent) const {
 	for ( const auto parent : parents) {
 		std::cout << std::string(indent + 2, ' ') << parent << std::endl;
 	}
+	std::cout << std::string(indent+1, ' ') << "ParentsArgs:" << std::endl;
+	for ( const auto parent_arg : parent_args->children) {
+		parent_arg->print(indent + 2);
+	} 
 	std::cout << std::string(indent + 1, ' ') << "Body:" << std::endl;
 	for ( const auto element : body) {
 		element->print(indent + 2);
