@@ -124,7 +124,6 @@ expr:
 	| id_expr %prec ASS_DES { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
-	| id_expr ASS_DES expr { $$ = new VarDesAssign($1, $3); }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
