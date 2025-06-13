@@ -200,9 +200,9 @@ bool_expr:
 	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
 	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
 	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
-	| expr AND_ expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3)); }
-	| expr OR_ expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3)); }
-	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2)); }
+	| bool_expr AND_ bool_expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3)); }
+	| bool_expr OR_ bool_expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3)); }
+	| NOT_ bool_expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2)); }
 	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	;

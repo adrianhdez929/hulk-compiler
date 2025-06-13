@@ -1,8 +1,3 @@
 {
-  let a = 0 in {
-	while (a < 10) {
-    	print(a);
-    	a := a + 1;
-    };
-  };
+	! b == 0;
 }
