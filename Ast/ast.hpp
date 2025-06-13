@@ -20,10 +20,12 @@ class Visitor;
 class ASTNode {
 public:
 	// Semantic attributes for attributed grammar
+	int line;
 	std::shared_ptr<TypeInfo> inferredType;
 	std::string semanticValue;
 	
 	ASTNode() : inferredType(nullptr), semanticValue("") {}
+	ASTNode(int line_) : inferredType(nullptr), semanticValue(""), line(line_) {}
 	virtual ~ASTNode() = default;
 	
 	virtual void print(int indent=0) const=0;
@@ -45,7 +47,7 @@ class ProgramNode : public ASTNode {
 private:
 	ASTNode* node;
 public:
-	ProgramNode(ASTNode* n);
+	ProgramNode(ASTNode* n, int line_);
 	void print(int indent=0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 	ASTNode* getNode() const { return node; }

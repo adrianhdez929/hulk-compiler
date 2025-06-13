@@ -1,5 +1,7 @@
 #include "ast.hpp"
 
+
+
 ASTNodeVector::ASTNodeVector(const std::vector<ASTNode*>& nodes): children(nodes) {}
 
 void ASTNodeVector::add_child(ASTNode* node) {
@@ -23,7 +25,7 @@ ASTNodeVector::~ASTNodeVector() {
 	}
 }
 
-ProgramNode::ProgramNode(ASTNode* n) : ASTNode(), node(n) {}
+ProgramNode::ProgramNode(ASTNode* n, int line_) : ASTNode(line_), node(n) {}
 
 void ProgramNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "PROGRAM\n";
