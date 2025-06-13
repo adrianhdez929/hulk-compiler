@@ -336,4 +336,14 @@ public:
 	void accept(Visitor* visitor, Context* context);
 };
 
+class TypeCastNode: public ASTNode {
+public:
+	ASTNode* expr;
+	std::string target_type;
+
+	TypeCastNode(ASTNode* expr_, const std::string& target_type_);
+	void print(int indent = 0) const override;
+	void accept(Visitor* visitor, Context* context) override;
+};
+
 #endif
