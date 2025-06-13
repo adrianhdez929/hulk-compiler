@@ -9,6 +9,7 @@
 #include "../Ast/ast.hpp"
 
 extern "C" {
+	extern int yylineno;
 	void yyerror(const char *);
 	int yylex(void);
 }
@@ -104,12 +105,12 @@ lines_block:
 	;
 
 lines:
-	/* empty */	 { $$ = new BlockNode({}); }
+	/* empty */	 { $$ = new BlockNode({}, yylineno); }
 	| non_empty_lines { $$ = $1; }
 	;
 
 non_empty_lines:
-	line { $$ = new BlockNode({$1}); }
+	line { $$ = new BlockNode({$1}, yylineno); }
 	| non_empty_lines line { $1->add_child($2); $$ = $1; }
 	;
 
@@ -124,146 +125,146 @@ expr:
 	| bool_expr { $$ = $1; }
 	| WHILE while_expr { $$ = $2; }
 //	| for_expr { $$ = $1; }
-	| STRING { $$ = new StringNode($1); }
+	| STRING { $$ = new StringNode($1, yylineno); }
 	| id_expr %prec ASS_DES  { $$ = $1; }
 	| func_call { $$ = $1; }
 	| let_assign { $$ = $1; }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
-	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
-	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
-	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3); }
-	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3); }
+	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3, yylineno); }
+	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3, yylineno); }
+	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3, yylineno); }
+	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3, yylineno); }
     ;
 
 func_asign:
-	FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); } 
+	FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $9, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $9, $7, yylineno); } 
 	;
 
 args_list:
-	/* empty */ { $$ = new ArgsList({}); }
-	| id_expr { $$ = new ArgsList({$1}); }
+	/* empty */ { $$ = new ArgsList({}, yylineno); }
+	| id_expr { $$ = new ArgsList({$1}, yylineno); }
 	| args_list COLON id_expr { $1->add_child($3); $$ = $1; }
 	;
 
 id_expr:
-	ID_ TWOPOINTS ID_ { $$ = new IDNode($1, $3); }
-	| ID_ { $$ = new IDNode($1); }
+	ID_ TWOPOINTS ID_ { $$ = new IDNode($1, $3, yylineno); }
+	| ID_ { $$ = new IDNode($1, yylineno); }
 	;
 
 let_assign:
-	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4); }
-	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4); }
+	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4, yylineno); }
+	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4, yylineno); }
 	;
 
 var_assign_list:
-	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) }); }
-	| id_expr ASSIGN expr AS_ ID_ { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
-	| id_expr ASSIGN new_expr { $$ = new VarAssignList({ new VarAssign($1, $3)}); }
-	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
-	| var_assign_list COLON id_expr ASSIGN expr AS_ ID_ { $1->add_child(new VarAssign($3, $5, $7)); $$ = $1; }
-	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
+	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3, yylineno) }, yylineno); }
+	| id_expr ASSIGN expr AS_ ID_ { $$ = new VarAssignList({ new VarAssign($1, $3, $5, yylineno)}, yylineno); }
+	| id_expr ASSIGN new_expr { $$ = new VarAssignList({ new VarAssign($1, $3, yylineno)}, yylineno); }
+	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5, yylineno)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN expr AS_ ID_ { $1->add_child(new VarAssign($3, $5, $7, yylineno)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5, yylineno)); $$ = $1; }
 	;
 
 new_expr:
-	NEW ID_ LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
+	NEW ID_ LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children, yylineno); }
 	;
 
 expr_list:
-	/* empty */ { $$ = new ASTNodeVector({}); }
-	| expr { $$ = new ASTNodeVector({$1}); }
-	| new_expr { $$ = new ASTNodeVector({$1}); }
+	/* empty */ { $$ = new ASTNodeVector({}, yylineno); }
+	| expr { $$ = new ASTNodeVector({$1}, yylineno); }
+	| new_expr { $$ = new ASTNodeVector({$1}, yylineno); }
 	| expr_list COLON expr { $1->add_child($3); $$ = $1; }
 	| expr_list COLON new_expr { $1->add_child($3); $$ = $1; }
 	;
 
 func_call:
-	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3); }
+	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3, yylineno); }
 	;
 
 arit_op:
-	NUMBER { $$ = new FloatNode($1); }
+	NUMBER { $$ = new FloatNode($1, yylineno); }
 	| LPARENT expr RPARENT { $$ = $2; }
-	| expr PLUS expr { $$ = new BinOpNode( $1, "+", $3); }
-	| expr MINUS expr { $$ = new BinOpNode( $1, "-", $3); }
-	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3); }
-	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3); }
-	| expr POW expr { $$ = new BinOpNode( $1, "^", $3); }
-	| MINUS expr %prec UMINUS { $$ = new UnaryOpNode("-", $2); }
+	| expr PLUS expr { $$ = new BinOpNode( $1, "+", $3, yylineno); }
+	| expr MINUS expr { $$ = new BinOpNode( $1, "-", $3, yylineno); }
+	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3, yylineno); }
+	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3, yylineno); }
+	| expr POW expr { $$ = new BinOpNode( $1, "^", $3, yylineno); }
+	| MINUS expr %prec UMINUS { $$ = new UnaryOpNode("-", $2, yylineno); }
 	;
 
 bool_expr:
-	BOOLEAN { $$ = new BoolExprNode(new BoolNode($1)); }
-	| expr GREATER_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, ">=", $3)); }
-	| expr GREATER expr { $$ = new BoolExprNode(new BinOpNode($1, ">", $3)); }
-	| expr LESS_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "<=", $3)); }
-	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
-	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
-	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
-	| expr AND_ expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3)); }
-	| expr OR_ expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3)); }
-	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2)); }
-	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
-	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
+	BOOLEAN { $$ = new BoolExprNode(new BoolNode($1, yylineno), yylineno); }
+	| expr GREATER_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, ">=", $3, yylineno), yylineno); }
+	| expr GREATER expr { $$ = new BoolExprNode(new BinOpNode($1, ">", $3, yylineno), yylineno); }
+	| expr LESS_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "<=", $3, yylineno), yylineno); }
+	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3, yylineno), yylineno); }
+	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3, yylineno), yylineno); }
+	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3, yylineno), yylineno); }
+	| expr AND_ expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3, yylineno), yylineno); }
+	| expr OR_ expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3, yylineno), yylineno); }
+	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2, yylineno), yylineno); }
+	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
+	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
 	;
 
 conditional:
-	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6); }
-	| LPARENT bool_expr RPARENT lines_block ELSE expr { $$ = new Conditional($2, $4, $6); }
-	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6); }
-	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6); }
-	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6); }
-	| LPARENT bool_expr RPARENT lines_block ELIF conditional { $$ = new Conditional($2, $4, $6); }
+	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELIF conditional { $$ = new Conditional($2, $4, $6, yylineno); }
 	;
 
 while_expr:
-	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4); }
-	| LPARENT bool_expr RPARENT expr { $$ = new WhileNode($2, $4); }
+	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4, yylineno); }
+	| LPARENT bool_expr RPARENT expr { $$ = new WhileNode($2, $4, yylineno); }
 	;
 
 //for_expr:
-//	FOR LPARENT ID_ IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID_ IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID_ IN ID_ RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-//	| FOR LPARENT ID_ IN ID_ RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	FOR LPARENT ID_ IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3, yylineno), $5, $7, yylineno); }
+//	| FOR LPARENT ID_ IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3, yylineno), $5, $7, yylineno); }
+//	| FOR LPARENT ID_ IN ID_ RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5, yylineno), $7, yylineno); }
+//	| FOR LPARENT ID_ IN ID_ RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5, yylineno), $7, yylineno); }
 //	;
 //	//pendiente que acepte argumentos de cualquier tipo
 //
 type_node_decl:
-	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), new ArgsList({}), $4->children); }
-	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $7->children); }
-	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $9->children, {$7}); }
-	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $12->children, {$7}, $9); }
+	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $4->children, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $7->children, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $9->children, {$7}, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $12->children, {$7}, $9, yylineno); }
 	;
 
 type_body_elements:
-	/* empty */ { $$ = new ASTNodeVector({}); }
+	/* empty */ { $$ = new ASTNodeVector({}, yylineno); }
 	| type_body_elements attribute { $1->add_child($2); $$ = $1; }
 	| type_body_elements method { $1->add_child($2); $$ = $1; }
 	;
 
 attribute:
-	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3); }
-	| id_expr ASSIGN expr AS_ ID_ SEMICOLON { $$ = new VarAssign($1, $3, $5); }
+	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3, yylineno); }
+	| id_expr ASSIGN expr AS_ ID_ SEMICOLON { $$ = new VarAssign($1, $3, $5, yylineno); }
 	;
 
 method:
-	ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
-	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); } 
-	| ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
-	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); }
+	ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $6, yylineno); }
+	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $8, $6, yylineno); } 
+	| ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $6, yylineno); }
+	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $8, $6, yylineno); }
 	;
 
 member_access_expr:
-	ID_ ACCESS ID_ { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID_ ACCESS ID_ LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } 
+	ID_ ACCESS ID_ { $$ = new AccessNode($1, new AttributeMember($3, yylineno), yylineno); }
+	| ID_ ACCESS ID_ LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children, yylineno), yylineno); } 
 	;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
+    fprintf(stderr, "Error en linea %d: %s\n", yylineno - 1, s);
 }

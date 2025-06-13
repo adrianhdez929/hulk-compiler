@@ -1,12 +1,17 @@
 %{
 #include "parser.h"
 #include <stdlib.h>
-extern "C"  {
+
+extern "C" {
 	int yylex(void);
 	void yyerror(const char *);
-} 
+}
+
+extern int yylineno;
 
 %}
+
+%option yylineno
 
 %%
 
