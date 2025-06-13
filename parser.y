@@ -46,15 +46,15 @@ extern ASTNode* root;
 %token NUMBER
 %token BOOLEAN
 %token STRING
-%token ID_ 
-%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION_ INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS_ 
+%token ID 
+%token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS 
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
 %token LET
 %token IN
 %token TYPE
 
 %token <num> NUMBER
-%token <str> ID_
+%token <str> ID
 %token <str> STRING
 %token <boolean> BOOLEAN
 
@@ -131,10 +131,10 @@ expr:
     ;
 
 func_asign:
-	FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
-	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); } 
+	FUNCTION ID LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT TWOPOINTS ID INLINE expr { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $7); }
+	| FUNCTION ID LPARENT args_list RPARENT TWOPOINTS ID LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2), $4, $9, $7); } 
 	;
 
 args_list:
@@ -144,8 +144,8 @@ args_list:
 	;
 
 id_expr:
-	ID_ TWOPOINTS ID_ { $$ = new IDNode($1, $3); }
-	| ID_ { $$ = new IDNode($1); }
+	ID TWOPOINTS ID { $$ = new IDNode($1, $3); }
+	| ID { $$ = new IDNode($1); }
 	;
 
 let_assign:
@@ -155,15 +155,15 @@ let_assign:
 
 var_assign_list:
 	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3) }); }
-	| id_expr ASSIGN expr AS_ ID_ { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
+	| id_expr ASSIGN expr AS ID { $$ = new VarAssignList({ new VarAssign($1, $3, $5) }); }
 	| id_expr ASSIGN new_expr { $$ = new VarAssignList({ new VarAssign($1, $3)}); }
 	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
-	| var_assign_list COLON id_expr ASSIGN expr AS_ ID_ { $1->add_child(new VarAssign($3, $5, $7)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN expr AS ID { $1->add_child(new VarAssign($3, $5, $7)); $$ = $1; }
 	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5)); $$ = $1; }
 	;
 
 new_expr:
-	NEW ID_ LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
+	NEW ID LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children); }
 	;
 
 expr_list:
@@ -175,7 +175,7 @@ expr_list:
 	;
 
 func_call:
-	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3); }
+	ID LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3); }
 	;
 
 arit_op:
@@ -197,8 +197,8 @@ bool_expr:
 	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
 	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
 	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
-	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
-	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
+	| id_expr IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
+	| func_call IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	;
 
 conditional:
@@ -216,18 +216,18 @@ while_expr:
 	;
 
 //for_expr:
-//	FOR LPARENT ID_ IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID_ IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
-//	| FOR LPARENT ID_ IN ID_ RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
-//	| FOR LPARENT ID_ IN ID_ RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	FOR LPARENT ID IN func_call RPARENT expr { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN func_call RPARENT lines_block { $$ = new ForNode(new IDNode($3), $5, $7); }
+//	| FOR LPARENT ID IN ID RPARENT expr { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
+//	| FOR LPARENT ID IN ID RPARENT lines_block { $$ = new ForNode(new IDNode($3), new IDNode($5), $7); }
 //	;
 //	//pendiente que acepte argumentos de cualquier tipo
 //
 type_node_decl:
-	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), new ArgsList({}), $4->children); }
-	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $7->children); }
-	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $9->children, {$7}); }
-	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $12->children, {$7}, $9); }
+	TYPE ID LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), new ArgsList({}), $4->children); }
+	| TYPE ID LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $7->children); }
+	| TYPE ID LPARENT args_list RPARENT INHERITS ID LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $9->children, {$7}); }
+	| TYPE ID LPARENT args_list RPARENT INHERITS ID LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2), $4, $12->children, {$7}, $9); }
 	;
 
 type_body_elements:
@@ -238,19 +238,19 @@ type_body_elements:
 
 attribute:
 	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3); }
-	| id_expr ASSIGN expr AS_ ID_ SEMICOLON { $$ = new VarAssign($1, $3, $5); }
+	| id_expr ASSIGN expr AS ID SEMICOLON { $$ = new VarAssign($1, $3, $5); }
 	;
 
 method:
-	ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
-	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); } 
-	| ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
-	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); }
+	ID LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT TWOPOINTS ID INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); } 
+	| ID LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $6); }
+	| ID LPARENT args_list RPARENT TWOPOINTS ID LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1), $3, $8, $6); }
 	;
 
 member_access_expr:
-	ID_ ACCESS ID_ { $$ = new AccessNode($1, new AttributeMember($3)); }
-	| ID_ ACCESS ID_ LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } 
+	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
+	| ID ACCESS ID LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } 
 	;
 
 %%
