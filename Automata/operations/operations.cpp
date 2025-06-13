@@ -169,8 +169,13 @@ vector<vector<DFA::State>> distinguish_states(
         vector<DFA::State> destinations;
         for (const auto& symbol : vocabulary) {
             DFA::State dest = automaton.getTransition(state, symbol);
-            DFA::State representative = partition.find(dest)->representative()->data;
-            destinations.push_back(representative);
+            if (dest == -1) {
+                // Si no hay transición, usar un valor especial para distinguir
+                destinations.push_back(-1);
+            } else {
+                DFA::State representative = partition.find(dest)->representative()->data;
+                destinations.push_back(representative);
+            }
         }
         
         split[destinations].push_back(state);
@@ -199,8 +204,14 @@ DisjointSet<DFA::State> state_minimization(const DFA& automaton) {
         }
     }
 
-    partition.merge(vector<DFA::State>(finals.begin(), finals.end()));
-    partition.merge(non_finals);
+    // Fusionar estados finales solo si hay estados finales
+    if (!finals.empty()) {
+        partition.merge(vector<DFA::State>(finals.begin(), finals.end()));
+    }
+    // Fusionar estados no finales solo si hay estados no finales
+    if (!non_finals.empty()) {
+        partition.merge(non_finals);
+    }
 
     // Refinar partición
     while (true) {
@@ -214,7 +225,9 @@ DisjointSet<DFA::State> state_minimization(const DFA& automaton) {
             const auto& group = group_entry.second;
             auto new_groups = distinguish_states(group, automaton, partition);
             for (const auto& new_group : new_groups) {
-                new_partition.merge(new_group);
+                if (!new_group.empty()) {  // Solo fusionar grupos no vacíos
+                    new_partition.merge(new_group);
+                }
             }
         }
 
@@ -232,39 +245,51 @@ DFA automata_minimization(const DFA& automaton) {
 
     // Mapeo de estados antiguos a nuevos
     map<DFA::State, DFA::State> state_map;
-    vector<DFA::State> new_states;
     DFA::State new_state_id = 0;
     for (const auto& group : groups) {
+        DFA::State representative = group.first;
         for (DFA::State s : group.second) {
             state_map[s] = new_state_id;
         }
-        new_states.push_back(new_state_id++);
+        new_state_id++;
     }
 
     // Construir transiciones
-    map<pair<DFA::State, DFA::Symbol>, vector<NFA::State>> new_transitions;
+    map<pair<DFA::State, DFA::Symbol>, vector<DFA::State>> new_transitions;
     for (const auto& group : groups) {
         DFA::State representative = group.first;
+        DFA::State new_source = state_map[representative];
+        
         for (const auto& symbol : automaton.getVocab()) {
             DFA::State old_dest = automaton.getTransition(representative, symbol);
-            new_transitions[{state_map[representative], symbol}].push_back(state_map[partition.find(old_dest)->representative()->data]); //[old_dest].findRepresentative()->value];
+            if (old_dest != -1) {  // Solo si hay transición válida
+                DFA::State new_dest = state_map[old_dest];
+                new_transitions[{new_source, symbol}].push_back(new_dest);
+            }
         }
     }
 
     // Calcular estados finales
     set<DFA::State> new_finals;
     for (const auto& group : groups) {
+        bool is_final_group = false;
         for (DFA::State s : group.second) {
             if (automaton.finalStates().find(s) != automaton.finalStates().end()) {
-                new_finals.insert(state_map[group.first]);
-                break; // Solo necesitamos agregar una vez el estado final
+                is_final_group = true;
+                break;
             }
+        }
+        if (is_final_group) {
+            new_finals.insert(state_map[group.first]);
         }
     }
 
     // Estado inicial
     DFA::State old_start = automaton.startState();
-    DFA::State new_start = state_map[partition.find(old_start)->representative()->data];
+    DFA::State new_start = state_map[old_start];
 
-    return DFA(new_states.size(), new_finals, new_transitions, new_start);
+    // El número total de estados es el número de grupos
+    int total_states = groups.size();
+    
+    return DFA(total_states, new_finals, new_transitions, new_start);
 }

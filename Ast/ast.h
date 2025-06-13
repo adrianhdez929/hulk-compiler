@@ -17,7 +17,7 @@ public:
     //Funcion virtual evaluate destinada a ser reeescrita por sus hijos
     //Devuelve tipo generico (para el lexer devuelve una instancia de automata, para parser devuelve una instancia de un nodo)
     virtual void evaluate() const = 0;
-    virtual void operate() const = 0;
+    // virtual void operate() const = 0;
 };
     
 // Nodo atómico (hoja del AST)
@@ -38,6 +38,8 @@ public:
 // Nodo unario abstracto
 class UnaryNode : public Node {
 protected:
+    // ATENCION: VERIFICAR SI VA ATOMICNODE EN VEZ DE NODE
+    // std::unique_ptr<const AtomicNode> node; ????????????????????/
     std::unique_ptr<const Node> node;  // Hijo único
     
 public:
@@ -72,7 +74,7 @@ public:
     //     return operate(lvalue, rvalue);
     // }
     void evaluate() const override {
-        std::cout << "Binary node. " << std::endl;
+        
     }
 
     virtual double operate(double lvalue, double rvalue) const = 0;

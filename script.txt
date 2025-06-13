@@ -1,32 +1,9 @@
-{  
-  type Point {
-      x:Number = 0;
-      y:Number = 0;
-
-      getX() {
-      self.x;
-    }
-      getY() => self.y;
-
-    setX(x) => self.x = x;
-      setY(y) => self.y = y;
-  }
-
-  type NewPoint inherits Point {
-    getY() => self.y + 1;
-  }
-
-  
-  let x = new Point() in {
-    x.setX(5);
-    print(x.getX());
-  };
-
-  let y = new NewPoint() in {
-  y.setY(5);
-  print(y.getY());
-  let z = y as Point in {
-    print(z.getY());
-  };
+{
+  let b: Boolean = true , c: Number = 3 in {
+    if (b & c == 3) {
+      print("b is true");
+    } else {
+      print("b is false");
+    };
   };
 }

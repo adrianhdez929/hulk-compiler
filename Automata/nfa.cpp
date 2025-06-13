@@ -15,6 +15,9 @@ NFA::NFA(int states,
     }
     build_transitions();
 }
+NFA::~NFA() {
+    // No dynamic memory to free, but destructor is needed for completeness
+}
 
 void NFA::build_transitions() {
     for (const auto& [key, destinations] : transitionsMap_) {
