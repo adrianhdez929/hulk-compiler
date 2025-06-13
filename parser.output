@@ -1,0 +1,3949 @@
+
+
+Terminals which are not used:
+
+   FOR
+
+
+Conflict in state 28 between rule 53 and token PLUS resolved as reduce.
+Conflict in state 28 between rule 53 and token MINUS resolved as reduce.
+Conflict in state 28 between rule 53 and token TIMES resolved as reduce.
+Conflict in state 28 between rule 53 and token DIV resolved as reduce.
+Conflict in state 28 between rule 53 and token POW resolved as reduce.
+Conflict in state 28 between rule 53 and token ASSIGN resolved as reduce.
+Conflict in state 28 between rule 53 and token ASS_DES resolved as reduce.
+Conflict in state 28 between rule 53 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 28 between rule 53 and token GREATER resolved as reduce.
+Conflict in state 28 between rule 53 and token LESS_EQUAL resolved as reduce.
+Conflict in state 28 between rule 53 and token LESS resolved as reduce.
+Conflict in state 28 between rule 53 and token EQUAL resolved as reduce.
+Conflict in state 28 between rule 53 and token DISTINCT resolved as reduce.
+Conflict in state 39 between rule 63 and token AND_ resolved as shift.
+Conflict in state 39 between rule 63 and token OR_ resolved as shift.
+Conflict in state 80 between rule 48 and token PLUS resolved as reduce.
+Conflict in state 80 between rule 48 and token MINUS resolved as reduce.
+Conflict in state 80 between rule 48 and token TIMES resolved as shift.
+Conflict in state 80 between rule 48 and token DIV resolved as shift.
+Conflict in state 80 between rule 48 and token POW resolved as shift.
+Conflict in state 80 between rule 48 and token ASSIGN resolved as reduce.
+Conflict in state 80 between rule 48 and token ASS_DES resolved as reduce.
+Conflict in state 80 between rule 48 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 80 between rule 48 and token GREATER resolved as reduce.
+Conflict in state 80 between rule 48 and token LESS_EQUAL resolved as reduce.
+Conflict in state 80 between rule 48 and token LESS resolved as reduce.
+Conflict in state 80 between rule 48 and token EQUAL resolved as reduce.
+Conflict in state 80 between rule 48 and token DISTINCT resolved as reduce.
+Conflict in state 81 between rule 49 and token PLUS resolved as reduce.
+Conflict in state 81 between rule 49 and token MINUS resolved as reduce.
+Conflict in state 81 between rule 49 and token TIMES resolved as shift.
+Conflict in state 81 between rule 49 and token DIV resolved as shift.
+Conflict in state 81 between rule 49 and token POW resolved as shift.
+Conflict in state 81 between rule 49 and token ASSIGN resolved as reduce.
+Conflict in state 81 between rule 49 and token ASS_DES resolved as reduce.
+Conflict in state 81 between rule 49 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 81 between rule 49 and token GREATER resolved as reduce.
+Conflict in state 81 between rule 49 and token LESS_EQUAL resolved as reduce.
+Conflict in state 81 between rule 49 and token LESS resolved as reduce.
+Conflict in state 81 between rule 49 and token EQUAL resolved as reduce.
+Conflict in state 81 between rule 49 and token DISTINCT resolved as reduce.
+Conflict in state 82 between rule 50 and token PLUS resolved as reduce.
+Conflict in state 82 between rule 50 and token MINUS resolved as reduce.
+Conflict in state 82 between rule 50 and token TIMES resolved as reduce.
+Conflict in state 82 between rule 50 and token DIV resolved as reduce.
+Conflict in state 82 between rule 50 and token POW resolved as shift.
+Conflict in state 82 between rule 50 and token ASSIGN resolved as reduce.
+Conflict in state 82 between rule 50 and token ASS_DES resolved as reduce.
+Conflict in state 82 between rule 50 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 82 between rule 50 and token GREATER resolved as reduce.
+Conflict in state 82 between rule 50 and token LESS_EQUAL resolved as reduce.
+Conflict in state 82 between rule 50 and token LESS resolved as reduce.
+Conflict in state 82 between rule 50 and token EQUAL resolved as reduce.
+Conflict in state 82 between rule 50 and token DISTINCT resolved as reduce.
+Conflict in state 83 between rule 51 and token PLUS resolved as reduce.
+Conflict in state 83 between rule 51 and token MINUS resolved as reduce.
+Conflict in state 83 between rule 51 and token TIMES resolved as reduce.
+Conflict in state 83 between rule 51 and token DIV resolved as reduce.
+Conflict in state 83 between rule 51 and token POW resolved as shift.
+Conflict in state 83 between rule 51 and token ASSIGN resolved as reduce.
+Conflict in state 83 between rule 51 and token ASS_DES resolved as reduce.
+Conflict in state 83 between rule 51 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 83 between rule 51 and token GREATER resolved as reduce.
+Conflict in state 83 between rule 51 and token LESS_EQUAL resolved as reduce.
+Conflict in state 83 between rule 51 and token LESS resolved as reduce.
+Conflict in state 83 between rule 51 and token EQUAL resolved as reduce.
+Conflict in state 83 between rule 51 and token DISTINCT resolved as reduce.
+Conflict in state 84 between rule 52 and token PLUS resolved as reduce.
+Conflict in state 84 between rule 52 and token MINUS resolved as reduce.
+Conflict in state 84 between rule 52 and token TIMES resolved as reduce.
+Conflict in state 84 between rule 52 and token DIV resolved as reduce.
+Conflict in state 84 between rule 52 and token POW resolved as shift.
+Conflict in state 84 between rule 52 and token ASSIGN resolved as reduce.
+Conflict in state 84 between rule 52 and token ASS_DES resolved as reduce.
+Conflict in state 84 between rule 52 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 84 between rule 52 and token GREATER resolved as reduce.
+Conflict in state 84 between rule 52 and token LESS_EQUAL resolved as reduce.
+Conflict in state 84 between rule 52 and token LESS resolved as reduce.
+Conflict in state 84 between rule 52 and token EQUAL resolved as reduce.
+Conflict in state 84 between rule 52 and token DISTINCT resolved as reduce.
+Conflict in state 85 between rule 21 and token PLUS resolved as shift.
+Conflict in state 85 between rule 21 and token MINUS resolved as shift.
+Conflict in state 85 between rule 21 and token TIMES resolved as shift.
+Conflict in state 85 between rule 21 and token DIV resolved as shift.
+Conflict in state 85 between rule 21 and token POW resolved as shift.
+Conflict in state 85 between rule 21 and token ASSIGN resolved as an error.
+Conflict in state 85 between rule 21 and token ASS_DES resolved as shift.
+Conflict in state 85 between rule 21 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 85 between rule 21 and token GREATER resolved as reduce.
+Conflict in state 85 between rule 21 and token LESS_EQUAL resolved as reduce.
+Conflict in state 85 between rule 21 and token LESS resolved as reduce.
+Conflict in state 85 between rule 21 and token EQUAL resolved as reduce.
+Conflict in state 85 between rule 21 and token DISTINCT resolved as reduce.
+Conflict in state 86 between rule 20 and token PLUS resolved as shift.
+Conflict in state 86 between rule 20 and token MINUS resolved as shift.
+Conflict in state 86 between rule 20 and token TIMES resolved as shift.
+Conflict in state 86 between rule 20 and token DIV resolved as shift.
+Conflict in state 86 between rule 20 and token POW resolved as shift.
+Conflict in state 86 between rule 20 and token ASSIGN resolved as reduce.
+Conflict in state 86 between rule 20 and token ASS_DES resolved as an error.
+Conflict in state 86 between rule 20 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 86 between rule 20 and token GREATER resolved as reduce.
+Conflict in state 86 between rule 20 and token LESS_EQUAL resolved as reduce.
+Conflict in state 86 between rule 20 and token LESS resolved as reduce.
+Conflict in state 86 between rule 20 and token EQUAL resolved as reduce.
+Conflict in state 86 between rule 20 and token DISTINCT resolved as reduce.
+Conflict in state 87 between rule 55 and token PLUS resolved as shift.
+Conflict in state 87 between rule 55 and token MINUS resolved as shift.
+Conflict in state 87 between rule 55 and token TIMES resolved as shift.
+Conflict in state 87 between rule 55 and token DIV resolved as shift.
+Conflict in state 87 between rule 55 and token POW resolved as shift.
+Conflict in state 87 between rule 55 and token ASSIGN resolved as shift.
+Conflict in state 87 between rule 55 and token ASS_DES resolved as shift.
+Conflict in state 87 between rule 55 and token GREATER_EQUAL resolved as an error.
+Conflict in state 87 between rule 55 and token GREATER resolved as an error.
+Conflict in state 87 between rule 55 and token LESS_EQUAL resolved as an error.
+Conflict in state 87 between rule 55 and token LESS resolved as an error.
+Conflict in state 87 between rule 55 and token EQUAL resolved as an error.
+Conflict in state 87 between rule 55 and token DISTINCT resolved as an error.
+Conflict in state 88 between rule 56 and token PLUS resolved as shift.
+Conflict in state 88 between rule 56 and token MINUS resolved as shift.
+Conflict in state 88 between rule 56 and token TIMES resolved as shift.
+Conflict in state 88 between rule 56 and token DIV resolved as shift.
+Conflict in state 88 between rule 56 and token POW resolved as shift.
+Conflict in state 88 between rule 56 and token ASSIGN resolved as shift.
+Conflict in state 88 between rule 56 and token ASS_DES resolved as shift.
+Conflict in state 88 between rule 56 and token GREATER_EQUAL resolved as an error.
+Conflict in state 88 between rule 56 and token GREATER resolved as an error.
+Conflict in state 88 between rule 56 and token LESS_EQUAL resolved as an error.
+Conflict in state 88 between rule 56 and token LESS resolved as an error.
+Conflict in state 88 between rule 56 and token EQUAL resolved as an error.
+Conflict in state 88 between rule 56 and token DISTINCT resolved as an error.
+Conflict in state 89 between rule 57 and token PLUS resolved as shift.
+Conflict in state 89 between rule 57 and token MINUS resolved as shift.
+Conflict in state 89 between rule 57 and token TIMES resolved as shift.
+Conflict in state 89 between rule 57 and token DIV resolved as shift.
+Conflict in state 89 between rule 57 and token POW resolved as shift.
+Conflict in state 89 between rule 57 and token ASSIGN resolved as shift.
+Conflict in state 89 between rule 57 and token ASS_DES resolved as shift.
+Conflict in state 89 between rule 57 and token GREATER_EQUAL resolved as an error.
+Conflict in state 89 between rule 57 and token GREATER resolved as an error.
+Conflict in state 89 between rule 57 and token LESS_EQUAL resolved as an error.
+Conflict in state 89 between rule 57 and token LESS resolved as an error.
+Conflict in state 89 between rule 57 and token EQUAL resolved as an error.
+Conflict in state 89 between rule 57 and token DISTINCT resolved as an error.
+Conflict in state 90 between rule 58 and token PLUS resolved as shift.
+Conflict in state 90 between rule 58 and token MINUS resolved as shift.
+Conflict in state 90 between rule 58 and token TIMES resolved as shift.
+Conflict in state 90 between rule 58 and token DIV resolved as shift.
+Conflict in state 90 between rule 58 and token POW resolved as shift.
+Conflict in state 90 between rule 58 and token ASSIGN resolved as shift.
+Conflict in state 90 between rule 58 and token ASS_DES resolved as shift.
+Conflict in state 90 between rule 58 and token GREATER_EQUAL resolved as an error.
+Conflict in state 90 between rule 58 and token GREATER resolved as an error.
+Conflict in state 90 between rule 58 and token LESS_EQUAL resolved as an error.
+Conflict in state 90 between rule 58 and token LESS resolved as an error.
+Conflict in state 90 between rule 58 and token EQUAL resolved as an error.
+Conflict in state 90 between rule 58 and token DISTINCT resolved as an error.
+Conflict in state 91 between rule 59 and token PLUS resolved as shift.
+Conflict in state 91 between rule 59 and token MINUS resolved as shift.
+Conflict in state 91 between rule 59 and token TIMES resolved as shift.
+Conflict in state 91 between rule 59 and token DIV resolved as shift.
+Conflict in state 91 between rule 59 and token POW resolved as shift.
+Conflict in state 91 between rule 59 and token ASSIGN resolved as shift.
+Conflict in state 91 between rule 59 and token ASS_DES resolved as shift.
+Conflict in state 91 between rule 59 and token GREATER_EQUAL resolved as an error.
+Conflict in state 91 between rule 59 and token GREATER resolved as an error.
+Conflict in state 91 between rule 59 and token LESS_EQUAL resolved as an error.
+Conflict in state 91 between rule 59 and token LESS resolved as an error.
+Conflict in state 91 between rule 59 and token EQUAL resolved as an error.
+Conflict in state 91 between rule 59 and token DISTINCT resolved as an error.
+Conflict in state 92 between rule 60 and token PLUS resolved as shift.
+Conflict in state 92 between rule 60 and token MINUS resolved as shift.
+Conflict in state 92 between rule 60 and token TIMES resolved as shift.
+Conflict in state 92 between rule 60 and token DIV resolved as shift.
+Conflict in state 92 between rule 60 and token POW resolved as shift.
+Conflict in state 92 between rule 60 and token ASSIGN resolved as shift.
+Conflict in state 92 between rule 60 and token ASS_DES resolved as shift.
+Conflict in state 92 between rule 60 and token GREATER_EQUAL resolved as an error.
+Conflict in state 92 between rule 60 and token GREATER resolved as an error.
+Conflict in state 92 between rule 60 and token LESS_EQUAL resolved as an error.
+Conflict in state 92 between rule 60 and token LESS resolved as an error.
+Conflict in state 92 between rule 60 and token EQUAL resolved as an error.
+Conflict in state 92 between rule 60 and token DISTINCT resolved as an error.
+Conflict in state 95 between rule 61 and token AND_ resolved as reduce.
+Conflict in state 95 between rule 61 and token OR_ resolved as reduce.
+Conflict in state 96 between rule 62 and token AND_ resolved as reduce.
+Conflict in state 96 between rule 62 and token OR_ resolved as reduce.
+Conflict in state 109 between rule 31 and token PLUS resolved as shift.
+Conflict in state 109 between rule 31 and token MINUS resolved as shift.
+Conflict in state 109 between rule 31 and token TIMES resolved as shift.
+Conflict in state 109 between rule 31 and token DIV resolved as shift.
+Conflict in state 109 between rule 31 and token POW resolved as shift.
+Conflict in state 109 between rule 31 and token ASSIGN resolved as an error.
+Conflict in state 109 between rule 31 and token ASS_DES resolved as shift.
+Conflict in state 109 between rule 31 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 109 between rule 31 and token GREATER resolved as reduce.
+Conflict in state 109 between rule 31 and token LESS_EQUAL resolved as reduce.
+Conflict in state 109 between rule 31 and token LESS resolved as reduce.
+Conflict in state 109 between rule 31 and token EQUAL resolved as reduce.
+Conflict in state 109 between rule 31 and token DISTINCT resolved as reduce.
+Conflict in state 152 between rule 67 and token PLUS resolved as shift.
+Conflict in state 152 between rule 67 and token MINUS resolved as shift.
+Conflict in state 152 between rule 67 and token TIMES resolved as shift.
+Conflict in state 152 between rule 67 and token DIV resolved as shift.
+Conflict in state 152 between rule 67 and token POW resolved as shift.
+Conflict in state 152 between rule 67 and token ASSIGN resolved as shift.
+Conflict in state 152 between rule 67 and token ASS_DES resolved as shift.
+Conflict in state 152 between rule 67 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 152 between rule 67 and token GREATER resolved as reduce.
+Conflict in state 152 between rule 67 and token LESS_EQUAL resolved as reduce.
+Conflict in state 152 between rule 67 and token LESS resolved as reduce.
+Conflict in state 152 between rule 67 and token EQUAL resolved as reduce.
+Conflict in state 152 between rule 67 and token DISTINCT resolved as reduce.
+Conflict in state 155 between rule 66 and token PLUS resolved as shift.
+Conflict in state 155 between rule 66 and token MINUS resolved as shift.
+Conflict in state 155 between rule 66 and token TIMES resolved as shift.
+Conflict in state 155 between rule 66 and token DIV resolved as shift.
+Conflict in state 155 between rule 66 and token POW resolved as shift.
+Conflict in state 155 between rule 66 and token ASSIGN resolved as shift.
+Conflict in state 155 between rule 66 and token ASS_DES resolved as shift.
+Conflict in state 155 between rule 66 and token GREATER_EQUAL resolved as reduce.
+Conflict in state 155 between rule 66 and token GREATER resolved as reduce.
+Conflict in state 155 between rule 66 and token LESS_EQUAL resolved as reduce.
+Conflict in state 155 between rule 66 and token LESS resolved as reduce.
+Conflict in state 155 between rule 66 and token EQUAL resolved as reduce.
+Conflict in state 155 between rule 66 and token DISTINCT resolved as reduce.
+State 22 contains 2 shift/reduce conflicts.
+State 39 contains 13 reduce/reduce conflicts.
+State 95 contains 13 reduce/reduce conflicts.
+State 96 contains 13 reduce/reduce conflicts.
+State 121 contains 13 shift/reduce conflicts.
+
+Grammar
+rule 1    input -> line
+rule 2    input -> lines_block
+rule 3    lines_block -> LKEY lines RKEY
+rule 4    lines ->		/* empty */
+rule 5    lines -> non_empty_lines
+rule 6    non_empty_lines -> line
+rule 7    non_empty_lines -> non_empty_lines line
+rule 8    line -> expr SEMICOLON
+rule 9    line -> func_asign SEMICOLON
+rule 10   line -> type_node_decl
+rule 11   expr -> arit_op
+rule 12   expr -> bool_expr
+rule 13   expr -> WHILE while_expr
+rule 14   expr -> STRING
+rule 15   expr -> id_expr
+rule 16   expr -> func_call
+rule 17   expr -> let_assign
+rule 18   expr -> IF conditional
+rule 19   expr -> member_access_expr
+rule 20   expr -> expr ASS_DES expr
+rule 21   expr -> expr ASSIGN expr
+rule 22   func_asign -> FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr
+rule 23   func_asign -> FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr
+rule 24   func_asign -> FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY
+rule 25   func_asign -> FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY
+rule 26   args_list ->		/* empty */
+rule 27   args_list -> id_expr
+rule 28   args_list -> args_list COLON id_expr
+rule 29   id_expr -> ID_ TWOPOINTS ID_
+rule 30   id_expr -> ID_
+rule 31   let_assign -> LET var_assign_list IN expr
+rule 32   let_assign -> LET var_assign_list IN lines_block
+rule 33   var_assign_list -> id_expr ASSIGN expr
+rule 34   var_assign_list -> id_expr ASSIGN expr AS_ ID_
+rule 35   var_assign_list -> id_expr ASSIGN new_expr
+rule 36   var_assign_list -> var_assign_list COLON id_expr ASSIGN expr
+rule 37   var_assign_list -> var_assign_list COLON id_expr ASSIGN expr AS_ ID_
+rule 38   var_assign_list -> var_assign_list COLON id_expr ASSIGN new_expr
+rule 39   new_expr -> NEW ID_ LPARENT expr_list RPARENT
+rule 40   expr_list ->		/* empty */
+rule 41   expr_list -> expr
+rule 42   expr_list -> new_expr
+rule 43   expr_list -> expr_list COLON expr
+rule 44   expr_list -> expr_list COLON new_expr
+rule 45   func_call -> ID_ LPARENT expr_list RPARENT
+rule 46   arit_op -> NUMBER
+rule 47   arit_op -> LPARENT expr RPARENT
+rule 48   arit_op -> expr PLUS expr
+rule 49   arit_op -> expr MINUS expr
+rule 50   arit_op -> expr TIMES expr
+rule 51   arit_op -> expr DIV expr
+rule 52   arit_op -> expr POW expr
+rule 53   arit_op -> MINUS expr
+rule 54   bool_expr -> BOOLEAN
+rule 55   bool_expr -> expr GREATER_EQUAL expr
+rule 56   bool_expr -> expr GREATER expr
+rule 57   bool_expr -> expr LESS_EQUAL expr
+rule 58   bool_expr -> expr LESS expr
+rule 59   bool_expr -> expr EQUAL expr
+rule 60   bool_expr -> expr DISTINCT expr
+rule 61   bool_expr -> bool_expr AND_ bool_expr
+rule 62   bool_expr -> bool_expr OR_ bool_expr
+rule 63   bool_expr -> NOT_ bool_expr
+rule 64   bool_expr -> id_expr IS ID_
+rule 65   bool_expr -> func_call IS ID_
+rule 66   conditional -> LPARENT bool_expr RPARENT expr ELSE expr
+rule 67   conditional -> LPARENT bool_expr RPARENT lines_block ELSE expr
+rule 68   conditional -> LPARENT bool_expr RPARENT expr ELSE lines_block
+rule 69   conditional -> LPARENT bool_expr RPARENT lines_block ELSE lines_block
+rule 70   conditional -> LPARENT bool_expr RPARENT expr ELIF conditional
+rule 71   conditional -> LPARENT bool_expr RPARENT lines_block ELIF conditional
+rule 72   while_expr -> LPARENT bool_expr RPARENT lines_block
+rule 73   while_expr -> LPARENT bool_expr RPARENT expr
+rule 74   type_node_decl -> TYPE ID_ LKEY type_body_elements RKEY
+rule 75   type_node_decl -> TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY
+rule 76   type_node_decl -> TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY
+rule 77   type_node_decl -> TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY
+rule 78   type_body_elements ->		/* empty */
+rule 79   type_body_elements -> type_body_elements attribute
+rule 80   type_body_elements -> type_body_elements method
+rule 81   attribute -> id_expr ASSIGN expr SEMICOLON
+rule 82   attribute -> id_expr ASSIGN expr AS_ ID_ SEMICOLON
+rule 83   method -> ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON
+rule 84   method -> ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON
+rule 85   method -> ID_ LPARENT args_list RPARENT LKEY lines RKEY
+rule 86   method -> ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY
+rule 87   member_access_expr -> ID_ ACCESS ID_
+rule 88   member_access_expr -> ID_ ACCESS ID_ LPARENT expr_list RPARENT
+
+Terminals, with rules where they appear
+
+$ (-1)
+error (256)
+NUMBER (258) 46
+BOOLEAN (259) 54
+STRING (260) 14
+ID_ (261) 22 23 24 25 29 30 34 37 39 45 64 65 74 75 76 77 82 83 84
+    85 86 87 88
+PLUS (262) 48
+MINUS (263) 49 53
+TIMES (264) 50
+DIV (265) 51
+POW (266) 52
+LPARENT (267) 22 23 24 25 39 45 47 66 67 68 69 70 71 72 73 75 76 77
+    83 84 85 86 88
+RPARENT (268) 22 23 24 25 39 45 47 66 67 68 69 70 71 72 73 75 76 77
+    83 84 85 86 88
+SEMICOLON (269) 8 9 81 82 83 84
+COLON (270) 28 36 37 38 43 44
+LKEY (271) 3 24 25 74 75 76 77 85 86
+RKEY (272) 3 24 25 74 75 76 77 85 86
+FUNCTION_ (273) 22 23 24 25
+INLINE (274) 22 23 83 84
+ASSIGN (275) 21 33 34 35 36 37 38 81 82
+ASS_DES (276) 20
+IF (277) 18
+ELSE (278) 66 67 68 69
+ELIF (279) 70 71
+WHILE (280) 13
+FOR (281)
+ACCESS (282) 87 88
+UMINUS (283)
+TWOPOINTS (284) 23 25 29 84 86
+NEW (285) 39
+INHERITS (286) 76 77
+IS (287) 64 65
+AS_ (288) 34 37 82
+GREATER_EQUAL (289) 55
+GREATER (290) 56
+LESS_EQUAL (291) 57
+LESS (292) 58
+EQUAL (293) 59
+DISTINCT (294) 60
+AND_ (295) 61
+NOT_ (296) 63
+OR_ (297) 62
+LET (298) 31 32
+IN (299) 31 32
+TYPE (300) 74 75 76 77
+
+Nonterminals, with rules where they appear
+
+input (46)
+    on left: 1 2
+lines_block (47)
+    on left: 3, on right: 2 32 67 68 69 71 72
+lines (48)
+    on left: 4 5, on right: 3 24 25 85 86
+non_empty_lines (49)
+    on left: 6 7, on right: 5 7
+line (50)
+    on left: 8 9 10, on right: 1 6 7
+expr (51)
+    on left: 11 12 13 14 15 16 17 18 19 20 21, on right: 8 20 21 22
+    23 31 33 34 36 37 41 43 47 48 49 50 51 52 53 55 56 57 58 59 60
+    66 67 68 70 73 81 82 83 84
+func_asign (52)
+    on left: 22 23 24 25, on right: 9
+args_list (53)
+    on left: 26 27 28, on right: 22 23 24 25 28 75 76 77 83 84 85 86
+id_expr (54)
+    on left: 29 30, on right: 15 27 28 33 34 35 36 37 38 64 81 82
+let_assign (55)
+    on left: 31 32, on right: 17
+var_assign_list (56)
+    on left: 33 34 35 36 37 38, on right: 31 32 36 37 38
+new_expr (57)
+    on left: 39, on right: 35 38 42 44
+expr_list (58)
+    on left: 40 41 42 43 44, on right: 39 43 44 45 88
+func_call (59)
+    on left: 45, on right: 16 65
+arit_op (60)
+    on left: 46 47 48 49 50 51 52 53, on right: 11
+bool_expr (61)
+    on left: 54 55 56 57 58 59 60 61 62 63 64 65, on right: 12 61 62
+    63 66 67 68 69 70 71 72 73
+conditional (62)
+    on left: 66 67 68 69 70 71, on right: 18 70 71
+while_expr (63)
+    on left: 72 73, on right: 13
+type_node_decl (64)
+    on left: 74 75 76 77, on right: 10
+type_body_elements (65)
+    on left: 78 79 80, on right: 74 75 76 77 79 80
+attribute (66)
+    on left: 81 82, on right: 79
+method (67)
+    on left: 83 84 85 86, on right: 80
+member_access_expr (68)
+    on left: 87 88, on right: 19
+
+
+state 0
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    input	go to state 198
+    lines_block	go to state 14
+    line	go to state 15
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 1
+
+    arit_op  ->  NUMBER .   (rule 46)
+
+    $default	reduce using rule 46 (arit_op)
+
+
+
+state 2
+
+    bool_expr  ->  BOOLEAN .   (rule 54)
+
+    $default	reduce using rule 54 (bool_expr)
+
+
+
+state 3
+
+    expr  ->  STRING .   (rule 14)
+
+    $default	reduce using rule 14 (expr)
+
+
+
+state 4
+
+    id_expr  ->  ID_ . TWOPOINTS ID_   (rule 29)
+    id_expr  ->  ID_ .   (rule 30)
+    func_call  ->  ID_ . LPARENT expr_list RPARENT   (rule 45)
+    member_access_expr  ->  ID_ . ACCESS ID_   (rule 87)
+    member_access_expr  ->  ID_ . ACCESS ID_ LPARENT expr_list RPARENT   (rule 88)
+
+    LPARENT	shift, and go to state 25
+    ACCESS	shift, and go to state 26
+    TWOPOINTS	shift, and go to state 27
+
+    $default	reduce using rule 30 (id_expr)
+
+
+
+state 5
+
+    arit_op  ->  MINUS . expr   (rule 53)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 28
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 6
+
+    arit_op  ->  LPARENT . expr RPARENT   (rule 47)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 29
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 7
+
+    lines_block  ->  LKEY . lines RKEY   (rule 3)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 4 (lines)
+
+    lines	go to state 30
+    non_empty_lines	go to state 31
+    line	go to state 32
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 8
+
+    func_asign  ->  FUNCTION_ . ID_ LPARENT args_list RPARENT INLINE expr   (rule 22)
+    func_asign  ->  FUNCTION_ . ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ . ID_ LPARENT args_list RPARENT LKEY lines RKEY   (rule 24)
+    func_asign  ->  FUNCTION_ . ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 25)
+
+    ID_ 	shift, and go to state 33
+
+
+
+state 9
+
+    expr  ->  IF . conditional   (rule 18)
+
+    LPARENT	shift, and go to state 34
+
+    conditional	go to state 35
+
+
+
+state 10
+
+    expr  ->  WHILE . while_expr   (rule 13)
+
+    LPARENT	shift, and go to state 36
+
+    while_expr	go to state 37
+
+
+
+state 11
+
+    bool_expr  ->  NOT_ . bool_expr   (rule 63)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 38
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 39
+    member_access_expr	go to state 24
+
+
+
+state 12
+
+    let_assign  ->  LET . var_assign_list IN expr   (rule 31)
+    let_assign  ->  LET . var_assign_list IN lines_block   (rule 32)
+
+    ID_ 	shift, and go to state 40
+
+    id_expr	go to state 41
+    var_assign_list	go to state 42
+
+
+
+state 13
+
+    type_node_decl  ->  TYPE . ID_ LKEY type_body_elements RKEY   (rule 74)
+    type_node_decl  ->  TYPE . ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 75)
+    type_node_decl  ->  TYPE . ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE . ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    ID_ 	shift, and go to state 43
+
+
+
+state 14
+
+    input  ->  lines_block .   (rule 2)
+
+    $default	reduce using rule 2 (input)
+
+
+
+state 15
+
+    input  ->  line .   (rule 1)
+
+    $default	reduce using rule 1 (input)
+
+
+
+state 16
+
+    line  ->  expr . SEMICOLON   (rule 8)
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    SEMICOLON	shift, and go to state 49
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 17
+
+    line  ->  func_asign . SEMICOLON   (rule 9)
+
+    SEMICOLON	shift, and go to state 58
+
+
+
+state 18
+
+    expr  ->  id_expr .   (rule 15)
+    bool_expr  ->  id_expr . IS ID_   (rule 64)
+
+    IS  	shift, and go to state 59
+
+    $default	reduce using rule 15 (expr)
+
+
+
+state 19
+
+    expr  ->  let_assign .   (rule 17)
+
+    $default	reduce using rule 17 (expr)
+
+
+
+state 20
+
+    expr  ->  func_call .   (rule 16)
+    bool_expr  ->  func_call . IS ID_   (rule 65)
+
+    IS  	shift, and go to state 60
+
+    $default	reduce using rule 16 (expr)
+
+
+
+state 21
+
+    expr  ->  arit_op .   (rule 11)
+
+    $default	reduce using rule 11 (expr)
+
+
+
+state 22
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+
+    AND_	shift, and go to state 61
+    OR_ 	shift, and go to state 62
+
+    AND_	[reduce using rule 12 (expr)]
+    OR_ 	[reduce using rule 12 (expr)]
+    $default	reduce using rule 12 (expr)
+
+
+
+state 23
+
+    line  ->  type_node_decl .   (rule 10)
+
+    $default	reduce using rule 10 (line)
+
+
+
+state 24
+
+    expr  ->  member_access_expr .   (rule 19)
+
+    $default	reduce using rule 19 (expr)
+
+
+
+state 25
+
+    func_call  ->  ID_ LPARENT . expr_list RPARENT   (rule 45)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    $default	reduce using rule 40 (expr_list)
+
+    expr	go to state 64
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 65
+    expr_list	go to state 66
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 26
+
+    member_access_expr  ->  ID_ ACCESS . ID_   (rule 87)
+    member_access_expr  ->  ID_ ACCESS . ID_ LPARENT expr_list RPARENT   (rule 88)
+
+    ID_ 	shift, and go to state 67
+
+
+
+state 27
+
+    id_expr  ->  ID_ TWOPOINTS . ID_   (rule 29)
+
+    ID_ 	shift, and go to state 68
+
+
+
+state 28
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    arit_op  ->  MINUS expr .   (rule 53)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+
+    $default	reduce using rule 53 (arit_op)
+
+
+
+state 29
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  LPARENT expr . RPARENT   (rule 47)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    RPARENT	shift, and go to state 69
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 30
+
+    lines_block  ->  LKEY lines . RKEY   (rule 3)
+
+    RKEY	shift, and go to state 70
+
+
+
+state 31
+
+    lines  ->  non_empty_lines .   (rule 5)
+    non_empty_lines  ->  non_empty_lines . line   (rule 7)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 5 (lines)
+
+    line	go to state 71
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 32
+
+    non_empty_lines  ->  line .   (rule 6)
+
+    $default	reduce using rule 6 (non_empty_lines)
+
+
+
+state 33
+
+    func_asign  ->  FUNCTION_ ID_ . LPARENT args_list RPARENT INLINE expr   (rule 22)
+    func_asign  ->  FUNCTION_ ID_ . LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ . LPARENT args_list RPARENT LKEY lines RKEY   (rule 24)
+    func_asign  ->  FUNCTION_ ID_ . LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 25)
+
+    LPARENT	shift, and go to state 72
+
+
+
+state 34
+
+    conditional  ->  LPARENT . bool_expr RPARENT expr ELSE expr   (rule 66)
+    conditional  ->  LPARENT . bool_expr RPARENT lines_block ELSE expr   (rule 67)
+    conditional  ->  LPARENT . bool_expr RPARENT expr ELSE lines_block   (rule 68)
+    conditional  ->  LPARENT . bool_expr RPARENT lines_block ELSE lines_block   (rule 69)
+    conditional  ->  LPARENT . bool_expr RPARENT expr ELIF conditional   (rule 70)
+    conditional  ->  LPARENT . bool_expr RPARENT lines_block ELIF conditional   (rule 71)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 38
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 73
+    member_access_expr	go to state 24
+
+
+
+state 35
+
+    expr  ->  IF conditional .   (rule 18)
+
+    $default	reduce using rule 18 (expr)
+
+
+
+state 36
+
+    while_expr  ->  LPARENT . bool_expr RPARENT lines_block   (rule 72)
+    while_expr  ->  LPARENT . bool_expr RPARENT expr   (rule 73)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 38
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 74
+    member_access_expr	go to state 24
+
+
+
+state 37
+
+    expr  ->  WHILE while_expr .   (rule 13)
+
+    $default	reduce using rule 13 (expr)
+
+
+
+state 38
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 39
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+    bool_expr  ->  NOT_ bool_expr .   (rule 63)
+
+    AND_	shift, and go to state 61
+    OR_ 	shift, and go to state 62
+
+    PLUS	reduce using rule 12 (expr)
+    PLUS	[reduce using rule 63 (bool_expr)]
+    MINUS	reduce using rule 12 (expr)
+    MINUS	[reduce using rule 63 (bool_expr)]
+    TIMES	reduce using rule 12 (expr)
+    TIMES	[reduce using rule 63 (bool_expr)]
+    DIV 	reduce using rule 12 (expr)
+    DIV 	[reduce using rule 63 (bool_expr)]
+    POW 	reduce using rule 12 (expr)
+    POW 	[reduce using rule 63 (bool_expr)]
+    RPARENT	reduce using rule 63 (bool_expr)
+    SEMICOLON	reduce using rule 63 (bool_expr)
+    COLON	reduce using rule 63 (bool_expr)
+    ASSIGN	reduce using rule 12 (expr)
+    ASSIGN	[reduce using rule 63 (bool_expr)]
+    ASS_DES	reduce using rule 12 (expr)
+    ASS_DES	[reduce using rule 63 (bool_expr)]
+    ELSE	reduce using rule 63 (bool_expr)
+    ELIF	reduce using rule 63 (bool_expr)
+    DISTINCT	reduce using rule 12 (expr)
+    DISTINCT	[reduce using rule 63 (bool_expr)]
+    AND_	[reduce using rule 12 (expr)]
+    AND_	[reduce using rule 63 (bool_expr)]
+    NOT_	reduce using rule 12 (expr)
+    NOT_	[reduce using rule 63 (bool_expr)]
+    OR_ 	[reduce using rule 12 (expr)]
+    OR_ 	[reduce using rule 63 (bool_expr)]
+    LET 	reduce using rule 12 (expr)
+    LET 	[reduce using rule 63 (bool_expr)]
+    TYPE	reduce using rule 63 (bool_expr)
+    $default	reduce using rule 12 (expr)
+
+
+
+state 40
+
+    id_expr  ->  ID_ . TWOPOINTS ID_   (rule 29)
+    id_expr  ->  ID_ .   (rule 30)
+
+    TWOPOINTS	shift, and go to state 27
+
+    $default	reduce using rule 30 (id_expr)
+
+
+
+state 41
+
+    var_assign_list  ->  id_expr . ASSIGN expr   (rule 33)
+    var_assign_list  ->  id_expr . ASSIGN expr AS_ ID_   (rule 34)
+    var_assign_list  ->  id_expr . ASSIGN new_expr   (rule 35)
+
+    ASSIGN	shift, and go to state 75
+
+
+
+state 42
+
+    let_assign  ->  LET var_assign_list . IN expr   (rule 31)
+    let_assign  ->  LET var_assign_list . IN lines_block   (rule 32)
+    var_assign_list  ->  var_assign_list . COLON id_expr ASSIGN expr   (rule 36)
+    var_assign_list  ->  var_assign_list . COLON id_expr ASSIGN expr AS_ ID_   (rule 37)
+    var_assign_list  ->  var_assign_list . COLON id_expr ASSIGN new_expr   (rule 38)
+
+    COLON	shift, and go to state 76
+    IN  	shift, and go to state 77
+
+
+
+state 43
+
+    type_node_decl  ->  TYPE ID_ . LKEY type_body_elements RKEY   (rule 74)
+    type_node_decl  ->  TYPE ID_ . LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 75)
+    type_node_decl  ->  TYPE ID_ . LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ . LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    LPARENT	shift, and go to state 78
+    LKEY	shift, and go to state 79
+
+
+
+state 44
+
+    arit_op  ->  expr PLUS . expr   (rule 48)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 80
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 45
+
+    arit_op  ->  expr MINUS . expr   (rule 49)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 81
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 46
+
+    arit_op  ->  expr TIMES . expr   (rule 50)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 82
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 47
+
+    arit_op  ->  expr DIV . expr   (rule 51)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 83
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 48
+
+    arit_op  ->  expr POW . expr   (rule 52)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 84
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 49
+
+    line  ->  expr SEMICOLON .   (rule 8)
+
+    $default	reduce using rule 8 (line)
+
+
+
+state 50
+
+    expr  ->  expr ASSIGN . expr   (rule 21)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 85
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 51
+
+    expr  ->  expr ASS_DES . expr   (rule 20)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 86
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 52
+
+    bool_expr  ->  expr GREATER_EQUAL . expr   (rule 55)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 87
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 53
+
+    bool_expr  ->  expr GREATER . expr   (rule 56)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 88
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 54
+
+    bool_expr  ->  expr LESS_EQUAL . expr   (rule 57)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 89
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 55
+
+    bool_expr  ->  expr LESS . expr   (rule 58)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 90
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 56
+
+    bool_expr  ->  expr EQUAL . expr   (rule 59)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 91
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 57
+
+    bool_expr  ->  expr DISTINCT . expr   (rule 60)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 92
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 58
+
+    line  ->  func_asign SEMICOLON .   (rule 9)
+
+    $default	reduce using rule 9 (line)
+
+
+
+state 59
+
+    bool_expr  ->  id_expr IS . ID_   (rule 64)
+
+    ID_ 	shift, and go to state 93
+
+
+
+state 60
+
+    bool_expr  ->  func_call IS . ID_   (rule 65)
+
+    ID_ 	shift, and go to state 94
+
+
+
+state 61
+
+    bool_expr  ->  bool_expr AND_ . bool_expr   (rule 61)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 38
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 95
+    member_access_expr	go to state 24
+
+
+
+state 62
+
+    bool_expr  ->  bool_expr OR_ . bool_expr   (rule 62)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 38
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 96
+    member_access_expr	go to state 24
+
+
+
+state 63
+
+    new_expr  ->  NEW . ID_ LPARENT expr_list RPARENT   (rule 39)
+
+    ID_ 	shift, and go to state 97
+
+
+
+state 64
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    expr_list  ->  expr .   (rule 41)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 41 (expr_list)
+
+
+
+state 65
+
+    expr_list  ->  new_expr .   (rule 42)
+
+    $default	reduce using rule 42 (expr_list)
+
+
+
+state 66
+
+    expr_list  ->  expr_list . COLON expr   (rule 43)
+    expr_list  ->  expr_list . COLON new_expr   (rule 44)
+    func_call  ->  ID_ LPARENT expr_list . RPARENT   (rule 45)
+
+    RPARENT	shift, and go to state 98
+    COLON	shift, and go to state 99
+
+
+
+state 67
+
+    member_access_expr  ->  ID_ ACCESS ID_ .   (rule 87)
+    member_access_expr  ->  ID_ ACCESS ID_ . LPARENT expr_list RPARENT   (rule 88)
+
+    LPARENT	shift, and go to state 100
+
+    $default	reduce using rule 87 (member_access_expr)
+
+
+
+state 68
+
+    id_expr  ->  ID_ TWOPOINTS ID_ .   (rule 29)
+
+    $default	reduce using rule 29 (id_expr)
+
+
+
+state 69
+
+    arit_op  ->  LPARENT expr RPARENT .   (rule 47)
+
+    $default	reduce using rule 47 (arit_op)
+
+
+
+state 70
+
+    lines_block  ->  LKEY lines RKEY .   (rule 3)
+
+    $default	reduce using rule 3 (lines_block)
+
+
+
+state 71
+
+    non_empty_lines  ->  non_empty_lines line .   (rule 7)
+
+    $default	reduce using rule 7 (non_empty_lines)
+
+
+
+state 72
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT . args_list RPARENT INLINE expr   (rule 22)
+    func_asign  ->  FUNCTION_ ID_ LPARENT . args_list RPARENT TWOPOINTS ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ LPARENT . args_list RPARENT LKEY lines RKEY   (rule 24)
+    func_asign  ->  FUNCTION_ ID_ LPARENT . args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 25)
+
+    ID_ 	shift, and go to state 40
+
+    $default	reduce using rule 26 (args_list)
+
+    args_list	go to state 101
+    id_expr	go to state 102
+
+
+
+state 73
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+    conditional  ->  LPARENT bool_expr . RPARENT expr ELSE expr   (rule 66)
+    conditional  ->  LPARENT bool_expr . RPARENT lines_block ELSE expr   (rule 67)
+    conditional  ->  LPARENT bool_expr . RPARENT expr ELSE lines_block   (rule 68)
+    conditional  ->  LPARENT bool_expr . RPARENT lines_block ELSE lines_block   (rule 69)
+    conditional  ->  LPARENT bool_expr . RPARENT expr ELIF conditional   (rule 70)
+    conditional  ->  LPARENT bool_expr . RPARENT lines_block ELIF conditional   (rule 71)
+
+    RPARENT	shift, and go to state 103
+    AND_	shift, and go to state 61
+    OR_ 	shift, and go to state 62
+
+    $default	reduce using rule 12 (expr)
+
+
+
+state 74
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+    while_expr  ->  LPARENT bool_expr . RPARENT lines_block   (rule 72)
+    while_expr  ->  LPARENT bool_expr . RPARENT expr   (rule 73)
+
+    RPARENT	shift, and go to state 104
+    AND_	shift, and go to state 61
+    OR_ 	shift, and go to state 62
+
+    $default	reduce using rule 12 (expr)
+
+
+
+state 75
+
+    var_assign_list  ->  id_expr ASSIGN . expr   (rule 33)
+    var_assign_list  ->  id_expr ASSIGN . expr AS_ ID_   (rule 34)
+    var_assign_list  ->  id_expr ASSIGN . new_expr   (rule 35)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 105
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 106
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 76
+
+    var_assign_list  ->  var_assign_list COLON . id_expr ASSIGN expr   (rule 36)
+    var_assign_list  ->  var_assign_list COLON . id_expr ASSIGN expr AS_ ID_   (rule 37)
+    var_assign_list  ->  var_assign_list COLON . id_expr ASSIGN new_expr   (rule 38)
+
+    ID_ 	shift, and go to state 40
+
+    id_expr	go to state 107
+
+
+
+state 77
+
+    let_assign  ->  LET var_assign_list IN . expr   (rule 31)
+    let_assign  ->  LET var_assign_list IN . lines_block   (rule 32)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    lines_block	go to state 108
+    expr	go to state 109
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 78
+
+    type_node_decl  ->  TYPE ID_ LPARENT . args_list RPARENT LKEY type_body_elements RKEY   (rule 75)
+    type_node_decl  ->  TYPE ID_ LPARENT . args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ LPARENT . args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    ID_ 	shift, and go to state 40
+
+    $default	reduce using rule 26 (args_list)
+
+    args_list	go to state 110
+    id_expr	go to state 102
+
+
+
+state 79
+
+    type_node_decl  ->  TYPE ID_ LKEY . type_body_elements RKEY   (rule 74)
+
+    $default	reduce using rule 78 (type_body_elements)
+
+    type_body_elements	go to state 111
+
+
+
+state 80
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr PLUS expr .   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+
+    $default	reduce using rule 48 (arit_op)
+
+
+
+state 81
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr MINUS expr .   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+
+    $default	reduce using rule 49 (arit_op)
+
+
+
+state 82
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr TIMES expr .   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    POW 	shift, and go to state 48
+
+    $default	reduce using rule 50 (arit_op)
+
+
+
+state 83
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr DIV expr .   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    POW 	shift, and go to state 48
+
+    $default	reduce using rule 51 (arit_op)
+
+
+
+state 84
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    arit_op  ->  expr POW expr .   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    POW 	shift, and go to state 48
+
+    $default	reduce using rule 52 (arit_op)
+
+
+
+state 85
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    expr  ->  expr ASSIGN expr .   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASS_DES	shift, and go to state 51
+
+    ASSIGN	error (nonassociative)
+
+    $default	reduce using rule 21 (expr)
+
+
+
+state 86
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr ASS_DES expr .   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+
+    ASS_DES	error (nonassociative)
+
+    $default	reduce using rule 20 (expr)
+
+
+
+state 87
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr GREATER_EQUAL expr .   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 55 (bool_expr)
+
+
+
+state 88
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr GREATER expr .   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 56 (bool_expr)
+
+
+
+state 89
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr LESS_EQUAL expr .   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 57 (bool_expr)
+
+
+
+state 90
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr LESS expr .   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 58 (bool_expr)
+
+
+
+state 91
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr EQUAL expr .   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 59 (bool_expr)
+
+
+
+state 92
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    bool_expr  ->  expr DISTINCT expr .   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    GREATER_EQUAL	error (nonassociative)
+    GREATER	error (nonassociative)
+    LESS_EQUAL	error (nonassociative)
+    LESS	error (nonassociative)
+    EQUAL	error (nonassociative)
+    DISTINCT	error (nonassociative)
+
+    $default	reduce using rule 60 (bool_expr)
+
+
+
+state 93
+
+    bool_expr  ->  id_expr IS ID_ .   (rule 64)
+
+    $default	reduce using rule 64 (bool_expr)
+
+
+
+state 94
+
+    bool_expr  ->  func_call IS ID_ .   (rule 65)
+
+    $default	reduce using rule 65 (bool_expr)
+
+
+
+state 95
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr AND_ bool_expr .   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+
+
+    PLUS	reduce using rule 12 (expr)
+    PLUS	[reduce using rule 61 (bool_expr)]
+    MINUS	reduce using rule 12 (expr)
+    MINUS	[reduce using rule 61 (bool_expr)]
+    TIMES	reduce using rule 12 (expr)
+    TIMES	[reduce using rule 61 (bool_expr)]
+    DIV 	reduce using rule 12 (expr)
+    DIV 	[reduce using rule 61 (bool_expr)]
+    POW 	reduce using rule 12 (expr)
+    POW 	[reduce using rule 61 (bool_expr)]
+    RPARENT	reduce using rule 61 (bool_expr)
+    SEMICOLON	reduce using rule 61 (bool_expr)
+    COLON	reduce using rule 61 (bool_expr)
+    ASSIGN	reduce using rule 12 (expr)
+    ASSIGN	[reduce using rule 61 (bool_expr)]
+    ASS_DES	reduce using rule 12 (expr)
+    ASS_DES	[reduce using rule 61 (bool_expr)]
+    ELSE	reduce using rule 61 (bool_expr)
+    ELIF	reduce using rule 61 (bool_expr)
+    DISTINCT	reduce using rule 12 (expr)
+    DISTINCT	[reduce using rule 61 (bool_expr)]
+    AND_	reduce using rule 12 (expr)
+    AND_	[reduce using rule 61 (bool_expr)]
+    NOT_	reduce using rule 12 (expr)
+    NOT_	[reduce using rule 61 (bool_expr)]
+    OR_ 	reduce using rule 12 (expr)
+    OR_ 	[reduce using rule 61 (bool_expr)]
+    LET 	reduce using rule 12 (expr)
+    LET 	[reduce using rule 61 (bool_expr)]
+    TYPE	reduce using rule 61 (bool_expr)
+    $default	reduce using rule 12 (expr)
+
+
+
+state 96
+
+    expr  ->  bool_expr .   (rule 12)
+    bool_expr  ->  bool_expr . AND_ bool_expr   (rule 61)
+    bool_expr  ->  bool_expr . OR_ bool_expr   (rule 62)
+    bool_expr  ->  bool_expr OR_ bool_expr .   (rule 62)
+
+
+    PLUS	reduce using rule 12 (expr)
+    PLUS	[reduce using rule 62 (bool_expr)]
+    MINUS	reduce using rule 12 (expr)
+    MINUS	[reduce using rule 62 (bool_expr)]
+    TIMES	reduce using rule 12 (expr)
+    TIMES	[reduce using rule 62 (bool_expr)]
+    DIV 	reduce using rule 12 (expr)
+    DIV 	[reduce using rule 62 (bool_expr)]
+    POW 	reduce using rule 12 (expr)
+    POW 	[reduce using rule 62 (bool_expr)]
+    RPARENT	reduce using rule 62 (bool_expr)
+    SEMICOLON	reduce using rule 62 (bool_expr)
+    COLON	reduce using rule 62 (bool_expr)
+    ASSIGN	reduce using rule 12 (expr)
+    ASSIGN	[reduce using rule 62 (bool_expr)]
+    ASS_DES	reduce using rule 12 (expr)
+    ASS_DES	[reduce using rule 62 (bool_expr)]
+    ELSE	reduce using rule 62 (bool_expr)
+    ELIF	reduce using rule 62 (bool_expr)
+    DISTINCT	reduce using rule 12 (expr)
+    DISTINCT	[reduce using rule 62 (bool_expr)]
+    AND_	reduce using rule 12 (expr)
+    AND_	[reduce using rule 62 (bool_expr)]
+    NOT_	reduce using rule 12 (expr)
+    NOT_	[reduce using rule 62 (bool_expr)]
+    OR_ 	reduce using rule 12 (expr)
+    OR_ 	[reduce using rule 62 (bool_expr)]
+    LET 	reduce using rule 12 (expr)
+    LET 	[reduce using rule 62 (bool_expr)]
+    TYPE	reduce using rule 62 (bool_expr)
+    $default	reduce using rule 12 (expr)
+
+
+
+state 97
+
+    new_expr  ->  NEW ID_ . LPARENT expr_list RPARENT   (rule 39)
+
+    LPARENT	shift, and go to state 112
+
+
+
+state 98
+
+    func_call  ->  ID_ LPARENT expr_list RPARENT .   (rule 45)
+
+    $default	reduce using rule 45 (func_call)
+
+
+
+state 99
+
+    expr_list  ->  expr_list COLON . expr   (rule 43)
+    expr_list  ->  expr_list COLON . new_expr   (rule 44)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 113
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 114
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 100
+
+    member_access_expr  ->  ID_ ACCESS ID_ LPARENT . expr_list RPARENT   (rule 88)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    $default	reduce using rule 40 (expr_list)
+
+    expr	go to state 64
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 65
+    expr_list	go to state 115
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 101
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list . RPARENT INLINE expr   (rule 22)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list . RPARENT TWOPOINTS ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list . RPARENT LKEY lines RKEY   (rule 24)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list . RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 25)
+    args_list  ->  args_list . COLON id_expr   (rule 28)
+
+    RPARENT	shift, and go to state 116
+    COLON	shift, and go to state 117
+
+
+
+state 102
+
+    args_list  ->  id_expr .   (rule 27)
+
+    $default	reduce using rule 27 (args_list)
+
+
+
+state 103
+
+    conditional  ->  LPARENT bool_expr RPARENT . expr ELSE expr   (rule 66)
+    conditional  ->  LPARENT bool_expr RPARENT . lines_block ELSE expr   (rule 67)
+    conditional  ->  LPARENT bool_expr RPARENT . expr ELSE lines_block   (rule 68)
+    conditional  ->  LPARENT bool_expr RPARENT . lines_block ELSE lines_block   (rule 69)
+    conditional  ->  LPARENT bool_expr RPARENT . expr ELIF conditional   (rule 70)
+    conditional  ->  LPARENT bool_expr RPARENT . lines_block ELIF conditional   (rule 71)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    lines_block	go to state 118
+    expr	go to state 119
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 104
+
+    while_expr  ->  LPARENT bool_expr RPARENT . lines_block   (rule 72)
+    while_expr  ->  LPARENT bool_expr RPARENT . expr   (rule 73)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    lines_block	go to state 120
+    expr	go to state 121
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 105
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    var_assign_list  ->  id_expr ASSIGN expr .   (rule 33)
+    var_assign_list  ->  id_expr ASSIGN expr . AS_ ID_   (rule 34)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    AS_ 	shift, and go to state 122
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 33 (var_assign_list)
+
+
+
+state 106
+
+    var_assign_list  ->  id_expr ASSIGN new_expr .   (rule 35)
+
+    $default	reduce using rule 35 (var_assign_list)
+
+
+
+state 107
+
+    var_assign_list  ->  var_assign_list COLON id_expr . ASSIGN expr   (rule 36)
+    var_assign_list  ->  var_assign_list COLON id_expr . ASSIGN expr AS_ ID_   (rule 37)
+    var_assign_list  ->  var_assign_list COLON id_expr . ASSIGN new_expr   (rule 38)
+
+    ASSIGN	shift, and go to state 123
+
+
+
+state 108
+
+    let_assign  ->  LET var_assign_list IN lines_block .   (rule 32)
+
+    $default	reduce using rule 32 (let_assign)
+
+
+
+state 109
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    let_assign  ->  LET var_assign_list IN expr .   (rule 31)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASS_DES	shift, and go to state 51
+
+    ASSIGN	error (nonassociative)
+
+    $default	reduce using rule 31 (let_assign)
+
+
+
+state 110
+
+    args_list  ->  args_list . COLON id_expr   (rule 28)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list . RPARENT LKEY type_body_elements RKEY   (rule 75)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list . RPARENT INHERITS ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list . RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    RPARENT	shift, and go to state 124
+    COLON	shift, and go to state 117
+
+
+
+state 111
+
+    type_node_decl  ->  TYPE ID_ LKEY type_body_elements . RKEY   (rule 74)
+    type_body_elements  ->  type_body_elements . attribute   (rule 79)
+    type_body_elements  ->  type_body_elements . method   (rule 80)
+
+    ID_ 	shift, and go to state 125
+    RKEY	shift, and go to state 126
+
+    id_expr	go to state 127
+    attribute	go to state 128
+    method	go to state 129
+
+
+
+state 112
+
+    new_expr  ->  NEW ID_ LPARENT . expr_list RPARENT   (rule 39)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    $default	reduce using rule 40 (expr_list)
+
+    expr	go to state 64
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 65
+    expr_list	go to state 130
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 113
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    expr_list  ->  expr_list COLON expr .   (rule 43)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 43 (expr_list)
+
+
+
+state 114
+
+    expr_list  ->  expr_list COLON new_expr .   (rule 44)
+
+    $default	reduce using rule 44 (expr_list)
+
+
+
+state 115
+
+    expr_list  ->  expr_list . COLON expr   (rule 43)
+    expr_list  ->  expr_list . COLON new_expr   (rule 44)
+    member_access_expr  ->  ID_ ACCESS ID_ LPARENT expr_list . RPARENT   (rule 88)
+
+    RPARENT	shift, and go to state 131
+    COLON	shift, and go to state 99
+
+
+
+state 116
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT . INLINE expr   (rule 22)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT . TWOPOINTS ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT . LKEY lines RKEY   (rule 24)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT . TWOPOINTS ID_ LKEY lines RKEY   (rule 25)
+
+    LKEY	shift, and go to state 132
+    INLINE	shift, and go to state 133
+    TWOPOINTS	shift, and go to state 134
+
+
+
+state 117
+
+    args_list  ->  args_list COLON . id_expr   (rule 28)
+
+    ID_ 	shift, and go to state 40
+
+    id_expr	go to state 135
+
+
+
+state 118
+
+    conditional  ->  LPARENT bool_expr RPARENT lines_block . ELSE expr   (rule 67)
+    conditional  ->  LPARENT bool_expr RPARENT lines_block . ELSE lines_block   (rule 69)
+    conditional  ->  LPARENT bool_expr RPARENT lines_block . ELIF conditional   (rule 71)
+
+    ELSE	shift, and go to state 136
+    ELIF	shift, and go to state 137
+
+
+
+state 119
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    conditional  ->  LPARENT bool_expr RPARENT expr . ELSE expr   (rule 66)
+    conditional  ->  LPARENT bool_expr RPARENT expr . ELSE lines_block   (rule 68)
+    conditional  ->  LPARENT bool_expr RPARENT expr . ELIF conditional   (rule 70)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    ELSE	shift, and go to state 138
+    ELIF	shift, and go to state 139
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 120
+
+    while_expr  ->  LPARENT bool_expr RPARENT lines_block .   (rule 72)
+
+    $default	reduce using rule 72 (while_expr)
+
+
+
+state 121
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    while_expr  ->  LPARENT bool_expr RPARENT expr .   (rule 73)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    PLUS	[reduce using rule 73 (while_expr)]
+    MINUS	[reduce using rule 73 (while_expr)]
+    TIMES	[reduce using rule 73 (while_expr)]
+    DIV 	[reduce using rule 73 (while_expr)]
+    POW 	[reduce using rule 73 (while_expr)]
+    ASSIGN	[reduce using rule 73 (while_expr)]
+    ASS_DES	[reduce using rule 73 (while_expr)]
+    GREATER_EQUAL	[reduce using rule 73 (while_expr)]
+    GREATER	[reduce using rule 73 (while_expr)]
+    LESS_EQUAL	[reduce using rule 73 (while_expr)]
+    LESS	[reduce using rule 73 (while_expr)]
+    EQUAL	[reduce using rule 73 (while_expr)]
+    DISTINCT	[reduce using rule 73 (while_expr)]
+    $default	reduce using rule 73 (while_expr)
+
+
+
+state 122
+
+    var_assign_list  ->  id_expr ASSIGN expr AS_ . ID_   (rule 34)
+
+    ID_ 	shift, and go to state 140
+
+
+
+state 123
+
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN . expr   (rule 36)
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN . expr AS_ ID_   (rule 37)
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN . new_expr   (rule 38)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NEW 	shift, and go to state 63
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 141
+    id_expr	go to state 18
+    let_assign	go to state 19
+    new_expr	go to state 142
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 124
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT . LKEY type_body_elements RKEY   (rule 75)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT . INHERITS ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT . INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    LKEY	shift, and go to state 143
+    INHERITS	shift, and go to state 144
+
+
+
+state 125
+
+    id_expr  ->  ID_ . TWOPOINTS ID_   (rule 29)
+    id_expr  ->  ID_ .   (rule 30)
+    method  ->  ID_ . LPARENT args_list RPARENT INLINE expr SEMICOLON   (rule 83)
+    method  ->  ID_ . LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ . LPARENT args_list RPARENT LKEY lines RKEY   (rule 85)
+    method  ->  ID_ . LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 86)
+
+    LPARENT	shift, and go to state 145
+    TWOPOINTS	shift, and go to state 27
+
+    $default	reduce using rule 30 (id_expr)
+
+
+
+state 126
+
+    type_node_decl  ->  TYPE ID_ LKEY type_body_elements RKEY .   (rule 74)
+
+    $default	reduce using rule 74 (type_node_decl)
+
+
+
+state 127
+
+    attribute  ->  id_expr . ASSIGN expr SEMICOLON   (rule 81)
+    attribute  ->  id_expr . ASSIGN expr AS_ ID_ SEMICOLON   (rule 82)
+
+    ASSIGN	shift, and go to state 146
+
+
+
+state 128
+
+    type_body_elements  ->  type_body_elements attribute .   (rule 79)
+
+    $default	reduce using rule 79 (type_body_elements)
+
+
+
+state 129
+
+    type_body_elements  ->  type_body_elements method .   (rule 80)
+
+    $default	reduce using rule 80 (type_body_elements)
+
+
+
+state 130
+
+    new_expr  ->  NEW ID_ LPARENT expr_list . RPARENT   (rule 39)
+    expr_list  ->  expr_list . COLON expr   (rule 43)
+    expr_list  ->  expr_list . COLON new_expr   (rule 44)
+
+    RPARENT	shift, and go to state 147
+    COLON	shift, and go to state 99
+
+
+
+state 131
+
+    member_access_expr  ->  ID_ ACCESS ID_ LPARENT expr_list RPARENT .   (rule 88)
+
+    $default	reduce using rule 88 (member_access_expr)
+
+
+
+state 132
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT LKEY . lines RKEY   (rule 24)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 4 (lines)
+
+    lines	go to state 148
+    non_empty_lines	go to state 31
+    line	go to state 32
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 133
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT INLINE . expr   (rule 22)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 149
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 134
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS . ID_ INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS . ID_ LKEY lines RKEY   (rule 25)
+
+    ID_ 	shift, and go to state 150
+
+
+
+state 135
+
+    args_list  ->  args_list COLON id_expr .   (rule 28)
+
+    $default	reduce using rule 28 (args_list)
+
+
+
+state 136
+
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELSE . expr   (rule 67)
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELSE . lines_block   (rule 69)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    lines_block	go to state 151
+    expr	go to state 152
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 137
+
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELIF . conditional   (rule 71)
+
+    LPARENT	shift, and go to state 34
+
+    conditional	go to state 153
+
+
+
+state 138
+
+    conditional  ->  LPARENT bool_expr RPARENT expr ELSE . expr   (rule 66)
+    conditional  ->  LPARENT bool_expr RPARENT expr ELSE . lines_block   (rule 68)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    LKEY	shift, and go to state 7
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    lines_block	go to state 154
+    expr	go to state 155
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 139
+
+    conditional  ->  LPARENT bool_expr RPARENT expr ELIF . conditional   (rule 70)
+
+    LPARENT	shift, and go to state 34
+
+    conditional	go to state 156
+
+
+
+state 140
+
+    var_assign_list  ->  id_expr ASSIGN expr AS_ ID_ .   (rule 34)
+
+    $default	reduce using rule 34 (var_assign_list)
+
+
+
+state 141
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN expr .   (rule 36)
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN expr . AS_ ID_   (rule 37)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    AS_ 	shift, and go to state 157
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 36 (var_assign_list)
+
+
+
+state 142
+
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN new_expr .   (rule 38)
+
+    $default	reduce using rule 38 (var_assign_list)
+
+
+
+state 143
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT LKEY . type_body_elements RKEY   (rule 75)
+
+    $default	reduce using rule 78 (type_body_elements)
+
+    type_body_elements	go to state 158
+
+
+
+state 144
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS . ID_ LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS . ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    ID_ 	shift, and go to state 159
+
+
+
+state 145
+
+    method  ->  ID_ LPARENT . args_list RPARENT INLINE expr SEMICOLON   (rule 83)
+    method  ->  ID_ LPARENT . args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ LPARENT . args_list RPARENT LKEY lines RKEY   (rule 85)
+    method  ->  ID_ LPARENT . args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 86)
+
+    ID_ 	shift, and go to state 40
+
+    $default	reduce using rule 26 (args_list)
+
+    args_list	go to state 160
+    id_expr	go to state 102
+
+
+
+state 146
+
+    attribute  ->  id_expr ASSIGN . expr SEMICOLON   (rule 81)
+    attribute  ->  id_expr ASSIGN . expr AS_ ID_ SEMICOLON   (rule 82)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 161
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 147
+
+    new_expr  ->  NEW ID_ LPARENT expr_list RPARENT .   (rule 39)
+
+    $default	reduce using rule 39 (new_expr)
+
+
+
+state 148
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines . RKEY   (rule 24)
+
+    RKEY	shift, and go to state 162
+
+
+
+state 149
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr .   (rule 22)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 22 (func_asign)
+
+
+
+state 150
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ . INLINE expr   (rule 23)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ . LKEY lines RKEY   (rule 25)
+
+    LKEY	shift, and go to state 163
+    INLINE	shift, and go to state 164
+
+
+
+state 151
+
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELSE lines_block .   (rule 69)
+
+    $default	reduce using rule 69 (conditional)
+
+
+
+state 152
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELSE expr .   (rule 67)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    $default	reduce using rule 67 (conditional)
+
+
+
+state 153
+
+    conditional  ->  LPARENT bool_expr RPARENT lines_block ELIF conditional .   (rule 71)
+
+    $default	reduce using rule 71 (conditional)
+
+
+
+state 154
+
+    conditional  ->  LPARENT bool_expr RPARENT expr ELSE lines_block .   (rule 68)
+
+    $default	reduce using rule 68 (conditional)
+
+
+
+state 155
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    conditional  ->  LPARENT bool_expr RPARENT expr ELSE expr .   (rule 66)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+
+    $default	reduce using rule 66 (conditional)
+
+
+
+state 156
+
+    conditional  ->  LPARENT bool_expr RPARENT expr ELIF conditional .   (rule 70)
+
+    $default	reduce using rule 70 (conditional)
+
+
+
+state 157
+
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN expr AS_ . ID_   (rule 37)
+
+    ID_ 	shift, and go to state 165
+
+
+
+state 158
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements . RKEY   (rule 75)
+    type_body_elements  ->  type_body_elements . attribute   (rule 79)
+    type_body_elements  ->  type_body_elements . method   (rule 80)
+
+    ID_ 	shift, and go to state 125
+    RKEY	shift, and go to state 166
+
+    id_expr	go to state 127
+    attribute	go to state 128
+    method	go to state 129
+
+
+
+state 159
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ . LKEY type_body_elements RKEY   (rule 76)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ . LPARENT args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    LPARENT	shift, and go to state 167
+    LKEY	shift, and go to state 168
+
+
+
+state 160
+
+    args_list  ->  args_list . COLON id_expr   (rule 28)
+    method  ->  ID_ LPARENT args_list . RPARENT INLINE expr SEMICOLON   (rule 83)
+    method  ->  ID_ LPARENT args_list . RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ LPARENT args_list . RPARENT LKEY lines RKEY   (rule 85)
+    method  ->  ID_ LPARENT args_list . RPARENT TWOPOINTS ID_ LKEY lines RKEY   (rule 86)
+
+    RPARENT	shift, and go to state 169
+    COLON	shift, and go to state 117
+
+
+
+state 161
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    attribute  ->  id_expr ASSIGN expr . SEMICOLON   (rule 81)
+    attribute  ->  id_expr ASSIGN expr . AS_ ID_ SEMICOLON   (rule 82)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    SEMICOLON	shift, and go to state 170
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    AS_ 	shift, and go to state 171
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 162
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY .   (rule 24)
+
+    $default	reduce using rule 24 (func_asign)
+
+
+
+state 163
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY . lines RKEY   (rule 25)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 4 (lines)
+
+    lines	go to state 172
+    non_empty_lines	go to state 31
+    line	go to state 32
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 164
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE . expr   (rule 23)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 173
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 165
+
+    var_assign_list  ->  var_assign_list COLON id_expr ASSIGN expr AS_ ID_ .   (rule 37)
+
+    $default	reduce using rule 37 (var_assign_list)
+
+
+
+state 166
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY .   (rule 75)
+
+    $default	reduce using rule 75 (type_node_decl)
+
+
+
+state 167
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT . args_list RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    ID_ 	shift, and go to state 40
+
+    $default	reduce using rule 26 (args_list)
+
+    args_list	go to state 174
+    id_expr	go to state 102
+
+
+
+state 168
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY . type_body_elements RKEY   (rule 76)
+
+    $default	reduce using rule 78 (type_body_elements)
+
+    type_body_elements	go to state 175
+
+
+
+state 169
+
+    method  ->  ID_ LPARENT args_list RPARENT . INLINE expr SEMICOLON   (rule 83)
+    method  ->  ID_ LPARENT args_list RPARENT . TWOPOINTS ID_ INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ LPARENT args_list RPARENT . LKEY lines RKEY   (rule 85)
+    method  ->  ID_ LPARENT args_list RPARENT . TWOPOINTS ID_ LKEY lines RKEY   (rule 86)
+
+    LKEY	shift, and go to state 176
+    INLINE	shift, and go to state 177
+    TWOPOINTS	shift, and go to state 178
+
+
+
+state 170
+
+    attribute  ->  id_expr ASSIGN expr SEMICOLON .   (rule 81)
+
+    $default	reduce using rule 81 (attribute)
+
+
+
+state 171
+
+    attribute  ->  id_expr ASSIGN expr AS_ . ID_ SEMICOLON   (rule 82)
+
+    ID_ 	shift, and go to state 179
+
+
+
+state 172
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines . RKEY   (rule 25)
+
+    RKEY	shift, and go to state 180
+
+
+
+state 173
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr .   (rule 23)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+    $default	reduce using rule 23 (func_asign)
+
+
+
+state 174
+
+    args_list  ->  args_list . COLON id_expr   (rule 28)
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list . RPARENT LKEY type_body_elements RKEY   (rule 77)
+
+    RPARENT	shift, and go to state 181
+    COLON	shift, and go to state 117
+
+
+
+state 175
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements . RKEY   (rule 76)
+    type_body_elements  ->  type_body_elements . attribute   (rule 79)
+    type_body_elements  ->  type_body_elements . method   (rule 80)
+
+    ID_ 	shift, and go to state 125
+    RKEY	shift, and go to state 182
+
+    id_expr	go to state 127
+    attribute	go to state 128
+    method	go to state 129
+
+
+
+state 176
+
+    method  ->  ID_ LPARENT args_list RPARENT LKEY . lines RKEY   (rule 85)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 4 (lines)
+
+    lines	go to state 183
+    non_empty_lines	go to state 31
+    line	go to state 32
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 177
+
+    method  ->  ID_ LPARENT args_list RPARENT INLINE . expr SEMICOLON   (rule 83)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 184
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 178
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS . ID_ INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS . ID_ LKEY lines RKEY   (rule 86)
+
+    ID_ 	shift, and go to state 185
+
+
+
+state 179
+
+    attribute  ->  id_expr ASSIGN expr AS_ ID_ . SEMICOLON   (rule 82)
+
+    SEMICOLON	shift, and go to state 186
+
+
+
+state 180
+
+    func_asign  ->  FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY .   (rule 25)
+
+    $default	reduce using rule 25 (func_asign)
+
+
+
+state 181
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT . LKEY type_body_elements RKEY   (rule 77)
+
+    LKEY	shift, and go to state 187
+
+
+
+state 182
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY .   (rule 76)
+
+    $default	reduce using rule 76 (type_node_decl)
+
+
+
+state 183
+
+    method  ->  ID_ LPARENT args_list RPARENT LKEY lines . RKEY   (rule 85)
+
+    RKEY	shift, and go to state 188
+
+
+
+state 184
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    method  ->  ID_ LPARENT args_list RPARENT INLINE expr . SEMICOLON   (rule 83)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    SEMICOLON	shift, and go to state 189
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 185
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ . INLINE expr SEMICOLON   (rule 84)
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ . LKEY lines RKEY   (rule 86)
+
+    LKEY	shift, and go to state 190
+    INLINE	shift, and go to state 191
+
+
+
+state 186
+
+    attribute  ->  id_expr ASSIGN expr AS_ ID_ SEMICOLON .   (rule 82)
+
+    $default	reduce using rule 82 (attribute)
+
+
+
+state 187
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY . type_body_elements RKEY   (rule 77)
+
+    $default	reduce using rule 78 (type_body_elements)
+
+    type_body_elements	go to state 192
+
+
+
+state 188
+
+    method  ->  ID_ LPARENT args_list RPARENT LKEY lines RKEY .   (rule 85)
+
+    $default	reduce using rule 85 (method)
+
+
+
+state 189
+
+    method  ->  ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON .   (rule 83)
+
+    $default	reduce using rule 83 (method)
+
+
+
+state 190
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY . lines RKEY   (rule 86)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    FUNCTION_	shift, and go to state 8
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+    TYPE	shift, and go to state 13
+
+    $default	reduce using rule 4 (lines)
+
+    lines	go to state 193
+    non_empty_lines	go to state 31
+    line	go to state 32
+    expr	go to state 16
+    func_asign	go to state 17
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    type_node_decl	go to state 23
+    member_access_expr	go to state 24
+
+
+
+state 191
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE . expr SEMICOLON   (rule 84)
+
+    NUMBER	shift, and go to state 1
+    BOOLEAN	shift, and go to state 2
+    STRING	shift, and go to state 3
+    ID_ 	shift, and go to state 4
+    MINUS	shift, and go to state 5
+    LPARENT	shift, and go to state 6
+    IF  	shift, and go to state 9
+    WHILE	shift, and go to state 10
+    NOT_	shift, and go to state 11
+    LET 	shift, and go to state 12
+
+    expr	go to state 194
+    id_expr	go to state 18
+    let_assign	go to state 19
+    func_call	go to state 20
+    arit_op	go to state 21
+    bool_expr	go to state 22
+    member_access_expr	go to state 24
+
+
+
+state 192
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements . RKEY   (rule 77)
+    type_body_elements  ->  type_body_elements . attribute   (rule 79)
+    type_body_elements  ->  type_body_elements . method   (rule 80)
+
+    ID_ 	shift, and go to state 125
+    RKEY	shift, and go to state 195
+
+    id_expr	go to state 127
+    attribute	go to state 128
+    method	go to state 129
+
+
+
+state 193
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines . RKEY   (rule 86)
+
+    RKEY	shift, and go to state 196
+
+
+
+state 194
+
+    expr  ->  expr . ASS_DES expr   (rule 20)
+    expr  ->  expr . ASSIGN expr   (rule 21)
+    arit_op  ->  expr . PLUS expr   (rule 48)
+    arit_op  ->  expr . MINUS expr   (rule 49)
+    arit_op  ->  expr . TIMES expr   (rule 50)
+    arit_op  ->  expr . DIV expr   (rule 51)
+    arit_op  ->  expr . POW expr   (rule 52)
+    bool_expr  ->  expr . GREATER_EQUAL expr   (rule 55)
+    bool_expr  ->  expr . GREATER expr   (rule 56)
+    bool_expr  ->  expr . LESS_EQUAL expr   (rule 57)
+    bool_expr  ->  expr . LESS expr   (rule 58)
+    bool_expr  ->  expr . EQUAL expr   (rule 59)
+    bool_expr  ->  expr . DISTINCT expr   (rule 60)
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr . SEMICOLON   (rule 84)
+
+    PLUS	shift, and go to state 44
+    MINUS	shift, and go to state 45
+    TIMES	shift, and go to state 46
+    DIV 	shift, and go to state 47
+    POW 	shift, and go to state 48
+    SEMICOLON	shift, and go to state 197
+    ASSIGN	shift, and go to state 50
+    ASS_DES	shift, and go to state 51
+    GREATER_EQUAL	shift, and go to state 52
+    GREATER	shift, and go to state 53
+    LESS_EQUAL	shift, and go to state 54
+    LESS	shift, and go to state 55
+    EQUAL	shift, and go to state 56
+    DISTINCT	shift, and go to state 57
+
+
+
+state 195
+
+    type_node_decl  ->  TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY .   (rule 77)
+
+    $default	reduce using rule 77 (type_node_decl)
+
+
+
+state 196
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY .   (rule 86)
+
+    $default	reduce using rule 86 (method)
+
+
+
+state 197
+
+    method  ->  ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON .   (rule 84)
+
+    $default	reduce using rule 84 (method)
+
+
+
+state 198
+
+    $   	go to state 199
+
+
+
+state 199
+
+    $   	go to state 200
+
+
+
+state 200
+
+    $default	accept
