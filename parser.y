@@ -48,7 +48,7 @@ extern ASTNode* root;
 %token STRING
 %token ID
 %token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS 
-%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_
+%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_ ARROBA_ D_ARROBA_
 %token LET
 %token IN
 %token TYPE
@@ -130,6 +130,8 @@ expr:
 	| member_access_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
+	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3); }
+	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3); }
     ;
 
 func_asign:
