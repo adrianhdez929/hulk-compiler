@@ -53,6 +53,9 @@ extern "C"  {
 "<"			{ return LESS; }
 "=="		{ return EQUAL; }
 "!=" 		{ return DISTINCT; }
+"&" 		{ return AND_; }
+"|" 		{ return OR_; }
+"!" 		{ return NOT_; }
 "."			{ return ACCESS; }
 
 [ \t\n]     ; /* skip whitespace */
