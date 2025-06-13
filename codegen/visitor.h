@@ -60,7 +60,10 @@ class CodegenVisitor : public Visitor {
     std::map<std::string, llvm::StructType*> typeStructMap;
     std::map<std::string, std::vector<std::string>> typeAttributeMap;
     std::map<std::string, llvm::Value*> objectInstances;
-    std::map<std::string, std::string> objectTypes; 
+    std::map<std::string, std::string> objectTypes;
+    // Add attribute type map for struct fields
+    typedef std::map<std::string, llvm::Type*> AttributeTypeMap;
+    std::map<std::string, AttributeTypeMap> typeAttributeTypeMap; 
     
     void createStandardLibraryDeclarations();
     llvm::Function* createMainFunction();

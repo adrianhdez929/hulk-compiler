@@ -136,7 +136,7 @@ class SemanticCheckerVisitor : public Visitor {
                                                       std::shared_ptr<TypeInfo> leftType, 
                                                       std::shared_ptr<TypeInfo> rightType) {
         if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^") {
-            return Context::intType;
+            return Context::numberType;
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=" ||
                    op == "&&" || op == "||" || op == "and" || op == "or") {
             return Context::boolType;

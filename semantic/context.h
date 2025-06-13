@@ -97,7 +97,7 @@ public:
     int parentVarIndex;
     int parentFuncIndex;
 
-    static std::shared_ptr<TypeInfo> intType;
+    static std::shared_ptr<TypeInfo> numberType;
     static std::shared_ptr<TypeInfo> stringType;
     static std::shared_ptr<TypeInfo> boolType;
     static std::shared_ptr<TypeInfo> voidType;

@@ -247,6 +247,31 @@ void CodegenVisitor::visit(StringNode* node, Context* context) {
     }
     
     cout << "Generating code for String Node: " << node->value << endl;
+    
+    // Create a global string constant
+    std::string cleanStr = node->value;
+    if (cleanStr.length() >= 2 && cleanStr.front() == '"' && cleanStr.back() == '"') {
+        cleanStr = cleanStr.substr(1, cleanStr.length() - 2);
+    }
+    
+    llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, cleanStr);
+    
+    llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
+        *TheModule,
+        strConstant->getType(),
+        true,                                
+        llvm::GlobalValue::PrivateLinkage,
+        strConstant,
+        ".str"                              
+    );
+    
+    // Create a GEP instruction to get a pointer to the string
+    llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
+    std::vector<llvm::Value*> indices = {zero, zero};
+    llvm::Value* strPtr = Builder->CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "strptr");
+    
+    // Store the string pointer as the current value
+    currentValue = strPtr;
 }
 
 void CodegenVisitor::visit(UnaryOpNode* node, Context* context) {
@@ -257,6 +282,25 @@ void CodegenVisitor::visit(UnaryOpNode* node, Context* context) {
     cout << "Generating code for UnaryOp Node: " << node->op << endl;
     
     node->node->accept(this, context);
+    
+    if (node->op == "-") {
+        // Negate the value
+        if (currentValue->getType()->isDoubleTy()) {
+            currentValue = Builder->CreateFNeg(currentValue, "negtmp");
+        } else if (currentValue->getType()->isIntegerTy()) {
+            currentValue = Builder->CreateNeg(currentValue, "negtmp");
+        }
+    } else if (node->op == "!") {
+        // Logical not
+        if (currentValue->getType()->isIntegerTy(1)) {
+            currentValue = Builder->CreateNot(currentValue, "nottmp");
+        } else if (currentValue->getType()->isDoubleTy()) {
+            // Convert to bool first
+            llvm::Value* zero = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0));
+            llvm::Value* cmp = Builder->CreateFCmpOEQ(currentValue, zero, "cmptmp");
+            currentValue = cmp;
+        }
+    }
 }
 
 void CodegenVisitor::visit(BinOpNode* node, Context* context) {
@@ -344,17 +388,60 @@ void CodegenVisitor::visit(FunctionCallNode* node, Context* context) {
         
         StringNode* strNode = nullptr;
         
+        // Process string literals directly
         if (dynamic_cast<StringNode*>(node->argument) != nullptr) {
             strNode = dynamic_cast<StringNode*>(node->argument);
         }
+        // Process arguments in a node vector (e.g. from parsing expressions)
         else if (auto nodeVector = dynamic_cast<ASTNodeVector*>(node->argument)) {
             if (!nodeVector->children.empty()) {
+                // First check for a direct string node
                 strNode = dynamic_cast<StringNode*>(nodeVector->children[0]);
+                
+                // If not a string node, check if it's an ID node and handle accordingly
+                if (!strNode && dynamic_cast<IDNode*>(nodeVector->children[0]) != nullptr) {
+                    IDNode* idNode = dynamic_cast<IDNode*>(nodeVector->children[0]);
+                    idNode->accept(this, context);
+                    llvm::Value* varValue = currentValue;
+                    
+                    // Handle different variable types
+                    if (varValue->getType()->isPointerTy()) {
+                        // It's a string variable, use the print function directly
+                        std::vector<llvm::Value*> args = {varValue};
+                        currentValue = Builder->CreateCall(PrintFunc, args, "printcall");
+                        cout << "Called print function for string pointer value" << endl;
+                        return;
+                    } else if (varValue->getType()->isDoubleTy()) {
+                        // It's a double variable, use print_double
+                        llvm::Function* printDoubleFunc = TheModule->getFunction("print_double");
+                        if (printDoubleFunc) {
+                            std::vector<llvm::Value*> args = {varValue};
+                            currentValue = Builder->CreateCall(printDoubleFunc, args, "printcall");
+                            cout << "Called print_double function for double value" << endl;
+                            return;
+                        }
+                    } else if (varValue->getType()->isIntegerTy(1)) {
+                        // It's a boolean variable, use print_bool
+                        llvm::Function* printBoolFunc = TheModule->getFunction("print_bool");
+                        if (printBoolFunc) {
+                            std::vector<llvm::Value*> args = {varValue};
+                            currentValue = Builder->CreateCall(printBoolFunc, args, "printcall");
+                            cout << "Called print_bool function for boolean value" << endl;
+                            return;
+                        }
+                    }
+                    
+                    // Debug type info when we're not sure how to handle it
+                    std::string typeStr;
+                    llvm::raw_string_ostream typeStream(typeStr);
+                    varValue->getType()->print(typeStream);
+                    cout << "DEBUG: ID node value type: " << typeStream.str() << endl;
+                }
             }
         }
         
+        // Handle string literals
         if (strNode != nullptr) {
-            
             std::string cleanStr = strNode->value;
             if (cleanStr.length() >= 2 && cleanStr.front() == '"' && cleanStr.back() == '"') {
                 cleanStr = cleanStr.substr(1, cleanStr.length() - 2);
@@ -377,18 +464,44 @@ void CodegenVisitor::visit(FunctionCallNode* node, Context* context) {
             
             std::vector<llvm::Value*> args = {strPtr};
             currentValue = Builder->CreateCall(PrintFunc, args, "printcall");
+            cout << "Called print function for string literal" << endl;
             return;
         } 
+        // Handle ID nodes directly (variable references)
         else if (dynamic_cast<IDNode*>(node->argument) != nullptr) {
             IDNode* idNode = dynamic_cast<IDNode*>(node->argument);
             
             idNode->accept(this, context);
             llvm::Value* varValue = currentValue;
             
-            llvm::Function* printDoubleFunc = TheModule->getFunction("print_double");
-            if (printDoubleFunc && varValue && varValue->getType()->isDoubleTy()) {
+            // Debug the type of the value
+            std::string typeStr;
+            llvm::raw_string_ostream typeStream(typeStr);
+            varValue->getType()->print(typeStream);
+            cout << "DEBUG: Variable type for " << idNode->id_name << ": " << typeStream.str() << endl;
+            
+            if (varValue->getType()->isDoubleTy()) {
+                llvm::Function* printDoubleFunc = TheModule->getFunction("print_double");
+                if (printDoubleFunc) {
+                    std::vector<llvm::Value*> args = {varValue};
+                    currentValue = Builder->CreateCall(printDoubleFunc, args, "printcall");
+                    cout << "Called print_double function for variable " << idNode->id_name << endl;
+                    return;
+                }
+            } else if (varValue->getType()->isIntegerTy(1)) {
+                llvm::Function* printBoolFunc = TheModule->getFunction("print_bool");
+                if (printBoolFunc) {
+                    std::vector<llvm::Value*> args = {varValue};
+                    currentValue = Builder->CreateCall(printBoolFunc, args, "printcall");
+                    cout << "Called print_bool function for variable " << idNode->id_name << endl;
+                    return;
+                }
+            } else if (varValue->getType()->isPointerTy()) {
+                // Handle string variables
                 std::vector<llvm::Value*> args = {varValue};
-                currentValue = Builder->CreateCall(printDoubleFunc, args, "printcall");
+                currentValue = Builder->CreateCall(PrintFunc, args, "printcall");
+                cout << "Called print function for string pointer variable " << idNode->id_name << endl;
+                return;
             } else {
                 std::string idStr = idNode->id_name;
                 llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, idStr);
@@ -408,18 +521,27 @@ void CodegenVisitor::visit(FunctionCallNode* node, Context* context) {
                 
                 std::vector<llvm::Value*> args = {strPtr};
                 currentValue = Builder->CreateCall(PrintFunc, args, "printcall");
+                cout << "Called print function for variable name as string: " << idNode->id_name << endl;
             }
             return;
         }
+        // Handle other expressions (method calls, field access, etc.)
         else {
             node->argument->accept(this, context);
             llvm::Value* argValue = currentValue;
+            
+            // Debug the type of the value
+            std::string typeStr;
+            llvm::raw_string_ostream typeStream(typeStr);
+            argValue->getType()->print(typeStream);
+            cout << "DEBUG: Expression result type: " << typeStream.str() << endl;
             
             if (argValue->getType()->isDoubleTy()) {
                 llvm::Function* printDoubleFunc = TheModule->getFunction("print_double");
                 if (printDoubleFunc) {
                     std::vector<llvm::Value*> args = {argValue};
                     currentValue = Builder->CreateCall(printDoubleFunc, args, "printcall");
+                    cout << "Called print_double function for expression result" << endl;
                     return;
                 }
             } else if (argValue->getType()->isIntegerTy(1)) {
@@ -427,11 +549,18 @@ void CodegenVisitor::visit(FunctionCallNode* node, Context* context) {
                 if (printBoolFunc) {
                     std::vector<llvm::Value*> args = {argValue};
                     currentValue = Builder->CreateCall(printBoolFunc, args, "printcall");
+                    cout << "Called print_bool function for expression result" << endl;
                     return;
                 }
+            } else if (argValue->getType()->isPointerTy()) {
+                // Handle string values returned from field access or methods
+                std::vector<llvm::Value*> args = {argValue};
+                currentValue = Builder->CreateCall(PrintFunc, args, "printcall");
+                cout << "Called print function for string pointer expression result" << endl;
+                return;
             }
             
-            std::cerr << "Warning: Printing this value type is not implemented" << std::endl;
+            std::cerr << "Warning: Printing value type not implemented: " << typeStr << std::endl;
             return;
         }
     }
@@ -481,10 +610,31 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
         if (it != NamedValues.end()) {
             llvm::Value* varValue = it->second;
             if (llvm::isa<llvm::AllocaInst>(varValue)) {
-                currentValue = Builder->CreateLoad(llvm::Type::getDoubleTy(*TheContext), varValue, node->id_name);
+                llvm::AllocaInst* allocaInst = llvm::cast<llvm::AllocaInst>(varValue);
+                llvm::Type* allocaType = allocaInst->getAllocatedType();
+                
+                // Debug allocated type
+                std::string typeStr;
+                llvm::raw_string_ostream typeStream(typeStr);
+                allocaType->print(typeStream);
+                cout << "DEBUG: Variable " << node->id_name << " has allocated type: " << typeStream.str() << endl;
+                
+                currentValue = Builder->CreateLoad(allocaType, varValue, node->id_name);
+                
+                // Debug loaded value type
+                std::string valTypeStr;
+                llvm::raw_string_ostream valTypeStream(valTypeStr);
+                currentValue->getType()->print(valTypeStream);
+                cout << "DEBUG: Loaded " << node->id_name << " with type: " << valTypeStream.str() << endl;
+                
                 cout << "Loaded value from alloca for variable: " << node->id_name << endl;
             } else {
                 currentValue = varValue;
+                
+                std::string valTypeStr;
+                llvm::raw_string_ostream valTypeStream(valTypeStr);
+                currentValue->getType()->print(valTypeStream);
+                cout << "DEBUG: Using direct value for " << node->id_name << " with type: " << valTypeStr << endl;
             }
         } else {
             // In a real compiler, we would look up the variable in the symbol table
@@ -549,7 +699,30 @@ void CodegenVisitor::visit(LetAssign* node, Context* context) {
         
         assign->value->accept(this, context);
         
-        if (auto* idNode = dynamic_cast<IDNode*>(assign->value)) {
+        // Handle assignment from a NewTypeNode
+        if (auto* newTypeNode = dynamic_cast<NewTypeNode*>(assign->value)) {
+            std::string typeName = newTypeNode->id_type_name;
+            objectInstances[assign->var_id->id_name] = currentValue;
+            objectTypes[assign->var_id->id_name] = typeName;
+            
+            llvm::Function* function = Builder->GetInsertBlock()->getParent();
+            llvm::IRBuilder<> tmpBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
+            
+            llvm::AllocaInst* alloca = tmpBuilder.CreateAlloca(
+                llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0), 
+                nullptr, 
+                assign->var_id->id_name
+            );
+            
+            Builder->CreateStore(currentValue, alloca);
+            NamedValues[assign->var_id->id_name] = alloca;
+            
+            cout << "Let variable '" << assign->var_id->id_name 
+                 << "' allocated as new object of type '" << typeName << "'" << endl;
+            continue;
+        }
+        // Handle assignment from an IDNode (reference to existing object)
+        else if (auto* idNode = dynamic_cast<IDNode*>(assign->value)) {
             std::string sourceVarName = idNode->id_name;
             
             auto objIt = objectInstances.find(sourceVarName);
@@ -588,13 +761,41 @@ void CodegenVisitor::visit(LetAssign* node, Context* context) {
         
         llvm::Function* function = Builder->GetInsertBlock()->getParent();
         llvm::IRBuilder<> tmpBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
-        llvm::AllocaInst* alloca = tmpBuilder.CreateAlloca(llvm::Type::getDoubleTy(*TheContext), nullptr, assign->var_id->id_name);
+        
+        // Debug current value type
+        std::string typeStr;
+        llvm::raw_string_ostream typeStream(typeStr);
+        currentValue->getType()->print(typeStream);
+        cout << "DEBUG: Variable " << assign->var_id->id_name << " assignment value type: " << typeStream.str() << endl;
+        
+        // Set the appropriate allocation type based on the value type
+        llvm::Type* allocaType = llvm::Type::getDoubleTy(*TheContext);
+        
+        // Check if we're dealing with a string literal
+        if (auto* strNode = dynamic_cast<StringNode*>(assign->value)) {
+            allocaType = llvm::Type::getInt8PtrTy(*TheContext);
+            cout << "DEBUG: String literal detected, using pointer type" << endl;
+        }
+        // Check if value is a pointer type (including struct string fields)
+        else if (currentValue->getType()->isPointerTy()) {
+            allocaType = currentValue->getType();
+            cout << "DEBUG: Pointer type detected, using " << typeStream.str() << endl;
+        }
+        
+        llvm::AllocaInst* alloca = tmpBuilder.CreateAlloca(allocaType, nullptr, assign->var_id->id_name);
         
         Builder->CreateStore(currentValue, alloca);
         
         NamedValues[assign->var_id->id_name] = alloca;
         
-        cout << "Let variable '" << assign->var_id->id_name << "' allocated and assigned" << endl;
+        if (allocaType->isPointerTy() && assign->var_id->inferredType && 
+            assign->var_id->inferredType->name == "String") {
+            cout << "DEBUG: Marking " << assign->var_id->id_name << " as String type" << endl;
+            // Can track string variables in a separate map if needed
+        }
+        
+        cout << "Let variable '" << assign->var_id->id_name << "' allocated and assigned with type " 
+             << typeStream.str() << endl;
     }
 
     node->body->accept(this, context);
@@ -892,6 +1093,9 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
     std::vector<std::string> attributes;
     std::vector<AssignFuncNode*> methods;
     
+    // Use the member variable from visitor.h for attribute types
+    AttributeTypeMap attrTypeMap;
+    
     if (!node->parents.empty()) {
         std::string parentTypeName = node->parents[0];
         auto parentStructIt = typeStructMap.find(parentTypeName);
@@ -916,8 +1120,14 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         if (auto* varAssign = dynamic_cast<VarAssign*>(member)) {
             auto it = std::find(attributes.begin(), attributes.end(), varAssign->var_id->id_name);
             if (it == attributes.end()) {
-                structFields.push_back(llvm::Type::getDoubleTy(*TheContext));
+                // Infer type
+                llvm::Type* fieldType = llvm::Type::getDoubleTy(*TheContext);
+                if (auto* strNode = dynamic_cast<StringNode*>(varAssign->value)) {
+                    fieldType = llvm::Type::getInt8PtrTy(*TheContext);
+                }
+                structFields.push_back(fieldType);
                 attributes.push_back(varAssign->var_id->id_name);
+                attrTypeMap[varAssign->var_id->id_name] = fieldType;
             }
         } else if (auto* funcNode = dynamic_cast<AssignFuncNode*>(member)) {
             methods.push_back(funcNode);
@@ -928,8 +1138,22 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
     
     typeStructMap[typeName] = structType;
     typeAttributeMap[typeName] = attributes;
+    this->typeAttributeTypeMap[typeName] = attrTypeMap;
     
     cout << "DEBUG: Stored attributes for type " << typeName << ": ";
+    for (const auto& attr : attributes) {
+        cout << attr << " ";
+    }
+    cout << endl;
+    
+    cout << "DEBUG: Stored attribute types for type " << typeName << ": ";
+    for (const auto& [attrName, attrType] : attrTypeMap) {
+        std::string typeStr;
+        llvm::raw_string_ostream typeStream(typeStr);
+        attrType->print(typeStream);
+        cout << attrName << ": " << typeStream.str() << ", ";
+    }
+    cout << endl;
     for (const auto& attr : attributes) {
         cout << attr << " ";
     }
@@ -964,19 +1188,54 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         globalObjName
     );
     
+    // Initialize all fields with default values
+    for (size_t i = 0; i < structFields.size(); ++i) {
+        llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, globalObj, i, "field_" + std::to_string(i));
+        llvm::Value* defaultVal = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0));
+        constructorBuilder.CreateStore(defaultVal, fieldPtr);
+    }
+    
+    // Set specific values for attributes defined in the body
     for (auto* member : node->body) {
         if (auto* varAssign = dynamic_cast<VarAssign*>(member)) {
+            if (!varAssign->var_id || !varAssign->value) {
+                std::cerr << "Warning: Invalid var assignment in type declaration" << std::endl;
+                continue;
+            }
             auto it = std::find(attributes.begin(), attributes.end(), varAssign->var_id->id_name);
             if (it != attributes.end()) {
                 size_t fieldIndex = std::distance(attributes.begin(), it);
                 llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, globalObj, fieldIndex, "field_" + varAssign->var_id->id_name);
-                
-                llvm::Value* defaultVal = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0));
-                if (auto* floatNode = dynamic_cast<FloatNode*>(varAssign->value)) {
-                    defaultVal = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat((double)floatNode->value));
+                llvm::Type* fieldType = attrTypeMap[varAssign->var_id->id_name];
+                llvm::Value* defaultVal = nullptr;
+                if (fieldType->isDoubleTy()) {
+                    defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(0.0));
+                    if (auto* floatNode = dynamic_cast<FloatNode*>(varAssign->value)) {
+                        defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat((double)floatNode->value));
+                    }
+                } else if (fieldType->isPointerTy()) {
+                    std::string cleanStr = "";
+                    if (auto* strNode = dynamic_cast<StringNode*>(varAssign->value)) {
+                        cleanStr = strNode->value;
+                        if (cleanStr.length() >= 2 && cleanStr.front() == '"' && cleanStr.back() == '"') {
+                            cleanStr = cleanStr.substr(1, cleanStr.length() - 2);
+                        }
+                    }
+                    llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, cleanStr);
+                    llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
+                        *TheModule,
+                        strConstant->getType(),
+                        true,
+                        llvm::GlobalValue::PrivateLinkage,
+                        strConstant,
+                        ".str"
+                    );
+                    llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
+                    std::vector<llvm::Value*> indices = {zero, zero};
+                    defaultVal = constructorBuilder.CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "strptr");
                 }
-                
-                constructorBuilder.CreateStore(defaultVal, fieldPtr);
+                if (defaultVal) constructorBuilder.CreateStore(defaultVal, fieldPtr);
+                cout << "Set default value for field " << varAssign->var_id->id_name << " in type " << typeName << endl;
             }
         }
     }
@@ -1193,23 +1452,21 @@ void CodegenVisitor::visit(AttributeMember* node, Context* context) {
     
     auto structIt = typeStructMap.find(typeName);
     auto attrsIt = typeAttributeMap.find(typeName);
-    
-    if (structIt == typeStructMap.end() || attrsIt == typeAttributeMap.end()) {
+    auto attrTypeIt = typeAttributeTypeMap.find(typeName);
+    if (structIt == typeStructMap.end() || attrsIt == typeAttributeMap.end() || attrTypeIt == typeAttributeTypeMap.end()) {
         throw std::runtime_error("Type information not found for: " + typeName);
     }
-    
     llvm::StructType* structType = structIt->second;
     const std::vector<std::string>& attributes = attrsIt->second;
-    
+    const AttributeTypeMap& attrTypeMap = attrTypeIt->second;
     auto it = std::find(attributes.begin(), attributes.end(), node->name);
     if (it == attributes.end()) {
         throw std::runtime_error("Attribute not found: " + node->name);
     }
-    
     size_t index = std::distance(attributes.begin(), it);
-    
+    llvm::Type* fieldType = attrTypeMap.at(node->name);
     llvm::Value* fieldPtr = Builder->CreateStructGEP(structType, currentObjectPtr, index, "field_" + node->name);
-    llvm::Value* fieldValue = Builder->CreateLoad(llvm::Type::getDoubleTy(*TheContext), fieldPtr, node->name);
+    llvm::Value* fieldValue = Builder->CreateLoad(fieldType, fieldPtr, node->name);
     
     currentValue = fieldValue;
     
@@ -1242,6 +1499,13 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
         throw std::runtime_error("Method function not found: " + methodFuncName);
     }
     
+    // Determine the return type of the method
+    llvm::Type* returnType = methodFunc->getReturnType();
+    std::string returnTypeStr;
+    llvm::raw_string_ostream typeStream(returnTypeStr);
+    returnType->print(typeStream);
+    std::cout << "DEBUG: Method '" << node->name << "' return type: " << typeStream.str() << std::endl;
+    
     std::vector<llvm::Value*> args;
     args.push_back(currentObjectPtr);
     
@@ -1254,6 +1518,11 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
     
     currentValue = Builder->CreateCall(methodFunc, args, "method_call");
     
+    // Store the method's return type if needed for future type checking
+    if (returnType->isPointerTy()) {
+        std::cout << "DEBUG: Method returns a pointer type (likely a String)" << std::endl;
+    }
+    
     std::cout << "CodeGen: MethodMember '" << node->name << "' called successfully" << std::endl;
 }
 
@@ -1261,6 +1530,20 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
                                            llvm::StructType* structType, const std::vector<std::string>& attributes) {
     std::string methodName = typeName + "_" + method->func_name;
     
+    llvm::Type* returnType = llvm::Type::getDoubleTy(*TheContext);
+    // If this is a getter, set the return type to the field type
+    if (method->func_name.find("get") == 0 && method->args->children.empty()) {
+        std::string attrName = method->func_name.substr(3);
+        std::transform(attrName.begin(), attrName.end(), attrName.begin(), ::tolower);
+        auto attrTypeIt = typeAttributeTypeMap.find(typeName);
+        if (attrTypeIt != typeAttributeTypeMap.end()) {
+            const AttributeTypeMap& attrTypeMap = attrTypeIt->second;
+            auto it = attrTypeMap.find(attrName);
+            if (it != attrTypeMap.end()) {
+                returnType = it->second;
+            }
+        }
+    }
     std::vector<llvm::Type*> paramTypes;
     paramTypes.push_back(llvm::PointerType::get(structType, 0)); 
     
@@ -1272,9 +1555,8 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
     for (int i = 0; i < argCount; i++) {
         paramTypes.push_back(llvm::Type::getDoubleTy(*TheContext));
     }
-    
     llvm::FunctionType* methodType = llvm::FunctionType::get(
-        llvm::Type::getDoubleTy(*TheContext), 
+        returnType, 
         paramTypes,
         false
     );
@@ -1282,7 +1564,7 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
     llvm::Function* methodFunc = llvm::Function::Create(
         methodType,
         llvm::Function::ExternalLinkage,
-        methodName,
+        typeName + "_" + method->func_name,
         TheModule.get()
     );
     
@@ -1303,7 +1585,6 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
             methodParams.push_back({paramName, paramValue});
         }
     }
-    
     if (method->body) {
         llvm::Value* prevCurrentValue = currentValue;
         std::string prevObjectName = currentObjectName;
@@ -1373,12 +1654,18 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
         if (method->func_name.find("get") == 0) {
             std::string attrName = method->func_name.substr(3);
             std::transform(attrName.begin(), attrName.end(), attrName.begin(), ::tolower);
-            
             auto it = std::find(attributes.begin(), attributes.end(), attrName);
             if (it != attributes.end()) {
-                size_t index = std::distance(attributes.begin(), it);
-                llvm::Value* fieldPtr = methodBuilder.CreateStructGEP(structType, selfPtr, index, "field_" + attrName);
-                llvm::Value* fieldValue = methodBuilder.CreateLoad(llvm::Type::getDoubleTy(*TheContext), fieldPtr, attrName);
+                size_t fieldIndex = std::distance(attributes.begin(), it);
+                auto attrTypeIt = typeAttributeTypeMap.find(typeName);
+                llvm::Type* fieldType = llvm::Type::getDoubleTy(*TheContext);
+                if (attrTypeIt != typeAttributeTypeMap.end()) {
+                    const AttributeTypeMap& attrTypeMap = attrTypeIt->second;
+                    auto typeIt = attrTypeMap.find(attrName);
+                    if (typeIt != attrTypeMap.end()) fieldType = typeIt->second;
+                }
+                llvm::Value* fieldPtr = methodBuilder.CreateStructGEP(structType, selfPtr, fieldIndex, "field_" + attrName);
+                llvm::Value* fieldValue = methodBuilder.CreateLoad(fieldType, fieldPtr, attrName);
                 methodBuilder.CreateRet(fieldValue);
             } else {
                 methodBuilder.CreateRet(llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0)));
@@ -1400,53 +1687,111 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
             methodBuilder.CreateRet(llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0)));
         }
     }
-    
-    cout << "Generated method function: " << methodName << endl;
+    cout << "Generated method function: " << typeName + "_" + method->func_name << endl;
 }
 
 void CodegenVisitor::generateForwardingMethod(const std::string& childTypeName, const std::string& parentTypeName,
-                                              const std::string& methodName, llvm::StructType* structType) {
+                                 const std::string& methodName, llvm::StructType* structType) {
+    // Create forwarding method that calls the parent method
     std::string childMethodName = childTypeName + "_" + methodName;
     std::string parentMethodName = parentTypeName + "_" + methodName;
     
+    // Get the parent method
     llvm::Function* parentMethod = TheModule->getFunction(parentMethodName);
     if (!parentMethod) {
-        cout << "Warning: Parent method " << parentMethodName << " not found for forwarding" << endl;
-        return;
+        throw std::runtime_error("Parent method not found: " + parentMethodName);
     }
     
-    llvm::FunctionType* forwardingType = parentMethod->getFunctionType();
+    // Create the child method with the same signature
+    llvm::FunctionType* parentFuncType = parentMethod->getFunctionType();
     
-    llvm::Function* forwardingFunc = llvm::Function::Create(
-        forwardingType,
+    // First parameter type should be a pointer to the child struct
+    std::vector<llvm::Type*> paramTypes;
+    paramTypes.push_back(llvm::PointerType::get(structType, 0)); // Child struct pointer
+    
+    // Copy the rest of the parameter types from the parent function
+    for (unsigned i = 1; i < parentFuncType->getNumParams(); i++) {
+        paramTypes.push_back(parentFuncType->getParamType(i));
+    }
+    
+    llvm::FunctionType* childFuncType = llvm::FunctionType::get(
+        parentFuncType->getReturnType(),
+        paramTypes,
+        parentFuncType->isVarArg()
+    );
+    
+    llvm::Function* childMethod = llvm::Function::Create(
+        childFuncType,
         llvm::Function::ExternalLinkage,
         childMethodName,
         TheModule.get()
     );
     
-    llvm::BasicBlock* forwardingBB = llvm::BasicBlock::Create(*TheContext, "entry", forwardingFunc);
-    llvm::IRBuilder<> forwardingBuilder(*TheContext);
-    forwardingBuilder.SetInsertPoint(forwardingBB);
+    // Set parameter names
+    llvm::Function::arg_iterator childArgIt = childMethod->arg_begin();
+    childArgIt->setName("self");
     
-    std::vector<llvm::Value*> args;
-    for (auto& arg : forwardingFunc->args()) {
-        args.push_back(&arg);
+    std::vector<std::string> paramNames;
+    llvm::Function::arg_iterator parentArgIt = parentMethod->arg_begin();
+    ++parentArgIt; // Skip self
+    
+    for (unsigned i = 1; i < parentFuncType->getNumParams(); i++) {
+        if (parentArgIt != parentMethod->arg_end()) {
+            std::string paramName = parentArgIt->getName().str();
+            if (paramName.empty()) {
+                paramName = "arg" + std::to_string(i);
+            }
+            paramNames.push_back(paramName);
+            ++parentArgIt;
+        }
     }
     
-    llvm::Value* result = forwardingBuilder.CreateCall(parentMethod, args, "parent_call");
-    forwardingBuilder.CreateRet(result);
+    childArgIt++; // Move past "self"
+    for (unsigned i = 0; i < paramNames.size() && childArgIt != childMethod->arg_end(); i++, ++childArgIt) {
+        childArgIt->setName(paramNames[i]);
+    }
     
-    cout << "Generated forwarding method: " << childMethodName << " -> " << parentMethodName << endl;
+    // Create the function body
+    llvm::BasicBlock* entryBB = llvm::BasicBlock::Create(*TheContext, "entry", childMethod);
+    llvm::IRBuilder<> builder(entryBB);
+    
+    // Prepare arguments for parent method call
+    std::vector<llvm::Value*> parentArgs;
+    
+    // First argument is the child object pointer (self)
+    llvm::Function::arg_iterator selfArg = childMethod->arg_begin();
+    parentArgs.push_back(&(*selfArg));
+    
+    // Add the rest of the parameters
+    llvm::Function::arg_iterator paramArg = childMethod->arg_begin();
+    ++paramArg;
+    
+    while (paramArg != childMethod->arg_end()) {
+        parentArgs.push_back(&(*paramArg));
+        ++paramArg;
+    }
+    
+    // Call parent method
+    llvm::Value* result = builder.CreateCall(parentMethod, parentArgs, "call_parent");
+    
+    // Return the result
+    builder.CreateRet(result);
+    
+    std::cout << "Generated forwarding method: " << childMethodName << " -> " << parentMethodName << std::endl;
 }
 
-static std::map<std::string, llvm::StructType*> typeStructMap;
-static std::map<std::string, std::vector<std::string>> typeAttributeMap;
-static std::map<std::string, llvm::Value*> objectInstances;
+// Moved these maps to class members in visitor.h
 
 void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
     std::cout << "Handling assignment operation: " << node->op << std::endl;
     
+    // Process the right side of the assignment first
+    node->right->accept(this, context);
+    llvm::Value* valueToStore = currentValue;
+    
+    // Handle different types of assignment targets
     if (auto* accessNode = dynamic_cast<AccessNode*>(node->left)) {
+        // Handle attribute assignment (e.g., obj.attr := value)
         auto it = NamedValues.find(accessNode->var_name);
         if (it == NamedValues.end()) {
             throw std::runtime_error("Object not found: " + accessNode->var_name);
@@ -1458,20 +1803,58 @@ void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
             throw std::runtime_error("Assignment target must be an attribute");
         }
         
-        node->right->accept(this, context);
-        llvm::Value* valueToStore = currentValue;
+        // Find the type and attribute information
+        std::string typeName;
+        auto typeIt = objectTypes.find(accessNode->var_name);
+        if (typeIt != objectTypes.end()) {
+            typeName = typeIt->second;
+        } else {
+            throw std::runtime_error("Could not determine type for object: " + accessNode->var_name);
+        }
         
-        size_t index = (attrMember->name == "x") ? 0 : 1;
-        
-        std::string typeName = "Point";
         auto structIt = typeStructMap.find(typeName);
-        if (structIt != typeStructMap.end()) {
+        auto attrsIt = typeAttributeMap.find(typeName);
+        if (structIt != typeStructMap.end() && attrsIt != typeAttributeMap.end()) {
             llvm::StructType* structType = structIt->second;
-            llvm::Value* fieldPtr = Builder->CreateStructGEP(structType, objectPtr, index, "field_ptr");
+            const std::vector<std::string>& attributes = attrsIt->second;
+            
+            // Find the attribute index
+            auto it = std::find(attributes.begin(), attributes.end(), attrMember->name);
+            if (it == attributes.end()) {
+                throw std::runtime_error("Attribute not found: " + attrMember->name);
+            }
+            size_t index = std::distance(attributes.begin(), it);
+            
+            // Create the GEP instruction and store the value
+            llvm::Value* fieldPtr = Builder->CreateStructGEP(structType, objectPtr, index, "field_" + attrMember->name);
             Builder->CreateStore(valueToStore, fieldPtr);
         }
         
         currentValue = valueToStore;
+    } else if (auto* idNode = dynamic_cast<IDNode*>(node->left)) {
+        // Handle simple variable reassignment (e.g., var := value)
+        auto it = NamedValues.find(idNode->id_name);
+        if (it != NamedValues.end() && llvm::isa<llvm::AllocaInst>(it->second)) {
+            // Check types and perform conversion if necessary
+            llvm::AllocaInst* allocaInst = llvm::cast<llvm::AllocaInst>(it->second);
+            llvm::Type* allocaType = allocaInst->getAllocatedType();
+            
+            // If the value type doesn't match the variable type, try to convert it
+            if (valueToStore->getType() != allocaType) {
+                if (allocaType->isDoubleTy() && valueToStore->getType()->isIntegerTy()) {
+                    valueToStore = Builder->CreateSIToFP(valueToStore, allocaType, "conv_to_double");
+                }
+                // Add other type conversions as needed
+            }
+            
+            // Store the value in the variable
+            Builder->CreateStore(valueToStore, it->second);
+            currentValue = valueToStore;
+            
+            std::cout << "Variable '" << idNode->id_name << "' reassigned" << std::endl;
+        } else {
+            throw std::runtime_error("Variable '" + idNode->id_name + "' not found or not assignable");
+        }
     } else {
         throw std::runtime_error("Unsupported assignment target");
     }

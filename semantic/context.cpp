@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 
-std::shared_ptr<TypeInfo> Context::intType = nullptr;
+std::shared_ptr<TypeInfo> Context::numberType = nullptr;
 std::shared_ptr<TypeInfo> Context::stringType = nullptr;
 std::shared_ptr<TypeInfo> Context::boolType = nullptr;
 std::shared_ptr<TypeInfo> Context::voidType = nullptr;
@@ -111,11 +111,11 @@ Context::Context(Context *parent)
 }
 
 void Context::initializeBuiltinTypes() {
-    if (intType == nullptr) {
-        intType = std::make_shared<TypeInfo>("int", TypeKind::PRIMITIVE);
-        stringType = std::make_shared<TypeInfo>("string", TypeKind::PRIMITIVE);
-        boolType = std::make_shared<TypeInfo>("bool", TypeKind::PRIMITIVE);
-        voidType = std::make_shared<TypeInfo>("void", TypeKind::PRIMITIVE);
+    if (numberType == nullptr) {
+        numberType = std::make_shared<TypeInfo>("Number", TypeKind::PRIMITIVE);
+        stringType = std::make_shared<TypeInfo>("String", TypeKind::PRIMITIVE);
+        boolType = std::make_shared<TypeInfo>("Boolean", TypeKind::PRIMITIVE);
+        voidType = std::make_shared<TypeInfo>("Expression", TypeKind::PRIMITIVE);
         
         auto objectTypeDef = std::make_shared<TypeDef>("Object");
         objectType = std::make_shared<TypeInfo>("Object", TypeKind::CLASS);
@@ -260,10 +260,10 @@ std::shared_ptr<TypeDef> Context::getTypeDef(const std::string& typeName) {
 }
 
 std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
-    if (typeName == "int") return intType;
-    if (typeName == "string") return stringType;
-    if (typeName == "bool") return boolType;
-    if (typeName == "void") return voidType;
+    if (typeName == "Number") return numberType;
+    if (typeName == "String") return stringType;
+    if (typeName == "Boolean") return boolType;
+    if (typeName == "Void") return voidType;
     if (typeName == "Object") return objectType;
     
     auto typeDef = getTypeDef(typeName);

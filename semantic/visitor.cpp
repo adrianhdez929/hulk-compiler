@@ -2,6 +2,7 @@
 #include "../Ast/ast.hpp"
 #include "context.h"
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ void SemanticCheckerVisitor::visit(FloatNode* node, Context* context) {
 
     cout << "Visiting Float Node: " << node->value << endl;
     if (!node->inferredType) {
-        node->inferredType = Context::intType; 
+        node->inferredType = Context::numberType; 
     }
     node->semanticValue = "numeric_literal";
 }
@@ -66,11 +67,11 @@ void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
         node->inferredType = Context::boolType;
         node->semanticValue = "bool_negation(" + node->node->semanticValue + ")";
     } else if (node->op == "-" || node->op == "+") {
-        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::intType)) {
+        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::numberType)) {
             throw std::runtime_error("Type error: Arithmetic unary operation requires numeric operand, got " + 
                                    node->node->inferredType->name);
         }
-        node->inferredType = Context::intType;
+        node->inferredType = Context::numberType;
         node->semanticValue = "arithmetic_unary(" + node->op + ", " + node->node->semanticValue + ")";
     } else {
         throw std::runtime_error("Semantic error: Unknown unary operator: " + node->op);
@@ -88,10 +89,10 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
     node->right->accept(this, context);
     
     if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/" || node->op == "%" || node->op == "^") {
-        checkTypeCompatibility(Context::intType, node->left->inferredType, "left operand of " + node->op);
-        checkTypeCompatibility(Context::intType, node->right->inferredType, "right operand of " + node->op);
+        checkTypeCompatibility(Context::numberType, node->left->inferredType, "left operand of " + node->op);
+        checkTypeCompatibility(Context::numberType, node->right->inferredType, "right operand of " + node->op);
         
-        node->inferredType = Context::intType;
+        node->inferredType = Context::numberType;
         node->semanticValue = "arithmetic_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
         
     } else if (node->op == "==" || node->op == "!=" || node->op == "<" || node->op == ">" || node->op == "<=" || node->op == ">=") {
@@ -236,7 +237,7 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
     node->args->accept(this, context);
     
     for (auto* arg : node->args->children) {
-        auto paramType = Context::intType;
+        auto paramType = Context::numberType;
         paramTypes.push_back(paramType);
         
         if (!functionContext->defineVar(arg->id_name, paramType)) {
@@ -274,14 +275,19 @@ void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
                                    "' redefined in let block");
         }
         
-        cout << "Visiting LetAssign value" << endl;
+        cout << "Visiting LetAssign assignment" << endl;
         
-        assign->value->accept(this, letContext);
+        assign->accept(this, letContext);
 
+        auto staticType = assign->inferredType ? 
+                          assign->inferredType : 
+                          std::make_shared<TypeInfo>("none", TypeKind::INFERRED);
+        
         auto varType = assign->value->inferredType ? 
                       assign->value->inferredType : 
-                      std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+                      std::make_shared<TypeInfo>("none", TypeKind::INFERRED);
         
+
         if (!letContext->defineVar(assign->var_id->id_name, varType)) {
             throw std::runtime_error("Semantic error: Failed to define variable '" + assign->var_id->id_name + "'");
         }
@@ -304,14 +310,14 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Visiting VarAssign: " << node->var_id->id_name << endl;
+    cout << "Visiting VarAssign: " << node->var_id->id_name << " static type " << node->var_id->id_type << endl;
 
-    node->value->accept(this, context);
+    node->value->accept(this, context);    
     
-    if (!node->treated_as_type.empty() && node->treated_as_type != "none") {
-        auto castType = context->getType(node->treated_as_type);
+    if (!node->var_id->id_type.empty() && node->var_id->id_type != "none") {
+        auto castType = context->getType(node->var_id->id_type);
         if (!castType) {
-            throw std::runtime_error("Semantic error: Type '" + node->treated_as_type + "' not found for cast");
+            throw std::runtime_error("Semantic error: Type '" + node->var_id->id_type + "' not found for cast");
         }
         
         auto valueType = node->value->inferredType;
@@ -640,7 +646,7 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
         if (auto* funcNode = dynamic_cast<AssignFuncNode*>(element)) {
             std::vector<std::shared_ptr<TypeInfo>> paramTypes;
             for (auto* param : funcNode->args->children) {
-                paramTypes.push_back(Context::intType);
+                paramTypes.push_back(Context::numberType);
             }
             auto returnType = funcNode->body->inferredType ? 
                             funcNode->body->inferredType : Context::voidType;

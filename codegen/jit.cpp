@@ -19,7 +19,9 @@ Error HulkJIT::addModule(std::unique_ptr<Module> M) {
                                "Could not load process symbols: " + errorMsg);
     }
     
-    if (sys::DynamicLibrary::LoadLibraryPermanently("./libstandard.so", &errorMsg)) {
+    // Try to load the standard library from hulk directory or current directory
+    if (sys::DynamicLibrary::LoadLibraryPermanently("./hulk/libstandard.so", &errorMsg) &&
+        sys::DynamicLibrary::LoadLibraryPermanently("./libstandard.so", &errorMsg)) {
         std::cerr << "Warning: Could not load libstandard.so: " << errorMsg << std::endl;
     }
 
