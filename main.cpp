@@ -49,27 +49,31 @@ int main(int argc, char* argv[]) {
         globalContext->define("print", 1);  // print function takes 1 argument
         globalContext->define("pi");         // pi constant (variable)
         
-        try {
-            root->accept(semanticVisitor, globalContext);
-            std::cout << "Semantic check completed." << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "Semantic analysis error: " << e.what() << std::endl;
+        // Perform semantic analysis
+        root->accept(semanticVisitor, globalContext);
+        
+        // Check if there were any semantic errors
+        if (semanticVisitor->hasErrors()) {
+            std::cerr << "Semantic analysis failed with the following errors:" << std::endl;
+            semanticVisitor->printErrors();
             delete globalContext;
             delete root;
             fclose(yyin);
             return 1;
         }
-
-        std::cout << "Generating code with CodegenVisitor" << std::endl;
-        // Initialize the codegen visitor
-        codegenVisitor->initialize();
         
-        // Set the root node and context
-        codegenVisitor->setRootNode(root, globalContext);
+        // std::cout << "Semantic check completed successfully." << std::endl;
+
+        // std::cout << "Generating code with CodegenVisitor" << std::endl;
+        // // Initialize the codegen visitor
+        // codegenVisitor->initialize();
+        
+        // // Set the root node and context
+        // codegenVisitor->setRootNode(root, globalContext);
         
         // Generate and execute code
-        codegenVisitor->generateCode();
-        std::cout << "Code generation completed." << std::endl;
+        // codegenVisitor->generateCode();
+        // std::cout << "Code generation completed." << std::endl;
 
         // Clean up context
         delete globalContext;

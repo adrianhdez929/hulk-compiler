@@ -1,2 +1,5 @@
 main
 .vscode
+build/
+parser
+hulk/
