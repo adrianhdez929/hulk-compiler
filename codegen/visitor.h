@@ -45,6 +45,7 @@ class CodegenVisitor : public Visitor {
 	void visit(TypeAssMember* node, Context* context) override;
 	void visit(AttributeMember* node, Context* context) override;
 	void visit(MethodMember* node, Context* context) override;
+	void visit(TypeCastNode* node, Context* context) override;
 
     void initialize();
     void optimize();
@@ -64,6 +65,8 @@ class CodegenVisitor : public Visitor {
     // Add attribute type map for struct fields
     typedef std::map<std::string, llvm::Type*> AttributeTypeMap;
     std::map<std::string, AttributeTypeMap> typeAttributeTypeMap; 
+    // Add inheritance map to track type hierarchies
+    std::map<std::string, std::string> typeInheritanceMap; // child -> parent 
     
     void createStandardLibraryDeclarations();
     llvm::Function* createMainFunction();
@@ -74,6 +77,10 @@ class CodegenVisitor : public Visitor {
                                  const std::string& methodName, llvm::StructType* structType);
     
     void handleAssignment(BinOpNode* node, Context* context);
+    void handleStringConcatenation(llvm::Value* leftValue, llvm::Value* rightValue, BinOpNode* node, Context* context, bool space);
+    
+    // Helper method to check inheritance relationships
+    bool isSubtypeOf(const std::string& childType, const std::string& parentType);
 };
 
 #endif

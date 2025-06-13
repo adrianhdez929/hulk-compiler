@@ -263,7 +263,7 @@ std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
     if (typeName == "Number") return numberType;
     if (typeName == "String") return stringType;
     if (typeName == "Boolean") return boolType;
-    if (typeName == "Void") return voidType;
+    if (typeName == "Expression") return voidType;
     if (typeName == "Object") return objectType;
     
     auto typeDef = getTypeDef(typeName);

@@ -34,6 +34,7 @@ class AccessNode;
 class TypeAssMember;
 class AttributeMember;
 class MethodMember;
+class TypeCastNode;
 
 class Visitor {
     public:
@@ -66,6 +67,7 @@ class Visitor {
 	virtual void visit(TypeAssMember* node, Context* context) = 0;
 	virtual void visit(AttributeMember* node, Context* context) = 0;
 	virtual void visit(MethodMember* node, Context* context) = 0;
+	virtual void visit(TypeCastNode* node, Context* context) = 0;
 
 };
 
@@ -120,6 +122,7 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(TypeAssMember* node, Context* context) override;
     void visit(AttributeMember* node, Context* context) override;
     void visit(MethodMember* node, Context* context) override;
+    void visit(TypeCastNode* node, Context* context) override;
     
     Context* getContext() { return globalContext; }
     
@@ -132,11 +135,43 @@ class SemanticCheckerVisitor : public Visitor {
         }
     }
     
+    void checkFunctionSignature(const std::string& funcName, 
+                               const std::vector<std::shared_ptr<TypeInfo>>& expectedParamTypes,
+                               const std::vector<std::shared_ptr<TypeInfo>>& actualParamTypes) {
+        if (expectedParamTypes.size() != actualParamTypes.size()) {
+            throw std::runtime_error("Function '" + funcName + "' expects " + 
+                                   std::to_string(expectedParamTypes.size()) + " parameters, got " +
+                                   std::to_string(actualParamTypes.size()));
+        }
+        
+        for (size_t i = 0; i < expectedParamTypes.size(); i++) {
+            if (!globalContext->canAssign(actualParamTypes[i], expectedParamTypes[i])) {
+                throw std::runtime_error("Function '" + funcName + "' parameter " + std::to_string(i+1) + 
+                                       " expects type '" + expectedParamTypes[i]->name + 
+                                       "', got '" + actualParamTypes[i]->name + "'");
+            }
+        }
+    }
+    
+    bool isRecursiveCall(const std::string& funcName, Context* functionContext) {
+        // Simple check for direct recursive calls
+        // In a more sophisticated implementation, this would check the call stack
+        return funcName == getCurrentFunctionName(functionContext);
+    }
+    
+    std::string getCurrentFunctionName(Context* context) {
+        // This is a placeholder - in a real implementation, 
+        // the context would track the current function being analyzed
+        return "unknown";
+    }
+    
     std::shared_ptr<TypeInfo> inferBinaryOperationType(const std::string& op, 
                                                       std::shared_ptr<TypeInfo> leftType, 
                                                       std::shared_ptr<TypeInfo> rightType) {
         if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^") {
             return Context::numberType;
+        } else if (op == "@") {
+            return Context::stringType;
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=" ||
                    op == "&&" || op == "||" || op == "and" || op == "or") {
             return Context::boolType;
@@ -146,8 +181,15 @@ class SemanticCheckerVisitor : public Visitor {
         return Context::voidType;
     }
     
+    // Type inference helper methods - implemented in .cpp file
+    std::shared_ptr<TypeInfo> inferReturnType(ASTNode* body, Context* functionContext);
+    std::shared_ptr<TypeInfo> inferBlockReturnType(BlockNode* block, Context* functionContext);
+    std::shared_ptr<TypeInfo> inferConditionalReturnType(Conditional* cond, Context* functionContext);
+    
 private:
     Context* globalContext;
+    bool inMethodContext = false;
+    std::shared_ptr<TypeDef> currentTypeDef = nullptr;
 };
 
 #endif
