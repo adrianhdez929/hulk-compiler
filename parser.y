@@ -48,7 +48,7 @@ extern ASTNode* root;
 %token STRING
 %token ID
 %token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS 
-%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT 
+%token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_
 %token LET
 %token IN
 %token TYPE
@@ -82,6 +82,9 @@ extern ASTNode* root;
 %nonassoc ELSE ELIF
 %nonassoc ASSIGN IN ASS_DES
 %nonassoc WHILE LET IF
+
+%right NOT_
+%left AND_ OR_
 
 %left PLUS MINUS
 %left TIMES DIV
@@ -202,6 +205,9 @@ bool_expr:
 	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3)); }
 	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3)); }
 	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3)); }
+	| expr AND_ expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3)); }
+	| expr OR_ expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3)); }
+	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2)); }
 	| id_expr IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	| func_call IS ID { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3))); }
 	;
