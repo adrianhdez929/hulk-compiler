@@ -41,6 +41,7 @@ extern ASTNode* root;
 	class AccessNode* acc_node;
 	class VarAssignType* v_ass_t;
 	class NewTypeNode* new_t_n;
+	class TypeCastNode* type_cast;
 }
 
 %token NUMBER
@@ -76,15 +77,18 @@ extern ASTNode* root;
 %type <acc_node> member_access_expr
 %type <v_ass_t> var_ass_type
 %type <new_t_n> new_expr
+%type <type_cast> type_cast_expr
 
 %right NOT_
 %left AND_ OR_
 
-%nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
+%nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT IS
 %nonassoc ELSE ELIF
 %nonassoc ASSIGN IN ASS_DES
 %nonassoc WHILE LET IF
+%left AS
 
+%left ARROBA_ D_ARROBA_
 %left PLUS MINUS
 %left TIMES DIV
 %right POW
@@ -128,6 +132,7 @@ expr:
 	| let_assign { $$ = $1; }
 	| IF conditional { $$ = $2; }
 	| member_access_expr { $$ = $1; }
+	| type_cast_expr { $$ = $1; }
 	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3); }
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3); }
 	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3); }
@@ -261,6 +266,10 @@ method:
 member_access_expr:
 	ID ACCESS ID { $$ = new AccessNode($1, new AttributeMember($3)); }
 	| ID ACCESS ID LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children)); } 
+	;
+
+type_cast_expr:
+	expr AS ID { $$ = new TypeCastNode($1, $3); }
 	;
 
 %%
