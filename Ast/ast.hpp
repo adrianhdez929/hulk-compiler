@@ -56,7 +56,7 @@ public:
 class FloatNode : public ASTNode {
 public:
 	float value;
-	FloatNode(float v);
+	FloatNode(float v, int line_);
 	void print(int indent=0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 
@@ -65,7 +65,7 @@ public:
 class BoolNode : public ASTNode {
 public:
 	bool value;
-    BoolNode(bool v);
+    BoolNode(bool v, int line_);
     void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 
@@ -75,15 +75,16 @@ class BoolExprNode : public ASTNode {
 public: 
 	ASTNode* expr;
 
-	BoolExprNode(ASTNode* expr_);
+	BoolExprNode(ASTNode* expr_, int line_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };
 
 class StringNode : public ASTNode {
 public:
+	int line;
     std::string value;
-    StringNode(const std::string& v);
+    StringNode(const std::string& v, int line_);
     void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 
@@ -91,10 +92,11 @@ public:
 
 class UnaryOpNode : public ASTNode {
 public:
+	int line;
     std::string op;
     ASTNode* node;
 
-    UnaryOpNode(const std::string& o, ASTNode* n);
+    UnaryOpNode(const std::string& o, ASTNode* n, int line_);
     void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
     ~UnaryOpNode();
@@ -102,11 +104,12 @@ public:
 
 class BinOpNode : public ASTNode {
 public:
+	int line;
     std::string op;
     ASTNode* left;
     ASTNode* right;
 
-    BinOpNode(ASTNode* l, const std::string& o, ASTNode* r);
+    BinOpNode(ASTNode* l, const std::string& o, ASTNode* r, int line_);
     void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
     ~BinOpNode();
@@ -114,29 +117,32 @@ public:
 
 class FunctionCallNode : public ASTNode {
 public:
+	int line;
 	std::string func_name;
 	ASTNode* argument;
 
-	FunctionCallNode(const std::string& name, ASTNode* arg);
+	FunctionCallNode(const std::string& name, ASTNode* arg, int line_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 };
 
 class IDNode : public ASTNode {
 public:
+	int line;
 	std::string id_name;
 	std::string id_type;
-	IDNode(const std::string& name);
-	IDNode(const std::string& name, const std::string& type);
+	IDNode(const std::string& name, int line_);
+	IDNode(const std::string& name, const std::string& type, int line_);
 	void print(int indent =0 ) const override;
 	void accept(Visitor* visitor, Context* Context) override;
 };
 
 class BlockNode : public ASTNode {
 public:
+	int line;
 	std::vector<ASTNode*> children;
 
-	BlockNode(const std::vector<ASTNode*>& node);
+	BlockNode(const std::vector<ASTNode*>& node, int line_);
 	void add_child(ASTNode* node);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;
@@ -145,9 +151,10 @@ public:
 
 class ArgsList: public ASTNode { // lista de IDNode solamente
 public:
+	int line;
 	std::vector<IDNode*> children;
 
-	ArgsList(const std::vector<IDNode*>& nodes);
+	ArgsList(const std::vector<IDNode*>& nodes, int line_);
 	void add_child(IDNode* node);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* Context) override;

@@ -36,7 +36,7 @@ void ProgramNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-FloatNode::FloatNode(float v) : ASTNode(), value(v) {}
+FloatNode::FloatNode(float v, int line_) : ASTNode(line_), value(v) {}
 
 void FloatNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "NUMBER(" << value << ")\n";
@@ -46,7 +46,7 @@ void FloatNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-BoolNode::BoolNode(bool v) : ASTNode(), value(v) {}
+BoolNode::BoolNode(bool v, int line_) : ASTNode(line_), value(v) {}
 
 void BoolNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "BOOL(" << value << ")\n";
@@ -56,7 +56,7 @@ void BoolNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-BoolExprNode::BoolExprNode(ASTNode* expr_) : expr(expr_) {}
+BoolExprNode::BoolExprNode(ASTNode* expr_, int line_) :ASTNode(line_), expr(expr_) {}
 
 void BoolExprNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "BoolExprNode:" << std::endl;
@@ -67,7 +67,7 @@ void BoolExprNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-StringNode::StringNode(const std::string& v) : ASTNode(), value(v) {}
+StringNode::StringNode(const std::string& v, int line_) : ASTNode(line_), value(v) {}
 
 void StringNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "STRING(" << value << ")\n";
@@ -77,7 +77,7 @@ void StringNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n) : ASTNode(), op(o), node(n) {}
+UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n, int line_) : ASTNode(line_), op(o), node(n) {}
 
 void UnaryOpNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "UNARY_OP(" << op << ")\n";
@@ -92,7 +92,7 @@ UnaryOpNode::~UnaryOpNode() {
     delete node;
 }
 
-BinOpNode::BinOpNode(ASTNode* l, const std::string& o, ASTNode* r) : ASTNode(), op(o), left(l), right(r) {}
+BinOpNode::BinOpNode(ASTNode* l, const std::string& o, ASTNode* r, int line_) : ASTNode(line_), op(o), left(l), right(r) {}
 
 void BinOpNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "BINOP(" << op << ")\n";
@@ -109,7 +109,7 @@ BinOpNode::~BinOpNode() {
     delete right;
 }
 
-FunctionCallNode::FunctionCallNode(const std::string& name, ASTNode* arg): func_name(name), argument(arg) {}
+FunctionCallNode::FunctionCallNode(const std::string& name, ASTNode* arg, int line_): ASTNode(line_), func_name(name), argument(arg) {}
 
 void FunctionCallNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "FunctionCall: " << func_name << std::endl;
@@ -121,8 +121,8 @@ void FunctionCallNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-IDNode::IDNode(const std::string& name) : id_name(name), id_type("none") {}
-IDNode::IDNode(const std::string& name, const std::string& type) : id_name(name), id_type(type) {}
+IDNode::IDNode(const std::string& name, int line_) : ASTNode(line_), id_name(name), id_type("none") {}
+IDNode::IDNode(const std::string& name, const std::string& type, int line_) : ASTNode(line_), id_name(name), id_type(type) {}
 
 void IDNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ID(" << id_name << ")" << std::endl;
@@ -135,7 +135,7 @@ void IDNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-BlockNode::BlockNode(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+BlockNode::BlockNode(const std::vector<ASTNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
 void BlockNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "Block:" << std::endl;
 	for (const auto& child : children) {
@@ -157,7 +157,7 @@ BlockNode::~BlockNode() {
 	}
 }
 
-ArgsList::ArgsList(const std::vector<IDNode*>& nodes) : children(nodes) {}
+ArgsList::ArgsList(const std::vector<IDNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
 void ArgsList::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ArgsList:" << std::endl;
 	for (const auto& child : children) {
