@@ -62,11 +62,7 @@ $(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.tab.h $(SRC_DIR)/Ast/
 clean:
 	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so
 
-execute:
-	@if [ ! -d "$(BUILDDIR)" ] || [ -z "$$(ls -A $(BUILDDIR) 2>/dev/null)" ]; then \
-		echo "Build directory is empty or missing, compiling..."; \
-		$(MAKE) compile; \
-	fi
-	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.txt
+execute: compile
+	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.hulk
 
 .PHONY: compile execute clean
