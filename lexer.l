@@ -56,6 +56,10 @@ extern "C"  {
 "&" 		{ return AND_; }
 "|" 		{ return OR_; }
 "!" 		{ return NOT_; }
+
+"@" 		{ return ARROBA_; }
+"@@" 		{ return D_ARROBA_; }
+
 "."			{ return ACCESS; }
 
 [ \t\n]     ; /* skip whitespace */
