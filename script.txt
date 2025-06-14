@@ -1,8 +1,6 @@
 {
-  type B inherits A() {
-    y = "asuca";
+  
+      print(if (b as X) 2 else 2);
 
-    test() => self.x;
-  }
-
+	  
 }

@@ -268,5 +268,5 @@ member_access_expr:
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error en linea %d: %s\n", yylineno - 1, s);
+    fprintf(stderr, "Error en linea %d: %s\n", yylineno, s);
 }
