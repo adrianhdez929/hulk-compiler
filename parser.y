@@ -42,7 +42,6 @@ extern ASTNode* root;
 	class AccessNode* acc_node;
 	class VarAssignType* v_ass_t;
 	class NewTypeNode* new_t_n;
-	class TypeCastNode* type_cast;
 }
 
 %token NUMBER
@@ -83,14 +82,12 @@ extern ASTNode* root;
 
 %left ARROBA_ D_ARROBA_
 
-%nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT IS
+%nonassoc GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT
 %nonassoc ELSE ELIF
 %nonassoc ASSIGN IN 
 %nonassoc ASS_DES
 %nonassoc WHILE LET IF
-%left AS
 
-%left ARROBA_ D_ARROBA_
 %left PLUS MINUS
 %left TIMES DIV
 %right POW
