@@ -1,9 +1,8 @@
 {
-  let b: Boolean = true , c: Number = 3 in {
-    if (b & c == 3) {
-      print("b is true");
-    } else {
-      print("b is false");
-    };
-  };
+  type B inherits A() {
+    y = "asuca";
+
+    test() => self.x;
+  }
+
 }
