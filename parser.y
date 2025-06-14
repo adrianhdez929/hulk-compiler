@@ -235,6 +235,8 @@ while_expr:
 //
 type_node_decl:
 	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $4->children, yylineno); }
+	| TYPE ID_ INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $6->children, {$4}, yylineno); }
+	| TYPE ID_ INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $9->children, {$4}, $6, yylineno); }
 	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $7->children, yylineno); }
 	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $9->children, {$7}, yylineno); }
 	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $12->children, {$7}, $9, yylineno); }
