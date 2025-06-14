@@ -19,6 +19,9 @@
                 "Automata/state.cpp",
                 "Parser/Item.cpp",
                 "Parser/SLR1Parser.cpp",
+                "Ast/ast.cpp",
+                "semantic/context.cpp",
+                "semantic/visitor.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"

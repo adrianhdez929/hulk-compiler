@@ -2,6 +2,10 @@
 #include <variant>
 #include <memory>
 
+// using AnyVec = std::vector<any>;
+// using InnerFun = std::function<std::any(const AnyVec&)>;
+// using FactoryFun = std::function<InnerFun(const std::vector<int>&)>;
+
 class SymbolNode;
 class UnionNode;
 class ConcatNode;
@@ -15,7 +19,8 @@ class Node;
 
 using ElementType = std::variant<
     std::string,
-    std::shared_ptr<Node>
+    std::shared_ptr<Node>,
+    std::shared_ptr<SymbolNode>
 >;
             // std::shared_ptr<SymbolNode>,
         // std::shared_ptr<UnionNode>,

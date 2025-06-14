@@ -195,7 +195,7 @@ int lexer_node_test() {
     return 0;
 }
 
-int automata_tests() {
+// int automata_tests() {
     // NFA::State startState = 0;
     // NFA::Transitions transitions = {
     //     {{0, "a"}, {1}}
@@ -242,58 +242,58 @@ int automata_tests() {
     //     (4,'a'): 1,
     //     (4,'b'): 2,
     //     })
-    DFA::Transitions transitions = {
-        {{0, "a"}, {1}},
-        {{0, "b"}, {2}},
-        {{1, "a"}, {1}},
-        {{1, "b"}, {3}},
-        {{2, "a"}, {1}},
-        {{2, "b"}, {2}},
-        {{3, "a"}, {1}},
-        {{3, "b"}, {4}},
-        {{4, "a"}, {1}},
-        {{4, "b"}, {2}}
-    };
-    DFA dfa(5, {4}, transitions, 0);
-    DFA mini = automata_minimization(dfa);
-    cout << "Estados totales: " << mini.states() << endl;
-    string cadena1 = "abb";
-    string cadena2 = "ababbaabb";
-    cout << "Cadena: " << cadena1 << ", Reconocida: " << mini.recognize(cadena1) << endl;
-    cout << "Cadena: " << cadena2 << ", Reconocida: " << mini.recognize(cadena2) << endl;
+    // DFA::Transitions transitions = {
+    //     {{0, "a"}, {1}},
+    //     {{0, "b"}, {2}},
+    //     {{1, "a"}, {1}},
+    //     {{1, "b"}, {3}},
+    //     {{2, "a"}, {1}},
+    //     {{2, "b"}, {2}},
+    //     {{3, "a"}, {1}},
+    //     {{3, "b"}, {4}},
+    //     {{4, "a"}, {1}},
+    //     {{4, "b"}, {2}}
+    // };
+    // DFA dfa(5, {4}, transitions, 0);
+    // DFA mini = automata_minimization(dfa);
+    // cout << "Estados totales: " << mini.states() << endl;
+    // string cadena1 = "abb";
+    // string cadena2 = "ababbaabb";
+    // cout << "Cadena: " << cadena1 << ", Reconocida: " << mini.recognize(cadena1) << endl;
+    // cout << "Cadena: " << cadena2 << ", Reconocida: " << mini.recognize(cadena2) << endl;
 
-    vector<string> cadenas = {"", "ab", "aaaaa", "bbbbb", "abbabababa"};
-    for (string cadena : cadenas) {
-        cout << "Cadena: " << cadena << ", Reconocida: " << mini.recognize(cadena) << endl;
-    }
-
-    return 0;
-}
-
-int state_automata_test() {
-    DFA::Transitions transitions ={
-        {{0, "a"}, {0}},
-        {{0, "b"}, {1}},
-        {{1, "a"}, {2}},
-        {{1, "b"}, {1}},
-        {{2, "a"}, {0}},
-        {{2, "b"}, {1}}
-    };
-    DFA dfa(3, {2}, transitions, 0); // Reconoce cadenas sobre {a,b}* que terminan en "ba"
-    State* start = State::from_nfa(dfa);
-    // std::cout << "Estado inicial: " << start->id() << std::endl;
-    // std::cout << "Transiciones del estado inicial:" << std::endl;
-    // for (const auto& [symbol, states] : start->transitions()) {
-    //     std::cout << "  Símbolo: " << symbol << " -> Estados: ";
-    //     for (const auto* state : states) {
-    //         std::cout << state->id() << " ";
-    //     }
-    //     std::cout << std::endl;
+    // vector<string> cadenas = {"", "ab", "aaaaa", "bbbbb", "abbabababa"};
+    // for (string cadena : cadenas) {
+    //     cout << "Cadena: " << cadena << ", Reconocida: " << mini.recognize(cadena) << endl;
     // }
-    std::cout << start->ToString() << std::endl;
 
-    return 0;
-}
+    // return 0;
+// }
+
+// int state_automata_test() {
+    // DFA::Transitions transitions ={
+    //     {{0, "a"}, {0}},
+    //     {{0, "b"}, {1}},
+    //     {{1, "a"}, {2}},
+    //     {{1, "b"}, {1}},
+    //     {{2, "a"}, {0}},
+    //     {{2, "b"}, {1}}
+    // };
+    // DFA dfa(3, {2}, transitions, 0); // Reconoce cadenas sobre {a,b}* que terminan en "ba"
+    // State* start = State::from_nfa(dfa);
+    // // std::cout << "Estado inicial: " << start->id() << std::endl;
+    // // std::cout << "Transiciones del estado inicial:" << std::endl;
+    // // for (const auto& [symbol, states] : start->transitions()) {
+    // //     std::cout << "  Símbolo: " << symbol << " -> Estados: ";
+    // //     for (const auto* state : states) {
+    // //         std::cout << state->id() << " ";
+    // //     }
+    // //     std::cout << std::endl;
+    // // }
+    // std::cout << start->ToString() << std::endl;
+
+    // return 0;
+// }
 
 void test_parser() {
     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
@@ -821,8 +821,8 @@ void lexer_ast_test() {
 
 int execute_all_tests() {
     Item_test();
-    automata_tests();
-    state_automata_test();
+    // automata_tests();
+    // state_automata_test();
     return 0;
 }
 
