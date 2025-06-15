@@ -1,7 +1,7 @@
-#include "symbol.h"
-#include "sentence.h"
-#include "production.h"
-#include "grammar.h"
+#include "symbol.hpp"
+#include "sentence.hpp"
+#include "production.hpp"
+#include "grammar.hpp"
 #include <stdexcept>
 #include <memory>
 

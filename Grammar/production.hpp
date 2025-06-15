@@ -1,11 +1,11 @@
-#include "symbol.h"
-#include "sentence.h"
+#include "symbol.hpp"
+#include "sentence.hpp"
 #include <functional>
 #include <vector>
 // #include <any>
 #include <variant>
 #include <initializer_list>
-#include "../Lexer/SpecialTypes.h"
+#include "../Lexer/SpecialTypes.hpp"
 
 #ifndef PRODUCTION_H
 #define PRODUCTION_H

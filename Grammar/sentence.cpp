@@ -1,7 +1,7 @@
-#include "sentence.h"
-#include "symbol.h"
-#include "sentence.h"
-#include "symbol.h"
+#include "sentence.hpp"
+#include "symbol.hpp"
+#include "sentence.hpp"
+#include "symbol.hpp"
 
 Sentence::Sentence(std::shared_ptr<Symbol> symbol): symbols{symbol} {}
 

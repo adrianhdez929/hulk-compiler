@@ -1,5 +1,5 @@
-#include "symbol.h"
-#include "sentence.h" 
+#include "symbol.hpp"
+#include "sentence.hpp" 
 
 Symbol::Symbol(const std::string& name, Grammar& grammar) 
     : name(name), grammar(grammar) {}

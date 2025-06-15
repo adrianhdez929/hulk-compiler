@@ -5,6 +5,8 @@
             "label": "C/C++: gcc build active file",
             "command": "/usr/bin/g++",
             "args": [
+				"-std=c++17",
+                "-o",
 				"-fdiagnostics-color=always",
                 "-g",
                 "Grammar/grammar.cpp",
@@ -20,7 +22,6 @@
                 "Parser/Item.cpp",
                 "Parser/SLR1Parser.cpp",
                 "${file}",
-                "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {

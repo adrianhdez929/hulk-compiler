@@ -1,7 +1,7 @@
 
 #include <vector>
 #include <memory>
-#include "symbol.h"
+#include "symbol.hpp"
 
 #ifndef SENTENCE_H
 #define SENTENCE_H

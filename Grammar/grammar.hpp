@@ -4,8 +4,8 @@
 #include <variant>
 #include <typeindex>
 #include <stdexcept>
-#include "symbol.h"
-#include "production.h"
+#include "symbol.hpp"
+#include "production.hpp"
 
 #ifndef GRAMMAR_H
 #define GRAMMAR_H

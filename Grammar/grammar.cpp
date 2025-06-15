@@ -1,5 +1,5 @@
-#include "grammar.h"
-#include "symbol.h"
+#include "grammar.hpp"
+#include "symbol.hpp"
 #include <typeindex>
 #include <stdexcept>
 

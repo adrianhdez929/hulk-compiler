@@ -10,7 +10,7 @@
 #include <functional>
 #include <vector>
 #include <variant>
-#include "SpecialTypes.h"
+#include "SpecialTypes.hpp"
 
 
 
