@@ -74,8 +74,18 @@ void SymbolCollectorVisitor::visit(BinOpNode* node, Context* context) {
         if (node->left) node->left->accept(this, context);
         if (node->right) node->right->accept(this, context);
         // Basic type inference for binary operations
-        if (node->left && node->left->inferredType) {
-            node->inferredType = node->left->inferredType;
+        if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/") {
+            // Assume numeric operations return a number
+            node->inferredType = Context::numberType;
+        } else if (node->op == "&" || node->op == "|" || node->op == "==" || node->op == "!=" || node->op == "is" || node->op == "<" || node->op == ">" || node->op == "<=" || node->op == ">=") {
+            // Logical operations return a boolean
+            node->inferredType = Context::boolType;
+        } else if (node->op == "@" || node->op == "@@") {
+            // Equality checks return a boolean
+            node->inferredType = Context::stringType;
+        } else {
+            // Default to void for unsupported operations
+            node->inferredType = Context::voidType;
         }
     }
 }
@@ -108,15 +118,22 @@ void SymbolCollectorVisitor::visit(FunctionCallNode* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(IDNode* node, Context* context) {
     if (node && context) {
-        auto varType = context->getVarType(node->id_name);
+         if (context->isDefined(node->id_name)) {
+            node->inferredType = context->getVarType(node->id_name);
+            return;
+        }
+
         if (node->id_name == "PI" || node->id_name == "E") {
             // Special handling for constants
             node->inferredType = Context::numberType;
             return;
         }
-
+        
+        auto varType = context->getVarType(node->id_name);
         if (varType) {
             node->inferredType = varType;
+        } else {
+            node->inferredType = Context::numberType;
         }
     }
 }
@@ -154,92 +171,17 @@ void SymbolCollectorVisitor::visit(ArgsList* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
     if (!node) return;
-    
-    // Create appropriate context for the function
-    Context* functionContext = context;
+
+    for (auto* arg: node->args->children) {
+        arg->accept(this, context);
+        arg->inferredType = context->getVarType(arg->id_name);
+    }
+
+    node->body->accept(this, context);
+    node->inferredType = node->body->inferredType;
+
     if (!currentTypeName.empty()) {
-        // For methods, create a method context with 'self'
-        auto selfType = globalContext->getType(currentTypeName);
-        if (selfType) {
-            functionContext = context->createChildContext();
-            functionContext->defineVar("self", selfType);
-        }
-        
-        // Define parameters in the method context
-        if (node->args && !node->args->children.empty()) {
-            for (auto* param : node->args->children) {
-                if (param) {
-                    std::shared_ptr<TypeInfo> paramType = Context::numberType; // Default
-                    if (!param->id_type.empty() && param->id_type != "none") {
-                        auto explicitType = context->getType(param->id_type);
-                        if (explicitType) {
-                            paramType = explicitType;
-                        }
-                    }
-                    functionContext->defineVar(param->id_name, paramType);
-                }
-            }
-        }
-    }
-    
-    // Process the function body to infer its return type
-    std::shared_ptr<TypeInfo> bodyReturnType = Context::voidType;
-    if (node->body) {
-        // Set flag to indicate we're inside a method body if we're in a type
-        if (!currentTypeName.empty()) {
-            insideMethod = true;
-            std::cout << "SymbolCollector: Entering method body for '" << node->func_name 
-                      << "' in type '" << currentTypeName << "'" << std::endl;
-            processMethodDefinition(node, currentTypeName, context);
-        }
-        
-        node->body->accept(this, functionContext);
-        if (node->body->inferredType) {
-            bodyReturnType = node->body->inferredType;
-        }
-        
-        // Restore previous state
-        insideMethod = false;
-        if (!currentTypeName.empty()) {
-            std::cout << "SymbolCollector: Exiting method body for '" << node->func_name 
-                      << "' in type '" << currentTypeName << "'" << std::endl;
-        }
-    }
-    
-    // Determine the function's actual return type
-    std::shared_ptr<TypeInfo> declaredReturnType = nullptr;
-    if (!node->func_type.empty() && node->func_type != "none") {
-        declaredReturnType = context->getType(node->func_type);
-        if (!declaredReturnType) {
-            addError("Function '" + node->func_name + "' declared with unknown return type '" + node->func_type + "'");
-            node->inferredType = Context::voidType;
-            return;
-        }
-    }
-    
-    // Type checking: if both explicit type and body type exist, they must be compatible
-    if (declaredReturnType && bodyReturnType) {
-        // Check if the body return type is compatible with the declared return type
-        if (!bodyReturnType->isCompatibleWith(declaredReturnType) && 
-            !bodyReturnType->isSubtypeOf(declaredReturnType) &&
-            bodyReturnType->name != declaredReturnType->name) {
-            addError("Function '" + node->func_name + "' declared to return '" + 
-                    declaredReturnType->name + "' but body returns '" + bodyReturnType->name + "'");
-        }
-        
-        // Use the declared type as the function's return type
-        node->inferredType = declaredReturnType;
-    } else if (declaredReturnType) {
-        // Only explicit type provided, use it
-        node->inferredType = declaredReturnType;
-    } else {
-        // No explicit type, infer from body
-        node->inferredType = bodyReturnType;
-    }
-    
-    // Process method/function definition for collection
-    if (currentTypeName.empty()) {
-        processGlobalFunction(node, context);
+       processMethodDefinition(node, currentTypeName, context);
     }
 }
 
@@ -266,18 +208,22 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
     if (!node) return;
     
     // Debug output
-    std::cout << "SymbolCollector: Processing VarAssign '" << node->var_id->id_name 
-              << "' - currentTypeName: '" << currentTypeName 
-              << "', insideMethodBody: " << (insideMethod ? "true" : "false") << std::endl;
+    // std::cout << "SymbolCollector: Processing VarAssign '" << node->var_id->id_name 
+    //           << "' - currentTypeName: '" << currentTypeName 
+    //           << "', insideMethodBody: " << (insideMethod ? "true" : "false") << std::endl;
+
+    node->value->accept(this, context);
+    node->inferredType = node->value->inferredType;
     
     // Only treat VarAssign as type attribute if we're in a type but NOT inside a method body
     if (!currentTypeName.empty() && !insideMethod) {
         std::cout << "  -> Processing as type attribute" << std::endl;
         processAttributeDefinition(node, currentTypeName, context);
-    } else {
-        std::cout << "  -> Processing as variable definition" << std::endl;
-        processVariableDefinition(node, "global", context);
-    }
+    } 
+    // else {
+    //     std::cout << "  -> Processing as variable definition" << std::endl;
+    //     processVariableDefinition(node, "global", context);
+    // }
 }
 
 void SymbolCollectorVisitor::visit(NewTypeNode* node, Context* context) {
@@ -356,12 +302,12 @@ void SymbolCollectorVisitor::visit(WhileNode* node, Context* context) {
     }
     
     // Process the loop body
+    
     if (node->body) {
         node->body->accept(this, context);
     }
     
-    // While loops don't have a meaningful return type, use void
-    node->inferredType = Context::voidType;
+    node->inferredType = node->body ? node->body->inferredType : Context::voidType;
 }
 
 void SymbolCollectorVisitor::visit(VarDesAssign* node, Context* context) {
@@ -491,37 +437,39 @@ void SymbolCollectorVisitor::visit(ProgramNode* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(AccessNode* node, Context* context) {
     if (!node) return;
+
+
     
     // Get the variable type first
-    std::shared_ptr<TypeInfo> varType = context->getVarType(node->var_name);
-    if (!varType) {
-        addError("Unknown variable '" + node->var_name + "' in access expression");
-        return;
-    }
+    // std::shared_ptr<TypeInfo> varType = context->getVarType(node->var_name);
+    // if (!varType) {
+    //     addError("Unknown variable '" + node->var_name + "' in access expression");
+    //     return;
+    // }
     
-    // Process the member access
-    if (node->member) {
-        std::string memberName = node->member->get_name();
+    // // Process the member access
+    // if (node->member) {
+    //     std::string memberName = node->member->get_name();
         
-        if (node->member->get_form() == TypeAssMember::Form::Attribute) {
-            // Look up the attribute in the variable's type (including inherited attributes)
-            auto* attr = findAttribute(varType->name, memberName);
-            if (attr && attr->type) {
-                node->inferredType = attr->type;
-            } else {
-                addError("Attribute '" + memberName + "' not found in type '" + varType->name + "' or its parent types");
-                node->inferredType = Context::numberType; // Default fallback
-            }
-        } else if (node->member->get_form() == TypeAssMember::Form::Method) {
-            // For method access, we typically return void unless we can determine the return type
-            // In a complete implementation, we would look up the method signature
-            node->inferredType = Context::voidType;
-        } else {
-            node->inferredType = varType;
-        }
-    } else {
-        node->inferredType = varType;
-    }
+    //     if (node->member->get_form() == TypeAssMember::Form::Attribute) {
+    //         // Look up the attribute in the variable's type (including inherited attributes)
+    //         auto* attr = findAttribute(varType->name, memberName);
+    //         if (attr && attr->type) {
+    //             node->inferredType = attr->type;
+    //         } else {
+    //             addError("Attribute '" + memberName + "' not found in type '" + varType->name + "' or its parent types");
+    //             node->inferredType = Context::numberType; // Default fallback
+    //         }
+    //     } else if (node->member->get_form() == TypeAssMember::Form::Method) {
+    //         // For method access, we typically return void unless we can determine the return type
+    //         // In a complete implementation, we would look up the method signature
+    //         node->inferredType = Context::voidType;
+    //     } else {
+    //         node->inferredType = varType;
+    //     }
+    // } else {
+    //     node->inferredType = varType;
+    // }
 }
 
 void SymbolCollectorVisitor::visit(TypeAssMember* node, Context* context) {
@@ -564,9 +512,9 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
 
     // Visit the expression being cast first
     node->expr->accept(this, context);
-    
+
     // Get the source type from the expression
-    std::shared_ptr<TypeInfo> sourceType = node->expr->inferredType;
+    std::shared_ptr<TypeInfo> sourceType = node->expr->inferredType ? node->expr->inferredType : context->getType(node->target_type);
     if (!sourceType) {
         addError("Cannot determine type of expression being cast");
         return;
@@ -625,6 +573,8 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
     }
     
     // Set the inferred type to the target type
+    cout << "Casting from type '" << sourceType->name 
+         << "' to type '" << targetType->name << "'" << std::endl;
     node->inferredType = targetType;
 }
 
@@ -782,47 +732,7 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
 void SymbolCollectorVisitor::processGlobalFunction(AssignFuncNode* node, Context* context) {
     if (node) {
         std::cout << "Processing global function '" << node->func_name << "'" << std::endl;
-        
-        // Collect parameter types
-        std::vector<std::shared_ptr<TypeInfo>> paramTypes;
-        if (node->args && !node->args->children.empty()) {
-            for (auto* param : node->args->children) {
-                if (param) {
-                    std::shared_ptr<TypeInfo> paramType = Context::numberType; // Default
-                    if (!param->id_type.empty() && param->id_type != "none") {
-                        auto explicitType = context->getType(param->id_type);
-                        if (explicitType) {
-                            paramType = explicitType;
-                        }
-                    }
-                    paramTypes.push_back(paramType);
-                }
-            }
-        }
-        
-        // Determine return type
-        std::shared_ptr<TypeInfo> returnType = Context::numberType; // Default
-        if (!node->func_type.empty() && node->func_type != "none") {
-            auto explicitType = context->getType(node->func_type);
-            if (explicitType) {
-                returnType = explicitType;
-            }
-        } else if (node->body && node->body->inferredType) {
-            returnType = node->body->inferredType;
-        }
-        
-        // Define the function in the global context
-        if (globalContext) {
-            bool success = globalContext->defineFunc(node->func_name, returnType, paramTypes);
-            if (success) {
-                std::cout << "Successfully registered global function '" << node->func_name 
-                         << "' with " << paramTypes.size() << " parameters" << std::endl;
-            } else {
-                addError("Failed to define global function '" + node->func_name + "' - may already exist");
-            }
-        } else {
-            addError("Global context is null when trying to register function '" + node->func_name + "'");
-        }
+        // Add to global context or handle global functions as needed
     }
 }
 

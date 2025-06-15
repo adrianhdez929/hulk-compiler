@@ -457,6 +457,9 @@ void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
         return;
     }
 
+    if (context->isDefined(node->id_name)) {
+        node->inferredType = context->getVarType(node->id_name);
+    }
 
     if (node->id_name == "PI" || node->id_name == "E") {
         // Handle built-in constants
@@ -587,42 +590,32 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
         return;
     }
 
-
-
+    
     Context* functionContext = context->createChildContext();
     
-    // If we're inside a type, this is a method - define 'self'
+    
+    std::vector<std::shared_ptr<TypeInfo>> argTypes = std::vector<std::shared_ptr<TypeInfo>>();
+    
+    for (auto* arg : node->args->children) {
+        functionContext->defineVar(arg->id_name, arg->inferredType ? arg->inferredType : Context::numberType); // Default to number type
+        if (arg->inferredType) {
+            argTypes.push_back(arg->inferredType);
+        } else {
+            argTypes.push_back(Context::numberType);
+        }
+        
+        arg->accept(this, functionContext);
+    }
+
     if (context->currentType) {
-        // Create a TypeInfo for the current type and define 'self'
         auto selfType = std::make_shared<TypeInfo>(context->currentType->name, TypeKind::CLASS);
         selfType->typeDef = context->currentType->typeDef;
         functionContext->defineVar("self", selfType);
-        
-        // cout << "Method '" << node->func_name << "' in type '" << context->currentType->name << "' - 'self' defined" << endl;
+    } else {
+       context->defineFunc(node->func_name, node->inferredType, argTypes);
     }
     
-    // Process function parameters in the function context
-    for (auto* arg : node->args->children) {
-        // Define the parameter in the function context FIRST
-        std::shared_ptr<TypeInfo> paramType = Context::numberType; // Default
-        if (!arg->id_type.empty() && arg->id_type != "none") {
-            auto explicitType = context->getType(arg->id_type);
-            if (explicitType) {
-                paramType = explicitType;
-            }
-        }
-        functionContext->defineVar(arg->id_name, paramType);
-        
-        // Then process the argument for validation
-        arg->accept(this, functionContext);
-    }
-    
-    // Process function body in the function context
     node->body->accept(this, functionContext);
-    
-    // cout << "Function '" << node->func_name << "' defined successfully:" << endl;
-    // cout << "  - Parameters: " << node->args->children.size() << endl;
-    // cout << "  - Body type: " << (node->body->inferredType ? node->body->inferredType->name : "Expression") << endl;
 }
 
 void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
@@ -656,7 +649,21 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
 
     // cout << "Visiting VarAssign: " << node->var_id->id_name << " static type " << node->var_id->id_type << endl;
 
-    node->value->accept(this, context);    
+    if (context->isDefined(node->var_id->id_name)) {
+        // Variable already defined, check if it's a reassignment
+        auto existingType = context->getVarType(node->var_id->id_name);
+        if (existingType && !context->canAssign(node->value->inferredType, existingType)) {
+            addError("Semantic error in line " + std::to_string(node->line) + " : Cannot assign " + 
+                                   node->value->inferredType->name + " to existing variable " + 
+                                   node->var_id->id_name + " of type " + existingType->name);
+            return;
+        }
+    } else {
+        // New variable assignment
+        context->defineVar(node->var_id->id_name, node->value->inferredType);
+    }
+    
+    node->value->accept(this, context);
     
     // cout << "Semantic check: Variable assignment '" << node->var_id->id_name << "' with type " << 
             // (node->inferredType ? node->inferredType->name : "unknown") << endl;

@@ -13,7 +13,7 @@ BUILDDIR = $(SRC_DIR)/hulk
 
 PROGRAM = hulk
 
-OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
+OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
 
 compile: $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM)
 
@@ -56,8 +56,14 @@ $(BUILDDIR)/codegen.o: $(SRC_DIR)/codegen/visitor.cpp $(SRC_DIR)/codegen/visitor
 $(BUILDDIR)/jit.o: $(SRC_DIR)/codegen/jit.cpp $(SRC_DIR)/codegen/jit.h | $(BUILDDIR)
 	$(CC) $(CXXFLAGS) -c $(SRC_DIR)/codegen/jit.cpp -o $@
 
-$(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.h $(SRC_DIR)/Ast/ast.hpp $(SRC_DIR)/semantic/visitor.h $(SRC_DIR)/semantic/visitor.cpp
+$(BUILDDIR)/main.o: $(SRC_DIR)/main.cpp $(BUILDDIR)/parser.tab.h $(SRC_DIR)/Ast/ast.hpp $(SRC_DIR)/semantic/visitor.h $(SRC_DIR)/semantic/visitor.cpp
 	$(CC) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp $(LDFLAGS) -o $@
+
+$(BUILDDIR)/type_collector_visitor.o: $(SRC_DIR)/semantic/type_collector_visitor.cpp $(SRC_DIR)/semantic/type_collector_visitor.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/semantic/type_collector_visitor.cpp -o $@
+
+$(BUILDDIR)/symbol_collector_visitor.o: $(SRC_DIR)/semantic/symbol_collector_visitor.cpp $(SRC_DIR)/semantic/symbol_collector_visitor.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/semantic/symbol_collector_visitor.cpp -o $@
 
 clean:
 	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so
