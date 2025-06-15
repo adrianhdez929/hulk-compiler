@@ -118,7 +118,11 @@ void SymbolCollectorVisitor::visit(FunctionCallNode* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(IDNode* node, Context* context) {
     if (node && context) {
-         if (context->isDefined(node->id_name)) {
+        if (node->inferredType) {
+            // If already inferred, no need to re-infer
+            return;
+        }
+        if (context->isDefined(node->id_name)) {
             node->inferredType = context->getVarType(node->id_name);
             return;
         }
@@ -132,8 +136,6 @@ void SymbolCollectorVisitor::visit(IDNode* node, Context* context) {
         auto varType = context->getVarType(node->id_name);
         if (varType) {
             node->inferredType = varType;
-        } else {
-            node->inferredType = Context::numberType;
         }
     }
 }
@@ -174,7 +176,15 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
 
     for (auto* arg: node->args->children) {
         arg->accept(this, context);
-        arg->inferredType = context->getVarType(arg->id_name);
+        if (arg->inferredType) {
+            // If the argument already has an inferred type, use it
+            continue;
+        }
+        if (!arg->id_type.empty()) {
+            arg->inferredType = context->getType(arg->id_type);
+        } else {
+            arg->inferredType = Context::numberType;
+        }
     }
 
     node->body->accept(this, context);
@@ -212,8 +222,10 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
     //           << "' - currentTypeName: '" << currentTypeName 
     //           << "', insideMethodBody: " << (insideMethod ? "true" : "false") << std::endl;
 
+
     node->value->accept(this, context);
     node->inferredType = node->value->inferredType;
+    node->var_id->inferredType = node->inferredType;
     
     // Only treat VarAssign as type attribute if we're in a type but NOT inside a method body
     if (!currentTypeName.empty() && !insideMethod) {
@@ -228,6 +240,7 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(NewTypeNode* node, Context* context) {
     if (node) {
+        cout << "Setting inferredType for NewTypeNode '" << globalContext->getType(node->id_type_name)->name << "'" << std::endl;
         node->inferredType = globalContext->getType(node->id_type_name);
     }
 }
@@ -353,7 +366,7 @@ void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     
     std::cout << "SymbolCollector: Processing type body for '" << node->id->id_name << "'" << std::endl;
     currentTypeName = node->id->id_name;
-    
+
     // Process type body
     for (auto* element : node->body) {
         if (element) {
@@ -438,38 +451,7 @@ void SymbolCollectorVisitor::visit(ProgramNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(AccessNode* node, Context* context) {
     if (!node) return;
 
-
     
-    // Get the variable type first
-    // std::shared_ptr<TypeInfo> varType = context->getVarType(node->var_name);
-    // if (!varType) {
-    //     addError("Unknown variable '" + node->var_name + "' in access expression");
-    //     return;
-    // }
-    
-    // // Process the member access
-    // if (node->member) {
-    //     std::string memberName = node->member->get_name();
-        
-    //     if (node->member->get_form() == TypeAssMember::Form::Attribute) {
-    //         // Look up the attribute in the variable's type (including inherited attributes)
-    //         auto* attr = findAttribute(varType->name, memberName);
-    //         if (attr && attr->type) {
-    //             node->inferredType = attr->type;
-    //         } else {
-    //             addError("Attribute '" + memberName + "' not found in type '" + varType->name + "' or its parent types");
-    //             node->inferredType = Context::numberType; // Default fallback
-    //         }
-    //     } else if (node->member->get_form() == TypeAssMember::Form::Method) {
-    //         // For method access, we typically return void unless we can determine the return type
-    //         // In a complete implementation, we would look up the method signature
-    //         node->inferredType = Context::voidType;
-    //     } else {
-    //         node->inferredType = varType;
-    //     }
-    // } else {
-    //     node->inferredType = varType;
-    // }
 }
 
 void SymbolCollectorVisitor::visit(TypeAssMember* node, Context* context) {
@@ -606,7 +588,7 @@ void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const
             
             // Get parameter type (default to number if not specified)
             std::shared_ptr<TypeInfo> paramType = Context::numberType;
-            if (!param->id_type.empty() && param->id_type != "none") {
+            if (!param->id_type.empty()) {
                 auto explicitType = context->getType(param->id_type);
                 if (explicitType) {
                     paramType = explicitType;
@@ -629,19 +611,7 @@ void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const
         node->body->accept(this, methodContext);
     }
     
-    // Determine return type
-    std::shared_ptr<TypeInfo> returnType = Context::voidType;
-    if (!node->func_type.empty() && node->func_type != "none") {
-        auto explicitReturnType = context->getType(node->func_type);
-        if (explicitReturnType) {
-            returnType = explicitReturnType;
-        }
-    } else if (node->body && node->body->inferredType) {
-        returnType = node->body->inferredType;
-    }
-    
-    // Create method info
-    MethodInfo method(node->func_name, returnType, paramTypes, paramNames, typeName, false, 0);
+    MethodInfo method(node->func_name, node->body->inferredType, paramTypes, paramNames, typeName, false, 0);
     
     // Add to methods collection
     methodsByType[typeName].push_back(method);
@@ -667,7 +637,7 @@ void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const s
     }
     
     // Check for explicit type annotation
-    if (!node->var_id->id_type.empty() && node->var_id->id_type != "none") {
+    if (!node->var_id->id_type.empty()) {
         auto explicitType = context->getType(node->var_id->id_type);
         if (explicitType) {
             attrType = explicitType;
@@ -696,7 +666,7 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
         std::shared_ptr<TypeInfo> valueType = node->value->inferredType ? node->value->inferredType : Context::numberType;
         
         // Check if variable has explicit type annotation
-        if (!node->var_id->id_type.empty() && node->var_id->id_type != "none") {
+        if (!node->var_id->id_type.empty()) {
             declaredType = context->getType(node->var_id->id_type);
             if (!declaredType) {
                 addError("Variable '" + node->var_id->id_name + "' declared with unknown type '" + node->var_id->id_type + "'");

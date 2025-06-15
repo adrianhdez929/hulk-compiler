@@ -110,16 +110,6 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
             addError("Semantic error in line " + std::to_string(node->line) + " : Type '" + rightIdNode->id_name + "' not found in 'is' expression");
             return;
         }
-        
-        // Set the type for the right operand manually (it's a type reference)
-        rightIdNode->semanticValue = "type_ref(" + rightIdNode->id_name + ")";
-        
-        // The 'is' operator always returns a boolean
-        node->semanticValue = "type_check(" + node->left->semanticValue + " is " + rightIdNode->id_name + ")";
-        
-        // cout << "Semantic check: 'is' operator - checking if " << 
-                // (node->left->inferredType ? node->left->inferredType->name : "unknown") << 
-                // " is " << rightIdNode->id_name << endl;
         return;
     }
     
@@ -130,22 +120,15 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
     if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/" || node->op == "%" || node->op == "^") {
         checkTypeCompatibility(Context::numberType, node->left->inferredType, "left operand of " + node->op, node->line);
         checkTypeCompatibility(Context::numberType, node->right->inferredType, "right operand of " + node->op, node->line);
-        
-        node->semanticValue = "arithmetic_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
-        
     } else if (node->op == "==" || node->op == "!=" || node->op == "<" || node->op == ">" || node->op == "<=" || node->op == ">=") {
         checkTypeCompatibility(node->left->inferredType, node->right->inferredType, "comparison operands", node->line);
         if (!node->left->inferredType || !node->right->inferredType) {
             addError("Type error in line " + std::to_string(node->line) + " : Cannot compare untyped expressions");
             return;
         }
-        node->semanticValue = "comparison_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
     } else if (node->op == "&" || node->op == "|") {
         checkTypeCompatibility(Context::boolType, node->left->inferredType, "left operand of " + node->op, node->line);
         checkTypeCompatibility(Context::boolType, node->right->inferredType, "right operand of " + node->op, node->line);
-        
-        node->semanticValue = "logical_op(" + node->left->semanticValue + ", " + node->op + ", " + node->right->semanticValue + ")";
-        
     } else if (node->op == "@") {
         // String concatenation operator
         // Left operand should be a string, right operand can be string or number
@@ -161,7 +144,6 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
                                    node->right->inferredType->name);
             return;
         }
-        node->semanticValue = "string_concat(" + node->left->semanticValue + ", " + node->right->semanticValue + ")";
     } else if (node->op == "@@") {
         // String concatenation operator
         // Left operand should be a string, right operand can be string or number
@@ -177,7 +159,6 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
                                    node->right->inferredType->name);
             return;
         }
-        node->semanticValue = "string_double_concat(" + node->left->semanticValue + ", " + node->right->semanticValue + ")";
     } else if (node->op == "=" || node->op == ":=") {
         if (node->left->inferredType && node->right->inferredType) {
             if (!context->canAssign(node->right->inferredType, node->left->inferredType)) {
@@ -186,7 +167,6 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
                 return;
             }
         }
-        node->semanticValue = "assignment(" + node->left->semanticValue + ", " + node->right->semanticValue + ")";
         
     } else {
         addError("Semantic error in line " + std::to_string(node->line) + " : Unknown binary operator: " + node->op);
@@ -472,59 +452,59 @@ void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
     // cout << "Visiting IDNode: " << node->id_name << endl;
     
     // Check if we're in a type member context (inside a method)
-    if (context->currentType) {
-        cout << "inside type: " << context->currentType->name << endl;
-        // If we're inside a type, we need to check if the ID is a member variable or method
-        // First check if it's a local variable/parameter in the current function scope
-        auto localVarType = context->getVarType(node->id_name);
-        bool isLocalVariable = false;
+    // if (context->currentType) {
+    //     cout << "inside type: " << context->currentType->name << endl;
+    //     // If we're inside a type, we need to check if the ID is a member variable or method
+    //     // First check if it's a local variable/parameter in the current function scope
+    //     auto localVarType = context->getVarType(node->id_name);
+    //     bool isLocalVariable = false;
         
-        // Check if it's defined in the immediate function context (not inherited from parent contexts)
-        if (localVarType && context->isLocal(node->id_name)) {
-            isLocalVariable = true;
-            cout << "IDNode '" << node->id_name << "' is a local variable in function context" << endl;
-            node->inferredType = localVarType;
-            node->semanticValue = "var_ref(" + node->id_name + ")";
-            return;
-        }
+    //     // Check if it's defined in the immediate function context (not inherited from parent contexts)
+    //     if (localVarType && context->isLocal(node->id_name)) {
+    //         isLocalVariable = true;
+    //         cout << "IDNode '" << node->id_name << "' is a local variable in function context" << endl;
+    //         node->inferredType = localVarType;
+    //         node->semanticValue = "var_ref(" + node->id_name + ")";
+    //         return;
+    //     }
         
-        // If it's not a local variable, check if it's a member variable of the current type
-        if (!isLocalVariable) {
-            cout << "IDNode '" << node->id_name << "' is not a local variable, checking type members" << endl;
+    //     // If it's not a local variable, check if it's a member variable of the current type
+    //     if (!isLocalVariable) {
+    //         cout << "IDNode '" << node->id_name << "' is not a local variable, checking type members" << endl;
             
-            // Check if it's a member variable using the Context's collected data
-            auto collectedAttrs = context->getAttributesForType(context->currentType->name, true);
-            bool isMemberVariable = false;
+    //         // Check if it's a member variable using the Context's collected data
+    //         auto collectedAttrs = context->getAttributesForType(context->currentType->name, true);
+    //         bool isMemberVariable = false;
             
-            for (const auto& attr : collectedAttrs) {
-                cout << attr.name << " is an attribute of type " << context->currentType->name << endl;
-                if (attr.name == node->id_name) {
-                    cout << "IDNode '" << node->id_name << "' is an attribute of type '" << context->currentType->name << "'" << endl;
-                    node->semanticValue = "attr_ref(" + context->currentType->name + ", " + node->id_name + ")";
-                    node->inferredType = attr.type;
-                    isMemberVariable = true;
-                    addError("Semantic error in line " + std::to_string(node->line) + " : Member variable '" + node->id_name + 
-                                               "' cannot be accessed directly in method. Use 'self." + 
-                                               node->id_name + "' instead.");
-                    break;
-                }
-            }
+    //         for (const auto& attr : collectedAttrs) {
+    //             cout << attr.name << " is an attribute of type " << context->currentType->name << endl;
+    //             if (attr.name == node->id_name) {
+    //                 cout << "IDNode '" << node->id_name << "' is an attribute of type '" << context->currentType->name << "'" << endl;
+    //                 node->semanticValue = "attr_ref(" + context->currentType->name + ", " + node->id_name + ")";
+    //                 node->inferredType = attr.type;
+    //                 isMemberVariable = true;
+    //                 addError("Semantic error in line " + std::to_string(node->line) + " : Member variable '" + node->id_name + 
+    //                                            "' cannot be accessed directly in method. Use 'self." + 
+    //                                            node->id_name + "' instead.");
+    //                 break;
+    //             }
+    //         }
             
-            // Check if it's a method name used without 'self.'
-            if (!isMemberVariable) {
-                auto collectedMethods = context->getMethodsForType(context->currentType->name, true);
-                for (const auto& method : collectedMethods) {
-                    if (method.name == node->id_name) {
-                        cout << "IDNode '" << node->id_name << "' is a method of type '" << context->currentType->name << "'" << endl;
-                        addError("Semantic error in line " + std::to_string(node->line) + " : Method '" + node->id_name + 
-                                               "' cannot be called directly in method. Use 'self." + 
-                                               node->id_name + "()' instead.");
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    //         // Check if it's a method name used without 'self.'
+    //         if (!isMemberVariable) {
+    //             auto collectedMethods = context->getMethodsForType(context->currentType->name, true);
+    //             for (const auto& method : collectedMethods) {
+    //                 if (method.name == node->id_name) {
+    //                     cout << "IDNode '" << node->id_name << "' is a method of type '" << context->currentType->name << "'" << endl;
+    //                     addError("Semantic error in line " + std::to_string(node->line) + " : Method '" + node->id_name + 
+    //                                            "' cannot be called directly in method. Use 'self." + 
+    //                                            node->id_name + "()' instead.");
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     
     if (!context->isDefined(node->id_name)) {
         addError("Semantic error in line " + std::to_string(node->line) + " : Variable '" + node->id_name + "' is not defined");
@@ -534,12 +514,9 @@ void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
     // Get the variable type and set the inferred type
     auto varType = context->getVarType(node->id_name);
     if (varType) {
+        cout << "setting inferred type for IDNode '" << node->id_name << "' to " << varType->name << endl;
         node->inferredType = varType;
     }
-    
-    node->semanticValue = "var_ref(" + node->id_name + ")";
-    
-    // cout << "Semantic check: Variable '" << node->id_name << "' has type " << varType->name << endl;
 }
 
 void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
@@ -552,7 +529,7 @@ void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
 	
 	Context* blockContext = context->createChildContext();
 	
-	for (auto child : node->children) {
+	for (auto* child : node->children) {
 		child->accept(this, blockContext);
 	}
 	
@@ -576,7 +553,7 @@ void SemanticCheckerVisitor::visit(ArgsList* node, Context* context) {
 		}
 	}
 
-	for (auto child : node->children) {
+	for (auto* child : node->children) {
 		// cout << "Processing argument: " << child->id_name << endl;
         child->accept(this, context);
 	}
@@ -597,12 +574,24 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
     std::vector<std::shared_ptr<TypeInfo>> argTypes = std::vector<std::shared_ptr<TypeInfo>>();
     
     for (auto* arg : node->args->children) {
-        functionContext->defineVar(arg->id_name, arg->inferredType ? arg->inferredType : Context::numberType); // Default to number type
         if (arg->inferredType) {
-            argTypes.push_back(arg->inferredType);
+            if (!context->getType(arg->inferredType->name)) {
+                addError("Semantic error in line " + std::to_string(node->line) + " : Type '" + arg->inferredType->name + 
+                                       "' is not defined for argument '" + arg->id_name + "'");
+                continue;
+            }
         } else {
-            argTypes.push_back(Context::numberType);
+            if (!context->getType(arg->id_type)) {
+                addError("Semantic error in line " + std::to_string(node->line) + " : Type '" + arg->id_type + 
+                                       "' is not defined for argument '" + arg->id_name + "'");
+                continue;
+            } else {
+                arg->inferredType = context->getType(arg->id_type);
+            }
         }
+        
+        functionContext->defineVar(arg->id_name, arg->inferredType ? arg->inferredType : Context::numberType); // Default to number type
+        argTypes.push_back(arg->inferredType);
         
         arg->accept(this, functionContext);
     }
@@ -610,7 +599,6 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
     if (context->currentType) {
         auto selfType = std::make_shared<TypeInfo>(context->currentType->name, TypeKind::CLASS);
         selfType->typeDef = context->currentType->typeDef;
-        functionContext->defineVar("self", selfType);
     } else {
        context->defineFunc(node->func_name, node->inferredType, argTypes);
     }
@@ -660,7 +648,9 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
         }
     } else {
         // New variable assignment
-        context->defineVar(node->var_id->id_name, node->value->inferredType);
+        cout << "Defining new variable: " << node->var_id->id_name << " with type " << 
+                (node->inferredType ? node->inferredType->name : "unknown") << endl;
+        context->defineVar(node->var_id->id_name, node->inferredType);
     }
     
     node->value->accept(this, context);
@@ -821,27 +811,19 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
 		return;
     }
 
-    // cout << "DEBUG: Visiting TypeDeclNode: " << node->id->id_name << endl;
-
-    // Get the type info instead of type def for currentType
     auto typeInfo = context->getType(node->id->id_name);
+    auto typeContext = context->createChildContext();
     context->currentType = typeInfo;
 
-    node->args->accept(this, context);
+    typeContext->defineVar("self", typeInfo);
+
+    node->args->accept(this, typeContext);
 
     for (auto* element : node->body) {
-        element->accept(this, context);
+        element->accept(this, typeContext);
     }
 
     context->currentType = nullptr;
-
-    // node->semanticValue = "type_def(" + node->id->id_name + 
-    //                      ", properties:" + to_string(typeDef->properties.size()) +
-    //                      ", methods:" + to_string(typeDef->methods.size()) + ")";
-    
-    // cout << "Type '" << node->id->id_name << "' defined with " << 
-            // typeDef->properties.size() << " properties and " <<
-            // typeDef->methods.size() << " methods" << endl;
 }
 
 void SemanticCheckerVisitor::visit(ASTNodeVector* node, Context* context) {
@@ -896,8 +878,6 @@ void SemanticCheckerVisitor::visit(AccessNode* node, Context* context) {
         throw std::runtime_error("Node is null");
 		return;
     }
-    
-    // std::cout << "Visiting AccessNode: " << node->var_name << " accessing member" << std::endl;
 
     // Check if the object being accessed exists and get its type
     if (!context->isDefined(node->var_name)) {
@@ -910,19 +890,21 @@ void SemanticCheckerVisitor::visit(AccessNode* node, Context* context) {
         addError("Semantic error in line " + std::to_string(node->line) + " : Cannot determine type of '" + node->var_name + "'");
         return;
     }
+
+    cout << "Variable '" << node->var_name << "' has type '" << objectType->name << "'" << endl;
     
     // Get the member name being accessed
     std::string memberName = node->member->get_name();
     std::string objectTypeName = objectType->name;
     
     // Special handling for 'self' access in methods
-    if (node->var_name == "self") {
-        if (!context->currentType) {
-            addError("Semantic error in line " + std::to_string(node->line) + " : 'self' can only be used inside type methods");
-            return;
-        }
-        objectTypeName = context->currentType->name;
-    }
+    // if (node->var_name == "self") {
+    //     if (!context->currentType) {
+    //         addError("Semantic error in line " + std::to_string(node->line) + " : 'self' can only be used inside type methods");
+    //         return;
+    //     }
+    //     objectTypeName = context->currentType->name;
+    // }
     
     // Validate that the member exists in the object's type
     bool memberFound = false;
