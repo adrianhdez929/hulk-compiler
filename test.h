@@ -1,24 +1,24 @@
 #pragma once
-#include "Automata/nfa.h"
-#include "Automata/dfa.h"
-#include "Automata/utils/ContainerSet.h"
-#include "Automata/utils/aut_manipulation.h"
+#include "Automata/nfa.hpp"
+#include "Automata/dfa.hpp"
+#include "Automata/utils/ContainerSet.hpp"
+#include "Automata/utils/aut_manipulation.hpp"
 #include <iostream>
 #include <vector>
 #include <variant>
-#include "Automata/operations/operations.h"
-#include "Grammar/grammar.h"
-#include "Automata/state.h"
-#include "Lexer/node.h"
-#include "Automata/utils/utils.h"
-#include "Parser/Item.h"
-#include "Lexer/grammar_parser.h"
+#include "Automata/operations/operations.hpp"
+#include "Grammar/grammar.hpp"
+#include "Automata/state.hpp"
+#include "Lexer/node.hpp"
+#include "Automata/utils/utils.hpp"
+#include "Parser/Item.hpp"
+#include "Lexer/grammar_parser.hpp"
 // #include "Parser/LR1Parser.h"
-#include "Parser/SLR1Parser.h"
+#include "Parser/SLR1Parser.hpp"
 #include <cassert>
 #include <stack>
-#include "Lexer/Regex.h"
-#include "Lexer/Lexer.h"
+#include "Lexer/Regex.hpp"
+#include "Lexer/Lexer.hpp"
 
 int test_grammar() {
     // Crear una gramática
