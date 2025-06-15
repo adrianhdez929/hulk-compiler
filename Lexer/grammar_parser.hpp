@@ -1,12 +1,12 @@
 #pragma once
 #include <string>
-#include "../Grammar/grammar.h"
+#include "../Grammar/grammar.hpp"
 #include <fstream>
 #include <memory>
 #include <unordered_map>
 #include <algorithm>
 #include <cctype>
-#include "node.h"
+#include "node.hpp"
 #include <functional>
 #include <vector>
 #include <variant>

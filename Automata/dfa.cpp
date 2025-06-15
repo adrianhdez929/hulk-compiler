@@ -1,4 +1,4 @@
-#include "dfa.h"
+#include "dfa.hpp"
 
 DFA::DFA(int states,
          const set<State>& finalStates,

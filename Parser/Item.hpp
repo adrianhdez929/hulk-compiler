@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 #include <set>
-#include "../Grammar/production.h"
-#include "../Automata/utils/ContainerSet.h"
+#include "../Grammar/production.hpp"
+#include "../Automata/utils/ContainerSet.hpp"
 
 class Item {
 public:

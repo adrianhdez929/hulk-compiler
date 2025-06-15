@@ -1,6 +1,6 @@
-#include "../nfa.h"
-#include "../dfa.h"
-#include "../utils/Disjoint_set.h"
+#include "../nfa.hpp"
+#include "../dfa.hpp"
+#include "../utils/Disjoint_set.hpp"
 
 // Operaciones de union, concatenacion y clausura
 // union

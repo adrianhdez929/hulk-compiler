@@ -4,12 +4,12 @@
 #include <regex>
 #include <cctype>
 #include <iostream>
-#include "../Automata/dfa.h"
-#include "../Automata/nfa.h"
-#include "../Automata/utils/aut_manipulation.h"
-#include "../Automata/operations/operations.h"
-#include "../Parser/SLR1Parser.h"
-#include "../Parser/reverse_evaluate.h"
+#include "../Automata/dfa.hpp"
+#include "../Automata/nfa.hpp"
+#include "../Automata/utils/aut_manipulation.hpp"
+#include "../Automata/operations/operations.hpp"
+#include "../Parser/SLR1Parser.hpp"
+#include "../Parser/reverse_evaluate.hpp"
 
 using namespace std;
 

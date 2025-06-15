@@ -1,7 +1,7 @@
 
 #include <string>
 #include <stdexcept>
-#include "nfa.h"
+#include "nfa.hpp"
 
 using namespace std;
 

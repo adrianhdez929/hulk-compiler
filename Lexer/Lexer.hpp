@@ -2,9 +2,9 @@
 #include <string>
 #include <vector>
 #include <cassert>
-#include "../Automata/state.h"
-#include "Regex.h"
-#include "../Automata/nfa.h"
+#include "../Automata/state.hpp"
+#include "Regex.hpp"
+#include "../Automata/nfa.hpp"
 
 class Lexer {
 public:

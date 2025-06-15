@@ -1,9 +1,9 @@
-#include "../dfa.h"
-#include "../nfa.h"
-#include "ContainerSet.h"
+#include "../dfa.hpp"
+#include "../nfa.hpp"
+#include "ContainerSet.hpp"
 #include <algorithm>
 #include <map>
-#include "aut_manipulation.h"
+#include "aut_manipulation.hpp"
 #include <queue>
 
 // namespace manipulation {

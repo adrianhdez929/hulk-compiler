@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "../Grammar/grammar.h"
-#include "../Automata/state.h"
+#include "../Grammar/grammar.hpp"
+#include "../Automata/state.hpp"
 
 class SLR1Parser {
 public:

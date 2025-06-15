@@ -5,8 +5,8 @@
 #include <memory>
 #include <unordered_set>
 #include <queue>
-#include "nfa.h"
-#include "../Parser/Item.h"
+#include "nfa.hpp"
+#include "../Parser/Item.hpp"
 
 #ifndef STATE_H
 #define STATE_H

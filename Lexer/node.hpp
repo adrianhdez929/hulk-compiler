@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
-#include "../Automata/nfa.h"
-#include "../Automata/operations/operations.h"
+#include "../Automata/nfa.hpp"
+#include "../Automata/operations/operations.hpp"
 
 //BASIC NODES
 class Node {

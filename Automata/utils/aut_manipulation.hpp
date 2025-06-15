@@ -1,7 +1,7 @@
 #pragma once
-#include "../dfa.h"
-#include "../nfa.h"
-#include "../utils/ContainerSet.h"
+#include "../dfa.hpp"
+#include "../nfa.hpp"
+#include "../utils/ContainerSet.hpp"
 
 // namespace manipulation {
 //The move function computes the set of states that can be reached from the given set of states with the given symbol.

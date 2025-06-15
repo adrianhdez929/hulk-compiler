@@ -1,5 +1,5 @@
-#include "operations.h"
-#include "../nfa.h"
+#include "operations.hpp"
+#include "../nfa.hpp"
 #include <map>
 #include <set>
 #include <vector>

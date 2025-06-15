@@ -1,5 +1,5 @@
-#include "state.h"
-#include "nfa.h"
+#include "state.hpp"
+#include "nfa.hpp"
 #include <vector>
 #include <memory>
 #include <stack>

@@ -5,9 +5,9 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "../Grammar/grammar.h"
-#include "SLR1Parser.h"
-#include "../Lexer/node.h"
+#include "../Grammar/grammar.hpp"
+#include "SLR1Parser.hpp"
+#include "../Lexer/node.hpp"
 
 std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& productions, 
                         const std::vector<std::string>& actions, 

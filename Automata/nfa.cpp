@@ -1,4 +1,4 @@
-#include "nfa.h"
+#include "nfa.hpp"
 
 NFA::NFA(int states,
          const set<State>& finalStates,

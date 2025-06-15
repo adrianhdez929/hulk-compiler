@@ -1,5 +1,5 @@
-#include "SLR1Parser.h"
-#include "../Automata/utils/ContainerSet.h"
+#include "SLR1Parser.hpp"
+#include "../Automata/utils/ContainerSet.hpp"
 #include <stack>
 #include <assert.h>
 #include <iostream>
