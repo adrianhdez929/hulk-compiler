@@ -370,6 +370,7 @@ public:
 	std::string target_type;
 
 	TypeCastNode(ASTNode* expr_, const std::string& target_type_);
+	TypeCastNode(ASTNode* expr_, const std::string& target_type_, int line_);
 	void print(int indent = 0) const override;
 	void accept(Visitor* visitor, Context* context) override;
 };

@@ -99,8 +99,8 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
         TheModule.get()
     );
     
-    // funciones matematicas
-    std::vector<std::string> mathFuncs = {"sqrt_func", "sin_func", "cos_func", "tan_func", "log_func", "exp_func"};
+    // Mathematical functions
+    std::vector<std::string> mathFuncs = {"sqrt_func", "sin_func", "cos_func", "tan_func", "exp_func"};
     for (const auto& funcName : mathFuncs) {
         llvm::FunctionType* mathFuncType = llvm::FunctionType::get(
             llvm::Type::getDoubleTy(*TheContext),                 
@@ -114,6 +114,32 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
             TheModule.get()
         );
     }
+    
+    // Two-parameter log function
+    llvm::FunctionType* logFuncType = llvm::FunctionType::get(
+        llvm::Type::getDoubleTy(*TheContext),
+        {llvm::Type::getDoubleTy(*TheContext), llvm::Type::getDoubleTy(*TheContext)},
+        false
+    );
+    llvm::Function::Create(
+        logFuncType,
+        llvm::Function::ExternalLinkage,
+        "log_func",
+        TheModule.get()
+    );
+    
+    // Random function (no parameters)
+    llvm::FunctionType* randFuncType = llvm::FunctionType::get(
+        llvm::Type::getDoubleTy(*TheContext),
+        {},
+        false
+    );
+    llvm::Function::Create(
+        randFuncType,
+        llvm::Function::ExternalLinkage,
+        "rand_func",
+        TheModule.get()
+    );
     
     // String manipulation functions
     llvm::FunctionType* doubleToStringType = llvm::FunctionType::get(
@@ -676,6 +702,90 @@ void CodegenVisitor::visit(FunctionCallNode* node, Context* context) {
             return;
         }
     }
+    // Handle standard library math functions
+    else if (node->func_name == "sqrt" || node->func_name == "sin" || 
+             node->func_name == "cos" || node->func_name == "exp") {
+        // These functions take one argument
+        if (node->argument == nullptr) {
+            throw std::runtime_error("Function " + node->func_name + " requires one argument");
+        }
+        
+        // Process the argument
+        std::vector<llvm::Value*> args;
+        if (auto* nodeVector = dynamic_cast<ASTNodeVector*>(node->argument)) {
+            if (nodeVector->children.size() != 1) {
+                throw std::runtime_error("Function " + node->func_name + " requires exactly one argument");
+            }
+            nodeVector->children[0]->accept(this, context);
+            args.push_back(currentValue);
+        } else {
+            node->argument->accept(this, context);
+            args.push_back(currentValue);
+        }
+        
+        // Get the corresponding LLVM function
+        std::string funcName = node->func_name + "_func";
+        llvm::Function* mathFunc = TheModule->getFunction(funcName);
+        if (!mathFunc) {
+            throw std::runtime_error("Math function not found: " + funcName);
+        }
+        
+        currentValue = Builder->CreateCall(mathFunc, args, node->func_name + "call");
+        cout << "Called " << node->func_name << " function" << endl;
+        return;
+    }
+    else if (node->func_name == "log") {
+        // Log function takes two arguments: base and value
+        if (node->argument == nullptr) {
+            throw std::runtime_error("Function log requires two arguments: base and value");
+        }
+        
+        std::vector<llvm::Value*> args;
+        if (auto* nodeVector = dynamic_cast<ASTNodeVector*>(node->argument)) {
+            if (nodeVector->children.size() != 2) {
+                throw std::runtime_error("Function log requires exactly two arguments: base and value");
+            }
+            // Process base argument
+            nodeVector->children[0]->accept(this, context);
+            args.push_back(currentValue);
+            // Process value argument
+            nodeVector->children[1]->accept(this, context);
+            args.push_back(currentValue);
+        } else {
+            throw std::runtime_error("Function log requires two arguments, but only one provided");
+        }
+        
+        llvm::Function* logFunc = TheModule->getFunction("log_func");
+        if (!logFunc) {
+            throw std::runtime_error("Log function not found: log_func");
+        }
+        
+        currentValue = Builder->CreateCall(logFunc, args, "logcall");
+        cout << "Called log function with base and value" << endl;
+        return;
+    }
+    else if (node->func_name == "rand") {
+        // Rand function takes no arguments
+        if (node->argument != nullptr) {
+            // Check if it's an empty argument list
+            if (auto* nodeVector = dynamic_cast<ASTNodeVector*>(node->argument)) {
+                if (!nodeVector->children.empty()) {
+                    throw std::runtime_error("Function rand takes no arguments");
+                }
+            } else {
+                throw std::runtime_error("Function rand takes no arguments");
+            }
+        }
+        
+        llvm::Function* randFunc = TheModule->getFunction("rand_func");
+        if (!randFunc) {
+            throw std::runtime_error("Rand function not found: rand_func");
+        }
+        
+        currentValue = Builder->CreateCall(randFunc, {}, "randcall");
+        cout << "Called rand function" << endl;
+        return;
+    }
     else {
         llvm::Function* calledFunc = TheModule->getFunction(node->func_name);
         if (!calledFunc) {
@@ -714,7 +824,7 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
 
     cout << "Generating code for ID Node: " << node->id_name << endl;
     
-    if (node->id_name == "pi") {
+    if (node->id_name == "PI") {
         llvm::Function* getPiFunc = TheModule->getFunction("get_pi");
         if (getPiFunc) {
             currentValue = Builder->CreateCall(getPiFunc);
@@ -722,7 +832,7 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
             currentValue = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(3.14159265359));
             std::cerr << "Warning: get_pi function not found, using constant" << std::endl;
         }
-    } else if (node->id_name == "e") {
+    } else if (node->id_name == "E") {
         llvm::Function* getEFunc = TheModule->getFunction("get_e");
         if (getEFunc) {
             currentValue = Builder->CreateCall(getEFunc);
@@ -730,8 +840,6 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
             currentValue = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(2.71828182846));
             std::cerr << "Warning: get_e function not found, using constant" << std::endl;
         }
-    } else if (node->id_name == "alpha") {
-        currentValue = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.5));
     } else {
         auto it = NamedValues.find(node->id_name);
         if (it != NamedValues.end()) {

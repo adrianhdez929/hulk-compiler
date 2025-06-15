@@ -1,6 +1,8 @@
 #include "context.h"
 #include <stdexcept>
 #include <memory>
+#include <vector>
+#include <iostream>
 
 #ifndef VISITOR_H
 #define VISITOR_H
@@ -126,12 +128,37 @@ class SemanticCheckerVisitor : public Visitor {
     
     Context* getContext() { return globalContext; }
     
-    void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation) {
+    // Error collection methods
+    void addError(const std::string& error) {
+        errors.push_back(error);
+    }
+    
+    bool hasErrors() const {
+        return !errors.empty();
+    }
+    
+    const std::vector<std::string>& getErrors() const {
+        return errors;
+    }
+    
+    void printErrors() const {
+        if (hasErrors()) {
+            std::cout << "\n=== SEMANTIC ERRORS ===" << std::endl;
+            for (size_t i = 0; i < errors.size(); i++) {
+                std::cout << "Error " << (i + 1) << ": " << errors[i] << std::endl;
+            }
+            std::cout << "\nTotal errors found: " << errors.size() << std::endl;
+        } else {
+            std::cout << "Semantic analysis completed successfully with no errors." << std::endl;
+        }
+    }
+    
+    void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation, int line) {
         if (!expected || !actual) return;
         
         if (!globalContext->canAssign(actual, expected)) {
-            throw std::runtime_error("Type error in " + operation + ": Cannot assign " + 
-                                   actual->name + " to " + expected->name);
+            addError("Type error in " + operation + " in line "+ std::to_string(line) +" : Cannot operate " + 
+                    actual->name + " to " + expected->name);
         }
     }
     
@@ -139,16 +166,17 @@ class SemanticCheckerVisitor : public Visitor {
                                const std::vector<std::shared_ptr<TypeInfo>>& expectedParamTypes,
                                const std::vector<std::shared_ptr<TypeInfo>>& actualParamTypes) {
         if (expectedParamTypes.size() != actualParamTypes.size()) {
-            throw std::runtime_error("Function '" + funcName + "' expects " + 
-                                   std::to_string(expectedParamTypes.size()) + " parameters, got " +
-                                   std::to_string(actualParamTypes.size()));
+            addError("Function '" + funcName + "' expects " + 
+                    std::to_string(expectedParamTypes.size()) + " parameters, got " +
+                    std::to_string(actualParamTypes.size()));
+            return;
         }
         
         for (size_t i = 0; i < expectedParamTypes.size(); i++) {
             if (!globalContext->canAssign(actualParamTypes[i], expectedParamTypes[i])) {
-                throw std::runtime_error("Function '" + funcName + "' parameter " + std::to_string(i+1) + 
-                                       " expects type '" + expectedParamTypes[i]->name + 
-                                       "', got '" + actualParamTypes[i]->name + "'");
+                addError("Function '" + funcName + "' parameter " + std::to_string(i+1) + 
+                        " expects type '" + expectedParamTypes[i]->name + 
+                        "', got '" + actualParamTypes[i]->name + "'");
             }
         }
     }
@@ -190,6 +218,7 @@ private:
     Context* globalContext;
     bool inMethodContext = false;
     std::shared_ptr<TypeDef> currentTypeDef = nullptr;
+    std::vector<std::string> errors; // Store semantic errors
 };
 
 #endif

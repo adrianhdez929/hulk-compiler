@@ -135,6 +135,7 @@ expr:
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3, yylineno); }
 	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3, yylineno); }
 	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3, yylineno); }
+	| expr AS_ ID_ { $$ = new TypeCastNode($1, $3, yylineno); }
     ;
 
 func_asign:

@@ -439,6 +439,7 @@ void AccessNode::accept(Visitor* visitor, Context* context) {
 }
 
 TypeCastNode::TypeCastNode(ASTNode* expr_, const std::string& target_type_) : expr(expr_), target_type(target_type_) {}
+TypeCastNode::TypeCastNode(ASTNode* expr_, const std::string& target_type_, int line_) : ASTNode(line_), expr(expr_), target_type(target_type_) {}
 
 void TypeCastNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "TypeCast to " << target_type << ":" << std::endl;
