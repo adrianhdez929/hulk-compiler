@@ -19,8 +19,8 @@ class Node;
 
 using ElementType = std::variant<
     std::string,
-    std::shared_ptr<Node>,
-    std::shared_ptr<SymbolNode>
+    std::shared_ptr<SymbolNode>,
+    std::shared_ptr<Node>
 >;
             // std::shared_ptr<SymbolNode>,
         // std::shared_ptr<UnionNode>,

@@ -8,9 +8,23 @@ class Node {
 public:
     virtual ~Node() = default;
     virtual std::shared_ptr<NFA> evaluate() = 0;
+    virtual std::string ToString() const {
+        return "Node";
+    }
 };
 
 class AtomicNode : public Node {
+public:
+    /// @brief Evaluates the atomic node and returns an NFA.
+    /// This method should be overridden by derived classes to provide specific NFA evaluations.
+    /// @return A shared pointer to an NFA that represents the atomic node.
+    virtual std::shared_ptr<NFA> evaluate() = 0;
+
+    /// @brief Returns a string representation of the atomic node.
+    /// @return A string describing the atomic node.
+    std::string ToString() const override {
+        return "AtomicNode";
+    }
 
 };
 
@@ -20,6 +34,11 @@ protected:
 public:
     explicit UnaryNode(std::shared_ptr<Node> child) : child_(std::move(child)) {}
     virtual ~UnaryNode() = default;
+    /// @brief Returns a string representation of the unary node.
+    /// @return A string describing the unary node.
+    std::string ToString() const override {
+        return "UnaryNode(" + (child_ ? child_->ToString() : "nullptr") + ")";
+    }
 };
 
 class BinaryNode : public Node {
@@ -29,6 +48,11 @@ protected:
 public:
     BinaryNode(std::shared_ptr<Node> l, std::shared_ptr<Node> r) : left(std::move(l)), right(std::move(r)) {}
     virtual ~BinaryNode() = default;
+    /// @brief Returns a string representation of the binary node.
+    /// @return A string describing the binary node.
+    std::string ToString() const override {
+        return "BinaryNode(" + (left ? left->ToString() : "nullptr") + ", " + (right ? right->ToString() : "nullptr") + ")";
+    }
 };
 
 //LEXER NODES/////////////////////////////////////////////////////////////////////
@@ -40,6 +64,11 @@ public:
         NFA::Transitions transitions;
         transitions[{0, ""}] = {1};  // Transición epsilon desde el estado 0 al estado 1
         return std::make_shared<NFA>(2, std::initializer_list<int>{1}, transitions, 0);  // Automata con 2 estados, estado final 1, transiciones y estado inicial 0
+    }
+    /// @brief Returns a string representation of the epsilon node.
+    /// @return A string describing the epsilon node.
+    std::string ToString() const override {
+        return "EpsilonNode";
     }
 };
 
@@ -56,6 +85,11 @@ public:
         NFA::Transitions transitions;
         transitions[{0, symbol_}] = {1};
         return std::make_shared<NFA>(2, std::initializer_list<int>{1}, transitions, 0);  // Automata con 2 estados, estado final 1, transiciones y estado inicial 0
+    }
+    /// @brief Returns a string representation of the symbol node.
+    /// @return A string describing the symbol node.
+    std::string ToString() const override {
+        return "SymbolNode(" + symbol_ + ")";
     }
         
 };
@@ -76,6 +110,11 @@ public:
         return std::make_shared<NFA>(closure);
     }
     ~ClosureNode() override = default;  // Ensure proper cleanup of child node
+    /// @brief Returns a string representation of the closure node.
+    /// @return A string describing the closure node.
+    std::string ToString() const override {
+        return "ClosureNode(" + (child_ ? child_->ToString() : "nullptr") + ")";
+    }
 };
 
 class UnionNode : public BinaryNode {
@@ -92,6 +131,11 @@ public:
         return std::make_shared<NFA>(automata_union);
     }
     ~UnionNode() override = default;  // Ensure proper cleanup of child nodes
+    /// @brief Returns a string representation of the union node.
+    /// @return A string describing the union node.
+    std::string ToString() const override {
+        return "UnionNode(" + (left ? left->ToString() : "nullptr") + ", " + (right ? right->ToString() : "nullptr") + ")";
+    }
 };
 
 class ConcatNode : public BinaryNode {
@@ -107,6 +151,11 @@ public:
         return std::make_shared<NFA>(automata_concat);
     }
     ~ConcatNode() override = default;  // Ensure proper cleanup of child nodes
+    /// @brief Returns a string representation of the concatenation node.
+    /// @return A string describing the concatenation node.
+    std::string ToString() const override {
+        return "ConcatNode(" + (left ? left->ToString() : "nullptr") + ", " + (right ? right->ToString() : "nullptr") + ")";
+    }
 };
 
 class StringClassNode : public Node {
@@ -126,6 +175,20 @@ public:
             std::shared_ptr<NFA> next_nfa = symbols_[i]->evaluate();
             result = std::make_shared<NFA>(union_nfa(*result, *next_nfa));
         }
+        return result;
+    }
+    /// @brief Returns a string representation of the string class node.
+    /// @return A string describing the string class node.
+    std::string ToString() const override {
+        std::string result = "StringClassNode(";
+        for (const auto& symbol : symbols_) {
+            result += symbol->ToString() + ", ";
+        }
+        if (!symbols_.empty()) {
+            result.pop_back();  // Eliminar la última coma
+            result.pop_back();  // Eliminar el espacio
+        }
+        result += ")";
         return result;
     }
 };
@@ -173,6 +236,11 @@ public:
         }
         return result;
     }
+    /// @brief Returns a string representation of the range node.
+    /// @return A string describing the range node.
+    std::string ToString() const override {
+        return "RangeNode(" + (first_ ? first_->ToString() : "nullptr") + ", " + (last_ ? last_->ToString() : "nullptr") + ")";
+    }
 };
 
 class ZeroOrOneNode : public UnaryNode {
@@ -189,6 +257,11 @@ public:
         return std::make_shared<NFA>(union_nfa_result);
     }
     ~ZeroOrOneNode() override = default;  // Ensure proper cleanup of child node
+    /// @brief Returns a string representation of the zero or one node.
+    /// @return A string describing the zero or one node.
+    std::string ToString() const override {
+        return "ZeroOrOneNode(" + (child_ ? child_->ToString() : "nullptr") + ")";
+    }
 };
 
 class PositiveClosure : public UnaryNode {
@@ -206,4 +279,9 @@ public:
         return std::make_shared<NFA>(concat_nfa_result);
     }
     ~PositiveClosure() override = default;  // Ensure proper cleanup of child node
+    /// @brief Returns a string representation of the positive closure node.
+    /// @return A string describing the positive closure node.
+    std::string ToString() const override {
+        return "PositiveClosure(" + (child_ ? child_->ToString() : "nullptr") + ")";
+    }
 };

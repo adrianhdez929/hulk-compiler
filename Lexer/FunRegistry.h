@@ -64,10 +64,14 @@ InnerFun CreateRangeNode(const std::vector<int>& indexes) {
             throw std::invalid_argument("RangeNode requires two SymbolNode arguments");
         }
         try {
-            return std::make_shared<RangeNode>(
-                std::any_cast<std::shared_ptr<Node>>(args[indexes[0]]),
-                std::any_cast<std::shared_ptr<Node>>(args[indexes[1]])
+            std::cout << std::any_cast<std::shared_ptr<Node>>(args[indexes[0]])->ToString() << std::endl;
+            std::cout << std::any_cast<std::shared_ptr<Node>>(args[indexes[1]])->ToString() << std::endl;
+            // Create a RangeNode with the two SymbolNode arguments
+            std::shared_ptr<RangeNode> rangeNode = std::make_shared<RangeNode>(
+                std::any_cast<std::shared_ptr<SymbolNode>>(args[indexes[0]]),
+                std::any_cast<std::shared_ptr<SymbolNode>>(args[indexes[1]])
             );
+            return rangeNode;
         } catch(const std::bad_any_cast&) {
             throw std::invalid_argument("RangeNode requires SymbolNode arguments");
         }
