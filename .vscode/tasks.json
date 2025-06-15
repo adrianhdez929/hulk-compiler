@@ -5,7 +5,7 @@
             "label": "C/C++: gcc build active file",
             "command": "/usr/bin/g++",
             "args": [
-                "-fdiagnostics-color=always",
+				"-fdiagnostics-color=always",
                 "-g",
                 "Grammar/grammar.cpp",
                 "Grammar/production.cpp",
