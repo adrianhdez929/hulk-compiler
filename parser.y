@@ -55,7 +55,7 @@ extern ASTNode* root;
 %token TYPE
 
 %token <num> NUMBER
-%token <str> ID
+%token <str> ID_
 %token <str> STRING
 %token <boolean> BOOLEAN
 

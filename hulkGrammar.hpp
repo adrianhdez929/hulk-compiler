@@ -52,7 +52,12 @@ Grammar getHulkGrammar(){
 		{"==", "=="},
 		{"!=", "!="},
 		{"is", "is"},
-		{"!", "!"}
+		{"!", "!"},
+		{"let", "let"},
+		{"in", "in"},
+		{",", "\\,"},
+		{"=", "\\="},
+		{"as", "as"}
     };
 
 
@@ -84,6 +89,12 @@ Grammar getHulkGrammar(){
 	auto IS_ = g.SetTerminal("is");
 	auto NOT_ = g.SetTerminal("!");
 	auto BOOLEAN = g.SetTerminal("bool");
+	auto LET_ = g.SetTerminal("let");
+	auto IN_ = g.SetTerminal("in");
+	auto COLON_ = g.SetTerminal(",");
+	auto ASSIGN_ = g.SetTerminal("=");
+	auto AS_ = g.SetTerminal("as");
+
 
 // definir no Terminales
 	auto input = g.SetNonTerminal("input", true);
@@ -108,6 +119,11 @@ Grammar getHulkGrammar(){
 	auto sum_expr = g.SetNonTerminal("sum_expr");
 	auto not_expr = g.SetNonTerminal("not_expr");
 	auto bool_primary = g.SetNonTerminal("bool_primary");
+	auto let_assign = g.SetNonTerminal("let_assign");
+	auto var_assign_list = g.SetNonTerminal("var_assign_list");
+	auto var_assign_element = g.SetNonTerminal("var_assign_element");
+
+
 
 // definir Producciones
 
@@ -180,6 +196,47 @@ Grammar getHulkGrammar(){
 		BoolExprNode* bool_expr_node = std::get<BoolExprNode*>(args[0]);
 		return bool_expr_node;
 	}));
+	g.AddProduction(AttrProd(expr, Sentence( let_assign ), [](const std::vector<ElementType>& args) -> ElementType {
+		LetAssign* let_assign_node = std::get<LetAssign*>(args[0]);
+		return let_assign_node;
+	}));
+
+	//let_assign
+	g.AddProduction(AttrProd(let_assign, Sentence( {LET_, var_assign_list, IN_, expr} ), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = std::get<VarAssignList*>(args[1]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
+		return new LetAssign(var_assign_list_node->assigns, expr_node, 0);
+	}));
+	g.AddProduction(AttrProd(let_assign, Sentence( {LET_, var_assign_list, IN_, lines_block} ), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = std::get<VarAssignList*>(args[1]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
+		return new LetAssign(var_assign_list_node->assigns, expr_node, 0);
+	}));
+
+	//var_assign_list
+	g.AddProduction(AttrProd(var_assign_list, Sentence( var_assign_element ), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssign* var_assign_element_node = std::get<VarAssign*>(args[0]);
+		return new VarAssignList({var_assign_element_node},  0);
+	}));
+	g.AddProduction(AttrProd(var_assign_list, Sentence( {var_assign_list, COLON_, var_assign_element} ), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssign* var_assign_element_node = std::get<VarAssign*>(args[2]);
+		VarAssignList* var_assign_list_node = std::get<VarAssignList*>(args[0]);
+		var_assign_list_node->add_child(var_assign_element_node);
+		return var_assign_element_node;
+	}));
+
+	//var_assign_element
+	g.AddProduction(AttrProd(var_assign_element, Sentence( {id_expr, ASSIGN_, expr} ), [](const std::vector<ElementType>& args) -> ElementType {
+		IDNode* id_expr_node = std::get<IDNode*>(args[0]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
+		return new VarAssign(id_expr_node, expr_node, 0);
+	}));
+	g.AddProduction(AttrProd(var_assign_element, Sentence( {id_expr, ASSIGN_, expr, AS_, ID_} ), [](const std::vector<ElementType>& args) -> ElementType {
+		IDNode* id_expr_node = std::get<IDNode*>(args[0]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
+		return new VarAssign(id_expr_node, expr_node, 0);
+	}));
+
 
 	//bool_expr
 	g.AddProduction(AttrProd(bool_expr, Sentence( or_expr ), [](const std::vector<ElementType>& args) -> ElementType {
@@ -210,32 +267,32 @@ Grammar getHulkGrammar(){
 	}));
 
 	//comp_expr
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, GR_EQ_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, GR_EQ_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, ">=", sum_expr_node_2, 0), 0);
 	}));
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, GR_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, GR_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, ">", sum_expr_node_2, 0), 0);
 	}));
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, LESS_EQ_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, LESS_EQ_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, "<=", sum_expr_node_2, 0), 0);
 	}));
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, LESS_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, LESS_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, "<", sum_expr_node_2, 0), 0);
 	}));
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, EQ_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, EQ_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, "==", sum_expr_node_2, 0), 0);
 	}));
-	g.AddProduction(AttrProd(comp_expr, Sentence({ sum_expr, DISTINCT_, sum_expr }), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(comp_expr, Sentence({ arit_op, DISTINCT_, arit_op }), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* sum_expr_node_1 = std::get<ASTNode*>(args[0]);
 		ASTNode* sum_expr_node_2 = std::get<ASTNode*>(args[2]);	
 		return new BoolExprNode(new BinOpNode(sum_expr_node_1, "!=", sum_expr_node_2, 0), 0);
@@ -251,10 +308,6 @@ Grammar getHulkGrammar(){
 	}));
 
 	//not_expr
-	g.AddProduction(AttrProd(not_expr, Sentence({ NOT_, not_expr }), [](const std::vector<ElementType>& args) -> ElementType {
-		BoolExprNode* not_expr_node = std::get<BoolExprNode*>(args[1]);
-		return new BoolExprNode(not_expr_node, 0);
-	}));
 	g.AddProduction(AttrProd(not_expr, Sentence({ NOT_, not_expr }), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* not_expr_node = std::get<BoolExprNode*>(args[1]);
 		return new BoolExprNode(not_expr_node, 0);
