@@ -11,7 +11,7 @@ class Sentence {
 public:
     Sentence() = default;
     explicit Sentence(std::shared_ptr<Symbol> symbol);
-    explicit Sentence(std::shared_ptr<Symbol> symbol1, std::shared_ptr<Symbol> symbol2);
+    //explicit Sentence(std::shared_ptr<Symbol> symbol1, std::shared_ptr<Symbol> symbol2);
     explicit Sentence(std::shared_ptr<Symbol> symbol, const std::vector<std::shared_ptr<Symbol>>& symbols);
     explicit Sentence(std::shared_ptr<Symbol> symbol, const Sentence& sentence);
     explicit Sentence(const std::vector<std::shared_ptr<Symbol>>& symbols);

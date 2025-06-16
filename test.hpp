@@ -848,7 +848,9 @@ void lexer_ast_test() {
 
 int execute_all_tests() {
     Item_test();
-    automata_tests();
+    automata_tests();        // {"-", "-"},              // Minus sign
+        // {"EOF", "EOF"}           // End of file token
+
     state_automata_test();
     return 0;
 }
