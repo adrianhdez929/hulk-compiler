@@ -80,6 +80,7 @@ class Grammar {
         // using ProductionVariant = std::variant<Production, AttrProd>;
         void AddProduction(const AttrProd& production);
         void AddProduction(const Production& production);
+        static void ResetProductionCounter();  // Función para resetear el contador
         // const std::vector<ProductionVariant>& Productions() const;
         // const std::vector<Production>& Productions() const;
         const std::vector<AttrProd>& Productions() const;

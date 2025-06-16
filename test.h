@@ -20,6 +20,7 @@
 #include "Lexer/Regex.h"
 #include "Lexer/Lexer.h"
 
+
 int test_grammar() {
     // Crear una gramática
     Grammar g;
@@ -29,6 +30,7 @@ int test_grammar() {
     auto B = g.SetNonTerminal("B");
     auto a = g.SetTerminal("a");
     auto b = g.SetTerminal("b");
+    auto epsilon = g.SetEpsilon();
     
     // Definir producciones
     g.AddProduction(AttrProd(S, Sentence({A, B}), [](const std::vector<ElementType>& args) -> ElementType {
@@ -736,12 +738,57 @@ void lexer_ast_test() {
     };
     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
     SLR1Parser parser(g);
-    Lexer lexer(table, g, parser);
-    auto tokens = lexer.tokenize("Func fibonacci(\"soy el animal?\", 0.543)"); //( 1 - 2 )");
-    std::cout << "Tokens:" << std::endl;
-    for (const auto& token : tokens) {
+    parser.serialize_parser("parser.p", "hulk");
+    auto parser1 = SLR1Parser::deserialize_parser("parser.p", "hulk", g);
+    if (!parser1) {
+        std::cerr << "Error: No se pudo deserializar el parser" << std::endl;
+        return;
+    }
+    Lexer lexer(table, g, *parser1);
+
+    // Probar el lexer original primero
+    std::cout << "=== Probando lexer original ===" << std::endl;
+    auto tokens_original = lexer.tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
+    std::cout << "Tokens del lexer original:" << std::endl;
+    for (const auto& token : tokens_original) {
         std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
     }
+    
+    // Serializar
+    std::cout << "\n=== Serializando lexer ===" << std::endl;
+    bool serialized = lexer.serialize_lexer("lexer.l", "hulk");
+    if (!serialized) {
+        std::cerr << "Error: No se pudo serializar el lexer" << std::endl;
+        return;
+    }
+    
+    // Deserializar
+    std::cout << "\n=== Deserializando lexer ===" << std::endl;
+    auto lexer1 = Lexer::deserialize_lexer("lexer.l", "hulk");
+    if (!lexer1) {
+        std::cerr << "Error: No se pudo deserializar el lexer" << std::endl;
+        return;
+    }
+    
+    // Probar el lexer deserializado
+    std::cout << "\n=== Probando lexer deserializado ===" << std::endl;
+    try {
+        auto tokens = lexer1->tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
+        std::cout << "Tokens del lexer deserializado:" << std::endl;
+        for (const auto& token : tokens) {
+            std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error al tokenizar con lexer deserializado: " << e.what() << std::endl;
+    }
+    
+    // Limpiar memoria del lexer deserializado
+    delete lexer1;
+    std::cout << "\n=== Test completado ===" << std::endl;
+
+
+
+
     // Regex regex("(0|[1-9][0-9]*)(.[0-9]+)?", g, parser);
 
     // DFA dfa = regex.Automaton();
@@ -843,7 +890,6 @@ void lexer_ast_test() {
     // }
     // cout << std::endl;
 }
-// Pair of token type and value
 
 
 int execute_all_tests() {
@@ -854,12 +900,12 @@ int execute_all_tests() {
 }
 
 int execute_test() {
-    // lexer_ast_test();
+    lexer_ast_test();
     // test_parser();
     // test_grammar();
     // execute_all_tests();
     // lexer_node_test();
-    test_grammar();
+    // test_grammar();
     // Item_test();
     return 0; 
 }

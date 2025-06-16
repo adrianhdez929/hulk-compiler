@@ -61,6 +61,19 @@
 		"bitset": "cpp",
 		"ctime": "cpp",
 		"regex": "cpp",
-		"iomanip": "cpp"
+		"iomanip": "cpp",
+		"charconv": "cpp",
+		"chrono": "cpp",
+		"codecvt": "cpp",
+		"csignal": "cpp",
+		"cstring": "cpp",
+		"ratio": "cpp",
+		"format": "cpp",
+		"semaphore": "cpp",
+		"span": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp",
+		"filesystem": "cpp",
+		"climits": "cpp"
 	}
 }
