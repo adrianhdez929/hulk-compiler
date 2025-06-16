@@ -15,6 +15,11 @@
 
 using namespace std;
 
+/**
+ * @class ASTNode
+ * @brief Nodo base para el Árbol de Sintaxis Abstracta (AST).
+ */
+
 class Visitor;
 
 class ASTNode {

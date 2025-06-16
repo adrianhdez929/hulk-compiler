@@ -1,4 +1,3 @@
-
 #include <vector>
 #include <memory>
 #include "symbol.h"
@@ -6,6 +5,13 @@
 #ifndef SENTENCE_H
 #define SENTENCE_H
 using namespace std;
+
+/**
+ * @class Sentence
+ * @brief Representa una secuencia de símbolos (lado derecho de una producción).
+ * 
+ * Se utiliza para definir el cuerpo de las reglas de la gramática.
+ */
 
 class Sentence {
 public:

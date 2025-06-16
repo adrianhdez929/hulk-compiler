@@ -6,6 +6,13 @@
 #include "Regex.h"
 #include "../Automata/nfa.h"
 
+/**
+ * @class Lexer
+ * @brief Analizador léxico que convierte texto en una secuencia de tokens.
+ * 
+ * Utiliza expresiones regulares y autómatas para identificar los tokens definidos en la gramática.
+ */
+
 class Lexer {
 public:
     Lexer(std::vector<std::pair<std::string, std::string>> token_table,  

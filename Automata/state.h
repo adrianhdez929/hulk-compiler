@@ -15,6 +15,13 @@
 #ifndef STATE_H
 #define STATE_H
 
+/**
+ * @class State
+ * @brief Representa un estado de un autómata finito (DFA/NFA), este ultimo definido como una serie de estados enlazados.
+ * 
+ * Contiene transiciones, información de aceptación y métodos para manipulación de autómatas.
+ */
+
 class State {
 public:
     using Symbol = std::string;

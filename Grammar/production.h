@@ -12,6 +12,13 @@
 
 using namespace std;
 
+/**
+ * @class Production
+ * @brief Representa una producción de la gramática (regla de derivación).
+ * 
+ * Una producción tiene un lado izquierdo (no terminal) y un lado derecho (sentencia de símbolos).
+ */
+
 class Node;
 class NonTerminal;
 
@@ -44,6 +51,13 @@ public:
     int get_id() const { return id_; }
 };
 
+/**
+ * @class AttrProd
+ * @brief Producción con acción semántica asociada (atributos).
+ * 
+ * Permite asociar una función semántica a la producción para gramáticas atribuidas.
+ */
+
 class AttrProd : public Production {
 public:
     // Funcion semántica que toma un vector de atributos heredados y un vector de atributos sintetizados
@@ -75,6 +89,13 @@ public:
 private:
     SemanticAction attribute; //CONVERTIR EN UN SOLO ATRIBUTO
 };
+
+/**
+ * @class NonTerminal
+ * @brief Representa un símbolo no terminal de la gramática.
+ * 
+ * Los no terminales se usan para definir las reglas de la gramática.
+ */
 
 class NonTerminal : public Symbol {
     public:

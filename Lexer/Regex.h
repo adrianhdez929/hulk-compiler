@@ -11,6 +11,13 @@
 #include "../Parser/SLR1Parser.h"
 #include "../Parser/reverse_evaluate.h"
 
+/**
+ * @class Regex
+ * @brief Implementa expresiones regulares para el análisis léxico.
+ * 
+ * Permite construir y manipular expresiones regulares y convertirlas en autómatas finitos deterministas (DFA).
+ */
+
 using namespace std;
 
 
