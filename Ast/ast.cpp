@@ -1,6 +1,8 @@
 #include "ast.hpp"
 
-ASTNodeVector::ASTNodeVector(const std::vector<ASTNode*>& nodes): children(nodes) {}
+
+
+ASTNodeVector::ASTNodeVector(const std::vector<ASTNode*>& nodes, int line_): ASTNode(line_), children(nodes) {}
 
 void ASTNodeVector::add_child(ASTNode* node) {
 	children.push_back(node);
@@ -23,7 +25,7 @@ ASTNodeVector::~ASTNodeVector() {
 	}
 }
 
-ProgramNode::ProgramNode(ASTNode* n) : ASTNode(), node(n) {}
+ProgramNode::ProgramNode(ASTNode* n, int line_) : ASTNode(line_), node(n) {}
 
 void ProgramNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "PROGRAM\n";
@@ -34,7 +36,7 @@ void ProgramNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-FloatNode::FloatNode(float v) : ASTNode(), value(v) {}
+FloatNode::FloatNode(float v, int line_) : ASTNode(line_), value(v) {}
 
 void FloatNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "NUMBER(" << value << ")\n";
@@ -44,7 +46,7 @@ void FloatNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-BoolNode::BoolNode(bool v) : ASTNode(), value(v) {}
+BoolNode::BoolNode(bool v, int line_) : ASTNode(line_), value(v) {}
 
 void BoolNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "BOOL(" << value << ")\n";
@@ -54,7 +56,7 @@ void BoolNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-BoolExprNode::BoolExprNode(ASTNode* expr_) : expr(expr_) {}
+BoolExprNode::BoolExprNode(ASTNode* expr_, int line_) :ASTNode(line_), expr(expr_) {}
 
 void BoolExprNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "BoolExprNode:" << std::endl;
@@ -65,7 +67,7 @@ void BoolExprNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-StringNode::StringNode(const std::string& v) : ASTNode(), value(v) {}
+StringNode::StringNode(const std::string& v, int line_) : ASTNode(line_), value(v) {}
 
 void StringNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "STRING(" << value << ")\n";
@@ -75,7 +77,7 @@ void StringNode::accept(Visitor* visitor, Context* context) {
     visitor->visit(this, context);
 }
 
-UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n) : ASTNode(), op(o), node(n) {}
+UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n, int line_) : ASTNode(line_), op(o), node(n) {}
 
 void UnaryOpNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "UNARY_OP(" << op << ")\n";
@@ -90,7 +92,7 @@ UnaryOpNode::~UnaryOpNode() {
     delete node;
 }
 
-BinOpNode::BinOpNode(ASTNode* l, const std::string& o, ASTNode* r) : ASTNode(), op(o), left(l), right(r) {}
+BinOpNode::BinOpNode(ASTNode* l, const std::string& o, ASTNode* r, int line_) : ASTNode(line_), op(o), left(l), right(r) {}
 
 void BinOpNode::print(int indent) const {
     std::cout << std::string(indent, ' ') << "BINOP(" << op << ")\n";
@@ -107,7 +109,7 @@ BinOpNode::~BinOpNode() {
     delete right;
 }
 
-FunctionCallNode::FunctionCallNode(const std::string& name, ASTNode* arg): func_name(name), argument(arg) {}
+FunctionCallNode::FunctionCallNode(const std::string& name, ASTNode* arg, int line_): ASTNode(line_), func_name(name), argument(arg) {}
 
 void FunctionCallNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "FunctionCall: " << func_name << std::endl;
@@ -119,8 +121,8 @@ void FunctionCallNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-IDNode::IDNode(const std::string& name) : id_name(name), id_type("none") {}
-IDNode::IDNode(const std::string& name, const std::string& type) : id_name(name), id_type(type) {}
+IDNode::IDNode(const std::string& name, int line_) : ASTNode(line_), id_name(name), id_type("none") {}
+IDNode::IDNode(const std::string& name, const std::string& type, int line_) : ASTNode(line_), id_name(name), id_type(type) {}
 
 void IDNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ID(" << id_name << ")" << std::endl;
@@ -133,7 +135,7 @@ void IDNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-BlockNode::BlockNode(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+BlockNode::BlockNode(const std::vector<ASTNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
 void BlockNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "Block:" << std::endl;
 	for (const auto& child : children) {
@@ -155,7 +157,7 @@ BlockNode::~BlockNode() {
 	}
 }
 
-ArgsList::ArgsList(const std::vector<IDNode*>& nodes) : children(nodes) {}
+ArgsList::ArgsList(const std::vector<IDNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
 void ArgsList::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ArgsList:" << std::endl;
 	for (const auto& child : children) {
@@ -177,7 +179,7 @@ ArgsList::~ArgsList() {
 	}
 }
 
-ExprsList::ExprsList(const std::vector<ASTNode*>& nodes) : children(nodes) {}
+ExprsList::ExprsList(const std::vector<ASTNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
 
 void ExprsList::add_child(ASTNode* node) {
 	children.push_back(node);
@@ -200,8 +202,8 @@ ExprsList::~ExprsList() {
 	}
 }
 
-AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_) : func_name(id->id_name), args(arg), body(body_), func_type("none") {}
-AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, std::string func_type_) : func_name(id->id_name), args(arg), body(body_), func_type(func_type_) {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, int line_) : ASTNode(line_), func_name(id->id_name), args(arg), body(body_), func_type("none") {}
+AssignFuncNode::AssignFuncNode(IDNode* id, ArgsList* arg, ASTNode* body_, std::string func_type_, int line_) : ASTNode(line_), func_name(id->id_name), args(arg), body(body_), func_type(func_type_) {}
 
 void AssignFuncNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "AssignFunction(" << func_name << ")" << std::endl;
@@ -215,7 +217,7 @@ void AssignFuncNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-LetAssign::LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_) : assigns(assigns_), body(body_) {}
+LetAssign::LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_, int line_) : ASTNode(line_), assigns(assigns_), body(body_) {}
 
 void LetAssign::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "LetAssign" << std::endl;
@@ -231,8 +233,8 @@ void LetAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-VarAssign::VarAssign(IDNode* id, ASTNode* value_) : var_id(id), value(value_), treated_as_type("none") {}
-VarAssign::VarAssign(IDNode* id, ASTNode* value_, std::string treated_as_type_) : var_id(id), value(value_), treated_as_type(treated_as_type_) {}
+VarAssign::VarAssign(IDNode* id, ASTNode* value_, int line_) : ASTNode(line_), var_id(id), value(value_), treated_as_type("none") {}
+VarAssign::VarAssign(IDNode* id, ASTNode* value_, std::string treated_as_type_, int line_) : ASTNode(line_), var_id(id), value(value_), treated_as_type(treated_as_type_) {}
 
 void VarAssign::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarAssign:" << std::endl;
@@ -248,7 +250,7 @@ void VarAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context); 
 }
 
-VarAssignType::VarAssignType(const std::string name, NewTypeNode* new_type_, ASTNode* body_) : var_name(name), new_type(new_type_), body(body_){}
+VarAssignType::VarAssignType(const std::string name, NewTypeNode* new_type_, ASTNode* body_, int line_) : ASTNode(line_), var_name(name), new_type(new_type_), body(body_){}
 
 void VarAssignType::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarAssignType(" << var_name << ")" << std::endl;
@@ -261,7 +263,7 @@ void VarAssignType::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-NewTypeNode::NewTypeNode(std::string id, std::vector<ASTNode*> expr_list_) : id_type_name(id), expr_list(expr_list_) {}
+NewTypeNode::NewTypeNode(std::string id, std::vector<ASTNode*> expr_list_, int line_) : ASTNode(line_), id_type_name(id), expr_list(expr_list_) {}
 
 void NewTypeNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "NewTypeNode(" << id_type_name << ")" << std::endl;
@@ -275,7 +277,7 @@ void NewTypeNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-VarAssignList::VarAssignList(const std::vector<VarAssign*>& assigns_) : assigns(assigns_) {}
+VarAssignList::VarAssignList(const std::vector<VarAssign*>& assigns_, int line_) : ASTNode(line_), assigns(assigns_) {}
 
 void VarAssignList::add_child(VarAssign* node) {
 	assigns.push_back(node);
@@ -292,7 +294,7 @@ void VarAssignList::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-VarDesAssign::VarDesAssign(IDNode* id_, ASTNode* value_) : id(id_), value(value_) {}
+VarDesAssign::VarDesAssign(IDNode* id_, ASTNode* value_, int line_) : ASTNode(line_), id(id_), value(value_) {}
 
 void VarDesAssign::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "VarDesAssign(" << id->id_name << ")" << std::endl;
@@ -304,7 +306,7 @@ void VarDesAssign::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-Conditional::Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_) : bool_expr(bool_expr_), if_body(if_body_), else_body(else_body_) {}
+Conditional::Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_, int line_) : ASTNode(line_), bool_expr(bool_expr_), if_body(if_body_), else_body(else_body_) {}
 
 void Conditional::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "Conditional:" << std::endl;
@@ -319,7 +321,7 @@ void Conditional::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-WhileNode::WhileNode(BoolExprNode* bool_expr_, ASTNode* body_) : bool_expr(bool_expr_), body(body_) {}
+WhileNode::WhileNode(BoolExprNode* bool_expr_, ASTNode* body_, int line_) : ASTNode(line_), bool_expr(bool_expr_), body(body_) {}
 
 void WhileNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "WhileNode:" << std::endl;
@@ -333,7 +335,7 @@ void WhileNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-ForNode::ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_) : id(id_), group(group_), body(body_) {}
+ForNode::ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_, int line_) : ASTNode(line_), id(id_), group(group_), body(body_) {}
 
 void ForNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "ForNode:" << std::endl;
@@ -349,9 +351,9 @@ void ForNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_): id(id_), args(args_), body(body_), parents(), parent_args(new ArgsList({})) {}
-TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_): id(id_), args(args_), body(body_), parents(parents_), parent_args(new ArgsList({})) {}
-TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_, ArgsList* parent_args_) : id(id_), args(args_), body(body_), parents(parents_), parent_args(parent_args_) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, int line_): ASTNode(line_), id(id_), args(args_), body(body_), parents(), parent_args(new ArgsList({}, line_)) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_, int line_): ASTNode(line_), id(id_), args(args_), body(body_), parents(parents_), parent_args(new ArgsList({}, line_)) {}
+TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, std::vector<std::string> parents_, ArgsList* parent_args_, int line_) : ASTNode(line_), id(id_), args(args_), body(body_), parents(parents_), parent_args(parent_args_) {}
 
 void TypeDeclNode::print(int indent) const {
 	std::cout << std::string(indent, ' ') << "TypeDeclNode(" << id->id_name << ")" << std::endl;
@@ -376,13 +378,13 @@ void TypeDeclNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }
 
-TypeAssMember::TypeAssMember(TypeAssMember::Form form_) : form(form_) {}
+TypeAssMember::TypeAssMember(TypeAssMember::Form form_, int line_) : ASTNode(line_), form(form_) {}
 
 TypeAssMember::Form TypeAssMember::get_form() {
 	return form;
 }
 
-AttributeMember::AttributeMember(std::string name_) : TypeAssMember(TypeAssMember::Form::Attribute), name(name_) {}
+AttributeMember::AttributeMember(std::string name_, int line_) : TypeAssMember(TypeAssMember::Form::Attribute, line_), name(name_) {}
 	
 std::string AttributeMember::get_name() const { return name; }
 
@@ -396,7 +398,7 @@ void AttributeMember::accept(Visitor* visitor, Context* context) {
 
 AttributeMember::~AttributeMember() {}
 
-MethodMember::MethodMember(std::string name_, std::vector<ASTNode*> args_): TypeAssMember(TypeAssMember::Form::Method), name(name_), args(args_) {}
+MethodMember::MethodMember(std::string name_, std::vector<ASTNode*> args_, int line_): TypeAssMember(TypeAssMember::Form::Method, line_), name(name_), args(args_) {}
 
 std::string MethodMember::get_name() const { return name; }
 
@@ -417,7 +419,7 @@ MethodMember::~MethodMember() {
 	}
 }
 
-AccessNode::AccessNode(const std::string var_name_, TypeAssMember* member_): var_name(var_name_), member(member_) {}
+AccessNode::AccessNode(const std::string var_name_, TypeAssMember* member_, int line_): ASTNode(line_), var_name(var_name_), member(member_) {}
 
 std::string AccessNode::get_name() const {
 	return var_name;
@@ -433,5 +435,17 @@ void AccessNode::print(int indent) const {
 }
 
 void AccessNode::accept(Visitor* visitor, Context* context) {
+	visitor->visit(this, context);
+}
+
+TypeCastNode::TypeCastNode(ASTNode* expr_, const std::string& target_type_) : expr(expr_), target_type(target_type_) {}
+TypeCastNode::TypeCastNode(ASTNode* expr_, const std::string& target_type_, int line_) : ASTNode(line_), expr(expr_), target_type(target_type_) {}
+
+void TypeCastNode::print(int indent) const {
+	std::cout << std::string(indent, ' ') << "TypeCast to " << target_type << ":" << std::endl;
+	expr->print(indent + 2);
+}
+
+void TypeCastNode::accept(Visitor* visitor, Context* context) {
 	visitor->visit(this, context);
 }

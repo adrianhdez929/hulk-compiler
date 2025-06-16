@@ -1,11 +1,11 @@
+#ifndef CONTEXT_H
+#define CONTEXT_H
+
 #include <string>
 #include <list>
 #include <vector>
 #include <unordered_map>
 #include <memory>
-
-#ifndef CONTEXT_H
-#define CONTEXT_H
 
 struct TypeInfo;
 struct TypeDef;
@@ -84,20 +84,65 @@ struct FuncInfo {
         : name(n), params(p), returnType(ret) {}
 };
 
+struct MethodInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> returnType;
+        std::vector<std::shared_ptr<TypeInfo>> paramTypes;
+        std::vector<std::string> paramNames;
+        std::string ownerType;
+        bool isInherited;
+        int line;
+        
+        MethodInfo(const std::string& n, std::shared_ptr<TypeInfo> ret, 
+                  const std::vector<std::shared_ptr<TypeInfo>>& params,
+                  const std::vector<std::string>& paramNames,
+                  const std::string& owner, bool inherited = false, int l = 0)
+            : name(n), returnType(ret), paramTypes(params), paramNames(paramNames),
+              ownerType(owner), isInherited(inherited), line(l) {}
+    };
+
+    struct AttributeInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> type;
+        std::string ownerType;
+        bool isInherited;
+        int line;
+        
+        AttributeInfo(const std::string& n, std::shared_ptr<TypeInfo> t, 
+                     const std::string& owner, bool inherited = false, int l = 0)
+            : name(n), type(t), ownerType(owner), isInherited(inherited), line(l) {}
+    };
+
+    struct VariableInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> type;
+        std::string scope;
+        bool isParameter;
+        int line;
+        
+        VariableInfo(const std::string& n, std::shared_ptr<TypeInfo> t, 
+                    const std::string& s, bool param = false, int l = 0)
+            : name(n), type(t), scope(s), isParameter(param), line(l) {}
+    };
+
 class Context {
 public:
     Context* parent;
     std::list<Context*> children;
-    TypeInfo* currentType;
+    std::shared_ptr<TypeInfo> currentType;
 
     std::vector<VarInfo> localVars;
     std::vector<FuncInfo> localFuncs;
     std::unordered_map<std::string, std::shared_ptr<TypeDef>> localTypes;
 
+    std::unordered_map<std::string, std::vector<MethodInfo>> methodsByType;
+    std::unordered_map<std::string, std::vector<AttributeInfo>> attributesByType;
+    std::vector<VariableInfo> globalVariables;
+
     int parentVarIndex;
     int parentFuncIndex;
 
-    static std::shared_ptr<TypeInfo> intType;
+    static std::shared_ptr<TypeInfo> numberType;
     static std::shared_ptr<TypeInfo> stringType;
     static std::shared_ptr<TypeInfo> boolType;
     static std::shared_ptr<TypeInfo> voidType;
@@ -144,7 +189,60 @@ public:
 
     virtual Context* createChildContext();
     
+    // Symbol collector integration - store collected symbol information
+    struct CollectedMethodInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> returnType;
+        std::vector<std::shared_ptr<TypeInfo>> paramTypes;
+        std::vector<std::string> paramNames;
+        std::string ownerType;
+        bool isInherited;
+        int line;
+        
+        CollectedMethodInfo(const std::string& n, std::shared_ptr<TypeInfo> ret, 
+                           const std::vector<std::shared_ptr<TypeInfo>>& params,
+                           const std::vector<std::string>& paramNames,
+                           const std::string& owner, bool inherited = false, int l = 0)
+            : name(n), returnType(ret), paramTypes(params), paramNames(paramNames),
+              ownerType(owner), isInherited(inherited), line(l) {}
+    };
+
+    struct CollectedAttributeInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> type;
+        std::string ownerType;
+        bool isInherited;
+        int line;
+        
+        CollectedAttributeInfo(const std::string& n, std::shared_ptr<TypeInfo> t, 
+                              const std::string& owner, bool inherited = false, int l = 0)
+            : name(n), type(t), ownerType(owner), isInherited(inherited), line(l) {}
+    };
+
+    struct CollectedVariableInfo {
+        std::string name;
+        std::shared_ptr<TypeInfo> type;
+        std::string scope;
+        bool isParameter;
+        int line;
+        
+        CollectedVariableInfo(const std::string& n, std::shared_ptr<TypeInfo> t, 
+                             const std::string& s, bool param = false, int l = 0)
+            : name(n), type(t), scope(s), isParameter(param), line(l) {}
+    };
+
+public:
+    
+    // Methods to query stored symbol collector data
+    virtual std::vector<MethodInfo> getMethodsForType(const std::string& typeName, bool includeInherited = true) const;
+    virtual std::vector<AttributeInfo> getAttributesForType(const std::string& typeName, bool includeInherited = true) const;
+    virtual MethodInfo* findMethod(const std::string& typeName, const std::string& methodName, 
+                                                     const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const;
+    virtual AttributeInfo* findAttribute(const std::string& typeName, const std::string& attrName) const;
+    virtual const std::vector<VariableInfo>& getGlobalVariables() const;
+    
     static void initializeBuiltinTypes();
+    void initializeBuiltinFunctions();
 };
 
 #endif

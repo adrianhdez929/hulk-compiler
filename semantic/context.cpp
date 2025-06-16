@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 
-std::shared_ptr<TypeInfo> Context::intType = nullptr;
+std::shared_ptr<TypeInfo> Context::numberType = nullptr;
 std::shared_ptr<TypeInfo> Context::stringType = nullptr;
 std::shared_ptr<TypeInfo> Context::boolType = nullptr;
 std::shared_ptr<TypeInfo> Context::voidType = nullptr;
@@ -107,15 +107,16 @@ Context::Context(Context *parent)
     
     if (parent == nullptr) {
         initializeBuiltinTypes();
+        initializeBuiltinFunctions();
     }
 }
 
 void Context::initializeBuiltinTypes() {
-    if (intType == nullptr) {
-        intType = std::make_shared<TypeInfo>("int", TypeKind::PRIMITIVE);
-        stringType = std::make_shared<TypeInfo>("string", TypeKind::PRIMITIVE);
-        boolType = std::make_shared<TypeInfo>("bool", TypeKind::PRIMITIVE);
-        voidType = std::make_shared<TypeInfo>("void", TypeKind::PRIMITIVE);
+    if (numberType == nullptr) {
+        numberType = std::make_shared<TypeInfo>("Number", TypeKind::PRIMITIVE);
+        stringType = std::make_shared<TypeInfo>("String", TypeKind::PRIMITIVE);
+        boolType = std::make_shared<TypeInfo>("Boolean", TypeKind::PRIMITIVE);
+        voidType = std::make_shared<TypeInfo>("Expression", TypeKind::PRIMITIVE);
         
         auto objectTypeDef = std::make_shared<TypeDef>("Object");
         objectType = std::make_shared<TypeInfo>("Object", TypeKind::CLASS);
@@ -123,9 +124,24 @@ void Context::initializeBuiltinTypes() {
     }
 }
 
+void Context::initializeBuiltinFunctions() {
+    // Mathematical functions with one parameter
+    std::vector<std::string> singleParamFuncs = {"sqrt", "sin", "cos", "exp"};
+    for (const auto& funcName : singleParamFuncs) {
+        defineFunc(funcName, numberType, {numberType});
+    }
+    
+    // Log function with two parameters (base, value)
+    defineFunc("log", numberType, {numberType, numberType});
+    
+    // Random function with no parameters
+    defineFunc("rand", numberType, {});
+}
+
 Context* Context::createChildContext()
 {
     Context* child = new Context(this);
+    child->currentType = this->currentType; // Inherit current type context
     this->children.push_back(child);
     return child;
 }
@@ -260,10 +276,10 @@ std::shared_ptr<TypeDef> Context::getTypeDef(const std::string& typeName) {
 }
 
 std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
-    if (typeName == "int") return intType;
-    if (typeName == "string") return stringType;
-    if (typeName == "bool") return boolType;
-    if (typeName == "void") return voidType;
+    if (typeName == "Number") return numberType;
+    if (typeName == "String") return stringType;
+    if (typeName == "Boolean") return boolType;
+    if (typeName == "Expression") return voidType;
     if (typeName == "Object") return objectType;
     
     auto typeDef = getTypeDef(typeName);
@@ -405,4 +421,187 @@ std::shared_ptr<TypeInfo> Context::instantiateGenericType(std::shared_ptr<TypeIn
 
 bool Context::matchesGenericConstraints(std::shared_ptr<TypeInfo> type, const std::string& genericParam) {
     return true;
+}
+
+std::vector<MethodInfo> Context::getMethodsForType(const std::string& typeName, bool includeInherited) const {
+    std::vector<MethodInfo> result;
+    
+    // Get methods directly defined in this type - search current and parent contexts
+    auto it = methodsByType.find(typeName);
+    if (it != methodsByType.end()) {
+        for (const auto& method : it->second) {
+            if (!method.isInherited) {
+                result.push_back(method);
+            }
+        }
+    } else if (parent != nullptr) {
+        // If not found in current context, check parent contexts
+        return parent->getMethodsForType(typeName, includeInherited);
+    }
+    
+    // Include inherited methods if requested
+    if (includeInherited) {
+        // Find the type definition to get parent information
+        auto typeIt = localTypes.find(typeName);
+        if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
+            std::string parentTypeName = typeIt->second->parentType->name;
+            
+            // Recursively get parent methods
+            auto parentMethods = getMethodsForType(parentTypeName, true);
+            for (auto method : parentMethods) {
+                // Mark as inherited and add to result if not overridden
+                method.isInherited = true;
+                
+                // Check if method is overridden in current type
+                bool isOverridden = false;
+                for (const auto& currentMethod : result) {
+                    if (currentMethod.name == method.name && 
+                        currentMethod.paramTypes.size() == method.paramTypes.size()) {
+                        bool paramsMatch = true;
+                        for (size_t i = 0; i < currentMethod.paramTypes.size(); i++) {
+                            if (currentMethod.paramTypes[i]->name != method.paramTypes[i]->name) {
+                                paramsMatch = false;
+                                break;
+                            }
+                        }
+                        if (paramsMatch) {
+                            isOverridden = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!isOverridden) {
+                    result.push_back(method);
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::vector<AttributeInfo> Context::getAttributesForType(const std::string& typeName, bool includeInherited) const {
+    std::vector<AttributeInfo> result;
+    
+    // Get attributes directly defined in this type - search current and parent contexts
+    auto it = attributesByType.find(typeName);
+    if (it != attributesByType.end()) {
+        for (const auto& attr : it->second) {
+            if (!attr.isInherited) {
+                result.push_back(attr);
+            }
+        }
+    } else if (parent != nullptr) {
+        // If not found in current context, check parent contexts
+        return parent->getAttributesForType(typeName, includeInherited);
+    }
+    
+    // Include inherited attributes if requested
+    if (includeInherited) {
+        // Find the type definition to get parent information
+        auto typeIt = localTypes.find(typeName);
+        if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
+            std::string parentTypeName = typeIt->second->parentType->name;
+            
+            // Recursively get parent attributes
+            auto parentAttrs = getAttributesForType(parentTypeName, true);
+            for (auto attr : parentAttrs) {
+                // Mark as inherited and add to result if not redefined
+                attr.isInherited = true;
+                
+                // Check if attribute is redefined in current type
+                bool isRedefined = false;
+                for (const auto& currentAttr : result) {
+                    if (currentAttr.name == attr.name) {
+                        isRedefined = true;
+                        break;
+                    }
+                }
+                
+                if (!isRedefined) {
+                    result.push_back(attr);
+                }
+            }
+        }
+    }
+
+    // for (auto res : result) {
+    //     std::cout << "Collected Attribute: " << res.name << " of type " << res.type->name 
+    //          << " in scope " << res.ownerType << (res.isInherited ? " (inherited)" : "") 
+    //          << " at line " << res.line << std::endl;
+    // }
+    
+    return result;
+}
+
+MethodInfo* Context::findMethod(const std::string& typeName, const std::string& methodName, 
+                                                          const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const {
+    auto methods = getMethodsForType(typeName, true);
+    
+    for (auto& method : methods) {
+        if (method.name == methodName && method.paramTypes.size() == paramTypes.size()) {
+            bool paramsMatch = true;
+            for (size_t i = 0; i < paramTypes.size(); i++) {
+                if (!paramTypes[i]->isCompatibleWith(method.paramTypes[i])) {
+                    paramsMatch = false;
+                    break;
+                }
+            }
+            if (paramsMatch) {
+                // Note: This returns a pointer to a local variable, which is dangerous
+                // In a real implementation, you'd want to return by value or store the methods
+                // For now, we'll search the original storage
+                auto it = methodsByType.find(typeName);
+                if (it != methodsByType.end()) {
+                    for (auto& storedMethod : const_cast<std::vector<MethodInfo>&>(it->second)) {
+                        if (storedMethod.name == methodName && storedMethod.paramTypes.size() == paramTypes.size()) {
+                            bool match = true;
+                            for (size_t j = 0; j < paramTypes.size(); j++) {
+                                if (!paramTypes[j]->isCompatibleWith(storedMethod.paramTypes[j])) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+                            if (match) {
+                                return &storedMethod;
+                            }
+                        }
+                    }
+                }
+                
+                // Check parent types if not found in current type
+                auto typeIt = localTypes.find(typeName);
+                if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
+                    return findMethod(typeIt->second->parentType->name, methodName, paramTypes);
+                }
+            }
+        }
+    }
+    
+    return nullptr;
+}
+
+AttributeInfo* Context::findAttribute(const std::string& typeName, const std::string& attrName) const {
+    // First check the current type
+    auto it = attributesByType.find(typeName);
+    if (it != attributesByType.end()) {
+        for (auto& attr : const_cast<std::vector<AttributeInfo>&>(it->second)) {
+            if (attr.name == attrName) {
+                return &attr;
+            }
+        }
+    }
+    
+    // Check parent types
+    auto typeIt = localTypes.find(typeName);
+    if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
+        return findAttribute(typeIt->second->parentType->name, attrName);
+    }
+    
+    return nullptr;
+}
+
+const std::vector<VariableInfo>& Context::getGlobalVariables() const {
+    return globalVariables;
 }
