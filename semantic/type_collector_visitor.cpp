@@ -28,7 +28,7 @@ void TypeCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
         return;
     }
     
-    std::cout << "TypeCollector: Processing type declaration '" << node->id->id_name << "'" << std::endl;
+    // std::cout << "TypeCollector: Processing type declaration '" << node->id->id_name << "'" << std::endl;
     processTypeDeclaration(node, context);
     
     // Visit children for nested types (if any)
@@ -46,7 +46,7 @@ void TypeCollectorVisitor::visit(ProgramNode* node, Context* context) {
         return;
     }
     
-    std::cout << "TypeCollector: Starting type collection pass" << std::endl;
+    // std::cout << "TypeCollector: Starting type collection pass" << std::endl;
     
     if (node->getNode()) {
         node->getNode()->accept(this, context);
@@ -57,7 +57,7 @@ void TypeCollectorVisitor::visit(ProgramNode* node, Context* context) {
         validateInheritanceChain(pair.first);
     }
     
-    std::cout << "TypeCollector: Collected " << collectedTypes.size() << " types" << std::endl;
+    // std::cout << "TypeCollector: Collected " << collectedTypes.size() << " types" << std::endl;
 }
 
 void TypeCollectorVisitor::visit(ASTNodeVector* node, Context* context) {
@@ -279,16 +279,16 @@ void TypeCollectorVisitor::processTypeDeclaration(TypeDeclNode* node, Context* c
         return;
     }
     
-    std::cout << "TypeCollector: Successfully collected type '" << typeName << "'";
+    // std::cout << "TypeCollector: Successfully collected type '" << typeName << "'";
     if (!parentName.empty()) {
-        std::cout << " inheriting from '" << parentName << "'";
+        // std::cout << " inheriting from '" << parentName << "'";
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 }
 
 void TypeCollectorVisitor::registerBuiltinTypes(Context* context) {
     context->initializeBuiltinTypes();
-    std::cout << "TypeCollector: Built-in types registered" << std::endl;
+    // std::cout << "TypeCollector: Built-in types registered" << std::endl;
 }
 
 bool TypeCollectorVisitor::detectCircularInheritance(const std::string& typeName, const std::string& parentName) {
@@ -392,11 +392,11 @@ const std::vector<std::string>& TypeCollectorVisitor::getErrors() const {
 
 void TypeCollectorVisitor::printErrors() const {
     if (hasErrors()) {
-        std::cout << "\n=== TYPE COLLECTION ERRORS ===" << std::endl;
+        // std::cout << "\n=== TYPE COLLECTION ERRORS ===" << std::endl;
         for (size_t i = 0; i < errors.size(); i++) {
-            std::cout << "Error " << (i + 1) << ": " << errors[i] << std::endl;
+            // std::cout << "Error " << (i + 1) << ": " << errors[i] << std::endl;
         }
-        std::cout << "\nTotal type collection errors: " << errors.size() << std::endl;
+        // std::cout << "\nTotal type collection errors: " << errors.size() << std::endl;
     }
 }
 

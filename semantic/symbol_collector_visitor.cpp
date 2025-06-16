@@ -30,9 +30,9 @@ const std::vector<std::string>& SymbolCollectorVisitor::getErrors() const {
 
 void SymbolCollectorVisitor::printErrors() const {
     if (!errors.empty()) {
-        std::cout << "\n=== Symbol Collection Errors ===" << std::endl;
+        // std::cout << "\n=== Symbol Collection Errors ===" << std::endl;
         for (const auto& error : errors) {
-            std::cout << "Error: " << error << std::endl;
+            // std::cout << "Error: " << error << std::endl;
         }
     }
 }
@@ -229,18 +229,18 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
     
     // Only treat VarAssign as type attribute if we're in a type but NOT inside a method body
     if (!currentTypeName.empty() && !insideMethod) {
-        std::cout << "  -> Processing as type attribute" << std::endl;
+        // std::cout << "  -> Processing as type attribute" << std::endl;
         processAttributeDefinition(node, currentTypeName, context);
     } 
     // else {
-    //     std::cout << "  -> Processing as variable definition" << std::endl;
+        // std::cout << "  -> Processing as variable definition" << std::endl;
     //     processVariableDefinition(node, "global", context);
     // }
 }
 
 void SymbolCollectorVisitor::visit(NewTypeNode* node, Context* context) {
     if (node) {
-        cout << "Setting inferredType for NewTypeNode '" << globalContext->getType(node->id_type_name)->name << "'" << std::endl;
+        // cout << "Setting inferredType for NewTypeNode '" << globalContext->getType(node->id_type_name)->name << "'" << std::endl;
         node->inferredType = globalContext->getType(node->id_type_name);
     }
 }
@@ -364,7 +364,7 @@ void SymbolCollectorVisitor::visit(ForNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     if (!node) return;
     
-    std::cout << "SymbolCollector: Processing type body for '" << node->id->id_name << "'" << std::endl;
+    // std::cout << "SymbolCollector: Processing type body for '" << node->id->id_name << "'" << std::endl;
     currentTypeName = node->id->id_name;
 
     // Process type body
@@ -379,16 +379,16 @@ void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     if (globalContext) {
         auto typeInfo = globalContext->getType(node->id->id_name);
         if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            std::cout << "Type '" << node->id->id_name << "' inherits from '" 
-                     << typeInfo->typeDef->parentType->name << "'" << std::endl;
+            // std::cout << "Type '" << node->id->id_name << "' inherits from '" 
+                    //  << typeInfo->typeDef->parentType->name << "'" << std::endl;
             
             // Get all inherited attributes (for debugging)
             auto inheritedAttrs = getAttributesForType(typeInfo->typeDef->parentType->name, true);
-            std::cout << "Inherited " << inheritedAttrs.size() << " attributes from parent types" << std::endl;
+            // std::cout << "Inherited " << inheritedAttrs.size() << " attributes from parent types" << std::endl;
             
             // Get all inherited methods (for debugging)
             auto inheritedMethods = getMethodsForType(typeInfo->typeDef->parentType->name, true);
-            std::cout << "Inherited " << inheritedMethods.size() << " methods from parent types" << std::endl;
+            // std::cout << "Inherited " << inheritedMethods.size() << " methods from parent types" << std::endl;
         }
     }
     
@@ -555,8 +555,8 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
     }
     
     // Set the inferred type to the target type
-    cout << "Casting from type '" << sourceType->name 
-         << "' to type '" << targetType->name << "'" << std::endl;
+    // cout << "Casting from type '" << sourceType->name 
+        //  << "' to type '" << targetType->name << "'" << std::endl;
     node->inferredType = targetType;
 }
 
@@ -567,7 +567,7 @@ void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const
         return;
     }
     
-    std::cout << "Processing method '" << node->func_name << "' in type '" << typeName << "'" << std::endl;
+    // std::cout << "Processing method '" << node->func_name << "' in type '" << typeName << "'" << std::endl;
     
     // Collect parameter types and names
     std::vector<std::shared_ptr<TypeInfo>> paramTypes;
@@ -575,9 +575,9 @@ void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const
     
     // Check if args is null
     if (!node->args) {
-        std::cout << "Method '" << node->func_name << "' has null args, treating as no parameters" << std::endl;
+        // std::cout << "Method '" << node->func_name << "' has null args, treating as no parameters" << std::endl;
     } else if (node->args->children.empty()) {
-        std::cout << "Method '" << node->func_name << "' has no parameters" << std::endl;
+        // std::cout << "Method '" << node->func_name << "' has no parameters" << std::endl;
     } else {
         for (auto* param : node->args->children) {
             if (!param) {
@@ -616,7 +616,7 @@ void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const
     // Add to methods collection
     methodsByType[typeName].push_back(method);
     
-    std::cout << "Added method '" << node->func_name << "' to type '" << typeName << "'" << std::endl;
+    // std::cout << "Added method '" << node->func_name << "' to type '" << typeName << "'" << std::endl;
 }
 
 void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const std::string& typeName, Context* context) {
@@ -625,7 +625,7 @@ void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const s
         return;
     }
     
-    std::cout << "Processing attribute '" << node->var_id->id_name << "' in type '" << typeName << "'" << std::endl;
+    // std::cout << "Processing attribute '" << node->var_id->id_name << "' in type '" << typeName << "'" << std::endl;
     
     // Infer type from value
     std::shared_ptr<TypeInfo> attrType = Context::numberType; // Default type
@@ -654,7 +654,7 @@ void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const s
     node->var_id->inferredType = attrType;
     node->inferredType = attrType;
     
-    std::cout << "Added attribute '" << node->var_id->id_name << "' to type '" << typeName << "'" << std::endl;
+    // std::cout << "Added attribute '" << node->var_id->id_name << "' to type '" << typeName << "'" << std::endl;
 }
 
 void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const std::string& scope, Context* context) {
@@ -695,13 +695,13 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
         VariableInfo varInfo(node->var_id->id_name, varType, scope, false, 0);
         globalVariables.push_back(varInfo);
         
-        std::cout << "Added variable '" << node->var_id->id_name << "' with type '" << varType->name << "' in scope '" << scope << "'" << std::endl;
+        // std::cout << "Added variable '" << node->var_id->id_name << "' with type '" << varType->name << "' in scope '" << scope << "'" << std::endl;
     }
 }
 
 void SymbolCollectorVisitor::processGlobalFunction(AssignFuncNode* node, Context* context) {
     if (node) {
-        std::cout << "Processing global function '" << node->func_name << "'" << std::endl;
+        // std::cout << "Processing global function '" << node->func_name << "'" << std::endl;
         // Add to global context or handle global functions as needed
     }
 }

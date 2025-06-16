@@ -66,7 +66,20 @@ class CodegenVisitor : public Visitor {
     typedef std::map<std::string, llvm::Type*> AttributeTypeMap;
     std::map<std::string, AttributeTypeMap> typeAttributeTypeMap; 
     // Add inheritance map to track type hierarchies
-    std::map<std::string, std::string> typeInheritanceMap; // child -> parent 
+    std::map<std::string, std::string> typeInheritanceMap; // child -> parent
+    // Add method tracking map to track methods per type
+    std::map<std::string, std::vector<std::string>> typeMethodMap; // type -> methods 
+    // Map to store default values for each attribute in each type
+    // Store raw values instead of LLVM Values to avoid context issues
+    struct DefaultValue {
+        enum Type { DOUBLE, STRING } type;
+        double doubleVal;
+        std::string stringVal;
+        DefaultValue() : type(DOUBLE), doubleVal(0.0) {} // Default constructor
+        DefaultValue(double val) : type(DOUBLE), doubleVal(val) {}
+        DefaultValue(const std::string& val) : type(STRING), stringVal(val) {}
+    };
+    std::map<std::string, std::map<std::string, DefaultValue>> typeDefaultValuesMap;
     
     void createStandardLibraryDeclarations();
     llvm::Function* createMainFunction();

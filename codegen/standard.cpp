@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+#include <cstring>
 
 extern "C" void print(const char* str) {
     std::cout << str << std::endl;
@@ -61,7 +62,32 @@ extern "C" double rand_func() {
     return static_cast<double>(std::rand()) / RAND_MAX;
 }
 
-extern "C" const char* double_to_string(double value) {
-    std::string* result = new std::string(std::to_string(value));
-    return result->c_str();
+extern "C" char* double_to_string(double value) {
+    // Create a string representation of the double
+    std::string str = std::to_string(value);
+    // Allocate memory for the C string using std::malloc directly
+    char* result = (char*)std::malloc(str.length() + 1);
+    // Manually copy the string content to avoid any wrapped functions
+    const char* src = str.c_str();
+    for (size_t i = 0; i <= str.length(); ++i) {
+        result[i] = src[i];
+    }
+    return result;
 }
+
+extern "C" char* hulk_strcat(char* dest, const char* src) {
+    return std::strcat(dest, src);
+}
+
+extern "C" size_t hulk_strlen(const char* str) {
+    return std::strlen(str);
+}
+
+extern "C" char* hulk_strcpy(char* dest, const char* src) {
+    return std::strcpy(dest, src);
+}
+
+extern "C" void* hulk_malloc(size_t size) {
+    return std::malloc(size);
+}
+

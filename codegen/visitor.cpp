@@ -163,7 +163,7 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
     llvm::Function::Create(
         strcatType,
         llvm::Function::ExternalLinkage,
-        "strcat",
+        "hulk_strcat",
         TheModule.get()
     );
     
@@ -175,7 +175,7 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
     llvm::Function::Create(
         strlenType,
         llvm::Function::ExternalLinkage,
-        "strlen",
+        "hulk_strlen",
         TheModule.get()
     );
     
@@ -187,7 +187,7 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
     llvm::Function::Create(
         strcpyType,
         llvm::Function::ExternalLinkage,
-        "strcpy",
+        "hulk_strcpy",
         TheModule.get()
     );
     
@@ -199,7 +199,7 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
     llvm::Function::Create(
         mallocType,
         llvm::Function::ExternalLinkage,
-        "malloc",
+        "hulk_malloc",
         TheModule.get()
     );
     
@@ -460,18 +460,7 @@ void CodegenVisitor::visit(BinOpNode* node, Context* context) {
     } else if (node->op == "@@") {
         handleStringConcatenation(L, R, node, context, true);
     } else if (node->op == "is") {
-        // Type checking operator: returns true if left operand is of type specified by right operand
-        // Left operand should be an object reference, right operand should be a type name
-        
-        // The semantic checker has already validated that right operand is a type name
-        // We need to implement runtime type checking
-        
-        // For now, let's implement a simplified version that checks object types
-        // Get the object from left operand
         auto* rightIdNode = dynamic_cast<IDNode*>(node->right);
-        if (!rightIdNode) {
-            throw std::runtime_error("CodeGen error: Right operand of 'is' must be a type name");
-        }
         
         std::string targetTypeName = rightIdNode->id_name;
         
@@ -822,8 +811,6 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    cout << "Generating code for ID Node: " << node->id_name << endl;
-    
     if (node->id_name == "PI") {
         llvm::Function* getPiFunc = TheModule->getFunction("get_pi");
         if (getPiFunc) {
@@ -852,7 +839,6 @@ void CodegenVisitor::visit(IDNode* node, Context* context) {
                 std::string typeStr;
                 llvm::raw_string_ostream typeStream(typeStr);
                 allocaType->print(typeStream);
-                cout << "DEBUG: Variable " << node->id_name << " has allocated type: " << typeStream.str() << endl;
                 
                 currentValue = Builder->CreateLoad(allocaType, varValue, node->id_name);
                 
@@ -904,6 +890,16 @@ void CodegenVisitor::visit(ArgsList* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
+    for (auto* arg : node->children) {
+        if (arg == nullptr) {
+            throw std::runtime_error("Argument node is null");
+        }
+        arg->accept(this, context);
+        
+        // Store the current value in NamedValues for later use
+        NamedValues[arg->id_name] = currentValue;
+    }
+
     cout << "Generating code for ArgsList" << endl;
 }
 
@@ -919,17 +915,36 @@ void CodegenVisitor::visit(AssignFuncNode* node, Context* context) {
     for (auto* arg : node->args->children) {
         if (arg->id_type == "String") {
             argTypes.push_back(llvm::Type::getInt8PtrTy(*TheContext)); // String as char*
-        } else {
+        } else if (arg->id_type == "Boolean") {
+            argTypes.push_back(llvm::Type::getInt1Ty(*TheContext)); // Boolean as i1
+        }
+        else {
             argTypes.push_back(llvm::Type::getDoubleTy(*TheContext)); // Default to double for Number
         }
     }
     
     // Create function type (returns double for simplicity)
-    llvm::FunctionType* funcType = llvm::FunctionType::get(
-        llvm::Type::getDoubleTy(*TheContext),
-        argTypes,
-        false
-    );
+    llvm::FunctionType* funcType;
+    if (node->inferredType->name == "String") {
+        funcType = llvm::FunctionType::get(
+            llvm::Type::getInt8PtrTy(*TheContext), // Return type for String
+            argTypes,
+            false
+        );
+    } else if (node->inferredType->name == "Boolean") {
+        funcType = llvm::FunctionType::get(
+            llvm::Type::getInt1Ty(*TheContext), // Return type for Boolean
+            argTypes,
+            false
+        );
+    } else {
+        // Default to double return type
+        funcType = llvm::FunctionType::get(
+            llvm::Type::getDoubleTy(*TheContext),
+            argTypes,
+            false
+        );
+    }
     
     // Create the function
     llvm::Function* function = llvm::Function::Create(
@@ -946,8 +961,9 @@ void CodegenVisitor::visit(AssignFuncNode* node, Context* context) {
     llvm::BasicBlock* prevBB = Builder->GetInsertBlock();
     Builder->SetInsertPoint(funcBB);
     
-    // Save current named values
+    // Save current named values and object types
     std::map<std::string, llvm::Value*> prevNamedValues = NamedValues;
+    std::map<std::string, std::string> prevObjectTypes = objectTypes;
     
     // Set up function parameters
     auto argIt = function->arg_begin();
@@ -974,6 +990,16 @@ void CodegenVisitor::visit(AssignFuncNode* node, Context* context) {
         Builder->CreateStore(arg, alloca);
         NamedValues[node->args->children[i]->id_name] = alloca;
         
+        // Store the parameter type in objectTypes map for proper type resolution
+        if (!node->args->children[i]->id_type.empty() && 
+            node->args->children[i]->id_type != "Number" && 
+            node->args->children[i]->id_type != "Boolean" &&
+            node->args->children[i]->id_type != "String") {
+            objectTypes[node->args->children[i]->id_name] = node->args->children[i]->id_type;
+            cout << "Stored parameter '" << node->args->children[i]->id_name 
+                 << "' with object type '" << node->args->children[i]->id_type << "'" << endl;
+        }
+        
         cout << "Parameter '" << node->args->children[i]->id_name << "' of type " << 
                 node->args->children[i]->id_type << " allocated" << endl;
     }
@@ -991,6 +1017,7 @@ void CodegenVisitor::visit(AssignFuncNode* node, Context* context) {
     
     // Restore previous state
     NamedValues = prevNamedValues;
+    objectTypes = prevObjectTypes;
     if (prevBB) {
         Builder->SetInsertPoint(prevBB);
     }
@@ -1295,6 +1322,14 @@ void CodegenVisitor::visit(Conditional* node, Context* context) {
         phiType = llvm::Type::getDoubleTy(*TheContext);
     }
 
+    // Special case: if both branches return void, don't create a PHI node
+    if (phiType && phiType->isVoidTy()) {
+        // Both branches return void, just set currentValue to a dummy value
+        currentValue = llvm::ConstantFP::get(llvm::Type::getDoubleTy(*TheContext), llvm::APFloat(0.0));
+        cout << "Conditional: Both branches return void, using dummy value" << endl;
+        return;
+    }
+
     llvm::PHINode* phiNode = Builder->CreatePHI(phiType, 2, "iftmp");
     
     // Add incoming values with type conversion if needed
@@ -1478,6 +1513,7 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
     
     if (!node->parents.empty()) {
         std::string parentTypeName = node->parents[0];
+        cout << "Type " << typeName << " inherits from " << parentTypeName << endl;
         auto parentStructIt = typeStructMap.find(parentTypeName);
         auto parentAttributesIt = typeAttributeMap.find(parentTypeName);
         auto parentAttrTypeIt = typeAttributeTypeMap.find(parentTypeName);
@@ -1571,16 +1607,36 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
     llvm::IRBuilder<> constructorBuilder(*TheContext);
     constructorBuilder.SetInsertPoint(constructorBB);
     
-    static int objectCounter = 0;
-    std::string globalObjName = "global_" + typeName + "_" + std::to_string(objectCounter++);
+    // Allocate memory for the new instance using hulk_malloc
+    llvm::Function* mallocFunc = TheModule->getFunction("hulk_malloc");
+    if (!mallocFunc) {
+        // Declare hulk_malloc if not already declared
+        llvm::FunctionType* mallocType = llvm::FunctionType::get(
+            llvm::Type::getInt8PtrTy(*TheContext),
+            {llvm::Type::getInt64Ty(*TheContext)},
+            false
+        );
+        mallocFunc = llvm::Function::Create(
+            mallocType,
+            llvm::Function::ExternalLinkage,
+            "hulk_malloc",
+            TheModule.get()
+        );
+    }
     
-    llvm::GlobalVariable* globalObj = new llvm::GlobalVariable(
-        *TheModule,
-        structType,
-        false,                                     
-        llvm::GlobalValue::InternalLinkage,        
-        llvm::Constant::getNullValue(structType),
-        globalObjName
+    // Calculate the size of the struct
+    llvm::DataLayout dataLayout(TheModule.get());
+    uint64_t structSize = dataLayout.getTypeAllocSize(structType);
+    llvm::Value* sizeValue = llvm::ConstantInt::get(llvm::Type::getInt64Ty(*TheContext), structSize);
+    
+    // Call malloc to allocate memory
+    llvm::Value* mallocResult = constructorBuilder.CreateCall(mallocFunc, {sizeValue}, "malloc_result");
+    
+    // Cast the result to the correct struct type pointer
+    llvm::Value* newInstance = constructorBuilder.CreateBitCast(
+        mallocResult,
+        llvm::PointerType::get(structType, 0),
+        "new_instance"
     );
     
     // Set specific values for attributes defined in the body
@@ -1593,14 +1649,18 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
             auto it = std::find(attributes.begin(), attributes.end(), varAssign->var_id->id_name);
             if (it != attributes.end()) {
                 size_t fieldIndex = std::distance(attributes.begin(), it);
-                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, globalObj, fieldIndex, "field_" + varAssign->var_id->id_name);
+                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, newInstance, fieldIndex, "field_" + varAssign->var_id->id_name);
                 llvm::Type* fieldType = attrTypeMap[varAssign->var_id->id_name];
                 llvm::Value* defaultVal = nullptr;
+                DefaultValue defaultValueData; // Store the raw value for inheritance
+                
                 if (fieldType->isDoubleTy()) {
-                    defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(0.0));
+                    double doubleValue = 0.0;
                     if (auto* floatNode = dynamic_cast<FloatNode*>(varAssign->value)) {
-                        defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat((double)floatNode->value));
+                        doubleValue = (double)floatNode->value;
                     }
+                    defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(doubleValue));
+                    defaultValueData = DefaultValue(doubleValue);
                 } else if (fieldType->isPointerTy()) {
                     std::string cleanStr = "";
                     if (auto* strNode = dynamic_cast<StringNode*>(varAssign->value)) {
@@ -1621,9 +1681,14 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
                     llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
                     std::vector<llvm::Value*> indices = {zero, zero};
                     defaultVal = constructorBuilder.CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "strptr");
+                    defaultValueData = DefaultValue(cleanStr);
                 }
-                if (defaultVal) constructorBuilder.CreateStore(defaultVal, fieldPtr);
-                cout << "Set default value for field " << varAssign->var_id->id_name << " in type " << typeName << endl;
+                if (defaultVal) {
+                    constructorBuilder.CreateStore(defaultVal, fieldPtr);
+                    // Store the default value in our map for inheritance
+                    typeDefaultValuesMap[typeName][varAssign->var_id->id_name] = defaultValueData;
+                    cout << "Set and stored default value for field " << varAssign->var_id->id_name << " in type " << typeName << endl;
+                }
             }
         }
     }
@@ -1647,42 +1712,121 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
                 }
             }
             
-            // If not defined in current body, it's inherited - set the inherited value
-            if (!definedInCurrentBody && attrName == "x" && parentTypeName == "A") {
-                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, globalObj, i, "inherited_field_" + attrName);
+            // If not defined in current body, it's inherited - initialize with actual default value from parent
+            if (!definedInCurrentBody) {
+                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, newInstance, i, "inherited_field_" + attrName);
                 
-                // Set inherited field to the same value as in parent ("test" for field x from type A)
-                llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, "test");
-                llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
-                    *TheModule,
-                    strConstant->getType(),
-                    true,
-                    llvm::GlobalValue::PrivateLinkage,
-                    strConstant,
-                    ".str"
-                );
-                llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
-                std::vector<llvm::Value*> indices = {zero, zero};
-                llvm::Value* strPtr = constructorBuilder.CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "inherited_strptr");
-                constructorBuilder.CreateStore(strPtr, fieldPtr);
-                cout << "Set inherited field " << attrName << " = \"test\" in type " << typeName << endl;
+                // Try to get the actual default value from the parent type
+                llvm::Value* defaultVal = nullptr;
+                auto parentDefaultsIt = typeDefaultValuesMap.find(parentTypeName);
+                if (parentDefaultsIt != typeDefaultValuesMap.end()) {
+                    auto attrDefaultIt = parentDefaultsIt->second.find(attrName);
+                    if (attrDefaultIt != parentDefaultsIt->second.end()) {
+                        // Found the actual default value from parent, recreate it in current context
+                        const DefaultValue& parentDefault = attrDefaultIt->second;
+                        
+                        // Get field type for current context
+                        auto attrTypeIt = typeAttributeTypeMap.find(typeName);
+                        if (attrTypeIt != typeAttributeTypeMap.end()) {
+                            const AttributeTypeMap& attrTypeMap = attrTypeIt->second;
+                            auto fieldTypeIt = attrTypeMap.find(attrName);
+                            if (fieldTypeIt != attrTypeMap.end()) {
+                                llvm::Type* fieldType = fieldTypeIt->second;
+                                
+                                if (parentDefault.type == DefaultValue::DOUBLE && fieldType->isDoubleTy()) {
+                                    defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(parentDefault.doubleVal));
+                                } else if (parentDefault.type == DefaultValue::STRING && fieldType->isPointerTy()) {
+                                    llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, parentDefault.stringVal);
+                                    llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
+                                        *TheModule,
+                                        strConstant->getType(),
+                                        true,
+                                        llvm::GlobalValue::PrivateLinkage,
+                                        strConstant,
+                                        ".str"
+                                    );
+                                    llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
+                                    std::vector<llvm::Value*> indices = {zero, zero};
+                                    defaultVal = constructorBuilder.CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "strptr");
+                                }
+                                
+                                if (defaultVal) {
+                                    constructorBuilder.CreateStore(defaultVal, fieldPtr);
+                                    cout << "Set inherited field " << attrName << " with parent's actual default value (" 
+                                         << (parentDefault.type == DefaultValue::DOUBLE ? std::to_string(parentDefault.doubleVal) : parentDefault.stringVal) 
+                                         << ") in type " << typeName << endl;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Fallback: if parent default not found, use type-based generic defaults
+                auto attrTypeIt = typeAttributeTypeMap.find(typeName);
+                if (attrTypeIt != typeAttributeTypeMap.end()) {
+                    const AttributeTypeMap& attrTypeMap = attrTypeIt->second;
+                    auto fieldTypeIt = attrTypeMap.find(attrName);
+                    if (fieldTypeIt != attrTypeMap.end()) {
+                        llvm::Type* fieldType = fieldTypeIt->second;
+                        
+                        if (fieldType->isDoubleTy()) {
+                            // For numeric fields, use 0.0 as default
+                            defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(0.0));
+                        } else if (fieldType->isPointerTy()) {
+                            // For string fields, use empty string as default
+                            llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, "");
+                            llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
+                                *TheModule,
+                                strConstant->getType(),
+                                true,
+                                llvm::GlobalValue::PrivateLinkage,
+                                strConstant,
+                                ".str"
+                            );
+                            llvm::Value* zero = llvm::ConstantInt::get(*TheContext, llvm::APInt(32, 0, true));
+                            std::vector<llvm::Value*> indices = {zero, zero};
+                            defaultVal = constructorBuilder.CreateInBoundsGEP(globalStr->getValueType(), globalStr, indices, "inherited_strptr");
+                        }
+                        
+                        if (defaultVal) {
+                            constructorBuilder.CreateStore(defaultVal, fieldPtr);
+                            cout << "Set inherited field " << attrName << " with generic default value in type " << typeName << " (parent default not found)" << endl;
+                        }
+                    }
+                }
             }
         }
     }
     
-    constructorBuilder.CreateRet(globalObj);
+    constructorBuilder.CreateRet(newInstance);
     
+    // Generate methods for this type
     for (auto* funcNode : methods) {
         generateMethodFunction(typeName, funcNode, structType, attributes);
     }
     
+    // Handle inheritance forwarding using LLVM module method discovery
     if (!node->parents.empty()) {
         std::string parentTypeName = node->parents[0];
+        typeInheritanceMap[typeName] = parentTypeName; // Track inheritance relationship
         
+        // Discover parent methods by examining what functions exist in the LLVM module
         std::vector<std::string> parentMethods;
-        if (parentTypeName == "Point") {
-            parentMethods = {"getX", "setX", "setY"};
+        std::string parentPrefix = parentTypeName + "_";
+        
+        // Iterate through all functions in the module to find parent methods
+        for (auto& func : *TheModule) {
+            std::string funcName = func.getName().str();
+            if (funcName.find(parentPrefix) == 0) {
+                // Extract method name by removing the prefix
+                std::string methodName = funcName.substr(parentPrefix.length());
+                parentMethods.push_back(methodName);
+            }
         }
+        
+        cout << "Type " << typeName << " inherits from " << parentTypeName << 
+                " with " << parentMethods.size() << " parent methods discovered from LLVM module" << endl;
         
         for (const std::string& parentMethodName : parentMethods) {
             bool isOverridden = false;
@@ -2345,8 +2489,8 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
     
     // Declare required functions for string concatenation
     
-    // strlen function
-    llvm::Function* strlenFunc = TheModule->getFunction("strlen");
+    // hulk_strlen function
+    llvm::Function* strlenFunc = TheModule->getFunction("hulk_strlen");
     if (!strlenFunc) {
         llvm::FunctionType* strlenType = llvm::FunctionType::get(
             llvm::Type::getInt64Ty(*TheContext),
@@ -2356,13 +2500,13 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
         strlenFunc = llvm::Function::Create(
             strlenType,
             llvm::Function::ExternalLinkage,
-            "strlen",
+            "hulk_strlen",
             TheModule.get()
         );
     }
     
-    // malloc function
-    llvm::Function* mallocFunc = TheModule->getFunction("malloc");
+    // hulk_malloc function
+    llvm::Function* mallocFunc = TheModule->getFunction("hulk_malloc");
     if (!mallocFunc) {
         llvm::FunctionType* mallocType = llvm::FunctionType::get(
             llvm::Type::getInt8PtrTy(*TheContext),
@@ -2372,13 +2516,13 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
         mallocFunc = llvm::Function::Create(
             mallocType,
             llvm::Function::ExternalLinkage,
-            "malloc",
+            "hulk_malloc",
             TheModule.get()
         );
     }
     
-    // strcpy function
-    llvm::Function* strcpyFunc = TheModule->getFunction("strcpy");
+    // hulk_strcpy function
+    llvm::Function* strcpyFunc = TheModule->getFunction("hulk_strcpy");
     if (!strcpyFunc) {
         llvm::FunctionType* strcpyType = llvm::FunctionType::get(
             llvm::Type::getInt8PtrTy(*TheContext),
@@ -2388,13 +2532,13 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
         strcpyFunc = llvm::Function::Create(
             strcpyType,
             llvm::Function::ExternalLinkage,
-            "strcpy",
+            "hulk_strcpy",
             TheModule.get()
         );
     }
     
-    // strcat function
-    llvm::Function* strcatFunc = TheModule->getFunction("strcat");
+    // hulk_strcat function
+    llvm::Function* strcatFunc = TheModule->getFunction("hulk_strcat");
     if (!strcatFunc) {
         llvm::FunctionType* strcatType = llvm::FunctionType::get(
             llvm::Type::getInt8PtrTy(*TheContext),
@@ -2404,7 +2548,7 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
         strcatFunc = llvm::Function::Create(
             strcatType,
             llvm::Function::ExternalLinkage,
-            "strcat",
+            "hulk_strcat",
             TheModule.get()
         );
     }
@@ -2413,8 +2557,13 @@ void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Val
     llvm::Value* leftLen = Builder->CreateCall(strlenFunc, {leftValue}, "left_len");
     llvm::Value* rightLen = Builder->CreateCall(strlenFunc, {rightStringValue}, "right_len");
     
-    // Calculate total length needed (left + right + 1 for null terminator)
+    // Calculate total length needed (left + right + 1 for null terminator, +1 for space if needed)
     llvm::Value* totalLen = Builder->CreateAdd(leftLen, rightLen, "total_len");
+    if (space) {
+        // Add 1 for the space character
+        totalLen = Builder->CreateAdd(totalLen, 
+            llvm::ConstantInt::get(llvm::Type::getInt64Ty(*TheContext), 1), "total_len_with_space");
+    }
     llvm::Value* totalLenPlusOne = Builder->CreateAdd(totalLen, 
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(*TheContext), 1), "total_len_plus_one");
     
