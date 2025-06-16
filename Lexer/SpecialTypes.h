@@ -13,6 +13,34 @@ class SymbolNode;
 // class EpsilonNode;
 class Node;
 class ASTNode;
+class ASTNodeVector;
+class ProgramNode;
+class FloatNode;
+class BoolNode;
+class BoolExprNode;
+class StringNode;
+class UnaryOpNode;
+class BinOpNode;
+class FunctionCallNode;
+class IDNode;
+class BlockNode;
+class ArgsList;
+class ExprsList;
+class AssignFuncNode;
+class VarAssign;
+class NewTypeNode;
+class VarAssignType;
+class VarAssignList;
+class LetAssign;
+class VarDesAssign;
+class Conditional;
+class WhileNode;
+class ForNode;
+class TypeDeclNode;
+class TypeAssMember;
+class AttributeMember;
+class MethodMember;
+class AccessNode;
 
 using ElementType = std::variant<
     std::string,

@@ -8,6 +8,50 @@
 #include "../Automata/state.h"
 
 /**
+ * @class ParsingError
+ * @brief Excepción especializada para errores de análisis sintáctico.
+ * 
+ * Proporciona información detallada sobre errores durante el parseo, incluyendo
+ * la posición del error, el token inesperado, y los tokens esperados.
+ */
+class ParsingError : public std::runtime_error {
+public:
+    /**
+     * @brief Constructor para error de token inesperado.
+     * @param message Mensaje descriptivo del error
+     * @param state Estado en que ocurrió el error
+     * @param token Token que causó el error
+     * @param expected_tokens Lista de tokens que serían válidos en este punto
+     */
+    ParsingError(const std::string& message, int state, const std::string& token, 
+                 const std::vector<std::string>& expected_tokens)
+        : std::runtime_error(message),
+          state_(state),
+          token_(token),
+          expected_tokens_(expected_tokens) {}
+    
+    /**
+     * @brief Obtiene el estado donde ocurrió el error.
+     */
+    int getState() const { return state_; }
+    
+    /**
+     * @brief Obtiene el token que causó el error.
+     */
+    std::string getToken() const { return token_; }
+    
+    /**
+     * @brief Obtiene la lista de tokens esperados.
+     */
+    std::vector<std::string> getExpectedTokens() const { return expected_tokens_; }
+
+private:
+    int state_;
+    std::string token_;
+    std::vector<std::string> expected_tokens_;
+};
+
+/**
  * @class SLR1Parser
  * @brief Implementa un parser SLR(1) para analizar cadenas según una gramática dada.
  * 
@@ -20,6 +64,7 @@ public:
     static constexpr const char* SHIFT = "SHIFT";
     static constexpr const char* REDUCE = "REDUCE";
     static constexpr const char* OK = "OK";
+    static constexpr const char* ERROR = "ERROR";
 
     /**
      * @brief Constructor del parser SLR(1).
@@ -135,4 +180,30 @@ private:
                const std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& action,
                const std::map<std::pair<int, Symbol>, int>& goto_table,
                bool verbose = false);
+
+    /**
+     * @brief Obtiene los tokens esperados para un estado dado.
+     * @param state_id El ID del estado para el que se buscan tokens válidos
+     * @return Vector de nombres de tokens que son válidos en ese estado
+     */
+    std::vector<std::string> getExpectedTokens(int state_id) const;
+    
+    /**
+     * @brief Genera un mensaje de error para un error de sintaxis.
+     * @param state_id El estado en que se encontró el error
+     * @param token El token inesperado
+     * @return Par con mensaje de error y lista de tokens esperados
+     */
+    std::pair<std::string, std::vector<std::string>> generateErrorMessage(int state_id, const std::string& token) const;
+
+    /**
+     * @brief Genera un mensaje de error con contexto para un error de sintaxis.
+     * @param tokens Vector de tokens de entrada
+     * @param error_position Posición donde ocurrió el error
+     * @param error_message Mensaje base del error
+     * @return Mensaje de error con contexto visual
+     */
+    static std::string formatErrorWithContext(const std::vector<Terminal>& tokens, 
+                                             int error_position, 
+                                             const std::string& error_message);
 };

@@ -209,11 +209,12 @@ State* State::to_deterministic() {
     for (const State* s : initial_set) {
         if (s->is_final()) {
             is_final = true;
-            // Usar el tag del estado con menor número n (mayor prioridad)
-            if (s->get_n() < min_n && !s->tag().empty()) {
-                min_n = s->get_n();
-                dfa_tag = s->tag();
-            }
+            // // Usar el tag del estado con menor número n (mayor prioridad)
+            // if (s->get_n() < min_n && !s->tag().empty()) {
+            //     min_n = s->get_n();
+            //     dfa_tag = s->tag();
+            // }
+            break;
         }
     }
 

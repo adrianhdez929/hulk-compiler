@@ -1,7 +1,7 @@
 /// \file execute.cpp
 /// \brief Archivo para la ejecución del compilador Hulk
 
-#include "create_artifacts.cpp"
+// #include "create_artifacts.cpp"
 #include "Lexer/Lexer.h"
 #include "Parser/SLR1Parser.h"
 #include "Grammar/grammar.h"
@@ -10,19 +10,144 @@
 #include <filesystem>
 #include <fstream>
 #include "Parser/reverse_evaluate.h"
+#include "hulkGrammar.hpp"
 
+void create_artifacts() {
+    std::cout << "=== Creando artefactos del compilador Hulk ===" << std::endl;
+
+    // Reset production counter to ensure fresh start
+    Grammar::ResetProductionCounter();
+
+    // Verificar y crear directorio hulk
+    if (!std::filesystem::exists("hulk")) {
+        std::filesystem::create_directory("hulk");
+    }
+
+    // Crear gramática del lexer
+    Grammar lexer_grammar = GrammarParser::Parse("Lexer/grammar.txt");
+    
+    // Crear parser
+    SLR1Parser parser(lexer_grammar);
+    
+    // Serializar parser
+    if (!parser.serialize_parser("parser.p")) {
+        std::cerr << "Error: No se pudo serializar el parser" << std::endl;
+        return;
+    }
+    // Crear tabla de tokens para el lexer
+    std::vector<std::pair<std::string, std::string>> token_table = {
+        {"string", "\"([\\x20-!#-\\x7e])*\""},
+        {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+        {"bool", "true|false"},  // Regular expression for boolean values
+
+        {"space", " +"}, // Regular expression for spaces
+        // Regular expression for identifiers
+        {"(", "\\("},            // Left parenthesis
+        {")", "\\)"},            // Right parenthesis
+		{"{", "\\{"},
+		{"}", "\\}"},
+		{";", "\\;"},
+		{"+", "\\+"},
+		{"-", "\\-"},
+		{"*", "\\*"},
+		{"/", "\\/"},
+		{"^", "\\^"},
+        {"%", "\\%"},
+        {":=", ":="},          // Alternative assignment operator
+        {":", "\\:"},
+        {"|", "\\|"},
+        {"&", "\\&"},
+        {">=", ">="},
+        {">", "\\>"},
+        {"<=", "<="},
+        {"<", "<"},
+        {"==", "=="},
+        {"!=", "!="},
+        {"is", "is"},
+        {"!", "!"},
+        {",", "\\,"},           // Comma for lists
+        {"=", "="},            // Assignment operator
+        
+        {"function", "function"}, // Function keyword
+        {"=>", "=>"},          // Arrow for inline functions
+        {"let", "let"},        // Let keyword
+        {"in", "in"},          // In keyword for let expressions
+        {"if", "if"},          // If keyword
+        {"else", "else"},      // Else keyword
+        {"elif", "elif"},      // Else-if keyword
+        {"while", "while"},    // While keyword
+        {"type", "type"},      // Type definition keyword
+        {"inherits", "inherits"}, // Inheritance keyword
+        {".", "\\."},          // Member access operator
+        {"@", "@"},            // At operator
+        {"@@", "@@"},          // Double at operator
+        {"as", "as"},          // Type cast keyword
+        {"for", "for"},        // For loop keyword
+        {"new", "new"},         // Object instantiation keyword
+        {"type_id", "[A-Z][_a-zA-Z0-9]*"},
+        {"var_id", "[_a-z][_a-zA-Z0-9]*"},
+        {"tab", "\t"},
+        {"newline", "\n"} // Regular expression for newlines
+    };
+    // 	std::vector<std::pair<std::string, std::string>> token_table = {
+    //     {"string", "\"([\\x20-!#-\\x7e])*\""},
+    //     {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+    //     {"bool", "true|false"},  // Regular expression for boolean values
+    //     {"type_id", "[A-Z][_a-zA-Z0-9]*"},
+    //     {"var_id", "[_a-z][_a-zA-Z0-9]*"},
+    //     {"space", " +"}, // Regular expression for spaces
+    //     // Regular expression for identifiers
+    //     {"(", "\\("},            // Left parenthesis
+    //     {")", "\\)"},            // Right parenthesis
+	// 	{"{", "\\{"},
+	// 	{"}", "\\}"},
+	// 	{";", "\\;"},
+	// 	{"+", "\\+"},
+	// 	{"-", "\\-"},
+	// 	{"*", "\\*"},
+	// 	{"/", "\\/"},
+	// 	{"^", "\\^"},
+    //     {"tab", "\t"},
+    //     {"newline", "\n"}, // Regular expression for newlines
+    //     {"EOF", "EOF"}      // End of file token
+    // };
+    
+    // Crear lexer
+    Lexer lexer(token_table, lexer_grammar, parser);
+    
+    // Serializar lexer
+    if (!lexer.serialize_lexer("lexer.l")) {
+        std::cerr << "Error: No se pudo serializar el lexer" << std::endl;
+        return;
+    }
+
+    // Crear gramatica de Hulk
+    // POR IMPLEMENTAR: Aquí deberías definir la gramática específica de Hulk
+    Grammar::ResetProductionCounter();  // Reset before creating Hulk grammar
+    Grammar hulk_grammar = getHulkGrammar(); //getHulkGrammar();
+
+    // Crear parser de Hulk
+    SLR1Parser hulk_parser(hulk_grammar); // true for verbose mode
+    // Serializar parser de Hulk
+    if (!hulk_parser.serialize_parser("hulk_parser.p")) {
+        std::cerr << "Error: No se pudo serializar el parser de Hulk" << std::endl;
+        return;
+    }
+    
+    std::cout << "Artefactos creados exitosamente en la carpeta 'hulk'" << std::endl;
+}
 
 int main() {
     std::cout << "=== Ejecutando el compilador Hulk ===" << std::endl;
     
-    // // Verificar y crear directorio hulk
-    // if (!std::filesystem::exists("hulk")) {
-    //     std::filesystem::create_directory("hulk");
-    // }
-    // // Crear artefactos del compilador si no estan creados
-    // if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.slr")) {
-    //     create_artifacts();
-    // }
+    // Verificar y crear directorio hulk
+    if (!std::filesystem::exists("hulk")) {
+        std::filesystem::create_directory("hulk");
+    }
+    // Crear artefactos del compilador si no estan creados
+    if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
+        create_artifacts();
+    }
 
     // Cargar Lexer y Parser
     Lexer* lexer = Lexer::deserialize_lexer("lexer.l");
@@ -113,7 +238,5 @@ int main() {
     ast->print();
     std::cout << "Ejecución del compilador Hulk finalizada exitosamente." << std::endl;
 
-    // Cargar gramática del lexer
-    // Grammar lexer_grammar = GrammarParser::Parse("Lexer/grammar.txt");
     return 0;
 }

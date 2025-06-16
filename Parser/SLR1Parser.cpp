@@ -70,38 +70,87 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
     std::stack<Terminal> symbol_stack;
 
     int index = 0;
-    while (index < tokens.size() || !symbol_stack.empty()) {
-        if (index < tokens.size()) {
-            auto current_token = tokens[index];
-            auto action_key = std::make_pair(state_stack.top(), current_token);
+    // Guardar el índice actual para proporcionar contexto en caso de error
+    int current_position = 0;
 
-            if (action_.find(action_key) != action_.end()) {
-                auto action_value = action_[action_key];
-                if (action_value.first == SHIFT) {
-                    // Shift action
-                    state_stack.push(action_value.second);
-                    symbol_stack.push(current_token);
-                    actions.push_back(SHIFT);
-                    index++;
-                } else if (action_value.first == REDUCE) {
-                    // Reduce action
-                    auto production = G_.Productions()[action_value.second];
-                    production_ids.push_back(production.get_id());
-                    actions.push_back(REDUCE);
-                    // index++;
-                    for (int i = 0; i < production.Right().Symbols().size(); i++) {
-                        state_stack.pop();
-                        if (!symbol_stack.empty()) {
-                            symbol_stack.pop();
+    try {
+        while (index < tokens.size() || !symbol_stack.empty()) {
+            current_position = index;
+            if (index < tokens.size()) {
+                auto current_token = tokens[index];
+                auto action_key = std::make_pair(state_stack.top(), current_token);
+
+                if (action_.find(action_key) != action_.end()) {
+                    auto action_value = action_[action_key];
+                    if (action_value.first == SHIFT) {
+                        // Shift action
+                        state_stack.push(action_value.second);
+                        symbol_stack.push(current_token);
+                        actions.push_back(SHIFT);
+                        index++;
+                    } else if (action_value.first == REDUCE) {
+                        // Reduce action
+                        auto production = G_.Productions()[action_value.second];
+                        cout << "Reducing by production: " << production.ToString() << endl;
+                        production_ids.push_back(production.get_id());
+                        actions.push_back(REDUCE);
+                        // index++;
+                        for (int i = 0; i < production.Right().Symbols().size(); i++) {
+                            state_stack.pop();
+                            if (!symbol_stack.empty()) {
+                                symbol_stack.pop();
+                            }
                         }
-                    }
 
-                    auto goto_key = std::make_pair(state_stack.top(), *(production.Left()));
-                    if (goto_.find(goto_key) != goto_.end()) {
-                        state_stack.push(goto_[goto_key]);
-                        // symbol_stack.push(*(production.Left()));
-                        //actions.push_back(OK);//NOTE: ATENCIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONNNNNNNNNNNNNN
+                        auto goto_key = std::make_pair(state_stack.top(), *(production.Left()));
+                        if (goto_.find(goto_key) != goto_.end()) {
+                            state_stack.push(goto_[goto_key]);
+                            // symbol_stack.push(*(production.Left()));
+                            //actions.push_back(OK);//NOTE: ATENCIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONNNNNNNNNNNNNN
+                        } else {
+                            // Error interno del parser - no se encontró una transición goto
+                            if (verbose_) {
+                                cout << "Actions:" << endl;
+                                for (const auto& action : action_) {
+                                    cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
+                                        << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
+                                }
+                                cout << "Goto:" << endl;
+                                for (const auto& goto_action : goto_) {
+                                    cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
+                                        << " -> Goto State: " << goto_action.second << endl;
+                                }
+                            }
+                            
+                            // Este es un error interno del parser, probablemente debido a una gramática mal construida
+                            std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
+                                                production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());
+                            throw std::runtime_error(error_msg);
+                        }
+                    } else if (action_value.first == OK) {
+                        // Accept action
+                        actions.push_back(OK);
+                        if (G_.IsAugmented()) {
+                            // If the grammar is augmented, we can consider the production as accepted
+                            for (const auto& production : G_.Productions()) {
+                                if (production.Left() == G_.GetStartSymbol()) {
+                                    production_ids.push_back(production.get_id());
+                                }
+                            }
+                        } else {
+                            throw std::runtime_error("Grammar is not augmented, cannot accept.");
+                        }
+                        break;
                     } else {
+                        throw std::runtime_error("Unknown action: " + action_value.first);
+                    }
+                } else {
+                    // No se encontró una acción para este estado y token
+                    // Utilizamos los métodos helper para generar el mensaje de error
+                    auto [error_msg, expected_tokens] = generateErrorMessage(state_stack.top(), current_token.Name());
+                    
+                    // Si estamos en modo verbose, mostramos información de depuración
+                    if (verbose_) {
                         cout << "Actions:" << endl;
                         for (const auto& action : action_) {
                             cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
@@ -112,46 +161,27 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                             cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
                                 << " -> Goto State: " << goto_action.second << endl;
                         }
-                        throw std::runtime_error("Goto not found for " + production.Left()->Name() + " in state " + std::to_string(state_stack.top()));
                     }
-                } else if (action_value.first == OK) {
-                    // Accept action
-                    actions.push_back(OK);
-                    if (G_.IsAugmented()) {
-                        // If the grammar is augmented, we can consider the production as accepted
-                        for (const auto& production : G_.Productions()) {
-                            if (production.Left() == G_.GetStartSymbol()) {
-                                production_ids.push_back(production.get_id());
-                            }
-                        }
-                    } else {
-                        throw std::runtime_error("Grammar is not augmented, cannot accept.");
-                    }
-                    break;
-                } else {
-                    throw std::runtime_error("Unknown action: " + action_value.first);
+                    
+                    // Lanzar una excepción especializada con detalles del error
+                    throw ParsingError(error_msg, state_stack.top(), current_token.Name(), expected_tokens);
                 }
             } else {
-                cout << "Actions:" << endl;
-                for (const auto& action : action_) {
-                    cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                         << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
+                // If no more tokens, check for reduce or accept
+                if (!symbol_stack.empty() && state_stack.top() == 0) {
+                    actions.push_back(OK);
                 }
-                cout << "Goto:" << endl;
-                for (const auto& goto_action : goto_) {
-                    cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                         << " -> Goto State: " << goto_action.second << endl;
-                }
-                throw std::runtime_error("Action not found for state " + std::to_string(state_stack.top()) + " and token " + current_token.Name());
-            }
-        } else {
-            // If no more tokens, check for reduce or accept
-            if (!symbol_stack.empty() && state_stack.top() == 0) {
-                actions.push_back(OK);
             }
         }
-    }
     return std::make_pair(production_ids, actions);
+} catch (const ParsingError& e) {
+    // Mejorar el mensaje de error con contexto visual
+        std::string enhanced_message = formatErrorWithContext(tokens, current_position, e.what());
+        throw ParsingError(enhanced_message, e.getState(), e.getToken(), e.getExpectedTokens());
+    } catch (const std::exception& e) {
+        // Para otros errores, proporcionamos un poco más de contexto
+        throw std::runtime_error("Error durante el análisis sintáctico: " + std::string(e.what()));
+    }
 }
 
 void SLR1Parser::BuildParsingTable() {
@@ -732,4 +762,77 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         file.close();
         return nullptr;
     }
+}
+
+std::vector<std::string> SLR1Parser::getExpectedTokens(int state_id) const {
+    std::vector<std::string> expected_tokens;
+    
+    // Buscar todas las acciones válidas para este estado
+    for (const auto& [key, value] : action_) {
+        if (key.first == state_id) {
+            expected_tokens.push_back(key.second.Name());
+        }
+    }
+    
+    return expected_tokens;
+}
+
+std::pair<std::string, std::vector<std::string>> SLR1Parser::generateErrorMessage(int state_id, const std::string& token) const {
+    std::vector<std::string> expected_tokens = getExpectedTokens(state_id);
+    
+    std::string error_msg = "Error de sintaxis: token inesperado '" + token + "'";
+    if (!expected_tokens.empty()) {
+        error_msg += ". Se esperaba: ";
+        for (size_t i = 0; i < expected_tokens.size(); ++i) {
+            if (i > 0) {
+                error_msg += (i == expected_tokens.size() - 1) ? " o " : ", ";
+            }
+            error_msg += "'" + expected_tokens[i] + "'";
+        }
+    }
+    
+    return {error_msg, expected_tokens};
+}
+
+std::string SLR1Parser::formatErrorWithContext(const std::vector<Terminal>& tokens, 
+                                                     int error_position, 
+                                                     const std::string& error_message) {
+    std::string result = error_message + "\n\n";
+    
+    // Mostrar contexto (los tokens alrededor del error)
+    const int context_size = 5;  // Número de tokens a mostrar antes y después del error
+    
+    int start = std::max(0, error_position - context_size);
+    int end = std::min(static_cast<int>(tokens.size()), error_position + context_size + 1);
+    
+    // Construir la línea con los tokens
+    std::string tokens_line;
+    for (int i = start; i < end; ++i) {
+        std::string token_str = tokens[i].Name();
+        tokens_line += token_str + " ";
+    }
+    
+    // Construir la línea con el marcador de error
+    std::string marker_line;
+    int position = 0;
+    for (int i = start; i < end; ++i) {
+        std::string token_str = tokens[i].Name();
+        
+        if (i < error_position) {
+            // Añadir espacios para alinear con los tokens anteriores
+            for (size_t j = 0; j < token_str.length() + 1; ++j) {
+                marker_line += " ";
+            }
+        } else if (i == error_position) {
+            // Marcar el token erróneo
+            marker_line += "^";
+            for (size_t j = 1; j < token_str.length(); ++j) {
+                marker_line += "~";
+            }
+            marker_line += " ";
+        }
+    }
+    
+    result += tokens_line + "\n" + marker_line + "\n";
+    return result;
 }
