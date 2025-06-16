@@ -11,6 +11,13 @@
 #include "../Parser/SLR1Parser.h"
 #include "../Parser/reverse_evaluate.h"
 
+/**
+ * @class Regex
+ * @brief Implementa expresiones regulares para el análisis léxico.
+ * 
+ * Permite construir y manipular expresiones regulares y convertirlas en autómatas finitos deterministas (DFA).
+ */
+
 using namespace std;
 
 
@@ -92,14 +99,14 @@ public:
         }
         auto [production_ids, actions] = parser.Parse(tokens);
         //Debugg
-        std::cout << "Productions:" << std::endl;
-        for (const auto& production_id : production_ids) {
-            std::cout << grammar_.GetProduction(production_id).ToString() << std::endl;
-        }
-        std::cout << "Actions:" << std::endl;
-        for (const auto& action : actions) {
-            std::cout << action << std::endl;
-        }
+        // std::cout << "Productions:" << std::endl;
+        // for (const auto& production_id : production_ids) {
+        //     std::cout << grammar_.GetProduction(production_id).ToString() << std::endl;
+        // }
+        // std::cout << "Actions:" << std::endl;
+        // for (const auto& action : actions) {
+        //     std::cout << action << std::endl;
+        // }
         // Create a queue of productions from the production IDs
         std::queue<std::shared_ptr<AttrProd>> productions;
         for (const auto& production_id : production_ids) {

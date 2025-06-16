@@ -1,38 +1,4 @@
 {
-  type A {
-    x = 5;
-
-    setX(x: Number) => self.x := x;
-  }
-
-  type B inherits A {
-    y = 3;
-
-    getSum() => self.x + self.y;
-    setY(y:Number) => self.y :=y;
-  }
-
-  function sum(x: Number, y: Number) {
-    x + y;
-  };
-
-  let x = new A() in {
-    let y = new B() in {
-      print(y.getSum());
-      print(sum(x.x, y.getSum()));
-
-      y.setY(6);
-      y.setX(6);
-      x.setX(3);
-
-      let a = 5 in {
-        a := 3;
-        print(a);
-      };
-
-      if (y.getSum() >= 12) print("asuca" @ sin(y.x)) else print("merengue");
-
-      print(sum(x.x, y.getSum()));
-    };
-  };
+  20 + 30;
+  20 - 30;
 }

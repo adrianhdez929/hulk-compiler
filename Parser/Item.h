@@ -4,22 +4,61 @@
 #include "../Grammar/production.h"
 #include "../Automata/utils/ContainerSet.h"
 
+/**
+ * @class Item
+ * @brief Representa un ítem LR(0) para el análisis sintáctico.
+ *
+ * Un ítem es una producción con un punto (posición) que indica el avance en el reconocimiento de la producción.
+ * Se utiliza para construir autómatas LR(0), SLR(1), etc.
+ */
 class Item {
 public:
+    /**
+     * @brief Constructor de un ítem LR(0).
+     * @param production_ Producción asociada al ítem.
+     * @param pos_ Posición del punto en la producción.
+     */
     Item(std::shared_ptr<Production> production_, int pos_);//, ContainerSet<string> lookaheads_);
 
+    /**
+     * @brief Devuelve la producción asociada al ítem.
+     */
     std::shared_ptr<Production> production() const { return production_; }
+    /**
+     * @brief Devuelve la posición del punto en la producción.
+     */
     int pos() const { return pos_; }
     //const ContainerSet<string>& lookaheads() const { return lookaheads_; }
 
+    /**
+     * @brief Indica si el ítem es de reducción (el punto está al final).
+     */
     bool IsReduceItem() const;
+    /**
+     * @brief Devuelve el siguiente símbolo después del punto.
+     */
     std::shared_ptr<Symbol> NextSymbol() const;
+    /**
+     * @brief Devuelve el siguiente ítem (avanza el punto).
+     */
     std::shared_ptr<Item> NextItem() const;
     // std::vector<std::vector<string>> Preview(int skip = 1) const;
+    /**
+     * @brief Devuelve el ítem centrado (sin lookaheads).
+     */
     std::shared_ptr<Item> Center() const;
 
+    /**
+     * @brief Compara si dos ítems son iguales.
+     */
     bool operator==(std::shared_ptr<Item> other) const;
+    /**
+     * @brief Calcula el hash del ítem.
+     */
     size_t hash() const;
+    /**
+     * @brief Devuelve una representación en string del ítem.
+     */
     std::string ToString() const;
 
 

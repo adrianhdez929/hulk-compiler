@@ -77,7 +77,7 @@ std::shared_ptr<EndOfFile> Grammar::SetEndOfFile() {
     return eof;
 }
 
-static int production_counter = 0;
+int production_counter = 0;  // Contador global de producciones
 
 void Grammar::AddProduction(const Production& production) {
     // Convert Production to AttrProd with empty attributes
@@ -230,4 +230,9 @@ std::string Grammar::ToString() const {
     // }
     result += "\n";
     return result;
+}
+
+// Function to reset the production counter
+void Grammar::ResetProductionCounter() {
+    production_counter = 0;
 }

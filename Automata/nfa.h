@@ -7,6 +7,13 @@
 using namespace std;
 
 
+/**
+ * @class NFA
+ * @brief Representa un autómata finito no determinista (NFA).
+ * 
+ * Permite construir y manipular autómatas NFA para expresiones regulares y análisis léxico.
+ */
+
 #ifndef NFA_H
 #define NFA_H
 

@@ -3,6 +3,45 @@
 #include <stack>
 #include <assert.h>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
+
+// ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
+
+// Funciones auxiliares para manejo de directorios (reutilizadas del State)
+namespace {
+    std::string get_hulk_path(const std::string& filename) {
+        return "hulk/" + filename;
+    }
+
+    bool ensure_hulk_directory() {
+        try {
+            if (!std::filesystem::exists("hulk")) {
+                return std::filesystem::create_directories("hulk");
+            }
+            return true;
+        } catch (const std::exception& e) {
+            std::cerr << "Error creando directorio hulk: " << e.what() << std::endl;
+            return false;
+        }
+    }
+
+    std::string get_custom_path(const std::string& filename, const std::string& directory) {
+        return directory + "/" + filename;
+    }
+
+    bool ensure_directory(const std::string& directory) {
+        try {
+            if (!std::filesystem::exists(directory)) {
+                return std::filesystem::create_directories(directory);
+            }
+            return true;
+        } catch (const std::exception& e) {
+            std::cerr << "Error creando directorio " << directory << ": " << e.what() << std::endl;
+            return false;
+        }
+    }
+}
 
 SLR1Parser::SLR1Parser(Grammar& G, bool verbose)
     : G_(G), verbose_(verbose) {
@@ -463,4 +502,234 @@ void SLR1Parser::CleanupAutomatonStates() {
 // Destructor de SLR1Parser
 SLR1Parser::~SLR1Parser() {
     CleanupAutomatonStates();
+}
+
+// ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
+
+// Constructor privado para deserialización
+SLR1Parser::SLR1Parser(Grammar& G, 
+                       const std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& action,
+                       const std::map<std::pair<int, Symbol>, int>& goto_table,
+                       bool verbose)
+    : G_(G), verbose_(verbose), action_(action), goto_(goto_table) {
+    // Asegurar que la gramática esté aumentada para el parser deserializado
+    G_.Augment();
+    if (!G_.IsAugmented()) {
+        throw std::runtime_error("Error: No se pudo aumentar la gramática para el parser deserializado");
+    }
+    
+    // No necesitamos automaton_states_ para un parser deserializado ya que
+    // toda la información está en las tablas action_ y goto_
+}
+
+bool SLR1Parser::serialize_parser(const std::string& filename) const {
+    if (!ensure_hulk_directory()) {
+        return false;
+    }
+    return serialize_parser(filename, "hulk");
+}
+
+bool SLR1Parser::serialize_parser(const std::string& filename, const std::string& directory) const {
+    if (!ensure_directory(directory)) {
+        return false;
+    }
+    
+    std::string filepath = get_custom_path(filename, directory);
+    std::ofstream file(filepath, std::ios::binary);
+    
+    if (!file.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo para escritura: " << filepath << std::endl;
+        return false;
+    }
+    
+    try {
+        // Escribir firma del archivo
+        const char* signature = "SLR1PARSER";
+        file.write(signature, 10);
+        
+        // Escribir versión
+        uint32_t version = 1;
+        file.write(reinterpret_cast<const char*>(&version), sizeof(version));
+        
+        // Escribir flag verbose_
+        file.write(reinterpret_cast<const char*>(&verbose_), sizeof(verbose_));
+        
+        // Serializar tabla action_
+        size_t action_size = action_.size();
+        file.write(reinterpret_cast<const char*>(&action_size), sizeof(action_size));
+        
+        for (const auto& [key, value] : action_) {
+            // Escribir key: pair<int, Symbol>
+            file.write(reinterpret_cast<const char*>(&key.first), sizeof(key.first));
+            
+            // Escribir Symbol (nombre y tipo)
+            std::string symbol_name = key.second.Name();
+            size_t name_length = symbol_name.length();
+            file.write(reinterpret_cast<const char*>(&name_length), sizeof(name_length));
+            file.write(symbol_name.c_str(), name_length);
+            
+            bool is_terminal = key.second.IsTerminal();
+            file.write(reinterpret_cast<const char*>(&is_terminal), sizeof(is_terminal));
+            
+            // Escribir value: pair<string, int>
+            std::string action_type = value.first;
+            size_t action_length = action_type.length();
+            file.write(reinterpret_cast<const char*>(&action_length), sizeof(action_length));
+            file.write(action_type.c_str(), action_length);
+            
+            file.write(reinterpret_cast<const char*>(&value.second), sizeof(value.second));
+        }
+        
+        // Serializar tabla goto_
+        size_t goto_size = goto_.size();
+        file.write(reinterpret_cast<const char*>(&goto_size), sizeof(goto_size));
+        
+        for (const auto& [key, value] : goto_) {
+            // Escribir key: pair<int, Symbol>
+            file.write(reinterpret_cast<const char*>(&key.first), sizeof(key.first));
+            
+            // Escribir Symbol
+            std::string symbol_name = key.second.Name();
+            size_t name_length = symbol_name.length();
+            file.write(reinterpret_cast<const char*>(&name_length), sizeof(name_length));
+            file.write(symbol_name.c_str(), name_length);
+            
+            bool is_terminal = key.second.IsTerminal();
+            file.write(reinterpret_cast<const char*>(&is_terminal), sizeof(is_terminal));
+            
+            // Escribir value: int
+            file.write(reinterpret_cast<const char*>(&value), sizeof(value));
+        }
+        
+        file.close();
+        std::cout << "Parser serializado exitosamente en: " << filepath << std::endl;
+        return true;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error durante la serialización del parser: " << e.what() << std::endl;
+        file.close();
+        return false;
+    }
+}
+
+SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, Grammar& grammar) {
+    return deserialize_parser(filename, "hulk", grammar);
+}
+
+SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const std::string& directory, Grammar& grammar) {
+    std::string filepath = get_custom_path(filename, directory);
+    std::ifstream file(filepath, std::ios::binary);
+    
+    if (!file.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo para lectura: " << filepath << std::endl;
+        return nullptr;
+    }
+    
+    try {
+        // Verificar firma
+        char signature[11] = {0};
+        file.read(signature, 10);
+        if (std::string(signature) != "SLR1PARSER") {
+            std::cerr << "Error: Archivo no es un parser serializado válido" << std::endl;
+            file.close();
+            return nullptr;
+        }
+        
+        // Leer versión
+        uint32_t version;
+        file.read(reinterpret_cast<char*>(&version), sizeof(version));
+        if (version != 1) {
+            std::cerr << "Error: Versión de parser no soportada: " << version << std::endl;
+            file.close();
+            return nullptr;
+        }
+        
+        // Leer flag verbose_
+        bool verbose;
+        file.read(reinterpret_cast<char*>(&verbose), sizeof(verbose));
+        
+        // Deserializar tabla action_
+        std::map<std::pair<int, Symbol>, std::pair<std::string, int>> action;
+        size_t action_size;
+        file.read(reinterpret_cast<char*>(&action_size), sizeof(action_size));
+        
+        for (size_t i = 0; i < action_size; ++i) {
+            // Leer key
+            int state_id;
+            file.read(reinterpret_cast<char*>(&state_id), sizeof(state_id));
+            
+            // Leer Symbol
+            size_t name_length;
+            file.read(reinterpret_cast<char*>(&name_length), sizeof(name_length));
+            std::string symbol_name(name_length, '\0');
+            file.read(&symbol_name[0], name_length);
+            
+            bool is_terminal;
+            file.read(reinterpret_cast<char*>(&is_terminal), sizeof(is_terminal));
+            
+            // Buscar el símbolo en la gramática
+            auto symbol_ptr = grammar.GetSymbol(symbol_name);
+            if (!symbol_ptr) {
+                std::cerr << "Error: Símbolo no encontrado en gramática: " << symbol_name << std::endl;
+                file.close();
+                return nullptr;
+            }
+            
+            // Leer value
+            size_t action_length;
+            file.read(reinterpret_cast<char*>(&action_length), sizeof(action_length));
+            std::string action_type(action_length, '\0');
+            file.read(&action_type[0], action_length);
+            
+            int action_value;
+            file.read(reinterpret_cast<char*>(&action_value), sizeof(action_value));
+            
+            action[{state_id, *symbol_ptr}] = {action_type, action_value};
+        }
+        
+        // Deserializar tabla goto_
+        std::map<std::pair<int, Symbol>, int> goto_table;
+        size_t goto_size;
+        file.read(reinterpret_cast<char*>(&goto_size), sizeof(goto_size));
+        
+        for (size_t i = 0; i < goto_size; ++i) {
+            // Leer key
+            int state_id;
+            file.read(reinterpret_cast<char*>(&state_id), sizeof(state_id));
+            
+            // Leer Symbol
+            size_t name_length;
+            file.read(reinterpret_cast<char*>(&name_length), sizeof(name_length));
+            std::string symbol_name(name_length, '\0');
+            file.read(&symbol_name[0], name_length);
+            
+            bool is_terminal;
+            file.read(reinterpret_cast<char*>(&is_terminal), sizeof(is_terminal));
+            
+            // Buscar el símbolo en la gramática
+            auto symbol_ptr = grammar.GetSymbol(symbol_name);
+            if (!symbol_ptr) {
+                std::cerr << "Error: Símbolo no encontrado en gramática: " << symbol_name << std::endl;
+                file.close();
+                return nullptr;
+            }
+            
+            // Leer value
+            int goto_value;
+            file.read(reinterpret_cast<char*>(&goto_value), sizeof(goto_value));
+            
+            goto_table[{state_id, *symbol_ptr}] = goto_value;
+        }
+        
+        file.close();
+        std::cout << "Parser deserializado exitosamente desde: " << filepath << std::endl;
+        
+        // Crear nuevo parser con las tablas deserializadas
+        return new SLR1Parser(grammar, action, goto_table, verbose);
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error durante la deserialización del parser: " << e.what() << std::endl;
+        file.close();
+        return nullptr;
+    }
 }

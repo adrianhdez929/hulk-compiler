@@ -1,10 +1,16 @@
-
 #include <string>
 #include <vector>
 #include <memory>
 
 #ifndef SYMBOL_H
 #define SYMBOL_H
+
+/**
+ * @class Symbol
+ * @brief Representa un símbolo de una gramática (terminal o no terminal).
+ * 
+ * Clase base para todos los símbolos usados en la definición de gramáticas.
+ */
 
 class Grammar;
 class Sentence;
@@ -44,6 +50,12 @@ class Symbol : public std::enable_shared_from_this<Symbol> {
 
 class Terminal : public Symbol {
     public:
+        /**
+         * @class Terminal
+         * @brief Representa un símbolo terminal de la gramática.
+         * 
+         * Los terminales son los símbolos que aparecen en la entrada (tokens).
+         */
         Terminal(const std::string& name, Grammar& grammar);
         bool IsTerminal() const override;
 };

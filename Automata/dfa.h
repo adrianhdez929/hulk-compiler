@@ -1,10 +1,16 @@
-
 #include <string>
 #include <stdexcept>
 #include "nfa.h"
 
 using namespace std;
 
+
+/**
+ * @class DFA
+ * @brief Representa un autómata finito determinista (DFA), derivado de NFA.
+ * 
+ * Se utiliza para el análisis léxico y la conversión de NFA a DFA.
+ */
 
 #ifndef DFA_H
 #define DFA_H

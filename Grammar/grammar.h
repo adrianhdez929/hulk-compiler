@@ -12,20 +12,32 @@
 
 using namespace std;
 
-// class Terminal;
-// class NonTerminal;
+/**
+ * @class Epsilon
+ * @brief Representa el símbolo épsilon (cadena vacía) en la gramática.
+ */
 class Epsilon : public Symbol {
     public:
         Epsilon(Grammar& grammar);
         bool IsEpsilon() const override;
 };
 
+/**
+ * @class EndOfFile
+ * @brief Representa el símbolo de fin de archivo (EOF) en la gramática.
+ */
 class EndOfFile : public Terminal {
     public:
         EndOfFile(Grammar& grammar);
         bool IsEndOfFile() const override;
 };
 
+/**
+ * @class Grammar
+ * @brief Representa una gramática formal, con sus símbolos, producciones y reglas.
+ * 
+ * Permite definir terminales, no terminales, producciones y obtener información sobre la gramática.
+ */
 class Grammar {
     public:
         Grammar();
@@ -80,6 +92,7 @@ class Grammar {
         // using ProductionVariant = std::variant<Production, AttrProd>;
         void AddProduction(const AttrProd& production);
         void AddProduction(const Production& production);
+        static void ResetProductionCounter();  // Función para resetear el contador
         // const std::vector<ProductionVariant>& Productions() const;
         // const std::vector<Production>& Productions() const;
         const std::vector<AttrProd>& Productions() const;

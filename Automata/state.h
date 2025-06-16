@@ -5,11 +5,22 @@
 #include <memory>
 #include <unordered_set>
 #include <queue>
+#include <fstream>
+#include <iostream>
+#include <unordered_map>
+#include <cstdlib>
 #include "nfa.h"
 #include "../Parser/Item.h"
 
 #ifndef STATE_H
 #define STATE_H
+
+/**
+ * @class State
+ * @brief Representa un estado de un autómata finito (DFA/NFA), este ultimo definido como una serie de estados enlazados.
+ * 
+ * Contiene transiciones, información de aceptación y métodos para manipulación de autómatas.
+ */
 
 class State {
 public:
@@ -91,6 +102,43 @@ public:
         return all_states;
     }
     const int get_n() const { return n_; }
+
+    // Métodos de Serialización
+    struct SerializedState {
+        int id;
+        bool is_final;
+        std::string tag;
+        int n;
+        std::map<std::string, std::vector<int>> transitions; // symbol -> vector of state IDs
+        std::set<int> epsilon_transitions; // set of state IDs
+    };
+    
+    struct SerializedAutomaton {
+        int start_state_id;
+        std::vector<SerializedState> states;
+    };
+    
+    // Serializar el autómata completo a un archivo
+    bool serialize_to_file(const std::string& filename) const;
+    
+    // Deserializar un autómata desde un archivo
+    static State* deserialize_from_file(const std::string& filename);
+    
+    // Métodos con carpeta personalizada
+    bool serialize_to_file(const std::string& filename, const std::string& directory) const;
+    static State* deserialize_from_file(const std::string& filename, const std::string& directory);
+    
+    // Métodos auxiliares para serialización
+    SerializedAutomaton serialize_automaton() const;
+    static State* deserialize_automaton(const SerializedAutomaton& serialized);
+    
+    // Método auxiliar para crear la ruta completa en la carpeta hulk
+    static std::string get_hulk_path(const std::string& filename);
+    static bool ensure_hulk_directory();
+    
+    // Métodos auxiliares para carpetas personalizadas
+    static std::string get_custom_path(const std::string& filename, const std::string& directory);
+    static bool ensure_directory(const std::string& directory);
 
 private:
     int id_;
