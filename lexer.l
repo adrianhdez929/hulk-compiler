@@ -1,12 +1,17 @@
 %{
 #include "parser.tab.h"
 #include <stdlib.h>
-extern "C"  {
+
+extern "C" {
 	int yylex(void);
 	void yyerror(const char *);
-} 
+}
+
+extern int yylineno;
 
 %}
+
+%option yylineno
 
 %%
 
@@ -53,6 +58,13 @@ extern "C"  {
 "<"			{ return LESS; }
 "=="		{ return EQUAL; }
 "!=" 		{ return DISTINCT; }
+"&" 		{ return AND_; }
+"|" 		{ return OR_; }
+"!" 		{ return NOT_; }
+
+"@" 		{ return ARROBA_; }
+"@@" 		{ return D_ARROBA_; }
+
 "."			{ return ACCESS; }
 
 [ \t\n]     ; /* skip whitespace */

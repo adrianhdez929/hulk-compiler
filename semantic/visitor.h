@@ -1,6 +1,8 @@
 #include "context.h"
 #include <stdexcept>
 #include <memory>
+#include <vector>
+#include <iostream>
 
 #ifndef VISITOR_H
 #define VISITOR_H
@@ -34,6 +36,7 @@ class AccessNode;
 class TypeAssMember;
 class AttributeMember;
 class MethodMember;
+class TypeCastNode;
 
 class Visitor {
     public:
@@ -66,6 +69,7 @@ class Visitor {
 	virtual void visit(TypeAssMember* node, Context* context) = 0;
 	virtual void visit(AttributeMember* node, Context* context) = 0;
 	virtual void visit(MethodMember* node, Context* context) = 0;
+	virtual void visit(TypeCastNode* node, Context* context) = 0;
 
 };
 
@@ -120,23 +124,82 @@ class SemanticCheckerVisitor : public Visitor {
     void visit(TypeAssMember* node, Context* context) override;
     void visit(AttributeMember* node, Context* context) override;
     void visit(MethodMember* node, Context* context) override;
+    void visit(TypeCastNode* node, Context* context) override;
     
     Context* getContext() { return globalContext; }
     
-    void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation) {
+    // Error collection methods
+    void addError(const std::string& error) {
+        errors.push_back(error);
+    }
+    
+    bool hasErrors() const {
+        return !errors.empty();
+    }
+    
+    const std::vector<std::string>& getErrors() const {
+        return errors;
+    }
+    
+    void printErrors() const {
+        if (hasErrors()) {
+            std::cout << "\n=== SEMANTIC ERRORS ===" << std::endl;
+            for (size_t i = 0; i < errors.size(); i++) {
+                std::cout << "Error " << (i + 1) << ": " << errors[i] << std::endl;
+            }
+            std::cout << "\nTotal errors found: " << errors.size() << std::endl;
+        } else {
+            std::cout << "Semantic analysis completed successfully with no errors." << std::endl;
+        }
+    }
+    
+    void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation, int line) {
         if (!expected || !actual) return;
         
         if (!globalContext->canAssign(actual, expected)) {
-            throw std::runtime_error("Type error in " + operation + ": Cannot assign " + 
-                                   actual->name + " to " + expected->name);
+            addError("Type error in " + operation + " in line "+ std::to_string(line) +" : Cannot operate " + 
+                    actual->name + " to " + expected->name);
         }
+    }
+    
+    void checkFunctionSignature(const std::string& funcName, 
+                               const std::vector<std::shared_ptr<TypeInfo>>& expectedParamTypes,
+                               const std::vector<std::shared_ptr<TypeInfo>>& actualParamTypes) {
+        if (expectedParamTypes.size() != actualParamTypes.size()) {
+            addError("Function '" + funcName + "' expects " + 
+                    std::to_string(expectedParamTypes.size()) + " parameters, got " +
+                    std::to_string(actualParamTypes.size()));
+            return;
+        }
+        
+        for (size_t i = 0; i < expectedParamTypes.size(); i++) {
+            if (!globalContext->canAssign(actualParamTypes[i], expectedParamTypes[i])) {
+                addError("Function '" + funcName + "' parameter " + std::to_string(i+1) + 
+                        " expects type '" + expectedParamTypes[i]->name + 
+                        "', got '" + actualParamTypes[i]->name + "'");
+            }
+        }
+    }
+    
+    bool isRecursiveCall(const std::string& funcName, Context* functionContext) {
+        // Simple check for direct recursive calls
+        // In a more sophisticated implementation, this would check the call stack
+        return funcName == getCurrentFunctionName(functionContext);
+    }
+    
+    std::string getCurrentFunctionName(Context* context) {
+        // This is a placeholder - in a real implementation, 
+        // the context would track the current function being analyzed
+        return "unknown";
     }
     
     std::shared_ptr<TypeInfo> inferBinaryOperationType(const std::string& op, 
                                                       std::shared_ptr<TypeInfo> leftType, 
                                                       std::shared_ptr<TypeInfo> rightType) {
         if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^") {
-            return Context::intType;
+            return Context::numberType;
+        } else if (op == "@") {
+            return Context::stringType;
         } else if (op == "==" || op == "!=" || op == "<" || op == ">" || op == "<=" || op == ">=" ||
                    op == "&&" || op == "||" || op == "and" || op == "or") {
             return Context::boolType;
@@ -146,8 +209,16 @@ class SemanticCheckerVisitor : public Visitor {
         return Context::voidType;
     }
     
+    // Type inference helper methods - implemented in .cpp file
+    std::shared_ptr<TypeInfo> inferReturnType(ASTNode* body, Context* functionContext);
+    std::shared_ptr<TypeInfo> inferBlockReturnType(BlockNode* block, Context* functionContext);
+    std::shared_ptr<TypeInfo> inferConditionalReturnType(Conditional* cond, Context* functionContext);
+    
 private:
     Context* globalContext;
+    bool inMethodContext = false;
+    std::shared_ptr<TypeDef> currentTypeDef = nullptr;
+    std::vector<std::string> errors; // Store semantic errors
 };
 
 #endif

@@ -45,6 +45,7 @@ class CodegenVisitor : public Visitor {
 	void visit(TypeAssMember* node, Context* context) override;
 	void visit(AttributeMember* node, Context* context) override;
 	void visit(MethodMember* node, Context* context) override;
+	void visit(TypeCastNode* node, Context* context) override;
 
     void initialize();
     void optimize();
@@ -60,7 +61,25 @@ class CodegenVisitor : public Visitor {
     std::map<std::string, llvm::StructType*> typeStructMap;
     std::map<std::string, std::vector<std::string>> typeAttributeMap;
     std::map<std::string, llvm::Value*> objectInstances;
-    std::map<std::string, std::string> objectTypes; 
+    std::map<std::string, std::string> objectTypes;
+    // Add attribute type map for struct fields
+    typedef std::map<std::string, llvm::Type*> AttributeTypeMap;
+    std::map<std::string, AttributeTypeMap> typeAttributeTypeMap; 
+    // Add inheritance map to track type hierarchies
+    std::map<std::string, std::string> typeInheritanceMap; // child -> parent
+    // Add method tracking map to track methods per type
+    std::map<std::string, std::vector<std::string>> typeMethodMap; // type -> methods 
+    // Map to store default values for each attribute in each type
+    // Store raw values instead of LLVM Values to avoid context issues
+    struct DefaultValue {
+        enum Type { DOUBLE, STRING } type;
+        double doubleVal;
+        std::string stringVal;
+        DefaultValue() : type(DOUBLE), doubleVal(0.0) {} // Default constructor
+        DefaultValue(double val) : type(DOUBLE), doubleVal(val) {}
+        DefaultValue(const std::string& val) : type(STRING), stringVal(val) {}
+    };
+    std::map<std::string, std::map<std::string, DefaultValue>> typeDefaultValuesMap;
     
     void createStandardLibraryDeclarations();
     llvm::Function* createMainFunction();
@@ -71,6 +90,10 @@ class CodegenVisitor : public Visitor {
                                  const std::string& methodName, llvm::StructType* structType);
     
     void handleAssignment(BinOpNode* node, Context* context);
+    void handleStringConcatenation(llvm::Value* leftValue, llvm::Value* rightValue, BinOpNode* node, Context* context, bool space);
+    
+    // Helper method to check inheritance relationships
+    bool isSubtypeOf(const std::string& childType, const std::string& parentType);
 };
 
 #endif
