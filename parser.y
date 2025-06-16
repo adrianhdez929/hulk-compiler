@@ -47,15 +47,17 @@ extern ASTNode* root;
 %token NUMBER
 %token BOOLEAN
 %token STRING
+
 %token ID_ 
 %token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION_ INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS_ 
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_ ARROBA_ D_ARROBA_
+
 %token LET
 %token IN
 %token TYPE
 
 %token <num> NUMBER
-%token <str> ID_
+%token <str> ID
 %token <str> STRING
 %token <boolean> BOOLEAN
 
@@ -183,7 +185,7 @@ expr_list:
 	;
 
 func_call:
-	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3, yylineno); }
+	ID LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3); }
 	;
 
 arit_op:
@@ -210,7 +212,6 @@ bool_expr:
 	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2, yylineno), yylineno); }
 	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
 	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
-	;
 
 conditional:
 	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
