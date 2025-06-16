@@ -5,17 +5,17 @@
 #include "semantic/type_collector_visitor.h"
 #include "semantic/symbol_collector_visitor.h"
 #include "semantic/context.h"
-#include "codegen/visitor.h"
+// #include "codegen/visitor.h"
 #include <iostream>
 #include <exception>
-// #include "test.h"
+#include "test.h"
 
 using namespace std;
-// using namespace manipulation;
+// // using namespace manipulation;
 
-extern FILE *yyin;
-extern int yyparse();
-ASTNode* root = nullptr;
+// extern FILE *yyin;
+// extern int yyparse();
+// ASTNode* root = nullptr;
 
 // Create the new two-pass semantic analysis system
 TypeCollectorVisitor* typeCollectorVisitor = new TypeCollectorVisitor();
@@ -25,36 +25,34 @@ CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
     //run tests
-    // execute_test();
+    execute_test();
     
-    const char* filename = "script.txt"; //default
+    // const char* filename = "script.txt"; //default
 
-    if (argc > 1) {
-		filename = argv[1];
-    }
+    // if (argc > 1) {
+	// 	filename = argv[1];
+    // }
 		
-	yyin = fopen(filename, "r");
+	// yyin = fopen(filename, "r");
 
-	if (!yyin) {
-		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-		return 1;
-	}
+	// if (!yyin) {
+	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+	// 	return 1;
+	// }
 
-    yyparse();
+    // yyparse();
 
-	if (root) {
-		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-		root->print();
-
+	// if (root) {
+	// 	std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+	// 	root->print();
         std::cout << "\n=== Starting Two-Pass Semantic Analysis ===" << std::endl;
         
         // Create a global context for semantic analysis (with null parent for root context)
         Context* globalContext = new Context(nullptr);
-        
-        // Define built-in functions and variables
-        globalContext->define("print", 1);  // print function takes 1 argument
-        globalContext->define("pi");         // pi constant (variable)
-        
+       
+    //     // Define built-in functions and variables
+    //     globalContext->define("print", 1);  // print function takes 1 argument
+    //     globalContext->define("pi");         // pi constant (variable)
         // PASS 1: Type Collection
         std::cout << "\n--- Pass 1: Collecting Type Definitions ---" << std::endl;
         root->accept(typeCollectorVisitor, globalContext);
@@ -147,20 +145,19 @@ int main(int argc, char* argv[]) {
         // Initialize the codegen visitor
         codegenVisitor->initialize();
         
-        // Set the root node and context
-        codegenVisitor->setRootNode(root, globalContext);
+    //     // Set the root node and context
+    //     codegenVisitor->setRootNode(root, globalContext);
         
-        // Generate and execute code
-        codegenVisitor->generateCode();
-        std::cout << "Code generation completed." << std::endl;
-
+    //     // Generate and execute code
+    //     codegenVisitor->generateCode();
+    //     std::cout << "Code generation completed." << std::endl;
         // Clean up
         delete symbolCollectorVisitor;
         delete globalContext;
-		delete root;
+		    delete root;
 	}
 
-	fclose(yyin);
+	// fclose(yyin);
 
     return 0;
 }

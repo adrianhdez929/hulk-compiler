@@ -20,6 +20,33 @@
 #include "Lexer/Regex.h"
 #include "Lexer/Lexer.h"
 
+int test_grammar() {
+    // Crear una gramática
+    Grammar g;
+    // Definir símbolos
+    auto S = g.SetNonTerminal("S", true);
+    auto A = g.SetNonTerminal("A");
+    auto B = g.SetNonTerminal("B");
+    auto a = g.SetTerminal("a");
+    auto b = g.SetTerminal("b");
+    
+    // Definir producciones
+    g.AddProduction(AttrProd(S, Sentence({A, B}), [](const std::vector<ElementType>& args) -> ElementType {
+        return std::make_shared<UnionNode>(std::get<std::shared_ptr<Node>>(args[0]), std::get<std::shared_ptr<Node>>(args[1]));
+    }));
+    g.AddProduction(AttrProd(A, Sentence(a), [](const std::vector<ElementType>& args) -> ElementType {
+        return std::make_shared<SymbolNode>(std::get<std::string>(args[0]));
+    }));
+    g.AddProduction(AttrProd(B, Sentence(b), [](const std::vector<ElementType>& args) -> ElementType {
+        return std::make_shared<SymbolNode>(std::get<std::string>(args[0]));
+    }));
+
+    // Imprimir la gramática
+    std::cout << "Grammar:\n" << g.ToString() << std::endl;
+    
+    return 0;
+}
+
 int Item_test() {
     // Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
     // // Crear un objeto Production
@@ -827,12 +854,12 @@ int execute_all_tests() {
 }
 
 int execute_test() {
-    lexer_ast_test();
+    // lexer_ast_test();
     // test_parser();
     // test_grammar();
     // execute_all_tests();
     // lexer_node_test();
-    // grammar_test();
+    test_grammar();
     // Item_test();
     return 0; 
 }

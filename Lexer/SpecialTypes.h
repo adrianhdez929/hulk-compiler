@@ -3,19 +3,21 @@
 #include <memory>
 
 class SymbolNode;
-class UnionNode;
-class ConcatNode;
-class StringClassNode;
-class RangeNode;
-class ClosureNode;
-class PositiveClosure;
-class ZeroOrOneNode;
-class EpsilonNode;
+// class UnionNode;
+// class ConcatNode;
+// class StringClassNode;
+// class RangeNode;
+// class ClosureNode;
+// class PositiveClosure;
+// class ZeroOrOneNode;
+// class EpsilonNode;
 class Node;
+class ASTNode;
 
 using ElementType = std::variant<
     std::string,
-    std::shared_ptr<Node>
+    std::shared_ptr<Node>,
+    ASTNode*
 >;
             // std::shared_ptr<SymbolNode>,
         // std::shared_ptr<UnionNode>,
