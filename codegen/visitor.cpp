@@ -203,7 +203,7 @@ void CodegenVisitor::createStandardLibraryDeclarations() {
         TheModule.get()
     );
     
-    std::cout << "Standard library function declarations created." << std::endl;
+    // std::cout << "Standard library function declarations created." << std::endl;
 }
 
 // funcion main
@@ -223,7 +223,7 @@ llvm::Function* CodegenVisitor::createMainFunction() {
     llvm::BasicBlock* BB = llvm::BasicBlock::Create(*TheContext, "entry", mainFunc);
     Builder->SetInsertPoint(BB);
     
-    std::cout << "Main function created." << std::endl;
+    // std::cout << "Main function created." << std::endl;
     return mainFunc;
 }
 
@@ -240,7 +240,7 @@ void CodegenVisitor::initialize() {
     // funcion main
     llvm::Function* mainFunc = createMainFunction();
     
-    std::cout << "LLVM and JIT initialized. Main function created." << std::endl;
+    // std::cout << "LLVM and JIT initialized. Main function created." << std::endl;
 }
 
 void CodegenVisitor::visit(ASTNode* node, Context* context) {
@@ -1973,7 +1973,7 @@ void CodegenVisitor::visit(AccessNode* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
     
-    std::cout << "Generating code for AccessNode: " << node->var_name << " accessing member" << std::endl;
+    // std::cout << "Generating code for AccessNode: " << node->var_name << " accessing member" << std::endl;
     
     auto it = NamedValues.find(node->var_name);
     if (it == NamedValues.end()) {
@@ -1986,7 +1986,7 @@ void CodegenVisitor::visit(AccessNode* node, Context* context) {
         if (allocaInst->getAllocatedType()->isPointerTy()) {
             objectPtr = Builder->CreateLoad(allocaInst->getAllocatedType(), objectPtr, 
                                           node->var_name + "_loaded");
-            std::cout << "Loaded object pointer from alloca for " << node->var_name << std::endl;
+            // std::cout << "Loaded object pointer from alloca for " << node->var_name << std::endl;
         }
     }
     
@@ -1995,15 +1995,15 @@ void CodegenVisitor::visit(AccessNode* node, Context* context) {
     
     node->member->accept(this, context);
     
-    std::cout << "CodeGen: AccessNode processed for " << node->var_name << std::endl;
+    // std::cout << "CodeGen: AccessNode processed for " << node->var_name << std::endl;
 }
 
 void CodegenVisitor::visit(TypeAssMember* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
     }
-    std::cout << "Generating code for TypeAssMember: " << node->get_name() << std::endl;
-    std::cout << "CodeGen: TypeAssMember processed (placeholder)" << std::endl;
+    // std::cout << "Generating code for TypeAssMember: " << node->get_name() << std::endl;
+    // std::cout << "CodeGen: TypeAssMember processed (placeholder)" << std::endl;
 }
 
 void CodegenVisitor::visit(AttributeMember* node, Context* context) {
@@ -2011,7 +2011,7 @@ void CodegenVisitor::visit(AttributeMember* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
     
-    std::cout << "Generating code for AttributeMember: " << node->name << std::endl;
+    // std::cout << "Generating code for AttributeMember: " << node->name << std::endl;
     
     if (!currentObjectPtr) {
         throw std::runtime_error("No current object for attribute access: " + node->name);
@@ -2047,7 +2047,7 @@ void CodegenVisitor::visit(AttributeMember* node, Context* context) {
     
     currentValue = fieldValue;
     
-    std::cout << "CodeGen: AttributeMember '" << node->name << "' accessed successfully" << std::endl;
+    // std::cout << "CodeGen: AttributeMember '" << node->name << "' accessed successfully" << std::endl;
 }
 
 void CodegenVisitor::visit(MethodMember* node, Context* context) {
@@ -2055,7 +2055,7 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
     
-    std::cout << "Generating code for MethodMember: " << node->name << std::endl;
+    // std::cout << "Generating code for MethodMember: " << node->name << std::endl;
     
     if (!currentObjectPtr) {
         throw std::runtime_error("No current object for method call: " + node->name);
@@ -2081,7 +2081,7 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
     std::string returnTypeStr;
     llvm::raw_string_ostream typeStream(returnTypeStr);
     returnType->print(typeStream);
-    std::cout << "DEBUG: Method '" << node->name << "' return type: " << typeStream.str() << std::endl;
+    // std::cout << "DEBUG: Method '" << node->name << "' return type: " << typeStream.str() << std::endl;
     
     std::vector<llvm::Value*> args;
     args.push_back(currentObjectPtr);
@@ -2097,10 +2097,10 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
     
     // Store the method's return type if needed for future type checking
     if (returnType->isPointerTy()) {
-        std::cout << "DEBUG: Method returns a pointer type (likely a String)" << std::endl;
+        // std::cout << "DEBUG: Method returns a pointer type (likely a String)" << std::endl;
     }
     
-    std::cout << "CodeGen: MethodMember '" << node->name << "' called successfully" << std::endl;
+    // std::cout << "CodeGen: MethodMember '" << node->name << "' called successfully" << std::endl;
 }
 
 void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignFuncNode* method, 
@@ -2368,13 +2368,13 @@ void CodegenVisitor::generateForwardingMethod(const std::string& childTypeName, 
     // Return the result
     builder.CreateRet(result);
     
-    std::cout << "Generated forwarding method: " << childMethodName << " -> " << parentMethodName << std::endl;
+    // std::cout << "Generated forwarding method: " << childMethodName << " -> " << parentMethodName << std::endl;
 }
 
 // Moved these maps to class members in visitor.h
 
 void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
-    std::cout << "Handling assignment operation: " << node->op << std::endl;
+    // std::cout << "Handling assignment operation: " << node->op << std::endl;
     
     // Process the right side of the assignment first
     node->right->accept(this, context);
@@ -2442,7 +2442,7 @@ void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
             Builder->CreateStore(valueToStore, it->second);
             currentValue = valueToStore;
             
-            std::cout << "Variable '" << idNode->id_name << "' reassigned" << std::endl;
+            // std::cout << "Variable '" << idNode->id_name << "' reassigned" << std::endl;
         } else {
             throw std::runtime_error("Variable '" + idNode->id_name + "' not found or not assignable");
         }
@@ -2450,7 +2450,7 @@ void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
         throw std::runtime_error("Unsupported assignment target");
     }
     
-    std::cout << "Assignment operation completed" << std::endl;
+    // std::cout << "Assignment operation completed" << std::endl;
 }
 
 void CodegenVisitor::handleStringConcatenation(llvm::Value* leftValue, llvm::Value* rightValue, BinOpNode* node, Context* context, bool space) {
@@ -2591,7 +2591,7 @@ void CodegenVisitor::visit(TypeCastNode* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
     
-    std::cout << "Generating code for TypeCastNode: casting to " << node->target_type << std::endl;
+    // std::cout << "Generating code for TypeCastNode: casting to " << node->target_type << std::endl;
     
     // Generate code for the expression being cast
     node->expr->accept(this, context);
@@ -2608,7 +2608,7 @@ void CodegenVisitor::visit(TypeCastNode* node, Context* context) {
             // Cast the pointer to the target type
             llvm::Type* targetPtrType = llvm::PointerType::get(targetStruct, 0);
             currentValue = Builder->CreateBitCast(sourceValue, targetPtrType, "type_cast");
-            std::cout << "Generated pointer cast for inheritance" << std::endl;
+            // std::cout << "Generated pointer cast for inheritance" << std::endl;
         } else {
             throw std::runtime_error("CodeGen error: Cannot cast non-pointer value to custom type");
         }
@@ -2631,11 +2631,11 @@ void CodegenVisitor::visit(TypeCastNode* node, Context* context) {
         } else {
             // Default case - assume the cast is valid and pass through
             currentValue = sourceValue;
-            std::cout << "Generated identity cast for type " << node->target_type << std::endl;
+            // std::cout << "Generated identity cast for type " << node->target_type << std::endl;
         }
     }
     
-    std::cout << "Type cast code generation completed" << std::endl;
+    // std::cout << "Type cast code generation completed" << std::endl;
 }
 
 bool CodegenVisitor::isSubtypeOf(const std::string& childType, const std::string& parentType) {

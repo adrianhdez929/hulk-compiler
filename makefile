@@ -1,11 +1,11 @@
 CC = clang++
 LEX = flex
 YACC = bison
-CFLAGS = -Wall -std=c++11 -fexceptions
+CFLAGS = -Wall -std=c++17 -fexceptions
 
 LLVM_CONFIG=llvm-config-15
 
-CXXFLAGS=$(shell $(LLVM_CONFIG) --cxxflags) -fexceptions
+CXXFLAGS=$(shell $(LLVM_CONFIG) --cxxflags | sed 's/-std=c++[0-9][0-9]/-std=c++17/') -fexceptions
 LDFLAGS=`$(LLVM_CONFIG) --ldflags --libs all`
 
 SRC_DIR = .
