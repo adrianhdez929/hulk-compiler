@@ -25,11 +25,12 @@ class Visitor;
 class ASTNode {
 public:
 	// Semantic attributes for attributed grammar
-	int line;
+	
+	int line; // Número de línea de origen del nodo
 	std::shared_ptr<TypeInfo> inferredType;
 	std::string semanticValue;
 	
-	ASTNode() : inferredType(nullptr), semanticValue("") {}
+	ASTNode() : inferredType(nullptr), semanticValue(""), line(0) {}
 	ASTNode(int line_) : inferredType(nullptr), semanticValue(""), line(line_) {}
 	virtual ~ASTNode() = default;
 	
@@ -39,7 +40,6 @@ public:
 
 class ASTNodeVector : public ASTNode { 
 public:
-	int line;
 	std::vector<ASTNode*> children;
 
 	ASTNodeVector(const std::vector<ASTNode*>& nodes, int line_);
@@ -88,7 +88,7 @@ public:
 
 class StringNode : public ASTNode {
 public:
-	int line;
+	
     std::string value;
     StringNode(const std::string& v, int line_);
     void print(int indent = 0) const override;
@@ -98,7 +98,6 @@ public:
 
 class UnaryOpNode : public ASTNode {
 public:
-	int line;
     std::string op;
     ASTNode* node;
 
@@ -110,7 +109,7 @@ public:
 
 class BinOpNode : public ASTNode {
 public:
-	int line;
+	
     std::string op;
     ASTNode* left;
     ASTNode* right;
@@ -123,7 +122,7 @@ public:
 
 class FunctionCallNode : public ASTNode {
 public:
-	int line;
+	
 	std::string func_name;
 	ASTNode* argument;
 
@@ -134,7 +133,7 @@ public:
 
 class IDNode : public ASTNode {
 public:
-	int line;
+	
 	std::string id_name;
 	std::string id_type;
 	IDNode(const std::string& name, int line_);
@@ -145,7 +144,7 @@ public:
 
 class BlockNode : public ASTNode {
 public:
-	int line;
+	
 	std::vector<ASTNode*> children;
 
 	BlockNode(const std::vector<ASTNode*>& node, int line_);
@@ -157,7 +156,7 @@ public:
 
 class ArgsList: public ASTNode { // lista de IDNode solamente
 public:
-	int line;
+	
 	std::vector<IDNode*> children;
 
 	ArgsList(const std::vector<IDNode*>& nodes, int line_);
@@ -169,7 +168,7 @@ public:
 
 class ExprsList : public ASTNode {
 public:
-	int line;
+	
 	std::vector<ASTNode*> children;
 
 	ExprsList(const std::vector<ASTNode*>& nodes, int line_);
@@ -181,7 +180,7 @@ public:
 
 class AssignFuncNode: public ASTNode {
 public:
-	int line;
+	
 	std::string func_name;
 	ArgsList* args;
 	ASTNode* body;
@@ -195,7 +194,7 @@ public:
 
 class VarAssign: public ASTNode {
 public:
-	int line;
+	
 	IDNode* var_id;
 	ASTNode* value;
 	std::string treated_as_type;
@@ -207,7 +206,7 @@ public:
 };
 class NewTypeNode : public ASTNode {
 public:
-	int line;
+	
 	std::string id_type_name;
 	std::vector<ASTNode*> expr_list;
 
@@ -218,7 +217,7 @@ public:
 
 class VarAssignType : public ASTNode {
 public:
-	int line;
+	
 	std::string var_name;
 	NewTypeNode* new_type;
 	ASTNode* body;
@@ -231,7 +230,7 @@ public:
 
 class VarAssignList: public ASTNode {
 public:
-	int line;
+	
 	std::vector<VarAssign*> assigns;
 
 	VarAssignList(const std::vector<VarAssign*>& assigns_, int line_);
@@ -242,7 +241,7 @@ public:
 
 class LetAssign: public ASTNode {
 public:
-	int line;
+	
 	std::vector<VarAssign*> assigns;
 	ASTNode* body;
 
@@ -253,7 +252,7 @@ public:
 
 class VarDesAssign: public ASTNode {
 public:
-	int line;
+	
 	IDNode* id;
 	ASTNode* value;
 
@@ -264,7 +263,7 @@ public:
 
 class Conditional: public ASTNode {
 public:
-	int line;
+	
 	BoolExprNode* bool_expr;
 	ASTNode* if_body;
 	ASTNode* else_body;
@@ -276,7 +275,7 @@ public:
 
 class WhileNode: public ASTNode {
 public:
-	int line;
+	
 	BoolExprNode* bool_expr;
 	ASTNode* body;
 
@@ -287,7 +286,7 @@ public:
 
 class ForNode: public ASTNode {
 public:
-	int line;
+	
 	IDNode* id;
 	ASTNode* group;
 	ASTNode* body;
@@ -299,7 +298,7 @@ public:
 
 class TypeDeclNode: public ASTNode {
 public:
-	int line;
+	
 	IDNode* id;
 	ArgsList* args;
 	std::vector<std::string> parents;
@@ -317,7 +316,7 @@ public:
 
 class TypeAssMember : public ASTNode {
 public:
-	int line;
+	
 	enum class Form { Attribute, Method };
 
 	TypeAssMember(TypeAssMember::Form form_, int line_);
@@ -333,7 +332,7 @@ private:
 
 class AttributeMember : public TypeAssMember {
 public:
-	int line;
+	
 	std::string name;
 	
 	AttributeMember(std::string name_, int line_);
@@ -345,7 +344,7 @@ public:
 
 class MethodMember : public TypeAssMember {
 public:
-	int line;
+	
 	std::string name;
 	std::vector<ASTNode*> args;
 
@@ -358,7 +357,7 @@ public:
 
 class AccessNode: public ASTNode {
 public:
-	int line;
+	
 	const std::string var_name;
 	TypeAssMember* member;
 	

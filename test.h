@@ -894,6 +894,10 @@ void lexer_ast_test() {
     // }
     // cout << std::endl;
 }
+int make_ast_test() {
+    
+    return 0;
+}
 
 
 int execute_all_tests() {
@@ -904,9 +908,9 @@ int execute_all_tests() {
 }
 
 int execute_test() {
-    lexer_ast_test();
+    // lexer_ast_test();
     // test_parser();
-    test_grammar();
+    // test_grammar();
     // execute_all_tests();
     // lexer_node_test();
     // test_grammar();

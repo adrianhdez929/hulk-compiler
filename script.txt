@@ -1,8 +1,0 @@
-{
-  type B inherits A() {
-    y = "asuca";
-
-    test() => self.x;
-  }
-
-}
