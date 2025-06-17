@@ -216,8 +216,8 @@ std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& pr
 
 ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions, 
                         const std::vector<std::string>& actions, 
-                        const std::vector<std::pair<std::string, std::string>>& token_names, Grammar& grammar) {
-    std::stack<std::string> token_stack;
+                        const std::vector<Token>& token, Grammar& grammar) {
+    std::stack<Token> token_stack;
     std::map<std::string, std::stack<ASTNode*>> node_stack;
     // Initialize the node stack for each non-terminal in the grammar
     // for (const auto& nt : grammar.NonTerminals()) {
@@ -228,7 +228,7 @@ ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions,
     for (const auto& action : actions) {
         if (action == SLR1Parser::SHIFT) {
             // Shift operation
-            token_stack.push(token_names[index].first);
+            token_stack.push(token[index]);
             index++;
         } else if (action == SLR1Parser::REDUCE) {
             // Reduce operation
@@ -242,7 +242,7 @@ ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions,
             // std::cout << "Processing production: " << production->ToString() << std::endl;
             // std::cout << "Production right side has " << prod_right.size() << " symbols" << std::endl;
             
-            // Process symbols in reverse order since in LR parsing, we pop from stacks
+            // Process symbols in reverse order since in SLR parsing, we pop from stacks
             // We need to build the arguments vector in reverse order, then reverse it
             std::vector<ElementType> temp_args;
             for (int i = prod_right.size() - 1; i >= 0; --i) {
@@ -400,9 +400,9 @@ ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions,
     }
     
     // std::cout << "Parsing completed. Checking node stacks:" << std::endl;
-    for (const auto& [name, stack] : node_stack) {
+    // for (const auto& [name, stack] : node_stack) {
         // std::cout << "Stack for " << name << " has " << stack.size() << " elements" << std::endl;
-    }
+    // }
     
     // At the end, we should have a single node for the start symbol
     // auto start_symbol = grammar.GetStartSymbol();
@@ -411,7 +411,27 @@ ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions,
     // }
     std::string start_name = grammar.GetStartSymbol()->Name();
     if (node_stack.find(start_name) == node_stack.end() || node_stack[start_name].empty()) {
-        throw std::runtime_error("Node stack for start symbol is empty after parsing.");
+        // throw std::runtime_error("Node stack for start symbol is empty after parsing.");
+        //Buscar su produccion
+        auto start_symbol = grammar.GetStartSymbol();   
+        for (const auto& production : grammar.Productions()) {
+            if (production.Left()->Name() == start_name) {
+                // std::cout << "Found production for start symbol: " << production.ToString() << std::endl;
+                auto attr = production.Attribute();
+                std::vector<ElementType> args;
+                // Primer no terminal de la produccion pues esta produccion es la aumentada.
+                // El parser me garantiza que el start symbol tenga una unica produccion con un unico no terminal en su sentence.
+                args.push_back(node_stack[production.Right().Symbols().front()->Name()].top());
+                // Call the attribute function with an empty vector since we have no arguments
+                auto result = attr(args);
+                if (std::holds_alternative<ASTNode*>(result)) {
+                    return std::get<ASTNode*>(result);
+                } else {
+                    throw std::runtime_error("Attribute function did not return a Node.");
+                }
+                break;
+            }
+        }
     }
     // std::cout << "Final node stack for start symbol '" << start_name << "' has " 
     //       << node_stack[start_name].size() << " elements." << std::endl;

@@ -1,6 +1,7 @@
 #pragma once
 #include <variant>
 #include <memory>
+#include "Token.h"
 
 class SymbolNode;
 // class UnionNode;
@@ -41,11 +42,13 @@ class TypeAssMember;
 class AttributeMember;
 class MethodMember;
 class AccessNode;
+class Token;
 
 using ElementType = std::variant<
     std::string,
     std::shared_ptr<Node>,
-    ASTNode*
+    ASTNode*,
+	Token
 >;
             // std::shared_ptr<SymbolNode>,
         // std::shared_ptr<UnionNode>,
