@@ -201,7 +201,7 @@ Grammar getHulkGrammar(){
 	// --------- Bloques de código ---------
 	// lines_block -> { lines }
 	// Un bloque de código delimitado por llaves
-	g.AddProduction(AttrProd(lines_block, Sentence({LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(lines_block, Sentence(std::vector<std::shared_ptr<Symbol>>{LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
 		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[1]));
 		return lines_node;
 	}));
@@ -232,7 +232,7 @@ Grammar getHulkGrammar(){
 	
 	// non_empty_lines -> non_empty_lines line
 	// Una secuencia de líneas de código (recursión a izquierda)
-	g.AddProduction(AttrProd(non_empty_lines, Sentence({non_empty_lines, line}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(non_empty_lines, Sentence(std::vector<std::shared_ptr<Symbol>>{non_empty_lines, line}), [](const std::vector<ElementType>& args) -> ElementType {
 		BlockNode* n_e_l_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* line_node = std::get<ASTNode*>(args[1]);
 
@@ -243,14 +243,14 @@ Grammar getHulkGrammar(){
 	// --------- Líneas individuales de código ---------
 	// line -> expr ;
 	// Una expresión que termina con punto y coma
-	g.AddProduction(AttrProd(line, Sentence({expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(line, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[0]);
 		return expr_node;
 	}));
 	
 	// line -> func_assign ;
 	// Una declaración de función que termina con punto y coma
-	g.AddProduction(AttrProd(line, Sentence({func_assign, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(line, Sentence(std::vector<std::shared_ptr<Symbol>>{func_assign, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
 		AssignFuncNode* func_assign_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[0]));
 		return func_assign_node;
 	}));
@@ -286,7 +286,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> WHILE while_expr
 	// Expresión de bucle while
-	g.AddProduction(AttrProd(expr, Sentence({WHILE, while_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{WHILE, while_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		WhileNode* while_expr_node = static_cast<WhileNode*>(std::get<ASTNode*>(args[1]));
 		return while_expr_node;
 	}));
@@ -321,7 +321,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> IF conditional
 	// Expresión condicional if-else/elif
-	g.AddProduction(AttrProd(expr, Sentence({IF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{IF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
 		Conditional* conditional_node = static_cast<Conditional*>(std::get<ASTNode*>(args[1]));
 		return conditional_node;
 	}));
@@ -334,7 +334,7 @@ Grammar getHulkGrammar(){
 	}));
 	// expr -> expr := expr
 	// Asignación destructiva
-	g.AddProduction(AttrProd(expr, Sentence({expr, ASS_DES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, ASS_DES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -343,7 +343,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> expr = expr
 	// Asignación normal
-	g.AddProduction(AttrProd(expr, Sentence({expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -352,7 +352,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> expr @ expr
 	// Operador de composición simple
-	g.AddProduction(AttrProd(expr, Sentence({expr, ARROBA_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, ARROBA_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -361,7 +361,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> expr @@ expr
 	// Operador de composición doble
-	g.AddProduction(AttrProd(expr, Sentence({expr, D_ARROBA_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, D_ARROBA_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -370,7 +370,7 @@ Grammar getHulkGrammar(){
 	
 	// expr -> expr as ID
 	// Conversión explícita de tipo (cast)
-	g.AddProduction(AttrProd(expr, Sentence({expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[0]);
 		std::string type_name = std::get<std::string>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -449,7 +449,7 @@ Grammar getHulkGrammar(){
 	
 	// args_list -> args_list , id_expr
 	// Lista con múltiples argumentos (recursión a izquierda)
-	g.AddProduction(AttrProd(args_list, Sentence({args_list, COLON, id_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(args_list, Sentence(std::vector<std::shared_ptr<Symbol>>{args_list, COLON, id_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[0]));
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
 		args_list_node->add_child(id_expr_node);
@@ -487,14 +487,14 @@ Grammar getHulkGrammar(){
 	
 	// let_assign -> LET var_assign_list IN expr
 	// Asignación let-in con una expresión como cuerpo
-	g.AddProduction(AttrProd(let_assign, Sentence({LET, var_assign_list, IN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(let_assign, Sentence(std::vector<std::shared_ptr<Symbol>>{LET, var_assign_list, IN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[1]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
 		return new LetAssign(var_assign_list_node->assigns, expr_node, getMinLineFromArgs(args));
 	}));
 	// let_assign -> LET var_assign_list IN lines_block
 	// Asignación let-in con un bloque de código como cuerpo
-	g.AddProduction(AttrProd(let_assign, Sentence({LET, var_assign_list, IN, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(let_assign, Sentence(std::vector<std::shared_ptr<Symbol>>{LET, var_assign_list, IN, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
 		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[1]));
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
 		int minLine = getMinLineFromArgs(args);
@@ -504,7 +504,7 @@ Grammar getHulkGrammar(){
 	// --------- Lista de asignaciones de variables ---------
 	// var_assign_list -> id_expr = expr
 	// Asignación básica de una variable con una expresión
-	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{id_expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -512,7 +512,7 @@ Grammar getHulkGrammar(){
 	}));
 	// var_assign_list -> id_expr = expr as ID
 	// Asignación de una variable con una expresión y especificación de tipo
-	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, ASSIGN, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{id_expr, ASSIGN, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		std::string type_name = std::get<std::string>(args[4]);
@@ -521,7 +521,7 @@ Grammar getHulkGrammar(){
 	}));
 	// var_assign_list -> id_expr = new_expr
 	// Asignación de una variable con una expresión de creación de objeto
-	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, ASSIGN, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{id_expr, ASSIGN, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[2]));
 		int minLine = getMinLineFromArgs(args);
@@ -529,7 +529,7 @@ Grammar getHulkGrammar(){
 	}));
 	// var_assign_list -> var_assign_list , id_expr = expr
 	// Lista de asignaciones de variables con una expresión adicional
-	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{var_assign_list, COLON, id_expr, ASSIGN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[4]);
@@ -539,7 +539,7 @@ Grammar getHulkGrammar(){
 	}));
 	// var_assign_list -> var_assign_list , id_expr = expr as ID
 	// Lista de asignaciones de variables con una expresión adicional y tipo específico
-	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, ASSIGN, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{var_assign_list, COLON, id_expr, ASSIGN, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[4]);
@@ -550,7 +550,7 @@ Grammar getHulkGrammar(){
 	}));
 	// var_assign_list -> var_assign_list , id_expr = new_expr
 	// Lista de asignaciones de variables con una instanciación de objeto
-	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, ASSIGN, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(var_assign_list, Sentence(std::vector<std::shared_ptr<Symbol>>{var_assign_list, COLON, id_expr, ASSIGN, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
 		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[4]));
@@ -596,7 +596,7 @@ Grammar getHulkGrammar(){
 	}));
 	// expr_list -> expr_list , expr
 	// Lista de expresiones con una expresión adicional
-	g.AddProduction(AttrProd(expr_list, Sentence({expr_list, COLON, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr_list, Sentence(std::vector<std::shared_ptr<Symbol>>{expr_list, COLON, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		expr_list_node->add_child(expr_node);
@@ -604,7 +604,7 @@ Grammar getHulkGrammar(){
 	}));
 	// expr_list -> expr_list , new_expr
 	// Lista de expresiones con una expresión de creación de objeto adicional
-	g.AddProduction(AttrProd(expr_list, Sentence({expr_list, COLON, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(expr_list, Sentence(std::vector<std::shared_ptr<Symbol>>{expr_list, COLON, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
 		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[2]));
 		expr_list_node->add_child(new_expr_node);
@@ -642,55 +642,55 @@ Grammar getHulkGrammar(){
 	}));
 	// arit_op -> ( expr )
 	// Expresión entre paréntesis para agrupar o cambiar precedencia
-	g.AddProduction(AttrProd(arit_op, Sentence({LPARENT, expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
 		return expr_node;
 	}));
 	// arit_op -> expr + expr
 	// Operación de suma
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, PLUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, PLUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int line = getMinLineFromNodes(expr_node1, expr_node2);
 		return new BinOpNode(expr_node1, "+", expr_node2, line);
 	}));
 	// arit_op -> expr - expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int line = getMinLineFromNodes(expr_node1, expr_node2);
 		return new BinOpNode(expr_node1, "-", expr_node2, line);
 	}));
 	// arit_op -> expr * expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, TIMES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, TIMES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int line = getMinLineFromNodes(expr_node1, expr_node2);
 		return new BinOpNode(expr_node1, "*", expr_node2, line);
 	}));
 	// arit_op -> expr / expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, DIV, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, DIV, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int line = getMinLineFromNodes(expr_node1, expr_node2);
 		return new BinOpNode(expr_node1, "/", expr_node2, line);
 	}));
 	// arit_op -> expr ^ expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, POW, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, POW, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int line = getMinLineFromNodes(expr_node1, expr_node2);
 		return new BinOpNode(expr_node1, "^", expr_node2, line);
 	}));
 	// arit_op -> expr % expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, MOD, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{expr, MOD, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
 		return new BinOpNode(expr_node1, "%", expr_node2, minLine);
 	}));
 	// arit_op -> - expr
-	g.AddProduction(AttrProd(arit_op, Sentence({MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(arit_op, Sentence(std::vector<std::shared_ptr<Symbol>>{MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
 		int minLine = getMinLineFromArgs(args);
 		return new UnaryOpNode("-", expr_node, minLine);
@@ -800,7 +800,7 @@ Grammar getHulkGrammar(){
 	
 	// conditional -> ( bool_expr ) expr else expr
 	// Condicional simple con expresiones
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, expr, ELSE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, expr, ELSE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		ASTNode* expr_node1 = std::get<ASTNode*>(args[3]);
 		ASTNode* expr_node2 = std::get<ASTNode*>(args[5]);
@@ -809,7 +809,7 @@ Grammar getHulkGrammar(){
 	}));
 	// conditional -> ( bool_expr ) lines_block else expr
 	// Condicional con bloque para la parte verdadera y expresión para la parte falsa
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, lines_block, ELSE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, lines_block, ELSE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[5]);
@@ -817,28 +817,28 @@ Grammar getHulkGrammar(){
 		return new Conditional(bool_expr_node, lines_block_node, expr_node, minLine);
 	}));
 	// conditional -> ( bool_expr ) expr else lines_block
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, expr, ELSE, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, expr, ELSE, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[5]));
 		return new Conditional(bool_expr_node, expr_node, lines_block_node, 0);
 	}));
 	// conditional -> ( bool_expr ) lines_block else lines_block
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, lines_block, ELSE, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, lines_block, ELSE, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		BlockNode* lines_block_node1 = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
 		BlockNode* lines_block_node2 = static_cast<BlockNode*>(std::get<ASTNode*>(args[5]));
 		return new Conditional(bool_expr_node, lines_block_node1, lines_block_node2, 0);
 	}));
 	// conditional -> ( bool_expr ) expr else expr
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, expr, ELIF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, expr, ELIF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
 		Conditional* conditional_node = static_cast<Conditional*>(std::get<ASTNode*>(args[5]));
 		return new Conditional(bool_expr_node, expr_node, conditional_node, 0);
 	}));
 	// conditional -> ( bool_expr ) lines_block else lines_block
-	g.AddProduction(AttrProd(conditional, Sentence({LPARENT, bool_expr, RPARENT, lines_block, ELIF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(conditional, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, lines_block, ELIF, conditional}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
 		Conditional* conditional_node = static_cast<Conditional*>(std::get<ASTNode*>(args[5]));
@@ -853,7 +853,7 @@ Grammar getHulkGrammar(){
 	
 	// while_expr -> ( bool_expr ) lines_block
 	// Bucle while con un bloque de código
-	g.AddProduction(AttrProd(while_expr, Sentence({LPARENT, bool_expr, RPARENT, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(while_expr, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
 		int minLine = getMinLineFromArgs(args);
@@ -861,7 +861,7 @@ Grammar getHulkGrammar(){
 	}));
 	// while_expr -> ( bool_expr ) expr
 	// Bucle while con una expresión única
-	g.AddProduction(AttrProd(while_expr, Sentence({LPARENT, bool_expr, RPARENT, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(while_expr, Sentence(std::vector<std::shared_ptr<Symbol>>{LPARENT, bool_expr, RPARENT, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		BoolExprNode* bool_expr_node = static_cast<BoolExprNode*>(std::get<ASTNode*>(args[1]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
 		int minLine = getMinLineFromArgs(args);
@@ -941,7 +941,7 @@ Grammar getHulkGrammar(){
 	}));
 	// type_body_elements -> type_body_elements attribute
 	// Adición de un atributo a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, attribute}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(type_body_elements, Sentence(std::vector<std::shared_ptr<Symbol>>{type_body_elements, attribute}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
 		VarAssign* attribute_node = static_cast<VarAssign*>(std::get<ASTNode*>(args[1]));
 		type_body_elements_node->add_child(attribute_node);
@@ -949,7 +949,7 @@ Grammar getHulkGrammar(){
 	}));
 	// type_body_elements -> type_body_elements method
 	// Adición de un método a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, method}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(type_body_elements, Sentence(std::vector<std::shared_ptr<Symbol>>{type_body_elements, method}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
 		AssignFuncNode* method_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[1]));
 		type_body_elements_node->add_child(method_node);
@@ -959,7 +959,7 @@ Grammar getHulkGrammar(){
 	// --------- Atributos de tipos ---------
 	// attribute -> id_expr = expr ;
 	// Atributo con valor inicial
-	g.AddProduction(AttrProd(attribute, Sentence({id_expr, ASSIGN, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(attribute, Sentence(std::vector<std::shared_ptr<Symbol>>{id_expr, ASSIGN, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
@@ -967,7 +967,7 @@ Grammar getHulkGrammar(){
 	}));
 	// attribute -> id_expr = expr as ID ;
 	// Atributo con valor inicial y tipo especificado
-	g.AddProduction(AttrProd(attribute, Sentence({id_expr, ASSIGN, expr, AS_, ID_, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(attribute, Sentence(std::vector<std::shared_ptr<Symbol>>{id_expr, ASSIGN, expr, AS_, ID_, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		Token type_name = std::get<Token>(args[4]);

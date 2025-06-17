@@ -44,11 +44,8 @@ extern ASTNode* root;
 	class NewTypeNode* new_t_n;
 }
 
-%token NUMBER
-%token BOOLEAN
-%token STRING
 
-%token ID_ 
+
 %token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION_ INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS_ 
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_ ARROBA_ D_ARROBA_
 
@@ -57,7 +54,7 @@ extern ASTNode* root;
 %token TYPE
 
 %token <num> NUMBER
-%token <str> ID
+%token <str> ID_
 %token <str> STRING
 %token <boolean> BOOLEAN
 
@@ -185,7 +182,7 @@ expr_list:
 	;
 
 func_call:
-	ID LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3); }
+	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3, yylineno); }
 	;
 
 arit_op:
