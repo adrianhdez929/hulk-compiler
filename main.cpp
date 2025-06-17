@@ -1,17 +1,21 @@
 #include <stdio.h>
 // #include "hulk/parser.tab.h"
 #include "Ast/ast.hpp"
-// #include "semantic/visitor.h"
-// #include "semantic/type_collector_visitor.h"
-// #include "semantic/symbol_collector_visitor.h"
-// #include "semantic/context.h"
-// #include "codegen/visitor.h"
+#include "semantic/visitor.h"
+#include "semantic/type_collector_visitor.h"
+#include "semantic/symbol_collector_visitor.h"
+#include "semantic/context.h"
+#include "codegen/visitor.h"
 #include <iostream>
 #include <fstream>
 #include <exception>
 #include "test.h"
+#include "execute.cpp"
 
 using namespace std;
+
+ASTNode* parseScript(); // Forward declaration of parseScript function from execute.cpp
+
 // // using namespace manipulation;
 
 extern FILE *yyin;
@@ -19,10 +23,10 @@ extern int yyparse();
 ASTNode* root = nullptr;
 
 // Create the new two-pass semantic analysis system
-// TypeCollectorVisitor* typeCollectorVisitor = new TypeCollectorVisitor();
-// SymbolCollectorVisitor* symbolCollectorVisitor = nullptr; // Will be initialized after type collection
-// SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
-// CodegenVisitor* codegenVisitor = new CodegenVisitor();
+TypeCollectorVisitor* typeCollectorVisitor = new TypeCollectorVisitor();
+SymbolCollectorVisitor* symbolCollectorVisitor = nullptr; // Will be initialized after type collection
+SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
+CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
 
@@ -59,16 +63,16 @@ int main(int argc, char* argv[]) {
     // //region: Flex/Bison setup
     // //run tests
     // execute_test();
-    const char* filename = "script.hulk"; //default
-    if (argc > 1) {
-		filename = argv[1];
-    }
-	yyin = fopen(filename, "r");
-	if (!yyin) {
-		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-		return 1;
-	}
-    yyparse();
+    // const char* filename = "script.hulk"; //default
+    // if (argc > 1) {
+	// 	filename = argv[1];
+    // }
+	// yyin = fopen(filename, "r");
+	// if (!yyin) {
+	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+	// 	return 1;
+	// }
+    // yyparse();
     // //endregion
 
     // //region: Custom setup for Hulk language
@@ -158,42 +162,53 @@ int main(int argc, char* argv[]) {
     // std::cout << "AST construido exitosamente." << std::endl;
     // //enregion
 
-	if (root) {
-		std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-		root->print();
+    try {
+    root = parseScript();
+    } catch (const std::exception& e) {
+        std::cerr << "Error al parsear el script: " << e.what() << std::endl;
+        return 1;
     }
+
+    if (!root) {
+        std::cerr << "Error: No se pudo construir el AST" << std::endl;
+        fclose(yyin);
+        return 1;
+    }
+
+    std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+    root->print();
     //     std::cout << "\n=== Starting Two-Pass Semantic Analysis ===" << std::endl;
         
     //     // Create a global context for semantic analysis (with null parent for root context)
-    //     Context* globalContext = new Context(nullptr);
+    Context* globalContext = new Context(nullptr);
        
     // //     // Define built-in functions and variables
     // //     globalContext->define("print", 1);  // print function takes 1 argument
     // //     globalContext->define("pi");         // pi constant (variable)
     //     // PASS 1: Type Collection
     //     std::cout << "\n--- Pass 1: Collecting Type Definitions ---" << std::endl;
-    //     root->accept(typeCollectorVisitor, globalContext);
+        root->accept(typeCollectorVisitor, globalContext);
         
-    //     if (typeCollectorVisitor->hasErrors()) {
-    //         std::cerr << "Type collection failed with the following errors:" << std::endl;
-    //         typeCollectorVisitor->printErrors();
-    //     }
+        if (typeCollectorVisitor->hasErrors()) {
+            std::cerr << "Type collection failed with the following errors:" << std::endl;
+            typeCollectorVisitor->printErrors();
+        }
         
     //     std::cout << "Type collection completed successfully." << std::endl;
     //     std::cout << "Collected " << typeCollectorVisitor->getCollectedTypes().size() << " types" << std::endl;
 
-    //     globalContext->localTypes = typeCollectorVisitor->getCollectedTypes();
+        globalContext->localTypes = typeCollectorVisitor->getCollectedTypes();
 
         
     //     // PASS 2: Symbol Collection
     //     std::cout << "\n--- Pass 2: Collecting Symbols and Type Inference ---" << std::endl;
-    //     symbolCollectorVisitor = new SymbolCollectorVisitor(globalContext);
-    //     root->accept(symbolCollectorVisitor, globalContext);
+        symbolCollectorVisitor = new SymbolCollectorVisitor(globalContext);
+        root->accept(symbolCollectorVisitor, globalContext);
         
-    //     if (symbolCollectorVisitor->hasErrors()) {
-    //         std::cerr << "Symbol collection failed with the following errors:" << std::endl;
-    //         symbolCollectorVisitor->printErrors();
-    //     }
+        if (symbolCollectorVisitor->hasErrors()) {
+            std::cerr << "Symbol collection failed with the following errors:" << std::endl;
+            symbolCollectorVisitor->printErrors();
+        }
         
     //     std::cout << "Symbol collection completed successfully." << std::endl;
         
@@ -202,9 +217,9 @@ int main(int argc, char* argv[]) {
     //     std::cout << "Symbol data successfully stored in context." << std::endl;
         
     //     // Display collected symbols
-    //     globalContext->methodsByType = symbolCollectorVisitor->getMethodsByType();
-    //     globalContext->attributesByType = symbolCollectorVisitor->getAttributesByType();
-    //     globalContext->globalVariables = symbolCollectorVisitor->getGlobalVariables();
+        globalContext->methodsByType = symbolCollectorVisitor->getMethodsByType();
+        globalContext->attributesByType = symbolCollectorVisitor->getAttributesByType();
+        globalContext->globalVariables = symbolCollectorVisitor->getGlobalVariables();
         
     //     if (!globalContext->methodsByType.empty() || !globalContext->attributesByType.empty() || !globalContext->globalVariables.empty()) {
     //         std::cout << "\n=== Collected Symbols Summary ===" << std::endl;
@@ -244,17 +259,17 @@ int main(int argc, char* argv[]) {
         
     //     // PASS 3: Final Semantic Analysis (Optional - for additional validation)
     //     std::cout << "\n--- Pass 3: Final Semantic Validation ---" << std::endl;
-    //     root->accept(semanticVisitor, globalContext);
+        root->accept(semanticVisitor, globalContext);
         
-    //     if (semanticVisitor->hasErrors()) {
-    //         std::cerr << "Final semantic analysis failed with the following errors:" << std::endl;
-    //         semanticVisitor->printErrors();
-    //         delete symbolCollectorVisitor;
-    //         delete globalContext;
-    //         delete root;
-    //         fclose(yyin);
-    //         return 1;
-    //     }
+        if (semanticVisitor->hasErrors()) {
+            std::cerr << "Final semantic analysis failed with the following errors:" << std::endl;
+            semanticVisitor->printErrors();
+            delete symbolCollectorVisitor;
+            delete globalContext;
+            delete root;
+            fclose(yyin);
+            return 1;
+        }
         
     //     std::cout << "All semantic analysis passes completed successfully!" << std::endl;
 

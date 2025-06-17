@@ -1,5 +1,5 @@
 {
-  function tan(x) => sin(x) / cos(x);
+  function tan(x: Number) => sin(x) / cos(x);
   print("Hello World");
   print(sin(2 * 4) + cos(3 * 4 ));
   let a = 42 in if (a == 0) print("Even") else print("odd");
