@@ -82,10 +82,10 @@ void create_artifacts() {
         {"@", "@"},            // At operator
         {"@@", "@@"},          // Double at operator
         {"as", "as"},          // Type cast keyword
-        {"for", "for"},        // For loop keyword
+        {"for", "for"},        // For loop keyword 
         {"new", "new"},         // Object instantiation keyword
         {"type_id", "[A-Z][_a-zA-Z0-9]*"},
-        {"var_id", "[_a-z][_a-zA-Z0-9]*"},
+        {"var_id", "[a-z][_a-zA-Z0-9]*"},
         {"tab", "\t"},
         {"newline", "\n"} // Regular expression for newlines
     };
@@ -137,7 +137,7 @@ void create_artifacts() {
     std::cout << "Artefactos creados exitosamente en la carpeta 'hulk'" << std::endl;
 }
 
-int main() {
+int run_compiler() {
     std::cout << "=== Ejecutando el compilador Hulk ===" << std::endl;
     
     // Verificar y crear directorio hulk
@@ -177,66 +177,83 @@ int main() {
     script_file.close();
     std::cout << "Contenido del script.hulk cargado exitosamente." << std::endl;
     
-    // Tokenizar el script
-    auto result = lexer->tokenize(script_content);
-    std::cout << "Tokens generados:" << std::endl;
-    for (const auto& token : result) {
-        std::cout << "Tipo: " << token.first << ", Valor: " << token.second << std::endl;
-    }
-    if (result.empty()) {
-        std::cerr << "Error: No se generaron tokens del script" << std::endl;
+    // Tokenizar el script con información de posición
+    try {
+        // Usar el nuevo método tokenize_with_positions que incluye información de línea y columna
+        // y filtra automáticamente espacios, tabuladores y saltos de línea
+        auto tokens_with_positions = lexer->tokenize_with_positions(script_content, hulk_grammar);
+        std::cout << "Tokens generados con información de posición:" << std::endl;
+        for (const auto& token : tokens_with_positions) {
+            std::cout << token.ToString() << std::endl;
+        }
+        
+        if (tokens_with_positions.empty()) {
+            std::cerr << "Error: No se generaron tokens del script" << std::endl;
+            return 1;
+        }
+        
+        std::cout << "Tokens significativos generados exitosamente." << std::endl;
+        
+        // Usar los tokens con posición para el análisis sintáctico
+        try {
+            auto parse_result = parser->Parse(tokens_with_positions);
+            std::cout << "Análisis sintáctico exitoso." << std::endl;
+            
+            // // Imprimir los tokens generados
+            // std::cout << "Tokens generados:" << std::endl;
+            // for (const auto& token : result) {
+            //     std::cout << "Tipo: " << token.first << ", Valor: " << token.second << std::endl;
+            // }
+
+            // std::vector<std::string> token_strings;
+            // for (const auto& token : result) {
+            //     token_strings.push_back(token.second);
+            // }
+
+            // // Parsear los tokens
+            // auto parse_result = parser->Parse(token_strings);
+            // if (parse_result.first.empty()) {
+            //     std::cerr << "Error: No se pudo parsear el script" << std::endl;
+            //     return 1;
+            // }
+
+            std::queue<std::shared_ptr<AttrProd>> productions;
+            std::vector<std::string> actions;
+            // Get the productions and actions from the parse result
+            for (const auto& id : parse_result.first) {
+                productions.push(make_shared<AttrProd>(hulk_grammar.GetProduction(id)));
+            }
+            for (const auto& action : parse_result.second) {
+                actions.push_back(action);
+            }
+
+            std::vector<std::pair<std::string, std::string>> result;
+            for (const auto& token : tokens_with_positions) {
+                result.push_back(std::make_pair(token.Lexeme(), token.Name()));
+            }
+
+            // Aplicar reverse_evaluate
+            std::cout << "Aplicando reverse_evaluate..." << std::endl;
+            auto ast = build_ast(productions, actions, tokens_with_positions, hulk_grammar);
+            if (!ast) {
+                std::cerr << "Error: No se pudo construir el AST" << std::endl;
+                return 1;
+            }
+            std::cout << "AST construido exitosamente." << std::endl;
+            // Imprimir el AST
+            std::cout << "Imprimiendo el AST:" << std::endl;
+            ast->print();
+            std::cout << "Ejecución del compilador Hulk finalizada exitosamente." << std::endl;
+            
+        } catch (const ParsingError& e) {
+            std::cerr << "Error sintáctico: " << e.what() << std::endl;
+            return 1;
+        }
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error de tokenización: " << e.what() << std::endl;
         return 1;
     }
-    // Retirar los espacios, saltos de linea y tabulaciones
-    result.erase(std::remove_if(result.begin(), result.end(),
-                                 [](const std::pair<std::string, std::string>& token) {
-                                     return token.second == "space" || token.second == "newline" || token.second == "tab";
-                                 }), result.end());
-    if (result.empty()) {
-        std::cerr << "Error: No se generaron tokens significativos del script" << std::endl;
-        return 1;
-    }
-    std::cout << "Tokens significativos generados exitosamente." << std::endl;
-    // Imprimir los tokens generados
-    std::cout << "Tokens generados:" << std::endl;
-    for (const auto& token : result) {
-        std::cout << "Tipo: " << token.first << ", Valor: " << token.second << std::endl;
-    }
-
-    std::vector<std::string> token_strings;
-    for (const auto& token : result) {
-        token_strings.push_back(token.second);
-    }
-
-    // Parsear los tokens
-    auto parse_result = parser->Parse(token_strings);
-    if (parse_result.first.empty()) {
-        std::cerr << "Error: No se pudo parsear el script" << std::endl;
-        return 1;
-    }
-
-    std::queue<std::shared_ptr<AttrProd>> productions;
-    std::vector<std::string> actions;
-    // Get the productions and actions from the parse result
-    for (const auto& id : parse_result.first) {
-        productions.push(make_shared<AttrProd>(hulk_grammar.GetProduction(id)));
-    }
-    for (const auto& action : parse_result.second) {
-        actions.push_back(action);
-    }
-
-    // Aplicar reverse_evaluate
-    std::cout << "Aplicando reverse_evaluate..." << std::endl;
-    auto ast = build_ast(productions, actions, result, hulk_grammar);
-    if (!ast) {
-        std::cerr << "Error: No se pudo construir el AST" << std::endl;
-        return 1;
-    }
-    std::cout << "AST construido exitosamente." << std::endl;
-    // Imprimir el AST
-    std::cout << "Imprimiendo el AST:" << std::endl;
-    ast->print();
-    std::cout << "Ejecución del compilador Hulk finalizada exitosamente." << std::endl;
+    
 
     return 0;
 }

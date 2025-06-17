@@ -6,6 +6,7 @@
 #include <filesystem>
 #include "../Grammar/grammar.h"
 #include "../Automata/state.h"
+#include "../Lexer/Token.h"
 
 /**
  * @class ParsingError
@@ -93,6 +94,15 @@ public:
      */
     std::pair<std::vector<int>, std::vector<std::string>>
     Parse(const std::vector<std::string>& tokens);
+
+    /**
+     * @brief Parsea una secuencia de tokens con información de posición.
+     * @param tokens Vector de objetos Token con información de línea y columna.
+     * @return Par de vectores: ids de producciones y acciones realizadas.
+     * @throws ParsingError Si ocurre un error de sintaxis, con información detallada.
+     */
+    std::pair<std::vector<int>, std::vector<std::string>>
+    Parse(const std::vector<Token>& tokens);
 
     /**
      * @brief Construye las tablas de análisis sintáctico (action y goto).
@@ -204,6 +214,17 @@ private:
      * @return Mensaje de error con contexto visual
      */
     static std::string formatErrorWithContext(const std::vector<Terminal>& tokens, 
+                                             int error_position, 
+                                             const std::string& error_message);
+                                            
+    /**
+     * @brief Genera un mensaje de error con contexto para un error de sintaxis, usando tokens con posición.
+     * @param tokens Vector de tokens con información de posición
+     * @param error_position Posición donde ocurrió el error
+     * @param error_message Mensaje base del error
+     * @return Mensaje de error con contexto visual y posición precisa
+     */
+    static std::string formatErrorWithContext(const std::vector<Token>& tokens, 
                                              int error_position, 
                                              const std::string& error_message);
 };

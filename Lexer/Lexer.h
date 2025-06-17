@@ -5,6 +5,7 @@
 #include "../Automata/state.h"
 #include "Regex.h"
 #include "../Automata/nfa.h"
+#include "Token.h"
 
 /**
  * @class Lexer
@@ -140,6 +141,67 @@ public:
         }
         tokens.push_back(std::make_pair("EOF","EOF"));
         return tokens;
+    }
+
+    /**
+     * @brief Tokeniza un texto rastreando líneas y columnas para reportes de error precisos.
+     * @param input Texto a tokenizar
+     * @param grammar Gramática asociada
+     * @return Vector de objetos Token con información de posición
+     * @throw std::runtime_error Si hay un error de tokenización
+     */
+    std::vector<Token> tokenize_with_positions(const std::string& input, Grammar& grammar) {
+        std::vector<Token> result;
+        
+        int line = 1;
+        int column = 1;
+        
+        std::string remaining = input;
+        
+        while (!remaining.empty()) {
+            auto [state, token] = walk(remaining);
+            
+            if (token.empty()) {
+                // Si no hay token, es un error léxico
+                char invalid_char = remaining[0];
+                std::string error_msg = "Error léxico en línea " + std::to_string(line) + 
+                                       ", columna " + std::to_string(column) + 
+                                       ": carácter inválido '" + invalid_char + "'";
+                throw std::runtime_error(error_msg);
+            }
+            
+            // Guardar posición actual antes de actualizarla
+            int token_line = line;
+            int token_column = column;
+            
+            // Actualizar posición para el siguiente token
+            for (char c : token) {
+                if (c == '\n') {
+                    line++;
+                    column = 1;
+                } else {
+                    column++;
+                }
+            }
+            
+            // Filtrar espacios, tabulaciones, saltos de línea y comentarios
+            if (state.tag() == "space" || state.tag() == "tab" || state.tag() == "newline" || state.tag() == "comment") {
+                // Ignorar estos tokens pero seguir rastreando posición
+            } else {
+                // Crear un token con información de posición
+                Token pos_token(state.tag(), token, grammar, token_line, token_column);
+                result.push_back(pos_token);
+            }
+            
+            // Descartar el token procesado
+            remaining = remaining.substr(token.length());
+        }
+        
+        // Añadir token de fin de archivo
+        Token eof_token("EOF", "EOF", grammar, line, column);
+        result.push_back(eof_token);
+        
+        return result;
     }
 
     // ============= MÉTODOS DE SERIALIZACIÓN DEL LEXER =============
