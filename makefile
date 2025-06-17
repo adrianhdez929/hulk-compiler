@@ -1,4 +1,5 @@
-CC = clang++
+# CC = clang++
+CC = g++
 LEX = flex
 YACC = bison
 CFLAGS = -Wall -std=c++17 -fexceptions
@@ -12,10 +13,40 @@ SRC_DIR = .
 BUILDDIR = $(SRC_DIR)/hulk
 
 PROGRAM = hulk
+# NUEVO DESDE AQUI
+# Nuevo artefacto para generar lexer y parser serializados
+ARTIFACTS_BIN = $(BUILDDIR)/create_artifacts
 
+# Incluir todos los archivos necesarios para compilar los artefactos
+ARTIFACTS_SRC = $(SRC_DIR)/create_artifacts.cpp 
+ARTIFACTS_DEPS = $(SRC_DIR)/Grammar/grammar.cpp \
+	$(SRC_DIR)/Grammar/production.cpp \
+	$(SRC_DIR)/Grammar/symbol.cpp \
+	$(SRC_DIR)/Grammar/sentence.cpp \
+	$(SRC_DIR)/Automata/dfa.cpp \
+	$(SRC_DIR)/Automata/nfa.cpp \
+	$(SRC_DIR)/Automata/utils/ContainerSet.cpp \
+	$(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+	$(SRC_DIR)/Automata/operations/operations.cpp \
+	$(SRC_DIR)/Automata/state.cpp \
+	$(SRC_DIR)/Parser/Item.cpp \
+	$(SRC_DIR)/Parser/SLR1Parser.cpp
+# HASTA AQUI
 OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
 
-compile: $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM)
+#compile: $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM)
+#NUEVO
+compile: generate_artifacts $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM)
+
+# Nuevo target para compilar y ejecutar el generador de artefactos
+generate_artifacts: $(ARTIFACTS_BIN)
+	@echo "Generando lexer y parser serializados..."
+	$(ARTIFACTS_BIN)
+
+# Compilación del generador de artefactos
+$(ARTIFACTS_BIN): $(ARTIFACTS_SRC) $(ARTIFACTS_DEPS) | $(BUILDDIR)
+	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR)
+#HASTA AQUI
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -65,10 +96,23 @@ $(BUILDDIR)/type_collector_visitor.o: $(SRC_DIR)/semantic/type_collector_visitor
 $(BUILDDIR)/symbol_collector_visitor.o: $(SRC_DIR)/semantic/symbol_collector_visitor.cpp $(SRC_DIR)/semantic/symbol_collector_visitor.h | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/semantic/symbol_collector_visitor.cpp -o $@
 
+# clean:
+# 	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so
 clean:
-	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so
+	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so $(BUILDDIR)/hulk
+
+# También limpiamos los archivos serializados
+clean_artifacts:
+	rm -rf $(BUILDDIR)/lexer.l $(BUILDDIR)/parser.p $(BUILDDIR)/hulk_parser.p
+
+# Limpiar todo, incluidos los artefactos
+clean_all: clean clean_artifacts
 
 execute: compile
 	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.hulk
 
-.PHONY: compile execute clean
+# .PHONY: compile execute clean
+# Ejecutar solo la generación de artefactos
+artifacts: generate_artifacts
+
+.PHONY: compile execute clean clean_artifacts clean_all artifacts generate_artifacts
