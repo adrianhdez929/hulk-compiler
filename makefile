@@ -30,9 +30,10 @@ ARTIFACTS_DEPS = $(SRC_DIR)/Grammar/grammar.cpp \
 	$(SRC_DIR)/Automata/operations/operations.cpp \
 	$(SRC_DIR)/Automata/state.cpp \
 	$(SRC_DIR)/Parser/Item.cpp \
-	$(SRC_DIR)/Parser/SLR1Parser.cpp
+	$(SRC_DIR)/Parser/SLR1Parser.cpp \
+	$(SRC_DIR)/Ast/ast.cpp
 # HASTA AQUI
-OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
+OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o $(BUILDDIR)/grammar.o $(BUILDDIR)/production.o $(BUILDDIR)/symbol.o $(BUILDDIR)/sentence.o $(BUILDDIR)/dfa.o $(BUILDDIR)/nfa.o $(BUILDDIR)/ContainerSet.o $(BUILDDIR)/aut_manipulation.o $(BUILDDIR)/operations.o $(BUILDDIR)/state.o $(BUILDDIR)/Item.o $(BUILDDIR)/SLR1Parser.o
 
 #compile: $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM)
 #NUEVO
@@ -96,6 +97,45 @@ $(BUILDDIR)/type_collector_visitor.o: $(SRC_DIR)/semantic/type_collector_visitor
 $(BUILDDIR)/symbol_collector_visitor.o: $(SRC_DIR)/semantic/symbol_collector_visitor.cpp $(SRC_DIR)/semantic/symbol_collector_visitor.h | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/semantic/symbol_collector_visitor.cpp -o $@
 
+# Grammar object files
+$(BUILDDIR)/grammar.o: $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/grammar.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Grammar/grammar.cpp -o $@
+
+$(BUILDDIR)/production.o: $(SRC_DIR)/Grammar/production.cpp $(SRC_DIR)/Grammar/production.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Grammar/production.cpp -o $@
+
+$(BUILDDIR)/symbol.o: $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/symbol.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Grammar/symbol.cpp -o $@
+
+$(BUILDDIR)/sentence.o: $(SRC_DIR)/Grammar/sentence.cpp $(SRC_DIR)/Grammar/sentence.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Grammar/sentence.cpp -o $@
+
+# Automata object files
+$(BUILDDIR)/dfa.o: $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/dfa.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/dfa.cpp -o $@
+
+$(BUILDDIR)/nfa.o: $(SRC_DIR)/Automata/nfa.cpp $(SRC_DIR)/Automata/nfa.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/nfa.cpp -o $@
+
+$(BUILDDIR)/ContainerSet.o: $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/ContainerSet.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/utils/ContainerSet.cpp -o $@
+
+$(BUILDDIR)/aut_manipulation.o: $(SRC_DIR)/Automata/utils/aut_manipulation.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/utils/aut_manipulation.cpp -o $@
+
+$(BUILDDIR)/operations.o: $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/operations/operations.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/operations/operations.cpp -o $@
+
+$(BUILDDIR)/state.o: $(SRC_DIR)/Automata/state.cpp $(SRC_DIR)/Automata/state.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Automata/state.cpp -o $@
+
+# Parser object files
+$(BUILDDIR)/Item.o: $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/Item.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/Item.cpp -o $@
+
+$(BUILDDIR)/SLR1Parser.o: $(SRC_DIR)/Parser/SLR1Parser.cpp $(SRC_DIR)/Parser/SLR1Parser.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/SLR1Parser.cpp -o $@
+
 # clean:
 # 	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so
 clean:
@@ -108,7 +148,7 @@ clean_artifacts:
 # Limpiar todo, incluidos los artefactos
 clean_all: clean clean_artifacts
 
-execute: compile
+execute: # compile
 	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.hulk
 
 # .PHONY: compile execute clean
