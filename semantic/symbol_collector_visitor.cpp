@@ -74,7 +74,7 @@ void SymbolCollectorVisitor::visit(BinOpNode* node, Context* context) {
         if (node->left) node->left->accept(this, context);
         if (node->right) node->right->accept(this, context);
         // Basic type inference for binary operations
-        if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/") {
+        if (node->op == "+" || node->op == "-" || node->op == "*" || node->op == "/" || node->op == "^" || node->op == "%") {
             // Assume numeric operations return a number
             node->inferredType = Context::numberType;
         } else if (node->op == "&" || node->op == "|" || node->op == "==" || node->op == "!=" || node->op == "is" || node->op == "<" || node->op == ">" || node->op == "<=" || node->op == ">=") {

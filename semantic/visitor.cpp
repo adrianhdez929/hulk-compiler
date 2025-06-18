@@ -449,63 +449,6 @@ void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
         return;
     }
 
-    // cout << "Visiting IDNode: " << node->id_name << endl;
-    
-    // Check if we're in a type member context (inside a method)
-    // if (context->currentType) {
-        // cout << "inside type: " << context->currentType->name << endl;
-    //     // If we're inside a type, we need to check if the ID is a member variable or method
-    //     // First check if it's a local variable/parameter in the current function scope
-    //     auto localVarType = context->getVarType(node->id_name);
-    //     bool isLocalVariable = false;
-        
-    //     // Check if it's defined in the immediate function context (not inherited from parent contexts)
-    //     if (localVarType && context->isLocal(node->id_name)) {
-    //         isLocalVariable = true;
-            // cout << "IDNode '" << node->id_name << "' is a local variable in function context" << endl;
-    //         node->inferredType = localVarType;
-    //         node->semanticValue = "var_ref(" + node->id_name + ")";
-    //         return;
-    //     }
-        
-    //     // If it's not a local variable, check if it's a member variable of the current type
-    //     if (!isLocalVariable) {
-            // cout << "IDNode '" << node->id_name << "' is not a local variable, checking type members" << endl;
-            
-    //         // Check if it's a member variable using the Context's collected data
-    //         auto collectedAttrs = context->getAttributesForType(context->currentType->name, true);
-    //         bool isMemberVariable = false;
-            
-    //         for (const auto& attr : collectedAttrs) {
-                // cout << attr.name << " is an attribute of type " << context->currentType->name << endl;
-    //             if (attr.name == node->id_name) {
-                    // cout << "IDNode '" << node->id_name << "' is an attribute of type '" << context->currentType->name << "'" << endl;
-    //                 node->semanticValue = "attr_ref(" + context->currentType->name + ", " + node->id_name + ")";
-    //                 node->inferredType = attr.type;
-    //                 isMemberVariable = true;
-    //                 addError("Semantic error in line " + std::to_string(node->line) + " : Member variable '" + node->id_name + 
-    //                                            "' cannot be accessed directly in method. Use 'self." + 
-    //                                            node->id_name + "' instead.");
-    //                 break;
-    //             }
-    //         }
-            
-    //         // Check if it's a method name used without 'self.'
-    //         if (!isMemberVariable) {
-    //             auto collectedMethods = context->getMethodsForType(context->currentType->name, true);
-    //             for (const auto& method : collectedMethods) {
-    //                 if (method.name == node->id_name) {
-                        // cout << "IDNode '" << node->id_name << "' is a method of type '" << context->currentType->name << "'" << endl;
-    //                     addError("Semantic error in line " + std::to_string(node->line) + " : Method '" + node->id_name + 
-    //                                            "' cannot be called directly in method. Use 'self." + 
-    //                                            node->id_name + "()' instead.");
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    
     if (!context->isDefined(node->id_name)) {
         addError("Semantic error in line " + std::to_string(node->line) + " : Variable '" + node->id_name + "' is not defined");
         return;
@@ -514,7 +457,6 @@ void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
     // Get the variable type and set the inferred type
     auto varType = context->getVarType(node->id_name);
     if (varType) {
-        // cout << "setting inferred type for IDNode '" << node->id_name << "' to " << varType->name << endl;
         node->inferredType = varType;
     }
 }
