@@ -1,0 +1,214 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Informe del Compilador HULK}
+\author{David S\'anchez}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    % Un breve resumen del proyecto.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{Introducción}
+    \subsection{Motivación}
+    % Explicar por qué se realizó este proyecto.
+    \subsection{El Lenguaje HULK}
+    % Describir las características principales del lenguaje HULK.
+    \subsection{Objetivos}
+    % Listar los objetivos del proyecto.
+    \subsection{Estructura del Informe}
+    % Describir brevemente qué se encontrará en cada sección del informe.
+
+\section{Análisis Léxico}
+    \subsection{Tokens}
+    % Describir los tokens del lenguaje.
+    \subsection{Expresiones Regulares}
+    % Mostrar las expresiones regulares utilizadas para reconocer los tokens.
+    \subsection{Implementación}
+    % Describir la implementación del analizador léxico (por ejemplo, usando Flex).
+
+\section{Análisis Sintáctico}
+    \subsection{Gramática}
+    % Presentar la gramática del lenguaje en formato BNF.
+    \subsection{Tipo de Parser}
+    % Explicar el tipo de parser utilizado (SLR(1), LALR(1), etc.).
+    \subsection{Árbol de Sintaxis Abstracta (AST)}
+    % Describir la estructura del AST.
+    \subsection{Implementación}
+    % Describir la implementación del analizador sintáctico (por ejemplo, usando Bison/Yacc).
+
+\section{Análisis Semántico}
+    \subsection{Comprobación de Tipos}
+    % Describir cómo se realiza la comprobación de tipos.
+    \subsection{Reglas de Alcance (Scope)}
+    % Explicar las reglas de alcance de las variables y funciones.
+    \subsection{Tabla de Símbolos}
+    % Describir la estructura de la tabla de símbolos.
+    \subsection{Manejo de Errores}
+    % Explicar cómo se manejan los errores semánticos.
+
+\section{Generación de Código}
+    \subsection{Representación Intermedia}
+    % Si se utiliza una, describirla.
+    \subsection{Arquitectura de Destino}
+    % Especificar la arquitectura para la que se genera el código.
+    \subsection{Proceso de Generación}
+    % Describir el proceso de generación de código.
+
+\section{Pruebas}
+    % Describir cómo se probó el compilador.
+    % Incluir ejemplos de código HULK y la salida del compilador.
+
+\section{Conclusiones}
+    \subsection{Resumen del Trabajo}
+    % Resumir lo que se ha logrado.
+    \subsection{Trabajo Futuro}
+    % Sugerir posibles mejoras o extensiones del proyecto.
+
+\begin{thebibliography}{9}
+    % Listar las referencias bibliográficas.
+    \bibitem{aho_ullman}
+    Aho, A. V., Lam, M. S., Sethi, R., & Ullman, J. D. (2007).
+    \textit{Compilers: Principles, Techniques, and Tools}.
+    Pearson/Addison Wesley.
+\end{thebibliography}
+
+\appendix
+\section{Gramática Completa}
+\begin{verbatim}
+input -> line
+    | lines_block
+    | line lines_block
+
+lines_block -> { lines }
+
+lines -> epsilon
+    | non_empty_lines
+
+non_empty_lines -> line
+    | non_empty_lines line
+
+line -> expr ;
+    | func_assign ;
+    | type_node_decl
+
+expr -> arit_op
+    | bool_expr
+    | while while_expr
+    | string
+    | id_expr
+    | func_call
+    | let_assign
+    | if conditional
+    | member_access_expr
+    | expr := expr
+    | expr = expr
+    | expr @ expr
+    | expr @@ expr
+    | expr as var_id
+
+func_assign -> function var_id ( args_list ) => expr
+    | function var_id ( args_list ) : type_id => expr
+    | function var_id ( args_list ) { lines }
+    | function var_id ( args_list ) : type_id { lines }
+
+args_list -> epsilon
+    | id_expr
+    | args_list , id_expr
+
+id_expr -> var_id : type_id
+    | var_id
+
+let_assign -> let var_assign_list in expr
+    | let var_assign_list in lines_block
+
+var_assign_list -> id_expr = expr
+    | id_expr = expr as var_id
+    | id_expr = new_expr
+    | var_assign_list , id_expr = expr
+    | var_assign_list , id_expr = expr as var_id
+    | var_assign_list , id_expr = new_expr
+
+new_expr -> new var_id ( expr_list )
+
+expr_list -> epsilon
+    | expr
+    | new_expr
+    | expr_list , expr
+    | expr_list , new_expr
+
+func_call -> var_id ( expr_list )
+
+arit_op -> number
+    | ( expr )
+    | expr + expr
+    | expr - expr
+    | expr * expr
+    | expr / expr
+    | expr ^ expr
+    | expr % expr
+    | - expr
+
+bool_expr -> bool
+    | expr >= expr
+    | expr > expr
+    | expr <= expr
+    | expr < expr
+    | expr == expr
+    | expr != expr
+    | expr & expr
+    | expr | expr
+    | ! expr
+    | id_expr is type_id
+    | func_call is var_id
+
+conditional -> ( bool_expr ) expr else expr
+    | ( bool_expr ) lines_block else expr
+    | ( bool_expr ) expr else lines_block
+    | ( bool_expr ) lines_block else lines_block
+    | ( bool_expr ) expr elif conditional
+    | ( bool_expr ) lines_block elif conditional
+
+while_expr -> ( bool_expr ) lines_block
+    | ( bool_expr ) expr
+
+type_node_decl -> type type_id { type_body_elements }
+    | type type_id inherits type_id { type_body_elements }
+    | type type_id inherits type_id ( args_list ) { type_body_elements }
+    | type type_id ( args_list ) { type_body_elements }
+    | type type_id ( args_list ) inherits type_id { type_body_elements }
+    | type type_id ( args_list ) inherits type_id ( args_list ) { type_body_elements }
+
+type_body_elements -> epsilon
+    | type_body_elements attribute
+    | type_body_elements method
+
+attribute -> id_expr = expr ;
+    | id_expr = expr as var_id ;
+
+method -> var_id ( args_list ) => expr ;
+    | var_id ( args_list ) : type_id => expr ;
+    | var_id ( args_list ) { lines }
+    | var_id ( args_list ) : type_id { lines }
+\end{verbatim}
+
+\section{Fragmentos de Código Fuente}
+% Incluir fragmentos de código relevantes.
+\lstset{language=C++, basicstyle=\footnotesize}
+\begin{lstlisting}[caption={Ejemplo de código C++}]
+// Tu código aquí
+\end{lstlisting}
+
+\end{document}
