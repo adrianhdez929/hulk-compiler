@@ -4,7 +4,6 @@
 #include <algorithm>
 
 TypeCollectorVisitor::TypeCollectorVisitor() : globalContext(nullptr) {
-    // Initialize with built-in types will be called when context is available
 }
 
 void TypeCollectorVisitor::visit(ASTNode* node, Context* context) {
@@ -13,7 +12,6 @@ void TypeCollectorVisitor::visit(ASTNode* node, Context* context) {
         return;
     }
     
-    // Store global context reference
     if (!globalContext) {
         globalContext = context;
         registerBuiltinTypes(context);
@@ -31,13 +29,9 @@ void TypeCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     // std::cout << "TypeCollector: Processing type declaration '" << node->id->id_name << "'" << std::endl;
     processTypeDeclaration(node, context);
     
-    // Visit children for nested types (if any)
     if (node->args) {
         node->args->accept(this, context);
     }
-    
-    // Note: We don't visit the body here as that's for the symbol collector
-    // We only care about the type definition itself
 }
 
 void TypeCollectorVisitor::visit(ProgramNode* node, Context* context) {
@@ -46,13 +40,11 @@ void TypeCollectorVisitor::visit(ProgramNode* node, Context* context) {
         return;
     }
     
-    // std::cout << "TypeCollector: Starting type collection pass" << std::endl;
     
     if (node->getNode()) {
         node->getNode()->accept(this, context);
     }
     
-    // Validate all inheritance chains after collection
     for (const auto& pair : inheritanceMap) {
         validateInheritanceChain(pair.first);
     }
@@ -66,7 +58,6 @@ void TypeCollectorVisitor::visit(ASTNodeVector* node, Context* context) {
         return;
     }
     
-    // Process all children, looking for type declarations
     for (auto* child : node->children) {
         if (child) {
             child->accept(this, context);
@@ -77,7 +68,6 @@ void TypeCollectorVisitor::visit(ASTNodeVector* node, Context* context) {
 void TypeCollectorVisitor::visit(BlockNode* node, Context* context) {
     if (node == nullptr) return;
     
-    // Visit all children looking for type declarations
     for (auto* child : node->children) {
         if (child) {
             child->accept(this, context);
@@ -85,17 +75,13 @@ void TypeCollectorVisitor::visit(BlockNode* node, Context* context) {
     }
 }
 
-// For nodes that don't contain type declarations, we provide empty implementations
 void TypeCollectorVisitor::visit(FloatNode* node, Context* context) {
-    // No type declarations in literal nodes
 }
 
 void TypeCollectorVisitor::visit(BoolNode* node, Context* context) {
-    // No type declarations in literal nodes
 }
 
 void TypeCollectorVisitor::visit(StringNode* node, Context* context) {
-    // No type declarations in literal nodes
 }
 
 void TypeCollectorVisitor::visit(UnaryOpNode* node, Context* context) {
@@ -118,15 +104,12 @@ void TypeCollectorVisitor::visit(FunctionCallNode* node, Context* context) {
 }
 
 void TypeCollectorVisitor::visit(IDNode* node, Context* context) {
-    // No type declarations in ID nodes
 }
 
 void TypeCollectorVisitor::visit(ArgsList* node, Context* context) {
-    // Args list doesn't contain type declarations, just parameter names
 }
 
 void TypeCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
-    // Function definitions don't create new types, but may contain type declarations in body
     if (node && node->body) {
         node->body->accept(this, context);
     }
@@ -145,7 +128,6 @@ void TypeCollectorVisitor::visit(VarAssign* node, Context* context) {
 }
 
 void TypeCollectorVisitor::visit(NewTypeNode* node, Context* context) {
-    // Type instantiation doesn't declare new types
     for (auto* expr : node->expr_list) {
         if (expr) expr->accept(this, context);
     }
@@ -214,11 +196,9 @@ void TypeCollectorVisitor::visit(AccessNode* node, Context* context) {
 }
 
 void TypeCollectorVisitor::visit(TypeAssMember* node, Context* context) {
-    // Type assignment members don't declare new types
 }
 
 void TypeCollectorVisitor::visit(AttributeMember* node, Context* context) {
-    // Attribute members don't declare new types
 }
 
 void TypeCollectorVisitor::visit(MethodMember* node, Context* context) {
@@ -235,26 +215,21 @@ void TypeCollectorVisitor::visit(TypeCastNode* node, Context* context) {
     }
 }
 
-// Helper method implementations
 void TypeCollectorVisitor::processTypeDeclaration(TypeDeclNode* node, Context* context) {
     const std::string& typeName = node->id->id_name;
     
-    // Check for type redefinition
     checkTypeRedefinition(typeName, node->line);
     if (hasErrors()) return;
     
-    // Determine parent type
     std::string parentName = "";
     if (!node->parents.empty()) {
         parentName = node->parents[0]; // HULK supports single inheritance
         
-        // Validate parent type exists (will be checked later in validation phase)
         if (!isValidParentType(parentName, context)) {
             addError("Type error in line " + std::to_string(node->line) + " :Type '" + typeName + "' cannot inherit from undefined type '" + parentName + "'");
             return;
         }
         
-        // Check for circular inheritance
         if (detectCircularInheritance(typeName, parentName)) {
             addError("Type error in line " + std::to_string(node->line) + " :Circular inheritance detected: type '" + typeName + "' cannot inherit from '" + parentName + "'");
             return;
@@ -263,17 +238,14 @@ void TypeCollectorVisitor::processTypeDeclaration(TypeDeclNode* node, Context* c
         inheritanceMap[typeName] = parentName;
     }
     
-    // Create type definition
     auto typeDef = createTypeDef(typeName, parentName);
     if (!typeDef) {
         throw std::runtime_error("Failed to create type definition for '" + typeName + "'");
         return;
     }
     
-    // Store collected type
     collectedTypes[typeName] = typeDef;
     
-    // Register type in context
     if (!context->defineType(typeName, typeDef)) {
         throw std::runtime_error("Failed to register type '" + typeName + "' in context");
         return;
@@ -293,10 +265,9 @@ void TypeCollectorVisitor::registerBuiltinTypes(Context* context) {
 
 bool TypeCollectorVisitor::detectCircularInheritance(const std::string& typeName, const std::string& parentName) {
     if (typeName == parentName) {
-        return true; // Direct self-inheritance
+        return true; 
     }
     
-    // Check if parent eventually inherits from this type
     std::string current = parentName;
     std::unordered_set<std::string> visited;
     
@@ -306,11 +277,11 @@ bool TypeCollectorVisitor::detectCircularInheritance(const std::string& typeName
         auto it = inheritanceMap.find(current);
         if (it != inheritanceMap.end()) {
             if (it->second == typeName) {
-                return true; // Circular inheritance found
+                return true; 
             }
             current = it->second;
         } else {
-            break; // No more parents in chain
+            break;
         }
     }
     
@@ -328,9 +299,8 @@ void TypeCollectorVisitor::validateInheritanceChain(const std::string& typeName)
         if (it != inheritanceMap.end()) {
             current = it->second;
             
-            // Check if parent type was collected
             if (collectedTypes.find(current) == collectedTypes.end() && 
-                current != "Object" && // Built-in Object type
+                current != "Object" && 
                 !current.empty()) {
                 addError("Type '" + typeName + "' inherits from undefined type '" + current + "'");
                 return;
@@ -345,10 +315,8 @@ std::shared_ptr<TypeDef> TypeCollectorVisitor::createTypeDef(const std::string& 
     auto typeDef = std::make_shared<TypeDef>(typeName);
     
     if (!parentName.empty()) {
-        // Set parent type info (will be fully resolved later)
         typeDef->parentType = std::make_shared<TypeInfo>(parentName, TypeKind::CLASS);
     } else if (typeName != "Object") {
-        // Default to Object as parent for all types except Object itself
         typeDef->parentType = Context::objectType;
     }
     
@@ -356,17 +324,14 @@ std::shared_ptr<TypeDef> TypeCollectorVisitor::createTypeDef(const std::string& 
 }
 
 bool TypeCollectorVisitor::isValidParentType(const std::string& parentName, Context* context) {
-    // Check if it's a built-in type
     if (parentName == "Object" || parentName == "String" || parentName == "Number" || parentName == "Boolean") {
         return true;
     }
     
-    // Check if it's already been collected
     if (collectedTypes.find(parentName) != collectedTypes.end()) {
         return true;
     }
     
-    // Check if it exists in context
     return context->getType(parentName) != nullptr;
 }
 
@@ -376,7 +341,6 @@ void TypeCollectorVisitor::checkTypeRedefinition(const std::string& typeName, in
     }
 }
 
-// Error handling methods
 void TypeCollectorVisitor::addError(const std::string& error) {
     errors.push_back(error);
     std::cerr << "TypeCollector Error: " << error << std::endl;
@@ -400,7 +364,6 @@ void TypeCollectorVisitor::printErrors() const {
     }
 }
 
-// Getter methods
 const std::unordered_map<std::string, std::shared_ptr<TypeDef>>& TypeCollectorVisitor::getCollectedTypes() const {
     return collectedTypes;
 }

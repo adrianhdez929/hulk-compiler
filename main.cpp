@@ -14,12 +14,8 @@
 
 using namespace std;
 
-ASTNode* parseScript(); // Forward declaration of parseScript function from execute.cpp
-
 // // using namespace manipulation;
 
-extern FILE *yyin;
-extern int yyparse();
 ASTNode* root = nullptr;
 
 // Create the new two-pass semantic analysis system
@@ -103,16 +99,8 @@ int main(int argc, char* argv[]) {
     // yyparse();
     // //endregion
 
-    try {
-    root = parseScript();
-    } catch (const std::exception& e) {
-        std::cerr << "Error al parsear el script: " << e.what() << std::endl;
-        return 1;
-    }
-
     if (!root) {
         std::cerr << "Error: No se pudo construir el AST" << std::endl;
-        fclose(yyin);
         return 1;
     }
 
@@ -208,8 +196,9 @@ int main(int argc, char* argv[]) {
             delete symbolCollectorVisitor;
             delete globalContext;
             delete root;
-            fclose(yyin);
             return 1;
+        } else {
+            std::cout << "Semantic analysis completed successfully with no errors." << std::endl;
         }
         
     //     std::cout << "All semantic analysis passes completed successfully!" << std::endl;
