@@ -10,7 +10,7 @@
 #include <fstream>
 #include <exception>
 #include "test.h"
-#include "execute.cpp"
+#include "execute.h"
 
 using namespace std;
 
@@ -29,6 +29,30 @@ SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
+    std::string file_path = "script.hulk"; // Default file path
+
+    Grammar hulk_grammar = getHulkGrammar();
+    if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
+        bool success = create_artifacts(hulk_grammar, false); // false for no verbose output
+        if (!success) {
+            std::cerr << "Error al crear los artefactos" << std::endl;
+            return 1;
+        }
+    }
+
+    std::string error_message;
+    std::string script_content = read_source_file(file_path, error_message);
+    if (script_content.empty()) {
+        std::cerr << "Error: " << error_message << std::endl;
+        return 1;
+    }
+
+    root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+
+    if (!root) {
+        std::cerr << "Error al compilar el script: " << error_message << std::endl;
+        return 1;
+    }
 
     // Simple test to avoid segfaults
     std::cout << "=== HULK Compiler Starting ===" << std::endl;
@@ -61,8 +85,6 @@ int main(int argc, char* argv[]) {
     // return 0;
 
     // //region: Flex/Bison setup
-    // //run tests
-    // execute_test();
     // const char* filename = "script.hulk"; //default
     // if (argc > 1) {
 	// 	filename = argv[1];
@@ -74,93 +96,6 @@ int main(int argc, char* argv[]) {
 	// }
     // yyparse();
     // //endregion
-
-    // //region: Custom setup for Hulk language
-    // // Cargar Lexer y Parser
-    // Lexer* lexer = Lexer::deserialize_lexer("lexer.l");
-    // if (!lexer) {
-    //     std::cerr << "Error: No se pudo cargar el lexer" << std::endl;
-    //     return 1;
-    // }
-
-    // // Cargar gramatica de hulk
-    // Grammar hulk_grammar = getHulkGrammar();
-
-    // // Cargar Parser
-    // SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", hulk_grammar);
-    // if (!parser) {
-    //     std::cerr << "Error: No se pudo cargar el parser" << std::endl;
-    //     return 1;
-    // }
-    // std::cout << "Artefactos cargados exitosamente." << std::endl;
-
-    // // Cargar script.hulk
-    // std::ifstream script_file("script.hulk");
-    // if (!script_file.is_open()) {
-    //     std::cerr << "Error: No se pudo abrir el archivo script.hulk" << std::endl;
-    //     return 1;
-    // }
-    // std::string script_content((std::istreambuf_iterator<char>(script_file)), std::istreambuf_iterator<char>());
-    // script_file.close();
-    // std::cout << "Contenido del script.hulk cargado exitosamente." << std::endl;
-    
-    // // Tokenizar el script
-    // auto result = lexer->tokenize(script_content);
-    // std::cout << "Tokens generados:" << std::endl;
-    // for (const auto& token : result) {
-    //     std::cout << "Tipo: " << token.first << ", Valor: " << token.second << std::endl;
-    // }
-    // if (result.empty()) {
-    //     std::cerr << "Error: No se generaron tokens del script" << std::endl;
-    //     return 1;
-    // }
-    // // Retirar los espacios, saltos de linea y tabulaciones
-    // result.erase(std::remove_if(result.begin(), result.end(),
-    //                              [](const std::pair<std::string, std::string>& token) {
-    //                                  return token.second == "space" || token.second == "newline" || token.second == "tab";
-    //                              }), result.end());
-    // if (result.empty()) {
-    //     std::cerr << "Error: No se generaron tokens significativos del script" << std::endl;
-    //     return 1;
-    // }
-    // std::cout << "Tokens significativos generados exitosamente." << std::endl;
-    // // Imprimir los tokens generados
-    // std::cout << "Tokens generados:" << std::endl;
-    // for (const auto& token : result) {
-    //     std::cout << "Tipo: " << token.first << ", Valor: " << token.second << std::endl;
-    // }
-
-    // std::vector<std::string> token_strings;
-    // for (const auto& token : result) {
-    //     token_strings.push_back(token.second);
-    // }
-
-    // // Parsear los tokens
-    // auto parse_result = parser->Parse(token_strings);
-    // if (parse_result.first.empty()) {
-    //     std::cerr << "Error: No se pudo parsear el script" << std::endl;
-    //     return 1;
-    // }
-
-    // std::queue<std::shared_ptr<AttrProd>> productions;
-    // std::vector<std::string> actions;
-    // // Get the productions and actions from the parse result
-    // for (const auto& id : parse_result.first) {
-    //     productions.push(make_shared<AttrProd>(hulk_grammar.GetProduction(id)));
-    // }
-    // for (const auto& action : parse_result.second) {
-    //     actions.push_back(action);
-    // }
-
-    // // Aplicar reverse_evaluate
-    // std::cout << "Aplicando reverse_evaluate..." << std::endl;
-    // auto root = build_ast(productions, actions, result, hulk_grammar);
-    // if (!root) {
-    //     std::cerr << "Error: No se pudo construir el AST" << std::endl;
-    //     return 1;
-    // }
-    // std::cout << "AST construido exitosamente." << std::endl;
-    // //enregion
 
     try {
     root = parseScript();

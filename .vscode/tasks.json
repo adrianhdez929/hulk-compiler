@@ -20,6 +20,7 @@
                 "Parser/Item.cpp",
                 "Parser/SLR1Parser.cpp",
                 "Ast/ast.cpp",
+                "execute.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"

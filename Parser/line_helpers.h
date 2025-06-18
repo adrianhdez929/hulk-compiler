@@ -1,3 +1,4 @@
+#include <cstddef>  // Para offsetof
 #pragma once
 
 #include <algorithm>
@@ -7,15 +8,6 @@
 #include "../Ast/ast.hpp"
 #include "../Lexer/Token.h"
 #include "../Lexer/SpecialTypes.h"
-
-/**
- * @brief Extrae la línea de un Token
- * @param token Token del que extraer la línea
- * @return Línea del token o 0 si es nulo
- */
-inline int getLineFromToken(const Token* token) {
-    return token ? token->Line() : 0;
-}
 
 /**
  * @brief Extrae la línea de un ASTNode
@@ -39,45 +31,32 @@ inline int minLine(int line1, int line2) {
 }
 
 /**
- * @brief Extrae la línea mínima de un vector de argumentos de ElementType
+ * @brief Extrae la línea de un vector de argumentos de ElementType siguiendo la lógica de Bison
  * @param args Vector de argumentos (Token o ASTNode*)
- * @return Línea mínima encontrada o 0 si no se encuentra ninguna línea válida
+ * @return Línea del primer token o nodo válido, o 0 si no hay argumentos válidos
  */
 inline int getMinLineFromArgs(const std::vector<ElementType>& args) {
-    int minLine = std::numeric_limits<int>::max();
-    bool foundValidLine = false;
-    
-    for (const auto& arg : args) {
-        int line = 0;
+    // Bison asigna la línea del primer símbolo en la regla
+    for (size_t i = 0; i < args.size(); ++i) {
+        const auto& arg = args[i];
         
-        if (std::holds_alternative<std::string>(arg)) {
-            // Los strings no tienen información de línea
-            continue;
+        if (std::holds_alternative<Token>(arg)) {
+            // Si es un token, obtener su línea directamente
+            int line = std::get<Token>(arg).Line();
+            if (line > 0) return line;
         } 
         else if (std::holds_alternative<ASTNode*>(arg)) {
+            // Si es un nodo, verificar que su línea sea válida
             ASTNode* node = std::get<ASTNode*>(arg);
-            if (node) {
-                // // Intentar convertir a Token primero
-                // const Token* token = dynamic_cast<const Token*>(node);
-                // if (token) {
-                //     line = token->Line();
-                // } else {
-                //     line = node->line;
-                // }
-                line = node->line; // Usar la línea del nodo directamente
+            if (node && node->line > 0) {
+                return node->line;
             }
         }
-        else if (std::holds_alternative<Token>(arg)) {
-            line = std::get<Token>(arg).Line();
-        }
-        
-        if (line > 0) {
-            minLine = std::min(minLine, line);
-            foundValidLine = true;
-        }
+        // Los strings no tienen información de línea, ignorar
     }
-    //Si no se encontró ninguna línea válida, devolver el maximo valor posible de int
-    return foundValidLine ? minLine : std::numeric_limits<int>::max();
+    
+    // Si no encontramos ninguna línea válida, devolver 0
+    return 0;
 }
 
 /**
