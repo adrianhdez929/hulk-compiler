@@ -15,7 +15,7 @@
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return true si los artefactos se crearon correctamente, false en caso contrario
  */
-bool create_artifacts(bool verbose = false);
+bool create_artifacts(Grammar& hulk_grammar, bool verbose = false);
 
 /**
  * @brief Compila un código fuente Hulk y devuelve su AST
@@ -24,7 +24,7 @@ bool create_artifacts(bool verbose = false);
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Puntero al AST generado, o nullptr si hubo errores
  */
-ASTNode* compile_hulk(const std::string& source_code, std::string& error_message, bool verbose = false);
+ASTNode* compile_hulk(const std::string& source_code, std::string& error_message, Grammar& hulk_grammar, bool verbose = false);
 
 /**
  * @brief Compila un archivo de código fuente Hulk y devuelve su AST
@@ -33,7 +33,7 @@ ASTNode* compile_hulk(const std::string& source_code, std::string& error_message
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Puntero al AST generado, o nullptr si hubo errores
  */
-ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_message, bool verbose = false);
+ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_message, Grammar& hulk_grammar, bool verbose = false);
 
 /**
  * @brief Carga y devuelve los artefactos necesarios para compilar (lexer y parser)

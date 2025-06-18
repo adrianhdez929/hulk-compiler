@@ -18,7 +18,7 @@
 /// @param s La cadena a dividir.
 /// @param delimiter El carácter delimitador que se utilizará para dividir la cadena.
 /// @return Un vector de subcadenas (tokens) resultantes de la división.
-auto split(const std::string& s, char delimiter) -> std::vector<std::string> {
+inline auto split(const std::string& s, char delimiter) -> std::vector<std::string> {
     std::vector<std::string> tokens;
     std::string token;
     for (char c : s) {
@@ -35,7 +35,7 @@ auto split(const std::string& s, char delimiter) -> std::vector<std::string> {
         tokens.push_back(token);
     }
     return tokens;
-};
+}
 // std::string trim(const std::string& str) {
 //     auto start = str.begin();
 //     while (start != str.end() && std::isspace(*start)) {
@@ -53,13 +53,13 @@ auto split(const std::string& s, char delimiter) -> std::vector<std::string> {
 /// @param str La cadena a limpiar.
 /// @param chars_to_remove Los caracteres a eliminar (por defecto: espacio, tabulación, nueva línea, retorno de carro).
 /// @return La cadena limpia.
-std::string trim(const std::string& str, const std::string& chars_to_remove = " \t\n\r") {
+inline std::string trim(const std::string& str, const std::string& chars_to_remove = " \t\n\r") {
     auto start = str.find_first_not_of(chars_to_remove);
     if (start == std::string::npos) return "";
     
     auto end = str.find_last_not_of(chars_to_remove);
     return str.substr(start, end - start + 1);
-};
+}
 
 class GrammarParser {
 private:

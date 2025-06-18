@@ -23,7 +23,7 @@
 #include "Ast/ast.hpp"
 #include "Parser/line_helpers.h" // Utilidades para calcular líneas mínimas
 
-Grammar getHulkGrammar(){
+inline Grammar getHulkGrammar(){
 	Grammar g;
 
 	// Esta tabla es de guia, para saber los terminales y su representacion en el lexer.

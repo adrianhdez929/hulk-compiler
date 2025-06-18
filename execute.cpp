@@ -10,7 +10,7 @@
 #include "hulkGrammar.hpp"
 // #include "validate_grammar.hpp"
 
-bool create_artifacts(bool verbose) {
+bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     if (verbose) {
         std::cout << "=== Creando artefactos del compilador Hulk ===" << std::endl;
     }
@@ -122,9 +122,8 @@ bool create_artifacts(bool verbose) {
     }
 
     // Crear gramatica de Hulk
-    // POR IMPLEMENTAR: Aquí deberías definir la gramática específica de Hulk
     Grammar::ResetProductionCounter();  // Reset before creating Hulk grammar
-    Grammar hulk_grammar = getHulkGrammar(); //getHulkGrammar();
+    // Grammar hulk_grammar = getHulkGrammar(); //getHulkGrammar();
 
     // Crear parser de Hulk
     SLR1Parser hulk_parser(hulk_grammar); // true for verbose mode
@@ -149,7 +148,7 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
     // Verificar si necesitamos crear los artefactos
     static bool force_recreate = false;  // Esta variable se puede cambiar para forzar la recreación
     if (force_recreate || !std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
-        if (!create_artifacts(verbose)) {
+        if (!create_artifacts(parser_grammar, verbose)) {
             error_message = "No se pudieron crear los artefactos necesarios para el compilador";
             return {nullptr, nullptr};
         }
@@ -163,18 +162,18 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
     }
 
     // Para depuración, verifiquemos los símbolos de la gramática 
-    if (verbose) {
-        std::cout << "Símbolos en la gramática cargada:" << std::endl;
-        for (const auto& terminal : parser_grammar.Terminals()) {
-            std::cout << " - Terminal: " << terminal->Name() << std::endl;
-        }
-        for (const auto& nonterminal : parser_grammar.NonTerminals()) {
-            std::cout << " - No Terminal: " << nonterminal->Name() << std::endl;
-        }
-        for (const auto& production : parser_grammar.Productions()) {
-            std::cout << " - Producción: " << production.ToString() << std::endl;
-        }
-    }
+    // if (verbose) {
+    //     std::cout << "Símbolos en la gramática cargada:" << std::endl;
+    //     for (const auto& terminal : parser_grammar.Terminals()) {
+    //         std::cout << " - Terminal: " << terminal->Name() << std::endl;
+    //     }
+    //     for (const auto& nonterminal : parser_grammar.NonTerminals()) {
+    //         std::cout << " - No Terminal: " << nonterminal->Name() << std::endl;
+    //     }
+    //     for (const auto& production : parser_grammar.Productions()) {
+    //         std::cout << " - Producción: " << production.ToString() << std::endl;
+    //     }
+    // }
 
     SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", parser_grammar);
     if (!parser) {
@@ -226,14 +225,14 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
         if (verbose) {
             std::cout << "Iniciando análisis sintáctico con " << tokens.size() << " tokens..." << std::endl;
             
-            // Check if productions are still valid before parsing
-            std::cout << "Verificando integridad de producciones..." << std::endl;
-            int count = 0;
-            for (const auto& prod : hulk_grammar.Productions()) {
-                std::cout << "Producción " << prod.get_id() << ": " << prod.ToString() << std::endl;
-                count++;
-            }
-            std::cout << "Total de producciones verificadas: " << count << std::endl;
+            // // Check if productions are still valid before parsing
+            // std::cout << "Verificando integridad de producciones..." << std::endl;
+            // int count = 0;
+            // for (const auto& prod : hulk_grammar.Productions()) {
+            //     std::cout << "Producción " << prod.get_id() << ": " << prod.ToString() << std::endl;
+            //     count++;
+            // }
+            // std::cout << "Total de producciones verificadas: " << count << std::endl;
         }
         
         // Realizar análisis sintáctico
@@ -249,16 +248,16 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
         std::vector<std::string> actions;
         
         // Obtener producciones y acciones del resultado del parser
-        if (verbose) {
-            std::cout << "Obteniendo producciones a partir de IDs..." << std::endl;
-        }
+        // if (verbose) {
+        //     std::cout << "Obteniendo producciones a partir de IDs..." << std::endl;
+        // }
         
         int count = 0;
         for (const auto& id : parse_result.first) {
             try {
-                if (verbose) {
-                    std::cout << "  Buscando producción con ID: " << id << std::endl;
-                }
+                // if (verbose) {
+                //     std::cout << "  Buscando producción con ID: " << id << std::endl;
+                // }
                 const AttrProd& prod = hulk_grammar.GetProduction(id);
                 productions.push(make_shared<AttrProd>(prod));
                 count++;
@@ -270,10 +269,10 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
             }
         }
         
-        if (verbose) {
-            std::cout << "Se obtuvieron " << count << " producciones correctamente." << std::endl;
-            std::cout << "Procesando " << parse_result.second.size() << " acciones..." << std::endl;
-        }
+        // if (verbose) {
+        //     std::cout << "Se obtuvieron " << count << " producciones correctamente." << std::endl;
+        //     std::cout << "Procesando " << parse_result.second.size() << " acciones..." << std::endl;
+        // }
         
         for (const auto& action : parse_result.second) {
             actions.push_back(action);
@@ -296,10 +295,10 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
     }
 }
 
-ASTNode* compile_hulk(const std::string& source_code, std::string& error_message, bool verbose) {
+ASTNode* compile_hulk(const std::string& source_code, std::string& error_message, Grammar& hulk_grammar, bool verbose) {
     // Crear una única instancia de gramática para todo el proceso
-    Grammar hulk_grammar = getHulkGrammar();
-    
+    // Grammar hulk_grammar = getHulkGrammar();
+
     // Cargar artefactos del compilador
     std::string artifact_error;
     auto [lexer, parser] = load_compiler_artifacts(artifact_error, hulk_grammar, verbose);
@@ -335,7 +334,7 @@ ASTNode* compile_hulk(const std::string& source_code, std::string& error_message
     return ast;
 }
 
-ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_message, bool verbose) {
+ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_message, Grammar& hulk_grammar, bool verbose) {
     // Leer contenido del archivo
     std::string source_code = read_source_file(file_path, error_message);
     if (source_code.empty()) {
@@ -347,7 +346,7 @@ ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_mess
     }
     
     // Compilar el código fuente
-    return compile_hulk(source_code, error_message, verbose);
+    return compile_hulk(source_code, error_message, hulk_grammar, verbose);
 }
 
 // Sobrecarga eliminada: usamos parámetros por defecto en lugar de sobrecargas
@@ -414,67 +413,67 @@ bool validate_grammar_compatibility(const Grammar& g1, const Grammar& g2, bool v
     return compatible;
 }
 
-Grammar& ensure_same_grammar(Grammar& grammar) {
-    // This is a simple wrapper that can be expanded with validation logic
-    return grammar;
-}
+// int main(int argc, char* argv[]) {
+//     std::cout << "=== Ejecutando el compilador Hulk ===" << std::endl;
+    
+//     // Verificar si se solicita recrear los artefactos
+//     bool recreate_artifacts = false;
+//     std::string file_path = "script.hulk";
+    
+//     // for (int i = 1; i < argc; i++) {
+//     //     std::string arg = argv[i];
+//     //     if (arg == "--recreate" || arg == "-r") {
+//     //         recreate_artifacts = true;
+//     //     } else {
+//     //         file_path = arg;
+//     //     }
+//     // }
 
-int main(int argc, char* argv[]) {
-    std::cout << "=== Ejecutando el compilador Hulk ===" << std::endl;
+//     // Verificar si estan los artefactos del compilador
+//     if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
+//         recreate_artifacts = true; // Forzar recreación si no existen los artefactos
+//     }
     
-    // Verificar si se solicita recrear los artefactos
-    bool recreate_artifacts = false;
-    std::string file_path = "script.hulk";
+//     if (recreate_artifacts) {
+//         std::cout << "Recreando artefactos del compilador..." << std::endl;
+//         std::string error_msg;
+//         bool success = create_artifacts(true);
+//         if (!success) {
+//             std::cerr << "Error al recrear los artefactos" << std::endl;
+//             return 1;
+//         }
+//         std::cout << "Artefactos recreados exitosamente" << std::endl;
+//     }
     
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-        if (arg == "--recreate" || arg == "-r") {
-            recreate_artifacts = true;
-        } else {
-            file_path = arg;
-        }
-    }
+//     // Cargar archivo de código fuente
+//     std::string error_message;
+//     std::string script_content = read_source_file(file_path, error_message);
+//     if (script_content.empty()) {
+//         std::cerr << "Error: " << error_message << std::endl;
+//         return 1;
+//     }
+//     std::cout << "Contenido de '" << file_path << "' cargado exitosamente." << std::endl;
     
-    if (recreate_artifacts) {
-        std::cout << "Recreando artefactos del compilador..." << std::endl;
-        std::string error_msg;
-        bool success = create_artifacts(true);
-        if (!success) {
-            std::cerr << "Error al recrear los artefactos" << std::endl;
-            return 1;
-        }
-        std::cout << "Artefactos recreados exitosamente" << std::endl;
-    }
+//     // Compilar el código utilizando nuestra función principal con modo verbose
+//     // Nota: Utilizamos una única gramática para todo el proceso de compilación
+//     ASTNode* ast = compile_hulk(script_content, error_message, false);
     
-    // Cargar archivo de código fuente
-    std::string error_message;
-    std::string script_content = read_source_file(file_path, error_message);
-    if (script_content.empty()) {
-        std::cerr << "Error: " << error_message << std::endl;
-        return 1;
-    }
-    std::cout << "Contenido de '" << file_path << "' cargado exitosamente." << std::endl;
+//     if (!ast) {
+//         std::cerr << "Error al compilar: " << error_message << std::endl;
+//         return 1;
+//     }
     
-    // Compilar el código utilizando nuestra función principal con modo verbose
-    // Nota: Utilizamos una única gramática para todo el proceso de compilación
-    ASTNode* ast = compile_hulk(script_content, error_message, false);
+//     // El AST se ha construido correctamente, podemos imprimirlo o procesarlo
+//     std::cout << "\nImprimiendo el AST construido:" << std::endl;
+//     ast->print();
     
-    if (!ast) {
-        std::cerr << "Error al compilar: " << error_message << std::endl;
-        return 1;
-    }
+//     // Aquí podrías agregar más procesamiento del AST, como:
+//     // - Análisis semántico
+//     // - Optimización
+//     // - Generación de código
     
-    // El AST se ha construido correctamente, podemos imprimirlo o procesarlo
-    std::cout << "\nImprimiendo el AST construido:" << std::endl;
-    ast->print();
+//     // Liberar la memoria del AST cuando hayamos terminado con él
+//     // delete ast;  // Descomenta cuando termines de usarlo
     
-    // Aquí podrías agregar más procesamiento del AST, como:
-    // - Análisis semántico
-    // - Optimización
-    // - Generación de código
-    
-    // Liberar la memoria del AST cuando hayamos terminado con él
-    // delete ast;  // Descomenta cuando termines de usarlo
-    
-    return 0;
-}
+//     return 0;
+// }
