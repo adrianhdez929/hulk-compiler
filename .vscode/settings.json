@@ -74,6 +74,9 @@
 		"stop_token": "cpp",
 		"thread": "cpp",
 		"filesystem": "cpp",
-		"climits": "cpp"
+		"climits": "cpp",
+		"condition_variable": "cpp",
+		"mutex": "cpp",
+		"shared_mutex": "cpp"
 	}
 }

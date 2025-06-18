@@ -10,7 +10,7 @@
 #include "../Lexer/node.h"
 #include "../Ast/ast.hpp"
 
-std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& productions, 
+inline std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& productions, 
                         const std::vector<std::string>& actions, 
                         const std::vector<std::pair<std::string, std::string>>& token_names, Grammar& grammar) {
     std::stack<std::string> token_stack;
@@ -214,7 +214,7 @@ std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& pr
     return node_stack[start_name].top();
 }
 
-ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions, 
+inline ASTNode* build_ast(std::queue<std::shared_ptr<AttrProd>>& productions, 
                         const std::vector<std::string>& actions, 
                         const std::vector<Token>& token, Grammar& grammar) {
     std::stack<Token> token_stack;
