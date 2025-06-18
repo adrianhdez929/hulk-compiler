@@ -225,6 +225,12 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
         if (verbose) {
             std::cout << "Iniciando análisis sintáctico con " << tokens.size() << " tokens..." << std::endl;
             
+            // print tokens
+            std::cout << "Tokens generados:" << std::endl;
+            for (const auto& token : tokens) {
+                std::cout << "  " << token.ToString() << std::endl;
+            }
+
             // // Check if productions are still valid before parsing
             // std::cout << "Verificando integridad de producciones..." << std::endl;
             // int count = 0;
@@ -248,17 +254,20 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
         std::vector<std::string> actions;
         
         // Obtener producciones y acciones del resultado del parser
-        // if (verbose) {
-        //     std::cout << "Obteniendo producciones a partir de IDs..." << std::endl;
-        // }
+        if (verbose) {
+            std::cout << "Obteniendo producciones a partir de IDs..." << std::endl;
+        }
         
         int count = 0;
         for (const auto& id : parse_result.first) {
             try {
-                // if (verbose) {
-                //     std::cout << "  Buscando producción con ID: " << id << std::endl;
-                // }
+                if (verbose) {
+                    std::cout << "  Buscando producción con ID: " << id << std::endl;
+                }
                 const AttrProd& prod = hulk_grammar.GetProduction(id);
+                if (verbose) {
+                    std::cout << "  Producción encontrada: " << prod.ToString() << std::endl;
+                }
                 productions.push(make_shared<AttrProd>(prod));
                 count++;
             } catch (const std::runtime_error& e) {

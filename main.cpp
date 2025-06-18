@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+    root = compile_hulk(script_content, error_message, hulk_grammar, true); // false for no verbose output
 
     if (!root) {
         std::cerr << "Error al compilar el script: " << error_message << std::endl;
