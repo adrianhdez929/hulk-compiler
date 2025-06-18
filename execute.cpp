@@ -30,7 +30,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     SLR1Parser parser(lexer_grammar);
     
     // Serializar parser
-    if (!parser.serialize_parser("parser.p")) {
+    if (!parser.serialize_parser("parser.p", "hulk")) {
         std::cerr << "Error: No se pudo serializar el parser" << std::endl;
         return false;
     }
@@ -116,7 +116,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     Lexer lexer(token_table, lexer_grammar, parser);
     
     // Serializar lexer
-    if (!lexer.serialize_lexer("lexer.l")) {
+    if (!lexer.serialize_lexer("lexer.l", "hulk")) {
         std::cerr << "Error: No se pudo serializar el lexer" << std::endl;
         return false;
     }
@@ -128,7 +128,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     // Crear parser de Hulk
     SLR1Parser hulk_parser(hulk_grammar); // true for verbose mode
     // Serializar parser de Hulk
-    if (!hulk_parser.serialize_parser("hulk_parser.p")) {
+    if (!hulk_parser.serialize_parser("hulk_parser.p", "hulk")) {
         std::cerr << "Error: No se pudo serializar el parser de Hulk" << std::endl;
         return false;
     }
@@ -155,7 +155,7 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
     }
 
     // Cargar Lexer y Parser
-    Lexer* lexer = Lexer::deserialize_lexer("lexer.l");
+    Lexer* lexer = Lexer::deserialize_lexer("lexer.l", "hulk");
     if (!lexer) {
         error_message = "No se pudo cargar el lexer";
         return {nullptr, nullptr};
@@ -175,7 +175,7 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
     //     }
     // }
 
-    SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", parser_grammar);
+    SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", "hulk", parser_grammar);
     if (!parser) {
         delete lexer; // Liberar memoria del lexer cargado
         error_message = "No se pudo cargar el parser. Es posible que la gramática utilizada para crear el parser serializado sea diferente de la gramática actual. Intenta recrear los artefactos.";
@@ -412,6 +412,8 @@ bool validate_grammar_compatibility(const Grammar& g1, const Grammar& g2, bool v
     
     return compatible;
 }
+
+
 
 // int main(int argc, char* argv[]) {
 //     std::cout << "=== Ejecutando el compilador Hulk ===" << std::endl;
