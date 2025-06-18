@@ -29,10 +29,28 @@ EXECUTE_OBJS = $(BUILDDIR)/execute.o
 MAIN_OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
 OBJS = $(MAIN_OBJS) $(GRAMMAR_OBJS) $(AUTOMATA_OBJS) $(PARSER_OBJS) $(EXECUTE_OBJS)
 
-compile: $(BUILDDIR)/libstandard.so $(BUILDDIR)/$(PROGRAM) artifacts
+# Define los archivos necesarios para el create_artifacts
+# Incluimos Ast/ast.cpp porque el código de gramática depende de clases AST
+ARTIFACTS_SRC = $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR)/hulkGrammar.hpp \
+                $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
+                $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
+                $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
+                $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+                $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
+                $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp \
+                $(SRC_DIR)/Ast/ast.cpp
 
-artifacts: $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR)/execute.h $(SRC_DIR)/hulkGrammar.hpp $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp $(SRC_DIR)/Ast/ast.cpp | $(BUILDDIR)
-	$(CC) $(CFLAGS) -o $(SRC_DIR)/create_artifacts $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp $(SRC_DIR)/Ast/ast.cpp
+compile: $(BUILDDIR)/libstandard.so create_artifacts $(BUILDDIR)/$(PROGRAM)
+
+create_artifacts: | $(BUILDDIR)
+	$(CC) $(CFLAGS) -o $(SRC_DIR)/create_artifacts $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp \
+		$(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
+		$(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
+		$(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
+		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
+		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp \
+		$(SRC_DIR)/Ast/ast.cpp
 	$(SRC_DIR)/create_artifacts
 
 $(BUILDDIR):
@@ -127,7 +145,8 @@ $(BUILDDIR)/execute.o: $(SRC_DIR)/execute.cpp $(SRC_DIR)/execute.h | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/execute.cpp -o $@
 
 clean:
-	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so $(BUILDDIR)/create_artifacts
+	rm -rf $(BUILDDIR)/*.o $(BUILDDIR)/*.c $(BUILDDIR)/*.h $(BUILDDIR)/$(PROGRAM) $(BUILDDIR)/libstandard.so $(SRC_DIR)/create_artifacts
+	rm -f $(BUILDDIR)/lexer.l $(BUILDDIR)/parser.p $(BUILDDIR)/hulk_parser.p
 
 execute: compile
 	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.hulk
