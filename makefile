@@ -149,6 +149,6 @@ clean:
 	rm -f $(BUILDDIR)/lexer.l $(BUILDDIR)/parser.p $(BUILDDIR)/hulk_parser.p
 
 execute: compile
-	cd $(BUILDDIR) && LD_LIBRARY_PATH=. ./$(PROGRAM) ../script.hulk
+	cd $(SRC_DIR) && LD_LIBRARY_PATH=./hulk ./hulk/$(PROGRAM) ./script.hulk
 
 .PHONY: compile execute clean

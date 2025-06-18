@@ -27,15 +27,21 @@ ASTNode* root = nullptr;
 
 int main(int argc, char* argv[]) {
     std::string file_path = "script.hulk"; // Default file path
+    
+    // Si se proporciona un argumento, utilizarlo como ruta del archivo
+    if (argc > 1) {
+        file_path = argv[1];
+        std::cout << "Usando archivo: " << file_path << std::endl;
+    }
 
     Grammar hulk_grammar = getHulkGrammar();
-    if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
-        bool success = create_artifacts(hulk_grammar, false); // false for no verbose output
-        if (!success) {
-            std::cerr << "Error al crear los artefactos" << std::endl;
-            return 1;
-        }
-    }
+    // if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
+    //     bool success = create_artifacts(hulk_grammar, false); // false for no verbose output
+    //     if (!success) {
+    //         std::cerr << "Error al crear los artefactos" << std::endl;
+    //         return 1;
+    //     }
+    // }
 
     std::string error_message;
     std::string script_content = read_source_file(file_path, error_message);
