@@ -8,6 +8,7 @@
 #include <fstream>
 #include "Parser/reverse_evaluate.h"
 #include "hulkGrammar.hpp"
+#include "Parser/LR1Parser.h"
 // #include "validate_grammar.hpp"
 
 bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
@@ -27,7 +28,8 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     Grammar lexer_grammar = GrammarParser::Parse("Lexer/grammar.txt");
     
     // Crear parser
-    SLR1Parser parser(lexer_grammar);
+    // SLR1Parser parser(lexer_grammar);
+    LR1Parser parser(lexer_grammar); // Usando LR1Parser en lugar de SLR1Parser
     
     // Serializar parser
     if (!parser.serialize_parser("parser.p", "hulk")) {
@@ -126,7 +128,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     // Grammar hulk_grammar = getHulkGrammar(); //getHulkGrammar();
 
     // Crear parser de Hulk
-    SLR1Parser hulk_parser(hulk_grammar); // true for verbose mode
+    LR1Parser hulk_parser(hulk_grammar); // true for verbose mode
     // Serializar parser de Hulk
     if (!hulk_parser.serialize_parser("hulk_parser.p", "hulk")) {
         std::cerr << "Error: No se pudo serializar el parser de Hulk" << std::endl;
@@ -139,7 +141,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     return true;
 }
 
-std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose) {
+std::pair<Lexer*, LR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose) {
     // Verificar que existen los artefactos
     if (!std::filesystem::exists("hulk")) {
         std::filesystem::create_directory("hulk");
@@ -175,7 +177,7 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
     //     }
     // }
 
-    SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", "hulk", parser_grammar);
+    LR1Parser* parser = LR1Parser::deserialize_parser("hulk_parser.p", "hulk", parser_grammar);
     if (!parser) {
         delete lexer; // Liberar memoria del lexer cargado
         error_message = "No se pudo cargar el parser. Es posible que la gramática utilizada para crear el parser serializado sea diferente de la gramática actual. Intenta recrear los artefactos.";
@@ -219,7 +221,7 @@ std::vector<Token> tokenize_source(const std::string& source_code, Lexer* lexer,
     }
 }
 
-ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* parser, 
+ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, LR1Parser* parser, 
                               Grammar& hulk_grammar, std::string& error_message, bool verbose) {
     try {
         if (verbose) {
@@ -295,7 +297,7 @@ ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* par
         }
         
         return ast;
-    } catch (const ParsingError& e) {
+    } catch (const LR1ParsingError& e) {
         error_message = std::string("Error sintáctico: ") + e.what();
         return nullptr;
     } catch (const std::exception& e) {
@@ -448,7 +450,8 @@ bool validate_grammar_compatibility(const Grammar& g1, const Grammar& g2, bool v
 //     if (recreate_artifacts) {
 //         std::cout << "Recreando artefactos del compilador..." << std::endl;
 //         std::string error_msg;
-//         bool success = create_artifacts(true);
+//         Grammar hulk_grammar = getHulkGrammar();
+//         bool success = create_artifacts(hulk_grammar, true);
 //         if (!success) {
 //             std::cerr << "Error al recrear los artefactos" << std::endl;
 //             return 1;
@@ -467,7 +470,8 @@ bool validate_grammar_compatibility(const Grammar& g1, const Grammar& g2, bool v
     
 //     // Compilar el código utilizando nuestra función principal con modo verbose
 //     // Nota: Utilizamos una única gramática para todo el proceso de compilación
-//     ASTNode* ast = compile_hulk(script_content, error_message, false);
+//     Grammar hulk_grammar = getHulkGrammar();
+//     ASTNode* ast = compile_hulk(script_content, error_message, hulk_grammar, false);
     
 //     if (!ast) {
 //         std::cerr << "Error al compilar: " << error_message << std::endl;

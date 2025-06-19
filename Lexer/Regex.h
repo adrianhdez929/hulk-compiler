@@ -8,7 +8,7 @@
 #include "../Automata/nfa.h"
 #include "../Automata/utils/aut_manipulation.h"
 #include "../Automata/operations/operations.h"
-#include "../Parser/SLR1Parser.h"
+#include "../Parser/LR1Parser.h"
 #include "../Parser/reverse_evaluate.h"
 
 /**
@@ -24,7 +24,7 @@ using namespace std;
 class Regex {
 public:
     // Constructor
-    Regex(const std::string& pattern, Grammar& grammar, SLR1Parser& parser) 
+    Regex(const std::string& pattern, Grammar& grammar, LR1Parser& parser) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()) {
         automaton_ = build_dfa(parser);
     }
@@ -91,7 +91,7 @@ public:
         return tokens;
     }
 
-    DFA build_dfa(SLR1Parser& parser) {
+    DFA build_dfa(LR1Parser& parser) {
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         for (int i = 0; i < token_names.size(); ++i) {

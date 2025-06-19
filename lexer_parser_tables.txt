@@ -1,0 +1,81 @@
+==================================
+       ANÁLISIS DE PARSER LR1      
+==================================
+Generado el: Thu Jun 19 08:16:31 2025
+
+==================================
+       INFORMACIÓN GRAMÁTICA      
+==================================
+Símbolo inicial: SS
+Número de producciones: 19
+Número de terminales: 10
+Número de no terminales: 8
+
+Terminales: | + * ( ) symbol [ ] ? - 
+No terminales: E T F A S P R SS 
+
+Producciones:
+[101] E -> T 
+[102] E -> E | T 
+[103] T -> F 
+[104] T -> T F 
+[105] F -> A 
+[106] F -> A * 
+[107] F -> A ? 
+[108] F -> A + 
+[109] A -> P 
+[110] A -> epsilon 
+[111] A -> ( E ) 
+[112] A -> [ S ] 
+[113] P -> symbol 
+[114] S -> P 
+[115] S -> S P 
+[116] S -> R 
+[117] S -> S R 
+[118] R -> P - P 
+[119] SS -> E 
+==================================
+         CONJUNTOS FIRST          
+==================================
+FIRST(symbol) = { symbol }
+FIRST()) = { ) }
+FIRST(A) = { symbol [ ( }
+FIRST(A +) = { symbol [ ( }
+FIRST(A *) = { symbol [ ( }
+FIRST(A ?) = { symbol [ ( }
+FIRST(E) = { symbol [ ( }
+FIRST(E | T) = { symbol [ ( }
+FIRST(S) = { symbol }
+FIRST(S R) = { symbol }
+FIRST(S P) = { symbol }
+FIRST(T) = { symbol [ ( }
+FIRST(T F) = { symbol [ ( }
+FIRST(R) = { symbol }
+FIRST(SS) = { symbol [ ( }
+FIRST(+) = { + }
+FIRST(|) = { | }
+FIRST(() = { ( }
+FIRST(( E )) = { ( }
+FIRST(]) = { ] }
+FIRST(*) = { * }
+FIRST([) = { [ }
+FIRST([ S ]) = { [ }
+FIRST(?) = { ? }
+FIRST(P) = { symbol }
+FIRST(P - P) = { symbol }
+FIRST(F) = { symbol [ ( }
+FIRST(-) = { - }
+FIRST(epsilon) = { }
+----------------------------------------------------------
+==================================
+         CONJUNTOS FOLLOW         
+==================================
+FOLLOW(A) = { ) ? | EOF ( + * [ symbol }
+FOLLOW(E) = { EOF ) | }
+FOLLOW(S) = { symbol ] }
+FOLLOW(T) = { ) EOF ( [ symbol | }
+FOLLOW(R) = { ] symbol }
+FOLLOW(SS) = { EOF }
+FOLLOW(P) = { ) - symbol ] [ * + EOF ( | ? }
+FOLLOW(F) = { ) symbol [ EOF ( | }
+----------------------------------------------------------

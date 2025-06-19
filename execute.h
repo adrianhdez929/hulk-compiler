@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Lexer/Lexer.h"
-#include "Parser/SLR1Parser.h"
+#include "Parser/LR1Parser.h"
 #include "Grammar/grammar.h"
 #include "Ast/ast.hpp"
 #include <string>
@@ -42,7 +42,7 @@ ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_mess
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Par con el lexer y parser cargados, o nullptr si hubo errores
  */
-std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose = false);
+std::pair<Lexer*, LR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose = false);
 
 /**
  * @brief Tokeniza un código fuente Hulk
@@ -64,7 +64,7 @@ std::vector<Token> tokenize_source(const std::string& source_code, Lexer* lexer,
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Puntero al AST generado, o nullptr si hubo errores
  */
-ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* parser, 
+ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, LR1Parser* parser, 
                              Grammar& hulk_grammar, std::string& error_message, bool verbose = false);
 
 /**

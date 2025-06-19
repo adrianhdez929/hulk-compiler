@@ -1,4 +1,4 @@
-#include "SLR1Parser.h"
+#include "LR1Parser.h"
 #include "../Automata/utils/ContainerSet.h"
 #include <stack>
 #include <assert.h>
@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include "../Lexer/Token.h"
+#include "SLR1Parser.h" // Para acceder a la clase ParsingError
 
 // ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
 
@@ -44,7 +45,7 @@ namespace {
     }
 }
 
-SLR1Parser::SLR1Parser(Grammar& G, bool verbose)
+LR1Parser::LR1Parser(Grammar& G, bool verbose)
     : G_(G), verbose_(verbose) {
     // Initialize action and goto tables
     action_ = std::map<std::pair<int, Symbol>, std::pair<std::string, int>>();
@@ -53,7 +54,7 @@ SLR1Parser::SLR1Parser(Grammar& G, bool verbose)
 }
 
 //Parse method
-std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<std::string>& tokens) {
+std::pair<std::vector<int>, std::vector<std::string>> LR1Parser::Parse(const std::vector<std::string>& tokens) {
     // Convert string tokens to Terminal objects
     std::vector<Terminal> terminal_tokens;
     for (const auto& token : tokens) {
@@ -61,7 +62,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
     }
     return Parse(terminal_tokens);
 }
-std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<Terminal>& tokens) {
+std::pair<std::vector<int>, std::vector<std::string>> LR1Parser::Parse(const std::vector<Terminal>& tokens) {
     std::vector<int> production_ids;
     std::vector<std::string> actions;
     
@@ -175,7 +176,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     }
                     
                     // Lanzar una excepción especializada con detalles del error
-                    throw ParsingError(error_msg, state_stack.top(), current_token.Name(), expected_tokens);
+                    throw LR1ParsingError(error_msg, state_stack.top(), current_token.Name(), expected_tokens);
                 }
             } else {
                 // Si no quedan más tokens, comprobar si se puede reducir o aceptar
@@ -210,11 +211,11 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     // No se pudo reducir ni aceptar
                     auto expected_tokens = getExpectedTokens(state_stack.top());
                     std::string error_msg = "Error de sintaxis: fin de entrada inesperado";
-                    throw ParsingError(error_msg, state_stack.top(), "EOF", expected_tokens);
+                    throw LR1ParsingError(error_msg, state_stack.top(), "EOF", expected_tokens);
                 }
             }
         }
-    } catch (const ParsingError& e) {
+    } catch (const LR1ParsingError& e) {
         // Mejorar el mensaje de error con contexto visual
         std::string enhanced_message = e.what();
         enhanced_message += "\n\nContexto del error:";
@@ -246,7 +247,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
             }
         }
         
-        throw ParsingError(enhanced_message, e.getState(), e.getToken(), e.getExpectedTokens());
+        throw LR1ParsingError(enhanced_message, e.getState(), e.getToken(), e.getExpectedTokens());
     } catch (const std::exception& e) {
         // Re-lanzar excepciones normales
         throw;
@@ -254,7 +255,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
     
     return std::make_pair(production_ids, actions);
 }
-void SLR1Parser::BuildParsingTable() {
+void LR1Parser::BuildParsingTable() {
     G_.Augment();
     if (!G_.IsAugmented()) {
         throw std::runtime_error("Grammar is not augmented");
@@ -276,21 +277,7 @@ void SLR1Parser::BuildParsingTable() {
     // auto EOFile = Sentence(G_.GetEndOfFile());
     // firsts[EOFile] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
 
-    auto follows = compute_follows(firsts);
-    
-    // Debug: Print FOLLOW sets
-    if (verbose_) {
-        std::cout << "FOLLOW sets:" << std::endl;
-        for (const auto& [nt, follow_set] : follows) {
-            std::cout << "FOLLOW(" << nt.ToString() << ") = { ";
-            for (const auto& t : follow_set.get_values()) {
-                std::cout << t << " ";
-            }
-            std::cout << "}" << std::endl;
-        }
-    }
-    
-    State* automaton = BuildLR0Automaton().to_deterministic();
+    State* automaton = BuildLR1Automaton().to_deterministic();
     for (const auto& state : automaton->get_all_states()) {
         int state_id = state->id();
         for (const auto& item : state->get_items()) {
@@ -302,7 +289,7 @@ void SLR1Parser::BuildParsingTable() {
                     Register(action_, {state_id, *(G_.GetEndOfFile())}, {OK, 0});
                 } else {
                     // Regular reduce action
-                    auto lookaheads = follows[Sentence(production->Left())].get_values();
+                    auto lookaheads = item.lookaheads().get_values();
                     for (const auto& lookahead : lookaheads) {
                         auto terminal_ptr = G_.GetSymbol(lookahead);
                         if (terminal_ptr) {
@@ -329,7 +316,7 @@ void SLR1Parser::BuildParsingTable() {
         }
     }
 }
-void SLR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& table, 
+void LR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  const std::pair<std::string, int>& value) {
     if (verbose_) {
@@ -337,7 +324,7 @@ void SLR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::string
     }
     table[key] = value;
 }
-void SLR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table, 
+void LR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  int value) {
     if (verbose_) {
@@ -346,76 +333,106 @@ void SLR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table,
     table[key] = value;
 }
 
-
-State SLR1Parser::BuildLR0Automaton() {
+State LR1Parser::BuildLR1Automaton() {
     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
 
+    // Compute first sets
+    auto firsts = compute_firsts();
+    auto EOFile = Sentence(G_.GetEndOfFile());
+    firsts[EOFile] = ContainerSet<string>();
+    firsts[EOFile].add(G_.GetEndOfFile()->Name());
+
+    // Initialize start production and item
     auto start_production = G_.GetStartSymbol()->productions[0];
-    auto start_item = Item(std::make_shared<Production>(start_production), 0, ContainerSet<string>());
-    State automaton(0, true);
-    automaton.add_item(start_item);
+    ContainerSet<string> lookahead_set;
+    lookahead_set.add(G_.GetEndOfFile()->Name());
+    auto start_item = Item(std::make_shared<Production>(start_production), 0, lookahead_set);
+    std::vector<Item> start = {start_item};
 
-    std::queue<Item> pending;
-    pending.push(start_item);
+    // Compute closure for the start state
+    auto closure = closure_lr1(start, firsts, G_);
+    int state_id = 0;
+    auto automaton = State(state_id++, true);
+    
+    // Añadir los ítems al estado inicial
+    for (const auto& item : closure) {
+        automaton.add_item(item);
+    }
 
-    std::map<Item, State*> visited;
-    visited[start_item] = &automaton;
+    // Map to associate states with their items
+    std::map<std::set<Item>, State*> visited;
+    visited[std::set<Item>(closure.begin(), closure.end())] = &automaton;
 
-    int state_id = 0; // Start state ID from 0
+    // Queue for pending states
+    std::queue<std::set<Item>> pending;
+    pending.push(std::set<Item>(closure.begin(), closure.end()));
 
     while (!pending.empty()) {
-        auto current_item = pending.front();
+        auto current = pending.front();
         pending.pop();
-        if (current_item.IsReduceItem()) {
-            continue; // Skip reduced items
-        }
-        auto next_symbol = current_item.NextSymbol();
-        // if (next_symbol == nullptr) {
-        //     continue; // No next symbol, skip
-        // }
-        Item next_item = *current_item.NextItem();
-        if (visited.find(next_item) == visited.end()) {
-            visited[next_item] = new State(state_id, true);
-            state_id++;
-            visited[next_item]->add_item(next_item);
-            // automaton.add_item(next_item);
-            pending.push(next_item);
-        }
+        auto current_state = visited[current];
 
-        vector<Item> epsilon_transition_states;
-        if (next_symbol->IsNonTerminal()) {
-            for (const auto& production : G_.Productions()) {
-                if (production.Left() == next_symbol) {
-                    Item new_item(std::make_shared<Production>(production), 0, ContainerSet<string>());
-                    if (visited.find(new_item) == visited.end()) {
-                        visited[new_item] = new State(state_id++, true);
-                        visited[new_item]->add_item(new_item);
-                        pending.push(new_item);
-                    }
-                    // Add transition for the non-terminal
-                    epsilon_transition_states.push_back(new_item);
-                }
+        for (const auto& symbol : G_.Terminals()) {
+            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, firsts, true, G_);
+            if (next_items.empty()) {
+                continue;
             }
+
+            std::set<Item> next_set(next_items.begin(), next_items.end());
+            State* next_state;
+
+            if (visited.find(next_set) == visited.end()) {
+                auto next_closure = closure_lr1(next_items, firsts, G_);
+                next_state = new State(state_id++, true);
+                for (const auto& item : next_closure) {
+                    next_state->add_item(item);
+                }
+                visited[next_set] = next_state;
+                pending.push(next_set);
+            } else {
+                next_state = visited[next_set];
+            }
+
+            current_state->add_transition(symbol->Name(), next_state);
         }
 
-        State* current_state = visited[current_item];
-        current_state->add_transition(next_symbol->Name(), visited[next_item]);
-        for (const auto& epsilon_state : epsilon_transition_states) {
-            current_state->add_epsilon_transition(visited[epsilon_state]);
+        for (const auto& symbol : G_.NonTerminals()) {
+            auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, firsts, true, G_);
+            if (next_items.empty()) {
+                continue;
+            }
+
+            std::set<Item> next_set(next_items.begin(), next_items.end());
+            State* next_state;
+
+            if (visited.find(next_set) == visited.end()) {
+                auto next_closure = closure_lr1(next_items, firsts, G_);
+                next_state = new State(state_id++, true);
+                for (const auto& item : next_closure) {
+                    next_state->add_item(item);
+                }
+                visited[next_set] = next_state;
+                pending.push(next_set);
+            } else {
+                next_state = visited[next_set];
+            }
+
+            current_state->add_transition(symbol->Name(), next_state);
         }
     }
 
-    // Guardar todos los estados creados para liberarlos después
-    for (auto& [items, state] : visited) {
-        if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
-            automaton_states_.push_back(state);
-        }
-    }
+    // // Guardar todos los estados creados para liberarlos después
+    // for (auto& [items, state] : visited) {
+    //     if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
+    //         automaton_states_.push_back(state);
+    //     }
+    // }
+    
     return automaton;
-
 }
 
-map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
+
+map<Sentence, ContainerSet<string>> LR1Parser::compute_firsts() {
     map<Sentence, ContainerSet<string>> firsts;
     bool changed = true;
     
@@ -452,7 +469,7 @@ map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
             // Firsts de alpha
             auto& first_alpha = firsts[alpha];
 
-            ContainerSet<string> local_first = compute_local_firsts(alpha, firsts);
+            ContainerSet<string> local_first = compute_local_firsts(alpha, firsts, G_);
 
             bool changed_alpha = first_alpha.hard_update(local_first);
             // bool changed_alpha = hard_update_container_set(first_alpha, local_first);
@@ -465,7 +482,7 @@ map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
     return firsts;
 };
 
-ContainerSet<string> SLR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts) {
+ContainerSet<string> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G) {
     //Compute local first
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
@@ -482,7 +499,7 @@ ContainerSet<string> SLR1Parser::compute_local_firsts(const Sentence& alpha, con
     } else {
         // local_first.update(firsts.at(symbols[0]));
         if (symbols[0]->IsEndOfFile()){
-            auto EOFile = G_.GetEndOfFile();
+            auto EOFile = G.GetEndOfFile();
             local_first.add(EOFile->Name());
         } else {
             local_first.update(firsts.at(Sentence(symbols[0])));
@@ -518,8 +535,70 @@ ContainerSet<string> SLR1Parser::compute_local_firsts(const Sentence& alpha, con
     }
     return local_first;
 }
+// ContainerSet<string> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G) {
+//     ContainerSet<string> local_first;
+//     auto symbols = alpha.Symbols();
 
-std::map<Sentence, ContainerSet<string>> SLR1Parser::compute_follows(const map<Sentence, ContainerSet<string>>& symbol_firsts) {
+//     // Caso especial: cadena vacía
+//     if (symbols.empty()) {
+//         local_first.set_epsilon();
+//         return local_first;
+//     }
+
+//     // Verificar si todos los símbolos pueden ser epsilon
+//     bool all_epsilon = true;
+//     for (const auto& symbol : symbols) {
+//         Sentence sym_sent(symbol);
+//         if (firsts.find(sym_sent) == firsts.end() || !firsts.at(sym_sent).contains_epsilon()) {
+//             all_epsilon = false;
+//             break;
+//         }
+//     }
+//     if (all_epsilon) {
+//         local_first.set_epsilon();
+//         return local_first;
+//     }
+
+//     // Calcular FIRST para la cadena
+//     for (size_t i = 0; i < symbols.size(); ++i) {
+//         const auto& symbol = symbols[i];
+//         Sentence sym_sent(symbol);
+
+//         if (symbol->IsEndOfFile()) {
+//             local_first.add(G.GetEndOfFile()->Name());
+//             break;
+//         }
+
+//         if (firsts.find(sym_sent) != firsts.end()) {
+//             const auto& first_set = firsts.at(sym_sent);
+            
+//             // Añadir todos los terminales no-épsilon
+//             for (const auto& val : first_set.get_values()) {
+//                 if (val != G.GetEpsilon()->Name()) {
+//                     local_first.add(val);
+//                 }
+//             }
+
+//             // Si el símbolo no deriva épsilon, terminar
+//             if (!first_set.contains_epsilon()) {
+//                 break;
+//             }
+            
+//             // Si es el último símbolo y todos derivan épsilon, añadir épsilon
+//             if (i == symbols.size() - 1) {
+//                 local_first.set_epsilon();
+//             }
+//         } else {
+//             // Si el símbolo no está en firsts, es un terminal
+//             local_first.add(symbol->Name());
+//             break;
+//         }
+//     }
+
+//     return local_first;
+// }
+
+std::map<Sentence, ContainerSet<string>> LR1Parser::compute_follows(const map<Sentence, ContainerSet<string>>& symbol_firsts) {
     std::map<Sentence, ContainerSet<string>> follows;
     bool changed = true;
 
@@ -583,9 +662,128 @@ std::map<Sentence, ContainerSet<string>> SLR1Parser::compute_follows(const map<S
         }
     }
     return follows;
-};
+}
+
+static vector<std::shared_ptr<Symbol>> get_symbols(vector<string> symbols, Grammar& G_) {
+    vector<std::shared_ptr<Symbol>> result;
+    for (const auto& symbol : symbols) {
+        result.push_back(G_.GetSymbol(symbol));
+    }
+    return result;
+}
+
+vector<Item> expand(const Item& item, const map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
+    vector<Item> expanded;
+    const auto& next_symbol = item.NextSymbol();
+    if (next_symbol == nullptr || !next_symbol->IsNonTerminal()) {
+        return expanded;
+    }
+    auto lookaheads = ContainerSet<string>();
+    for (const auto& preview : item.Preview()) {
+        // lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
+        auto local_first = LR1Parser::compute_local_firsts(Sentence(get_symbols(preview, G_)), firsts, G_);
+        // update_container_set(lookaheads, local_first);
+        lookaheads.update(local_first);
+    }
+    if (lookaheads.contains_epsilon()) {
+        throw std::runtime_error("Epsilon in lookaheads");
+    }
+    for (auto& prod : G_.Productions()) {
+        if (prod.Left()->Name() == next_symbol->Name()) {
+            auto prod_ptr = std::make_shared<Production>(prod);
+            expanded.push_back(Item(prod_ptr, 0, lookaheads));
+            
+            // Añadimos debug para verificar si hay elementos duplicados
+            // std::cout << "Expandido: " << prod_ptr->ToString() << ", pos: 0, LA: " << lookaheads.str() << std::endl;
+        }
+    }
+    return expanded;
+}
+set<Item> compress(const vector<Item>& items) {
+    map<pair<string, int>, pair<shared_ptr<Production>, ContainerSet<string>>> centers;
+    for (const auto& item : items) {
+        auto key = make_pair(item.production()->ToString(), item.pos());
+        if (centers.find(key) == centers.end()) {
+            centers[key] = make_pair(item.production(), item.lookaheads());
+        } else {
+            // hard_update_container_set(centers[key].second, item.lookaheads());
+            centers[key].second.update(item.lookaheads());
+        }
+        
+    }
+    set<Item> compressed;
+    for (const auto& [key, lookaheads] : centers) {
+        compressed.insert(Item(centers[key].first, key.second, centers[key].second));
+    }
+    return compressed;
+}
+
+/// @brief Cierra un conjunto de ítems LR(1)
+/// @param items El conjunto de ítems
+/// @param firsts Los conjuntos FIRST
+/// @param G_ La gramática
+/// @return El conjunto de cierre
+std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
+    // Inicializar el conjunto de cierre con los elementos iniciales
+    ContainerSet<Item> closure;
+    closure.add(items);
+
+    bool changed = true;
+    while (changed) {
+        changed = false;
+
+        // Crear un nuevo conjunto para los nuevos elementos
+        ContainerSet<Item> new_items;
+        for (const auto& item : closure) {
+            // string item_str = item.production()->ToString() + " pos: " + std::to_string(item.pos());
+            auto lookaheads = item.lookaheads();
+            // Expandir cada elemento y agregar los nuevos elementos al conjunto
+            auto expanded_items = expand(item, firsts, G_);
+            new_items.add(expanded_items);
+        }
+
+        changed = closure.update(new_items);
+
+        // // Agregar los nuevos elementos al cierre si no están ya presentes
+        // for (const auto& new_item : new_items) {
+        //     bool found = false;
+        //     for (const auto& existing_item : closure) {
+        //         // Comparamos manualmente usando los valores, no los punteros
+        //         if (compare_items(existing_item, new_item)) {
+        //             found = true;
+        //             break;
+        //         }
+        //     }
+            
+        //     if (!found) {
+        //         closure.push_back(new_item);
+        //         changed = true;
+        //     }
+        // }
+    }
+    auto closure_items = closure.get_set();
+    vector<Item> closure_items_vector(closure_items.begin(), closure_items.end());
+    auto compressed_set = compress(closure_items_vector);
+    return std::vector<Item>(compressed_set.begin(), compressed_set.end());
+} 
+vector<Item> goto_lr1(const vector<Item>& items, shared_ptr<Symbol> symbol, const map<Sentence, ContainerSet<string>>& firsts, bool just_kernel, Grammar& G_) {
+    vector<Item> goto_items;
+    for (const auto& item : items) {
+        if (item.NextSymbol() == symbol) {
+            auto next_item = item.NextItem();
+            if (next_item != nullptr) {
+                goto_items.push_back(*next_item);
+            }
+        }
+    }
+    if (just_kernel) {
+        return goto_items;
+    }
+    return closure_lr1(goto_items, firsts, G_);
+}
+
 // Método para limpiar todos los estados creados
-void SLR1Parser::CleanupAutomatonStates() {
+void LR1Parser::CleanupAutomatonStates() {
     // Crear un conjunto para evitar eliminar el mismo estado más de una vez
     std::unordered_set<State*> visited;
     
@@ -600,14 +798,14 @@ void SLR1Parser::CleanupAutomatonStates() {
 }
 
 // Destructor de SLR1Parser
-SLR1Parser::~SLR1Parser() {
+LR1Parser::~LR1Parser() {
     CleanupAutomatonStates();
 }
 
 // ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
 
 // Constructor privado para deserialización
-SLR1Parser::SLR1Parser(Grammar& G, 
+LR1Parser::LR1Parser(Grammar& G, 
                        const std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& action,
                        const std::map<std::pair<int, Symbol>, int>& goto_table,
                        bool verbose)
@@ -622,14 +820,14 @@ SLR1Parser::SLR1Parser(Grammar& G,
     // toda la información está en las tablas action_ y goto_
 }
 
-bool SLR1Parser::serialize_parser(const std::string& filename) const {
+bool LR1Parser::serialize_parser(const std::string& filename) const {
     if (!ensure_hulk_directory()) {
         return false;
     }
     return serialize_parser(filename, "hulk");
 }
 
-bool SLR1Parser::serialize_parser(const std::string& filename, const std::string& directory) const {
+bool LR1Parser::serialize_parser(const std::string& filename, const std::string& directory) const {
     if (!ensure_directory(directory)) {
         return false;
     }
@@ -644,7 +842,7 @@ bool SLR1Parser::serialize_parser(const std::string& filename, const std::string
     
     try {
         // Escribir firma del archivo
-        const char* signature = "SLR1PARSER";
+        const char* signature = "LR1PARSER";
         file.write(signature, 10);
         
         // Escribir versión
@@ -712,11 +910,11 @@ bool SLR1Parser::serialize_parser(const std::string& filename, const std::string
     }
 }
 
-SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, Grammar& grammar) {
+LR1Parser* LR1Parser::deserialize_parser(const std::string& filename, Grammar& grammar) {
     return deserialize_parser(filename, "hulk", grammar);
 }
 
-SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const std::string& directory, Grammar& grammar) {
+LR1Parser* LR1Parser::deserialize_parser(const std::string& filename, const std::string& directory, Grammar& grammar) {
     std::string filepath = get_custom_path(filename, directory);
     std::ifstream file(filepath, std::ios::binary);
     
@@ -729,7 +927,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         // Verificar firma
         char signature[11] = {0};
         file.read(signature, 10);
-        if (std::string(signature) != "SLR1PARSER") {
+        if (std::string(signature) != "LR1PARSER") {
             std::cerr << "Error: Archivo no es un parser serializado válido" << std::endl;
             file.close();
             return nullptr;
@@ -825,7 +1023,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         std::cout << "Parser deserializado exitosamente desde: " << filepath << std::endl;
         
         // Crear nuevo parser con las tablas deserializadas
-        return new SLR1Parser(grammar, action, goto_table, verbose);
+        return new LR1Parser(grammar, action, goto_table, verbose);
         
     } catch (const std::exception& e) {
         std::cerr << "Error durante la deserialización del parser: " << e.what() << std::endl;
@@ -834,7 +1032,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
     }
 }
 
-std::vector<std::string> SLR1Parser::getExpectedTokens(int state_id) const {
+std::vector<std::string> LR1Parser::getExpectedTokens(int state_id) const {
     std::vector<std::string> expected_tokens;
     
     // Buscar todas las acciones válidas para este estado
@@ -847,7 +1045,7 @@ std::vector<std::string> SLR1Parser::getExpectedTokens(int state_id) const {
     return expected_tokens;
 }
 
-std::pair<std::string, std::vector<std::string>> SLR1Parser::generateErrorMessage(int state_id, const std::string& token) const {
+std::pair<std::string, std::vector<std::string>> LR1Parser::generateErrorMessage(int state_id, const std::string& token) const {
     std::vector<std::string> expected_tokens = getExpectedTokens(state_id);
     
     std::string error_msg = "Error de sintaxis: token inesperado '" + token + "'";
@@ -864,7 +1062,7 @@ std::pair<std::string, std::vector<std::string>> SLR1Parser::generateErrorMessag
     return {error_msg, expected_tokens};
 }
 
-std::string SLR1Parser::formatErrorWithContext(const std::vector<Terminal>& tokens, 
+std::string LR1Parser::formatErrorWithContext(const std::vector<Terminal>& tokens, 
                                                      int error_position, 
                                                      const std::string& error_message) {
     std::string result = error_message + "\n\n";
@@ -907,7 +1105,7 @@ std::string SLR1Parser::formatErrorWithContext(const std::vector<Terminal>& toke
     return result;
 }
 
-std::string SLR1Parser::formatErrorWithContext(const std::vector<Token>& tokens, 
+std::string LR1Parser::formatErrorWithContext(const std::vector<Token>& tokens, 
                                               int error_position, 
                                               const std::string& error_message) {
     std::string result = error_message + "\n\n";
@@ -963,7 +1161,7 @@ std::string SLR1Parser::formatErrorWithContext(const std::vector<Token>& tokens,
 }
 
 // Implementación completa del método Parse para objetos Token
-std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<Token>& tokens) {
+std::pair<std::vector<int>, std::vector<std::string>> LR1Parser::Parse(const std::vector<Token>& tokens) {
     std::vector<int> production_ids;
     std::vector<std::string> actions;
     
@@ -1043,8 +1241,8 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     
                     std::string enhanced_error = error_msg + position_info;
                     
-                    // Lanzar ParsingError con toda la información
-                    throw ParsingError(enhanced_error, state_stack.top(), current_token.Name(), expected_tokens);
+                    // Lanzar LR1ParsingError con toda la información
+                    throw LR1ParsingError(enhanced_error, state_stack.top(), current_token.Name(), expected_tokens);
                 }
             } 
             else {
@@ -1082,12 +1280,12 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     // No se pudo reducir ni aceptar
                     auto expected_tokens = getExpectedTokens(state_stack.top());
                     std::string error_msg = "Error de sintaxis: fin de entrada inesperado";
-                    throw ParsingError(error_msg, state_stack.top(), "EOF", expected_tokens);
+                    throw LR1ParsingError(error_msg, state_stack.top(), "EOF", expected_tokens);
                 }
             }
         }
     } 
-    catch (const ParsingError& e) {
+    catch (const LR1ParsingError& e) {
         // Mejorar el mensaje de error con contexto visual
         std::string enhanced_message = e.what();
         enhanced_message += "\n\nContexto del error:";
@@ -1107,7 +1305,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
             }
         }
         
-        throw ParsingError(enhanced_message, e.getState(), e.getToken(), e.getExpectedTokens());
+        throw LR1ParsingError(enhanced_message, e.getState(), e.getToken(), e.getExpectedTokens());
     }
     
     return std::make_pair(production_ids, actions);

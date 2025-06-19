@@ -13,8 +13,8 @@
 #include "Automata/utils/utils.h"
 #include "Parser/Item.h"
 #include "Lexer/grammar_parser.h"
-// #include "Parser/LR1Parser.h"
-#include "Parser/SLR1Parser.h"
+#include "Parser/LR1Parser.h"
+// #include "Parser/SLR1Parser.h"
 #include <cassert>
 #include <stack>
 #include "Lexer/Regex.h"
@@ -328,157 +328,157 @@ int state_automata_test() {
     return 0;
 }
 
-void test_parser() {
-    Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
-    // LR1Parser parser(g);
-    SLR1Parser parser(g,true);
-    g.Augment();
-    for (const auto& production : g.Productions()) {
-        std::cout << production.ToString() << " id = " << production.get_id() << std::endl;
-    }
-    //                                           "(0|[1-9][0-9]*)(.[0-9]+)?"
-    std::vector<std::string> tokens = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
-    auto [production_ids, actions] = parser.Parse(tokens);
-    std::cout << "Productions:" << std::endl;
-    for (const auto& production_id : production_ids) {
-        std::cout << g.GetProduction(production_id).ToString() << std::endl;
-    }
-    std::cout << "Actions:" << std::endl;
-    for (const auto& action : actions) {
-        std::cout << action << std::endl;
-    }
+// void test_parser() {
+//     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
+//     LR1Parser parser(g,true);
+//     // SLR1Parser parser(g,true);
+//     g.Augment();
+//     for (const auto& production : g.Productions()) {
+//         std::cout << production.ToString() << " id = " << production.get_id() << std::endl;
+//     }
+//     //                                           "(0|[1-9][0-9]*)(.[0-9]+)?"
+//     std::vector<std::string> tokens = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
+//     auto [production_ids, actions] = parser.Parse(tokens);
+//     std::cout << "Productions:" << std::endl;
+//     for (const auto& production_id : production_ids) {
+//         std::cout << g.GetProduction(production_id).ToString() << std::endl;
+//     }
+//     std::cout << "Actions:" << std::endl;
+//     for (const auto& action : actions) {
+//         std::cout << action << std::endl;
+//     }
 
 
-    //Compute firsts and follows
-    // auto firsts = compute_firsts(g);
+//     //Compute firsts and follows
+//     // auto firsts = compute_firsts(g);
 
-    // //Print firsts
-    // std::cout << "Firsts:" << std::endl;
-    // for (const auto& [symbol, first_set] : firsts) {
-    //     std::cout << symbol.ToString() << ": ";
-    //     std::cout << "{";
-    //     for (const auto& f : first_set.get_values()) {
-    //         std::cout << "'" << f << "', ";
-    //     }
-    //     std::cout << "} - " << first_set.contains_epsilon() << std::endl;
-    // }
+//     // //Print firsts
+//     // std::cout << "Firsts:" << std::endl;
+//     // for (const auto& [symbol, first_set] : firsts) {
+//     //     std::cout << symbol.ToString() << ": ";
+//     //     std::cout << "{";
+//     //     for (const auto& f : first_set.get_values()) {
+//     //         std::cout << "'" << f << "', ";
+//     //     }
+//     //     std::cout << "} - " << first_set.contains_epsilon() << std::endl;
+//     // }
 
-    // auto follows = compute_follows(firsts, g);
-    // // Print follows
-    // std::cout << "Follows:" << std::endl;
-    // for (const auto& [symbol, follow_set] : follows) {
-    //     std::cout << symbol.ToString() << ": ";
-    //     for (const auto& f : follow_set.get_values()) {
-    //         std::cout << f << " ";
-    //     }
-    //     std::cout << " -> " << follow_set.contains_epsilon() << std::endl;
-    // }
-    // std::vector<std::shared_ptr<Terminal>> terminals = g.Terminals();
-    // std::vector<std::shared_ptr<NonTerminal>> non_terminals = g.NonTerminals();
-
-
-
-    // shared_ptr<Symbol> plus;
-    // for (const auto& nt : g.Terminals()) {
-    //     if (nt->Name() == "+") {
-    //         plus = nt;
-    //         break;
-    //     }
-    // }
-    // shared_ptr<Symbol> eof = g.GetEndOfFile();
-    // vector<string> symbols = {eof->Name(), plus->Name()};
-    // Item item = Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols));
-    // std::cout << "Item: " << item.ToString() << std::endl;
-    // std::cout << "Next Symbol: " << item.NextSymbol()->Name() << std::endl;
-    // std::cout << "Next Item: " << item.NextItem()->ToString() << std::endl;
-    // std::cout << "Center Item: " << item.Center()->ToString() << std::endl;
-    // std::cout << "Preview: " << std::endl;
-    // for (const auto& preview : item.Preview()) {
-    //     std::cout << "  ";
-    //     for (const auto& sym : preview) {
-    //         std::cout << sym << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-    // std::cout << "Is Reduce Item: " << item.IsReduceItem() << std::endl;
-
-    // auto firsts = compute_firsts(g);
-    // auto expanded_item = expand(item, firsts, g);
-    // std::cout << "Expanded Items: " << std::endl;
-    // for (const auto& expanded : expanded_item) {
-    //     std::cout << "  " << expanded.ToString() << std::endl;
-    // }
+//     // auto follows = compute_follows(firsts, g);
+//     // // Print follows
+//     // std::cout << "Follows:" << std::endl;
+//     // for (const auto& [symbol, follow_set] : follows) {
+//     //     std::cout << symbol.ToString() << ": ";
+//     //     for (const auto& f : follow_set.get_values()) {
+//     //         std::cout << f << " ";
+//     //     }
+//     //     std::cout << " -> " << follow_set.contains_epsilon() << std::endl;
+//     // }
+//     // std::vector<std::shared_ptr<Terminal>> terminals = g.Terminals();
+//     // std::vector<std::shared_ptr<NonTerminal>> non_terminals = g.NonTerminals();
 
 
-    // vector<string> symbols1 = {eof->Name()};
-    // vector<string> symbols2 = {plus->Name()};
-    // vector<string> symbols3 = {plus->Name(), eof->Name()};
-    // vector<Item> items = {
-    //     Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols1)),
-    //     Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols2)),
-    //     Item(std::make_shared<Production>(g.Productions()[0]), 1, ContainerSet<string>(symbols2)),
-    //     Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols2)),
-    //     Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols3)),
-    // };
-    // set<Item> compressed = compress(items);
-    // std::cout << "Compressed Items: " << std::endl;
-    // for (const auto& compressed_item : compressed) {
-    //     std::cout << "  " << compressed_item.ToString() << std::endl;
-    // }
 
-    // shared_ptr<Item> temp = item.NextItem()->NextItem();
-    // Item item2 = *temp;
-    // std::cout << "Item2: " << item2.ToString() << std::endl;
-    // // Test closure_lr1
-    // vector<Item> clo_items = {item, item2};
-    // std::vector<Item> closure_items = closure_lr1(clo_items, firsts, g);
-    // std::cout << "Closure Items: " << std::endl;
-    // for (const auto& closure_item : closure_items) {
-    //     std::cout << "  " << closure_item.ToString() << std::endl;
-    // }
-    // shared_ptr<Symbol> A;
-    // for (const auto& nt : g.NonTerminals()) {
-    //     if (nt->Name() == "A") {
-    //         A = nt;
-    //         break;
-    //     }
-    // }
-    // auto goto_items = goto_lr1({item}, A, firsts, false, g);
-    // std::cout << "Goto Items for A: " << std::endl;
-    // for (const auto& goto_item : goto_items) {
-    //     std::cout << "  " << goto_item.ToString() << std::endl;
-    // }
+//     // shared_ptr<Symbol> plus;
+//     // for (const auto& nt : g.Terminals()) {
+//     //     if (nt->Name() == "+") {
+//     //         plus = nt;
+//     //         break;
+//     //     }
+//     // }
+//     // shared_ptr<Symbol> eof = g.GetEndOfFile();
+//     // vector<string> symbols = {eof->Name(), plus->Name()};
+//     // Item item = Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols));
+//     // std::cout << "Item: " << item.ToString() << std::endl;
+//     // std::cout << "Next Symbol: " << item.NextSymbol()->Name() << std::endl;
+//     // std::cout << "Next Item: " << item.NextItem()->ToString() << std::endl;
+//     // std::cout << "Center Item: " << item.Center()->ToString() << std::endl;
+//     // std::cout << "Preview: " << std::endl;
+//     // for (const auto& preview : item.Preview()) {
+//     //     std::cout << "  ";
+//     //     for (const auto& sym : preview) {
+//     //         std::cout << sym << " ";
+//     //     }
+//     //     std::cout << std::endl;
+//     // }
+//     // std::cout << "Is Reduce Item: " << item.IsReduceItem() << std::endl;
 
-    // State automaton = BuildLR1Automaton(g);
-    // //Cadenas
-    // std::vector<std::string> test_string1 = {"E"};
-    // std::vector<std::string> test_string2 = {"int", "+", "int", "+", "A"};
-    // std::cout << "Testing automaton with strings: ";
-    // // std::cout << "State item:" << std::endl;
-    // // vector<Item> items2 = automaton.get_items();
-    // // for (const auto& item : items2) {
-    // //     std::cout << "  " << item.ToString() << std::endl;
-    // // }
-    // // True si reconoce la cadena
-    // // std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
-    // std::cout << "Test String 2: " << automaton.recognizes(test_string2) << std::endl;
+//     // auto firsts = compute_firsts(g);
+//     // auto expanded_item = expand(item, firsts, g);
+//     // std::cout << "Expanded Items: " << std::endl;
+//     // for (const auto& expanded : expanded_item) {
+//     //     std::cout << "  " << expanded.ToString() << std::endl;
+//     // }
 
-    // //Probar LR0 Automaton
-    // State automaton = BuildLR0Automaton(g);
-    // //Cadenas
-    // std::vector<std::string> test_string1 = {"E"};
-    // std::vector<std::string> test_string2 = {"E","*","F"};
-    // std::cout << "Testing automaton with strings: ";
-    // // std::cout << "State item:" << std::endl;
-    // vector<Item> items2 = automaton.get_items();
-    // for (const auto& item : items2) {
-    //     std::cout << "  " << item.ToString() << std::endl;
-    // }
-    // // True si reconoce la cadena
-    // std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
-    // std::cout << "Test String 2: " << automaton.recognizes(test_string2) << std::endl;
 
-}
+//     // vector<string> symbols1 = {eof->Name()};
+//     // vector<string> symbols2 = {plus->Name()};
+//     // vector<string> symbols3 = {plus->Name(), eof->Name()};
+//     // vector<Item> items = {
+//     //     Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols1)),
+//     //     Item(std::make_shared<Production>(g.Productions()[0]), 0, ContainerSet<string>(symbols2)),
+//     //     Item(std::make_shared<Production>(g.Productions()[0]), 1, ContainerSet<string>(symbols2)),
+//     //     Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols2)),
+//     //     Item(std::make_shared<Production>(g.Productions()[0]), 2, ContainerSet<string>(symbols3)),
+//     // };
+//     // set<Item> compressed = compress(items);
+//     // std::cout << "Compressed Items: " << std::endl;
+//     // for (const auto& compressed_item : compressed) {
+//     //     std::cout << "  " << compressed_item.ToString() << std::endl;
+//     // }
+
+//     // shared_ptr<Item> temp = item.NextItem()->NextItem();
+//     // Item item2 = *temp;
+//     // std::cout << "Item2: " << item2.ToString() << std::endl;
+//     // // Test closure_lr1
+//     // vector<Item> clo_items = {item, item2};
+//     // std::vector<Item> closure_items = closure_lr1(clo_items, firsts, g);
+//     // std::cout << "Closure Items: " << std::endl;
+//     // for (const auto& closure_item : closure_items) {
+//     //     std::cout << "  " << closure_item.ToString() << std::endl;
+//     // }
+//     // shared_ptr<Symbol> A;
+//     // for (const auto& nt : g.NonTerminals()) {
+//     //     if (nt->Name() == "A") {
+//     //         A = nt;
+//     //         break;
+//     //     }
+//     // }
+//     // auto goto_items = goto_lr1({item}, A, firsts, false, g);
+//     // std::cout << "Goto Items for A: " << std::endl;
+//     // for (const auto& goto_item : goto_items) {
+//     //     std::cout << "  " << goto_item.ToString() << std::endl;
+//     // }
+
+//     // State automaton = BuildLR1Automaton(g);
+//     // //Cadenas
+//     // std::vector<std::string> test_string1 = {"E"};
+//     // std::vector<std::string> test_string2 = {"int", "+", "int", "+", "A"};
+//     // std::cout << "Testing automaton with strings: ";
+//     // // std::cout << "State item:" << std::endl;
+//     // // vector<Item> items2 = automaton.get_items();
+//     // // for (const auto& item : items2) {
+//     // //     std::cout << "  " << item.ToString() << std::endl;
+//     // // }
+//     // // True si reconoce la cadena
+//     // // std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
+//     // std::cout << "Test String 2: " << automaton.recognizes(test_string2) << std::endl;
+
+//     // //Probar LR0 Automaton
+//     // State automaton = BuildLR0Automaton(g);
+//     // //Cadenas
+//     // std::vector<std::string> test_string1 = {"E"};
+//     // std::vector<std::string> test_string2 = {"E","*","F"};
+//     // std::cout << "Testing automaton with strings: ";
+//     // // std::cout << "State item:" << std::endl;
+//     // vector<Item> items2 = automaton.get_items();
+//     // for (const auto& item : items2) {
+//     //     std::cout << "  " << item.ToString() << std::endl;
+//     // }
+//     // // True si reconoce la cadena
+//     // std::cout << "Test String 1: " << automaton.recognizes(test_string1) << std::endl;
+//     // std::cout << "Test String 2: " << automaton.recognizes(test_string2) << std::endl;
+
+// }
 
 // std::shared_ptr<Node> reverse_evaluate(std::queue<std::shared_ptr<AttrProd>>& productions, 
 //                         const std::vector<std::string>& actions, 
@@ -684,111 +684,111 @@ void test_parser() {
 //     return node_stack[start_name].top();
 // }
 
-void lexer_ast_test() {
-    // using Token = std::pair<std::string, std::string>; // Pair of token type and value
-    // vector<string> input = split("( 0 | [ 1 - 9 ] [ 0 - 9 ] * ) ( . [ 0 - 9 ] + ) ?", ' ');
-    // // vector<string> input = split("( a | b )", ' ');
-    // // vector<string> token_names = {"(", "symbol", "|", "symbol", ")", "EOF"};
-    // vector<string> token_names = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
+// void lexer_ast_test() {
+//     // using Token = std::pair<std::string, std::string>; // Pair of token type and value
+//     // vector<string> input = split("( 0 | [ 1 - 9 ] [ 0 - 9 ] * ) ( . [ 0 - 9 ] + ) ?", ' ');
+//     // // vector<string> input = split("( a | b )", ' ');
+//     // // vector<string> token_names = {"(", "symbol", "|", "symbol", ")", "EOF"};
+//     // vector<string> token_names = {"(", "symbol", "|", "[", "symbol", "-", "symbol", "]", "[", "symbol", "-", "symbol", "]", "*", ")", "(", "symbol", "[", "symbol", "-", "symbol", "]", "+", ")", "?", "EOF"};
 
-    // std::vector<Token> tokens;
-    // assert(input.size() == token_names.size() - 1);
-    // for (size_t i = 0; i < input.size(); ++i) {
-    //     tokens.emplace_back(token_names[i], input[i]);
-    // }
-    // tokens.emplace_back(make_pair("EOF", "EOF"));
+//     // std::vector<Token> tokens;
+//     // assert(input.size() == token_names.size() - 1);
+//     // for (size_t i = 0; i < input.size(); ++i) {
+//     //     tokens.emplace_back(token_names[i], input[i]);
+//     // }
+//     // tokens.emplace_back(make_pair("EOF", "EOF"));
 
 
-    //= {
-    //     {"(", "("},         // (
-    //     {"symbol", "0"},    // 0
-    //     {"|", "|"},         // |
-    //     {"[", "["},         // [
-    //     {"symbol", "1"},    // 1
-    //     {"-", "-"},         // -
-    //     {"symbol", "9"},    // 9
-    //     {"]", "]"},         // ]
-    //     {"[", "["},         // [
-    //     {"symbol", "0"},    // 0
-    //     {"-", "-"},         // -
-    //     {"symbol", "9"},    // 9
-    //     {"]", "]"},         // ]
-    //     {"*", "*"},         // *
-    //     {")", ")"},         // )
-    //     {"(", "("},         // (
-    //     {"symbol", "."},    // .
-    //     {"[", "["},         // [
-    //     {"symbol", "0"},    // 0
-    //     {"-", "-"},         // -
-    //     {"symbol", "9"},    // 9
-    //     {"]", "]"},         // ]
-    //     {"+", "+"},         // +
-    //     {")", ")"},         // )
-    //     {"?", "?"},         // ?
-    //     {"EOF", "EOF"}      // EOF
-    // };
-    std::vector<std::pair<std::string, std::string>> table = {
-        {"string", "\"([\\x20-!#-\\x7e])*\""},
-        {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
-        {"bool", "true|false"},  // Regular expression for boolean values
-        {"type_id", "[A-Z][_a-zA-Z0-9]*"},
-        {"var_id", "[_a-z][_a-zA-Z0-9]*"},
-        {"space", " +"}, // Regular expression for spaces
-        // Regular expression for identifiers
-        {"(", "\\("},            // Left parenthesis
-        {")", "\\)"}            // Right parenthesis
-        // {"-", "-"},              // Minus sign
-        // {"EOF", "EOF"}           // End of file token
-    };
-    Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
-    SLR1Parser parser(g);
-    parser.serialize_parser("parser.p", "hulk");
-    auto parser1 = SLR1Parser::deserialize_parser("parser.p", "hulk", g);
-    if (!parser1) {
-        std::cerr << "Error: No se pudo deserializar el parser" << std::endl;
-        return;
-    }
-    Lexer lexer(table, g, *parser1);
+//     //= {
+//     //     {"(", "("},         // (
+//     //     {"symbol", "0"},    // 0
+//     //     {"|", "|"},         // |
+//     //     {"[", "["},         // [
+//     //     {"symbol", "1"},    // 1
+//     //     {"-", "-"},         // -
+//     //     {"symbol", "9"},    // 9
+//     //     {"]", "]"},         // ]
+//     //     {"[", "["},         // [
+//     //     {"symbol", "0"},    // 0
+//     //     {"-", "-"},         // -
+//     //     {"symbol", "9"},    // 9
+//     //     {"]", "]"},         // ]
+//     //     {"*", "*"},         // *
+//     //     {")", ")"},         // )
+//     //     {"(", "("},         // (
+//     //     {"symbol", "."},    // .
+//     //     {"[", "["},         // [
+//     //     {"symbol", "0"},    // 0
+//     //     {"-", "-"},         // -
+//     //     {"symbol", "9"},    // 9
+//     //     {"]", "]"},         // ]
+//     //     {"+", "+"},         // +
+//     //     {")", ")"},         // )
+//     //     {"?", "?"},         // ?
+//     //     {"EOF", "EOF"}      // EOF
+//     // };
+//     std::vector<std::pair<std::string, std::string>> table = {
+//         {"string", "\"([\\x20-!#-\\x7e])*\""},
+//         {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+//         {"bool", "true|false"},  // Regular expression for boolean values
+//         {"type_id", "[A-Z][_a-zA-Z0-9]*"},
+//         {"var_id", "[_a-z][_a-zA-Z0-9]*"},
+//         {"space", " +"}, // Regular expression for spaces
+//         // Regular expression for identifiers
+//         {"(", "\\("},            // Left parenthesis
+//         {")", "\\)"}            // Right parenthesis
+//         // {"-", "-"},              // Minus sign
+//         // {"EOF", "EOF"}           // End of file token
+//     };
+//     Grammar g = GrammarParser::Parse("Lexer/grammar.txt");
+//     LR1Parser parser(g);
+//     parser.serialize_parser("parser.p", "hulk");
+//     auto parser1 = LR1Parser::deserialize_parser("parser.p", "hulk", g);
+//     if (!parser1) {
+//         std::cerr << "Error: No se pudo deserializar el parser" << std::endl;
+//         return;
+//     }
+//     Lexer lexer(table, g, *parser1);
 
-    // Probar el lexer original primero
-    std::cout << "=== Probando lexer original ===" << std::endl;
-    auto tokens_original = lexer.tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
-    std::cout << "Tokens del lexer original:" << std::endl;
-    for (const auto& token : tokens_original) {
-        std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
-    }
+//     // Probar el lexer original primero
+//     std::cout << "=== Probando lexer original ===" << std::endl;
+//     auto tokens_original = lexer.tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
+//     std::cout << "Tokens del lexer original:" << std::endl;
+//     for (const auto& token : tokens_original) {
+//         std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
+//     }
     
-    // Serializar
-    std::cout << "\n=== Serializando lexer ===" << std::endl;
-    bool serialized = lexer.serialize_lexer("lexer.l", "hulk");
-    if (!serialized) {
-        std::cerr << "Error: No se pudo serializar el lexer" << std::endl;
-        return;
-    }
+//     // Serializar
+//     std::cout << "\n=== Serializando lexer ===" << std::endl;
+//     bool serialized = lexer.serialize_lexer("lexer.l", "hulk");
+//     if (!serialized) {
+//         std::cerr << "Error: No se pudo serializar el lexer" << std::endl;
+//         return;
+//     }
     
-    // Deserializar
-    std::cout << "\n=== Deserializando lexer ===" << std::endl;
-    auto lexer1 = Lexer::deserialize_lexer("lexer.l", "hulk");
-    if (!lexer1) {
-        std::cerr << "Error: No se pudo deserializar el lexer" << std::endl;
-        return;
-    }
+//     // Deserializar
+//     std::cout << "\n=== Deserializando lexer ===" << std::endl;
+//     auto lexer1 = Lexer::deserialize_lexer("lexer.l", "hulk");
+//     if (!lexer1) {
+//         std::cerr << "Error: No se pudo deserializar el lexer" << std::endl;
+//         return;
+//     }
     
-    // Probar el lexer deserializado
-    std::cout << "\n=== Probando lexer deserializado ===" << std::endl;
-    try {
-        auto tokens = lexer1->tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
-        std::cout << "Tokens del lexer deserializado:" << std::endl;
-        for (const auto& token : tokens) {
-            std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error al tokenizar con lexer deserializado: " << e.what() << std::endl;
-    }
+//     // Probar el lexer deserializado
+//     std::cout << "\n=== Probando lexer deserializado ===" << std::endl;
+//     try {
+//         auto tokens = lexer1->tokenize("Func el_animal(\"soy el puto amo\", 0.000000001, 3455423);");
+//         std::cout << "Tokens del lexer deserializado:" << std::endl;
+//         for (const auto& token : tokens) {
+//             std::cout << "Type: " << token.first << ", Value: " << token.second << std::endl;
+//         }
+//     } catch (const std::exception& e) {
+//         std::cerr << "Error al tokenizar con lexer deserializado: " << e.what() << std::endl;
+//     }
     
-    // Limpiar memoria del lexer deserializado
-    delete lexer1;
-    std::cout << "\n=== Test completado ===" << std::endl;
+//     // Limpiar memoria del lexer deserializado
+//     delete lexer1;
+//     std::cout << "\n=== Test completado ===" << std::endl;
 
 
 
@@ -893,7 +893,7 @@ void lexer_ast_test() {
     //     cout << finalState << " ";
     // }
     // cout << std::endl;
-}
+// }
 
 
 int execute_all_tests() {

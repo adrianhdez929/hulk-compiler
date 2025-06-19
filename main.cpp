@@ -33,7 +33,6 @@ int main(int argc, char* argv[]) {
         file_path = argv[1];
         std::cout << "Usando archivo: " << file_path << std::endl;
     }
-
     Grammar hulk_grammar = getHulkGrammar();
     // if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
     //     bool success = create_artifacts(hulk_grammar, false); // false for no verbose output
