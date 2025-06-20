@@ -1,15 +1,10 @@
 
 function fibonacci(x:Int) {
   if (x > 0) {
-    let x1 = x;  
-    let x2 = x;
-    let v1 = fibonacci(x1); 
-    let v2 = fibonacci(x2);
-    v1 + v2;  // Sumamos los resultados
+    fibonacci(x-1) + fibonacci(x-2);
   }
   else {
-    let result = 1;
-    result;  // Devolvemos el resultado
+    x = 1;
   };
 }
 type Point {
