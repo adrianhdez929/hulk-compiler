@@ -8,7 +8,20 @@
 int main(int argc, char* argv[]) {
     // Obtener la gramática de Hulk
     Grammar hulk_grammar = getHulkGrammar();
-    
+    // for (const auto& production : hulk_grammar.Productions()) {
+    //     std::cout << "Producción: " << production.ToString() << std::endl;
+    // }
+    //buscar las producciones q tienen epsilon en parte derecha
+    std::cout << "Producciones con epsilon:" << std::endl;
+    for (const auto& production : hulk_grammar.Productions()) {
+        for (const auto& symbol : production.Right().Symbols()) {
+            if (symbol->IsEpsilon()) {
+                std::cout << "Producción: " << production.ToString() << std::endl;
+                break; // Solo necesitamos una vez por producción
+            }
+        }
+    }
+
     // Crear los artefactos con salida verbosa
     bool verbose = true;
     

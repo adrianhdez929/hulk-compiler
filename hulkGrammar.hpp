@@ -80,7 +80,7 @@ inline Grammar getHulkGrammar(){
     };
 
 
-	auto epsilon = g.GetEpsilon();
+	auto epsilon = g.SetEpsilon();
 
 // definir Terminales
 	auto LKEY = g.SetTerminal("{");
@@ -135,18 +135,31 @@ inline Grammar getHulkGrammar(){
 	auto line = g.SetNonTerminal("line");
 	auto lines_block = g.SetNonTerminal("lines_block");
 	auto lines = g.SetNonTerminal("lines");
+	auto decl = g.SetNonTerminal("decl");
+	auto decl_list = g.SetNonTerminal("decl_list");
+	auto declarations = g.SetNonTerminal("declarations");
 	auto non_empty_lines = g.SetNonTerminal("non_empty_lines");
 	auto expr = g.SetNonTerminal("expr");
 	auto func_assign = g.SetNonTerminal("func_assign");
+	auto func_full_assign = g.SetNonTerminal("func_full_assign");
 	auto type_node_decl = g.SetNonTerminal("type_node_decl");
+	auto type_elements = g.SetNonTerminal("type_elements");
 	auto arit_op = g.SetNonTerminal("arit_op");
-	// auto add_expr = g.SetNonTerminal("add_expr");
-	// auto mult_expr = g.SetNonTerminal("mult_expr");
-	// auto power_expr = g.SetNonTerminal("power_expr");
-	// auto unary_expr = g.SetNonTerminal("unary_expr");
-	// auto primary_expr = g.SetNonTerminal("primary_expr");
+	auto add_expr = g.SetNonTerminal("add_expr");
+	auto mult_expr = g.SetNonTerminal("mult_expr");
+	auto power_expr = g.SetNonTerminal("power_expr");
+	auto unary_expr = g.SetNonTerminal("unary_expr");
+	auto primary_expr = g.SetNonTerminal("primary_expr");
 	auto id_expr = g.SetNonTerminal("id_expr");
+	// Jerarquía para expresiones booleanas
 	auto bool_expr = g.SetNonTerminal("bool_expr");
+	auto or_expr = g.SetNonTerminal("or_expr");
+	auto and_expr = g.SetNonTerminal("and_expr");
+	auto not_expr = g.SetNonTerminal("not_expr");
+	auto comp_expr = g.SetNonTerminal("comp_expr");
+	auto eq_expr = g.SetNonTerminal("eq_expr");       // ==, != (igualdad)
+	auto rel_expr = g.SetNonTerminal("rel_expr");     // <, <=, >, >= (relacional)
+	auto bool_primary = g.SetNonTerminal("bool_primary"); // primarios booleanos (literales, expresiones entre paréntesis, etc)
 	// auto or_expr = g.SetNonTerminal("or_expr");
 	// auto and_expr = g.SetNonTerminal("and_expr");
 	// auto comp_expr = g.SetNonTerminal("comp_expr");
@@ -161,7 +174,9 @@ inline Grammar getHulkGrammar(){
 	// auto for_expr = g.SetNonTerminal("for_expr");
 	auto type_body_elements = g.SetNonTerminal("type_body_elements");
 	auto attribute = g.SetNonTerminal("attribute");
+	auto attributes = g.SetNonTerminal("attributes");
 	auto method = g.SetNonTerminal("method");
+	auto methods = g.SetNonTerminal("method_list");
 	auto member_access_expr = g.SetNonTerminal("member_access_expr");
 	auto new_expr = g.SetNonTerminal("new_expr");
 	auto expr_list = g.SetNonTerminal("expr_list");
@@ -176,13 +191,93 @@ inline Grammar getHulkGrammar(){
  */
 
 	// --------- Producción inicial del programa ---------
-	// input -> line
-	// Una línea de código como programa completo
-	g.AddProduction(AttrProd(input, Sentence(line), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* line_node = std::get<ASTNode*>(args[0]);
-		return line_node;
+	// // input -> line
+	// // Una línea de código como programa completo
+	// g.AddProduction(AttrProd(input, Sentence(line), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	ASTNode* line_node = std::get<ASTNode*>(args[0]);
+	// 	return line_node;
+	// }));
+
+	// input -> decl_list lines_block
+	g.AddProduction(AttrProd(input, Sentence({decl_list, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* decl_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[1]));
+		// Añadir las declaraciones al bloque de líneas
+		for (ASTNode* decl : decl_list_node->children) {
+			lines_block_node->add_child(decl);
+		}
+		return lines_block_node;
+	}));
+	//decl_list -> ε
+	g.AddProduction(AttrProd(decl_list, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({}, minLine);
+	}));
+	// // decl_list -> decl decl_list
+	// g.AddProduction(AttrProd(decl_list, Sentence({decl, decl_list}), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	ASTNodeVector* decl_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[1]));
+	// 	ASTNode* decl_node = std::get<ASTNode*>(args[0]);
+	// 	decl_list_node->add_child(decl_node);
+	// 	return decl_list_node;
+	// }));
+
+	// decl_list -> declarations
+	g.AddProduction(AttrProd(decl_list, Sentence(declarations), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* decl_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		return decl_list_node;
+	}));
+
+	//declarations -> decl
+	g.AddProduction(AttrProd(declarations, Sentence(decl), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* decl_node = std::get<ASTNode*>(args[0]);
+		int minline = getMinLineFromArgs(args);
+		ASTNodeVector* decl_list_node = new ASTNodeVector({}, minline);
+		decl_list_node->add_child(decl_node);
+		return decl_list_node;
+	}));
+
+	//declerations -> declerations decl
+	g.AddProduction(AttrProd(declarations, Sentence({declarations, decl}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* decl_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		ASTNode* decl_node = std::get<ASTNode*>(args[1]);
+		decl_list_node->add_child(decl_node);
+		return decl_list_node;
+	}));
+
+	//decl -> func_full_assign
+	g.AddProduction(AttrProd(decl, Sentence(func_full_assign), [](const std::vector<ElementType>& args) -> ElementType {
+		AssignFuncNode* func_assign_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[0]));
+		return func_assign_node;
+	}));
+
+	//decl -> type_node_decl
+	g.AddProduction(AttrProd(decl, Sentence(type_node_decl), [](const std::vector<ElementType>& args) -> ElementType {
+		TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
+		return type_node_decl_node;
 	}));
 	
+
+	// // decl_list -> decl_list func_full_assign
+	// g.AddProduction(AttrProd(decl_list, Sentence({decl_list, func_full_assign}), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	ASTNodeVector* decl_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+	// 	ASTNode* decl_node = std::get<ASTNode*>(args[1]);
+	// 	decl_list_node->add_child(decl_node);
+	// 	return decl_list_node;
+	// }));
+	// // decl -> type_node_decl
+	// // Una declaración de tipo
+	// g.AddProduction(AttrProd(decl, Sentence(type_node_decl), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
+	// 	return type_node_decl_node;
+	// }));
+
+	// // decl -> func_full_assign
+	// // Una asignación de función
+	// g.AddProduction(AttrProd(decl, Sentence(func_full_assign), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	AssignFuncNode* func_assign_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[0]));
+	// 	return func_assign_node;
+	// }));
+
 	// input -> lines_block
 	// Un bloque de código como programa completo
 	g.AddProduction(AttrProd(input, Sentence(lines_block), [](const std::vector<ElementType>& args) -> ElementType {
@@ -255,12 +350,12 @@ inline Grammar getHulkGrammar(){
 		return func_assign_node;
 	}));
 	
-	// line -> type_node_decl
-	// Una declaración de tipo (no requiere punto y coma)
-	g.AddProduction(AttrProd(line, Sentence( type_node_decl ), [](const std::vector<ElementType>& args) -> ElementType {
-		TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
-		return type_node_decl_node;
-	}));
+	// // line -> type_node_decl
+	// // Una declaración de tipo (no requiere punto y coma)
+	// g.AddProduction(AttrProd(line, Sentence( type_node_decl ), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
+	// 	return type_node_decl_node;
+	// }));
 
 	// ====================== EXPRESIONES ======================
 	/* 
@@ -271,7 +366,13 @@ inline Grammar getHulkGrammar(){
 	 */
 	
 	// expr -> arit_op
-	// Expresión aritmética
+	// Expresión aritmética - conectamos con la nueva jerarquía compatible con SLR1
+	g.AddProduction(AttrProd(expr, Sentence( add_expr ), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* expr_node = std::get<ASTNode*>(args[0]);
+		return expr_node;
+	}));
+	
+	// Mantenemos la original para compatibilidad
 	g.AddProduction(AttrProd(expr, Sentence( arit_op ), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* arit_op_node = std::get<ASTNode*>(args[0]);
 		return arit_op_node;
@@ -332,13 +433,13 @@ inline Grammar getHulkGrammar(){
 		AccessNode* member_access_expr_node = static_cast<AccessNode*>(std::get<ASTNode*>(args[0]));
 		return member_access_expr_node;
 	}));
-	// expr -> expr := expr
+	// expr -> id := expr
 	// Asignación destructiva
-	g.AddProduction(AttrProd(expr, Sentence({expr, ASS_DES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
+	g.AddProduction(AttrProd(expr, Sentence({ID_, ASS_DES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* var_id_node = std::get<ASTNode*>(args[0]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
-		return new BinOpNode(expr_node1, ":=", expr_node2, minLine);
+		return new BinOpNode(var_id_node, ":=", expr_node, minLine);
 	}));
 	
 	// expr -> expr = expr
@@ -405,9 +506,9 @@ inline Grammar getHulkGrammar(){
 		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, expr_node, return_type, minLine);
 	}));
 	
-	// func_assign -> function ID ( args_list ) { lines }
+	// func_full_assign -> function ID ( args_list ) { lines }
 	// Función con bloque de código sin tipo de retorno
-	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(func_full_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
 		Token func_name = std::get<Token>(args[1]);
 		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
 		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[6]));
@@ -415,9 +516,9 @@ inline Grammar getHulkGrammar(){
 		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, lines_node, minLine);
 	}));
 	
-	// func_assign -> function ID ( args_list ) : TYPE_ID { lines }
+	// func_full_assign -> function ID ( args_list ) : TYPE_ID { lines }
 	// Función con bloque de código con tipo de retorno especificado
-	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, TWO_POINTS, TYPE_ID, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(func_full_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, TWO_POINTS, TYPE_ID, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
 		Token func_name = std::get<Token>(args[1]);
 		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
 		Token return_type = std::get<Token>(args[6]);
@@ -632,64 +733,126 @@ inline Grammar getHulkGrammar(){
 	 * operaciones unarias (-). Se respeta la precedencia matemática estándar.
 	 */
 	
-	// arit_op -> NUMBER
+	// ----- NUEVA IMPLEMENTACIÓN DE OPERACIONES ARITMÉTICAS (SLR1 COMPATIBLE) -----
+	
+	// arit_op -> add_expr
+	// Entrada al nivel más bajo de precedencia (suma/resta)
+	g.AddProduction(AttrProd(arit_op, Sentence(add_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// ----- SUMAS Y RESTAS (precedencia baja) -----
+	
+	// add_expr -> add_expr + mult_expr
+	// Suma (asociatividad izquierda)
+	g.AddProduction(AttrProd(add_expr, Sentence({add_expr, PLUS, mult_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "+", right, line);
+	}));
+	
+	// add_expr -> add_expr - mult_expr
+	// Resta (asociatividad izquierda)
+	g.AddProduction(AttrProd(add_expr, Sentence({add_expr, MINUS, mult_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "-", right, line);
+	}));
+	
+	// add_expr -> mult_expr
+	// Paso al siguiente nivel de precedencia
+	g.AddProduction(AttrProd(add_expr, Sentence(mult_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// ----- MULTIPLICACIONES Y DIVISIONES (precedencia media) -----
+	
+	// mult_expr -> mult_expr * power_expr
+	// Multiplicación (asociatividad izquierda)
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, TIMES, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "*", right, line);
+	}));
+	
+	// mult_expr -> mult_expr / power_expr
+	// División (asociatividad izquierda)
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, DIV, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "/", right, line);
+	}));
+	
+	// mult_expr -> mult_expr % power_expr
+	// Módulo (asociatividad izquierda)
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, MOD, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "%", right, line);
+	}));
+	
+	// mult_expr -> power_expr
+	// Paso al siguiente nivel de precedencia
+	g.AddProduction(AttrProd(mult_expr, Sentence(power_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// ----- POTENCIA (precedencia alta) -----
+	
+	// power_expr -> unary_expr ^ power_expr
+	// Potencia (asociatividad derecha)
+	g.AddProduction(AttrProd(power_expr, Sentence({unary_expr, POW, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* left = std::get<ASTNode*>(args[0]);
+		ASTNode* right = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(left, right);
+		return new BinOpNode(left, "^", right, line);
+	}));
+	
+	// power_expr -> unary_expr
+	// Paso al siguiente nivel de precedencia
+	g.AddProduction(AttrProd(power_expr, Sentence(unary_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	// ----- OPERADORES UNARIOS -----
+	
+	// unary_expr -> - primary_expr
+	// Negación unaria
+	g.AddProduction(AttrProd(unary_expr, Sentence({MINUS, primary_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* expr = std::get<ASTNode*>(args[1]);
+		int line = getMinLineFromArgs(args);
+		return new UnaryOpNode("-", expr, line);
+	}));
+	
+	// unary_expr -> primary_expr
+	// Paso al siguiente nivel de precedencia
+	g.AddProduction(AttrProd(unary_expr, Sentence(primary_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// ----- TÉRMINOS PRIMARIOS -----
+	
+	// primary_expr -> NUMBER
 	// Literal numérico
-	g.AddProduction(AttrProd(arit_op, Sentence(NUMBER), [](const std::vector<ElementType>& args) -> ElementType {
+	g.AddProduction(AttrProd(primary_expr, Sentence(NUMBER), [](const std::vector<ElementType>& args) -> ElementType {
 		Token number_token = std::get<Token>(args[0]);
 		float number = std::stof(number_token.Lexeme());
 		int line = number_token.Line();
 		return new FloatNode(number, line);
 	}));
-	// arit_op -> ( expr )
+	
+	// primary_expr -> ( expr )
 	// Expresión entre paréntesis para agrupar o cambiar precedencia
-	g.AddProduction(AttrProd(arit_op, Sentence({LPARENT, expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
-		return expr_node;
+	g.AddProduction(AttrProd(primary_expr, Sentence({LPARENT, expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[1]);
 	}));
-	// arit_op -> expr + expr
-	// Operación de suma
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, PLUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BinOpNode(expr_node1, "+", expr_node2, line);
-	}));
-	// arit_op -> expr - expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BinOpNode(expr_node1, "-", expr_node2, line);
-	}));
-	// arit_op -> expr * expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, TIMES, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BinOpNode(expr_node1, "*", expr_node2, line);
-	}));
-	// arit_op -> expr / expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, DIV, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BinOpNode(expr_node1, "/", expr_node2, line);
-	}));
-	// arit_op -> expr ^ expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, POW, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BinOpNode(expr_node1, "^", expr_node2, line);
-	}));
-	// arit_op -> expr % expr
-	g.AddProduction(AttrProd(arit_op, Sentence({expr, MOD, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int minLine = getMinLineFromArgs(args);
-		return new BinOpNode(expr_node1, "%", expr_node2, minLine);
-	}));
-	// arit_op -> - expr
+	
+	// Mantener la implementación original para el resto de operadores unarios
+	// arit_op -> - expr (ANTIGUA IMPLEMENTACIÓN - MANTENIDA PARA COMPATIBILIDAD)
 	g.AddProduction(AttrProd(arit_op, Sentence({MINUS, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
 		int minLine = getMinLineFromArgs(args);
@@ -700,89 +863,161 @@ inline Grammar getHulkGrammar(){
 	/*
 	 * Las expresiones booleanas incluyen valores booleanos (true/false), operaciones de comparación,
 	 * operadores lógicos (AND, OR, NOT) y verificación de tipo (is).
+	 * 
+	 * La jerarquía de precedencia de operadores de menor a mayor es:
+	 * 1. OR (|)
+	 * 2. AND (&)
+	 * 3. NOT (!)
+	 * 4. Comparaciones (>, >=, <, <=, ==, !=)
+	 * 5. Valores booleanos, expresiones entre paréntesis, comprobación de tipos (is)
 	 */
 	
-	// bool_expr -> BOOLEAN
-	// Literal booleano (true o false)
-	g.AddProduction(AttrProd(bool_expr, Sentence(BOOLEAN), [](const std::vector<ElementType>& args) -> ElementType {
-		Token boolean_token = std::get<Token>(args[0]);
-		bool value = (boolean_token.Lexeme() == "true");
-		int line = boolean_token.Line();
-		return new BoolExprNode(new BoolNode(value, line), line);
+	// === NUEVA IMPLEMENTACIÓN SLR(1) COMPATIBLE ===
+	// La jerarquía de precedencia booleana sigue este esquema:
+	// bool_expr -> or_expr
+	// or_expr -> and_expr | or_expr OR and_expr
+	// and_expr -> not_expr | and_expr AND not_expr
+	// not_expr -> comp_expr | NOT comp_expr
+	// comp_expr -> expr comparison_op expr | BOOLEAN | (bool_expr) | IS_expr
+	
+	// bool_expr -> or_expr
+	g.AddProduction(AttrProd(bool_expr, Sentence(or_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
 	}));
-	// bool_expr -> expr >= expr
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, GR_EQ_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, ">=", expr_node2, line), line);
+	
+	// or_expr -> and_expr
+	g.AddProduction(AttrProd(or_expr, Sentence(and_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
 	}));
-	// bool_expr -> expr > expr
-	// Operador de mayor que
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, GR_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, ">", expr_node2, line), line);
+	
+	// or_expr -> or_expr OR and_expr (left recursion)
+	g.AddProduction(AttrProd(or_expr, Sentence({or_expr, OR_, and_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* or_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* and_expr_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(or_expr_node, and_expr_node);
+		return new BoolExprNode(new BinOpNode(or_expr_node, "|", and_expr_node, line), line);
 	}));
-	// bool_expr -> expr < expr
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, LESS_EQ_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, "<=", expr_node2, line), line);
+	
+	// and_expr -> not_expr
+	g.AddProduction(AttrProd(and_expr, Sentence(not_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
 	}));
-	// bool_expr -> expr < expr
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, LESS_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromArgs(args);
-		return new BoolExprNode(new BinOpNode(expr_node1, "<", expr_node2, line), line);
+	
+	// and_expr -> and_expr AND not_expr (left recursion)
+	g.AddProduction(AttrProd(and_expr, Sentence({and_expr, AND_, not_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* and_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* not_expr_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(and_expr_node, not_expr_node);
+		return new BoolExprNode(new BinOpNode(and_expr_node, "&", not_expr_node, line), line);
 	}));
-	// bool_expr -> expr == expr
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, EQ_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, "==", expr_node2, line), line);
+	
+	// not_expr -> comp_expr
+	g.AddProduction(AttrProd(not_expr, Sentence(comp_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
 	}));
-	// bool_expr -> expr != expr
-	// Operador de desigualdad
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, DISTINCT_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, "!=", expr_node2, line), line);
-	}));
-	// bool_expr -> expr AND expr
-	// Operador lógico AND
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, AND_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, "&", expr_node2, line), line);
-	}));
-	// bool_expr -> expr OR expr
-	// Operador lógico OR
-	g.AddProduction(AttrProd(bool_expr, Sentence({expr, OR_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNode* expr_node1 = std::get<ASTNode*>(args[0]);
-		ASTNode* expr_node2 = std::get<ASTNode*>(args[2]);
-		int line = getMinLineFromNodes(expr_node1, expr_node2);
-		return new BoolExprNode(new BinOpNode(expr_node1, "|", expr_node2, line), line);
-	}));
-	// bool_expr -> NOT expr
-	g.AddProduction(AttrProd(bool_expr, Sentence({NOT_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+	
+	// not_expr -> NOT not_expr
+	g.AddProduction(AttrProd(not_expr, Sentence({NOT_, not_expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
 		return new BoolExprNode(new UnaryOpNode("!", expr_node, expr_node->line), expr_node->line);
 	}));
-	// bool_expr -> expr IS TYPE_ID
-	g.AddProduction(AttrProd(bool_expr, Sentence({id_expr, IS_, TYPE_ID}), [](const std::vector<ElementType>& args) -> ElementType {
+	
+	// === NUEVA ESTRUCTURA DE COMPARACIÓN ===
+	// La jerarquía de operadores de comparación es:
+	// comp_expr -> eq_expr
+	// eq_expr -> rel_expr | eq_expr == rel_expr | eq_expr != rel_expr
+	// rel_expr -> bool_primary | rel_expr < bool_primary | rel_expr <= bool_primary | rel_expr > bool_primary | rel_expr >= bool_primary
+	// bool_primary -> BOOLEAN | (bool_expr) | id_expr IS TYPE_ID | func_call IS ID
+	
+	// comp_expr -> eq_expr
+	g.AddProduction(AttrProd(comp_expr, Sentence(eq_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// eq_expr -> rel_expr
+	g.AddProduction(AttrProd(eq_expr, Sentence(rel_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// eq_expr -> eq_expr == rel_expr (recursión izquierda)
+	g.AddProduction(AttrProd(eq_expr, Sentence({eq_expr, EQ_, rel_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* eq_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(eq_expr_node, rel_expr_node);
+		return new BoolExprNode(new BinOpNode(eq_expr_node, "==", rel_expr_node, line), line);
+	}));
+	
+	// eq_expr -> eq_expr != rel_expr (recursión izquierda)
+	g.AddProduction(AttrProd(eq_expr, Sentence({eq_expr, DISTINCT_, rel_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* eq_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(eq_expr_node, rel_expr_node);
+		return new BoolExprNode(new BinOpNode(eq_expr_node, "!=", rel_expr_node, line), line);
+	}));
+	
+	// rel_expr -> bool_primary
+	g.AddProduction(AttrProd(rel_expr, Sentence(bool_primary), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// rel_expr -> rel_expr < bool_primary (recursión izquierda)
+	g.AddProduction(AttrProd(rel_expr, Sentence({rel_expr, LESS_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* primary_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(rel_expr_node, primary_node);
+		return new BoolExprNode(new BinOpNode(rel_expr_node, "<", primary_node, line), line);
+	}));
+	
+	// rel_expr -> rel_expr <= bool_primary (recursión izquierda)
+	g.AddProduction(AttrProd(rel_expr, Sentence({rel_expr, LESS_EQ_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* primary_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(rel_expr_node, primary_node);
+		return new BoolExprNode(new BinOpNode(rel_expr_node, "<=", primary_node, line), line);
+	}));
+	
+	// rel_expr -> rel_expr > bool_primary (recursión izquierda)
+	g.AddProduction(AttrProd(rel_expr, Sentence({rel_expr, GR_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* primary_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(rel_expr_node, primary_node);
+		return new BoolExprNode(new BinOpNode(rel_expr_node, ">", primary_node, line), line);
+	}));
+	
+	// rel_expr -> rel_expr >= bool_primary (recursión izquierda)
+	g.AddProduction(AttrProd(rel_expr, Sentence({rel_expr, GR_EQ_, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* rel_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* primary_node = std::get<ASTNode*>(args[2]);
+		int line = getMinLineFromNodes(rel_expr_node, primary_node);
+		return new BoolExprNode(new BinOpNode(rel_expr_node, ">=", primary_node, line), line);
+	}));
+	
+	// bool_primary -> expr
+	g.AddProduction(AttrProd(bool_primary, Sentence(expr), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[0]);
+	}));
+	
+	// bool_primary -> BOOLEAN
+	g.AddProduction(AttrProd(bool_primary, Sentence(BOOLEAN), [](const std::vector<ElementType>& args) -> ElementType {
+		Token bool_token = std::get<Token>(args[0]);
+		return new BoolExprNode(new BoolNode(bool_token.Lexeme() == "true", bool_token.Line()), bool_token.Line());	
+	}));
+	
+	// bool_primary -> ( bool_expr )
+	g.AddProduction(AttrProd(bool_primary, Sentence({LPARENT, bool_expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+		return std::get<ASTNode*>(args[1]); // Simplemente devuelve la expresión booleana entre paréntesis
+	}));
+	
+	// bool_primary -> id_expr IS TYPE_ID
+	g.AddProduction(AttrProd(bool_primary, Sentence({id_expr, IS_, TYPE_ID}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		Token type_id_token = std::get<Token>(args[2]);
 		int minline = getMinLineFromArgs(args);
 		return new BoolExprNode(new BinOpNode(id_expr_node, "is", new IDNode(type_id_token.Lexeme(), type_id_token.Line()), minline), minline);
 	}));
-	g.AddProduction(AttrProd(bool_expr, Sentence({func_call, IS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
+	
+	// bool_primary -> func_call IS ID
+	g.AddProduction(AttrProd(bool_primary, Sentence({func_call, IS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		FunctionCallNode* func_call_node = static_cast<FunctionCallNode*>(std::get<ASTNode*>(args[0]));
 		Token type_id_token = std::get<Token>(args[2]);
 		int line = std::min(func_call_node->line, type_id_token.Line());
@@ -932,28 +1167,123 @@ inline Grammar getHulkGrammar(){
 	}));
 
 	// --------- Elementos del cuerpo de un tipo ---------
+	// Volvemos a la versión original pero mejorada para mayor compatibilidad
+	
 	// type_body_elements -> ε
 	// Cuerpo de tipo vacío (sin atributos ni métodos)
 	g.AddProduction(AttrProd(type_body_elements, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
-		// Retorna un vector vacío de nodos AST con el mayor linea posible
 		int minLine = getMinLineFromArgs(args);
 		return new ASTNodeVector({}, minLine);
 	}));
-	// type_body_elements -> type_body_elements attribute
-	// Adición de un atributo a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, attribute}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
-		VarAssign* attribute_node = static_cast<VarAssign*>(std::get<ASTNode*>(args[1]));
-		type_body_elements_node->add_child(attribute_node);
-		return type_body_elements_node;
+	
+	// type_body_elements -> type_elements
+	// Adición de un atributo a los elementos de un tipo (recursión izquierda)
+	g.AddProduction(AttrProd(type_body_elements, Sentence(type_elements), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* type_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(type_elements_node->children, minLine);
 	}));
-	// type_body_elements -> type_body_elements method
-	// Adición de un método a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, method}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+	
+	// //type_elements -> epsilon
+	// g.AddProduction(AttrProd(type_elements, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
+	// 	int minLine = getMinLineFromArgs(args);
+	// 	return new ASTNodeVector({}, minLine);
+	// }));
+	//type_elements -> attributes
+	g.AddProduction(AttrProd(type_elements, Sentence(attributes), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* attributes_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(attributes_node->children, minLine);
+	}));
+	//type_elements -> methods
+	g.AddProduction(AttrProd(type_elements, Sentence(methods), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* methods_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(methods_node->children, minLine);
+	}));
+	//type_elements -> attributes methods
+	// Combinación de atributos y métodos en el cuerpo del tipo
+	g.AddProduction(AttrProd(type_elements, Sentence({attributes, methods}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* attributes_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		ASTNodeVector* methods_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[1]));
+		
+		// Combinamos los hijos de ambos nodos
+		std::vector<ASTNode*> new_children = attributes_node->children;
+		new_children.insert(new_children.end(), methods_node->children.begin(), methods_node->children.end());
+		
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(new_children, minLine);
+	}));
+	//attributes -> epsilon
+	g.AddProduction(AttrProd(attributes, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({}, minLine);
+	}));
+	// attributes -> attribute
+	// Un único atributo
+	g.AddProduction(AttrProd(attributes, Sentence(attribute), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssign* attribute_node = static_cast<VarAssign*>(std::get<ASTNode*>(args[0]));
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({attribute_node}, minLine);
+	}));
+	// attributes -> attributes attribute
+	// Adición de un atributo a los elementos de un tipo (recursión izquierda)	
+	g.AddProduction(AttrProd(attributes, Sentence({attributes, attribute}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* attributes_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		VarAssign* attribute_node = static_cast<VarAssign*>(std::get<ASTNode*>(args[1]));
+		
+		// Insertamos el atributo al inicio para mantener el orden correcto
+		std::vector<ASTNode*> new_children = {attribute_node};
+		for (auto* child : attributes_node->children) {
+			new_children.push_back(child);
+		}
+		
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(new_children, minLine);
+	}));
+	// methods -> epsilon
+	// Cuerpo de tipo vacío (sin métodos)
+	g.AddProduction(AttrProd(methods, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({}, minLine);
+	}));
+	// methods -> method
+	// Un único método
+	g.AddProduction(AttrProd(methods, Sentence(method), [](const std::vector<ElementType>& args) -> ElementType {
+		AssignFuncNode* method_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[0]));
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({method_node}, minLine);
+	}));
+	// methos -> methods method 
+	// Adición de un método a los elementos de un tipo (recursión izquierda)
+	g.AddProduction(AttrProd(methods, Sentence({methods, method}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* methods_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
 		AssignFuncNode* method_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[1]));
-		type_body_elements_node->add_child(method_node);
-		return type_body_elements_node;
+		
+		// Insertamos el método al inicio para mantener el orden correcto
+		std::vector<ASTNode*> new_children = {method_node};
+		for (auto* child : methods_node->children) {
+			new_children.push_back(child);
+		}
+		
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(new_children, minLine);
+	}));
+
+	// type_body_elements -> method type_body_elements
+	// Adición de un método a los elementos de un tipo (recursión izquierda)
+	g.AddProduction(AttrProd(type_body_elements, Sentence({method, type_body_elements}), [](const std::vector<ElementType>& args) -> ElementType {
+		AssignFuncNode* method_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[0]));
+		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[1]));
+		
+		// Insertamos el método al inicio para mantener el orden correcto
+		std::vector<ASTNode*> new_children = {method_node};
+		for (auto* child : type_body_elements_node->children) {
+			new_children.push_back(child);
+		}
+		
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector(new_children, minLine);
 	}));
 
 	// --------- Atributos de tipos ---------
