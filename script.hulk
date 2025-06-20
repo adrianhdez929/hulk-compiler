@@ -1,23 +1,18 @@
 
-{
-  function tan(x : Number) => sin(x) / cos(x);
-  print("Hello World");
-  print(sin(2 * 4) ^ 2 + cos(3 * 4 / log(4, 64)));
-  let a = 42 in if (a%2 == 0) print("Even") else print("odd"); 
-  let a = 25 in print(if (a%2 == 0) "even" else "odd");
-  let mod = a % 3 in
-    print(
-        if (mod == 0) "Magic"
-        elif (mod % 3 == 1) "Woke"
-        else "Dumb"
-    );
-  let a = 10 in while (a >= 0) {
-    print(a);
-    a := a - 1;
+function fibonacci(x:Int) {
+  if (x > 0) {
+    fibonacci(x-1) + fibonacci(x-2);
+  }
+  else {
+    x = 1;
   };
-  function gcd(a, b) => while (a > 0)
-    let m = a % b in {
-        b := a;
-        a := m;
-      };
+}
+type Point {
+  x = 3;
+}
+type OtroType {
+  y = "25";
+}
+{
+  function fibonacci( x : Int) => fibonacci(x-1) + fibonacci(x-2);
 }
