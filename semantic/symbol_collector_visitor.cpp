@@ -30,9 +30,8 @@ const std::vector<std::string>& SymbolCollectorVisitor::getErrors() const {
 
 void SymbolCollectorVisitor::printErrors() const {
     if (!errors.empty()) {
-        // std::cout << "\n=== Symbol Collection Errors ===" << std::endl;
         for (const auto& error : errors) {
-            // std::cout << "Error: " << error << std::endl;
+            std::cout << "SymbolCollector Error: " << error << std::endl;
         }
     }
 }
@@ -43,19 +42,19 @@ void SymbolCollectorVisitor::visit(ASTNode* node, Context* context) {
 }
 
 void SymbolCollectorVisitor::visit(FloatNode* node, Context* context) {
-    if (node && !node->inferredType) {
+    if (node) {
         node->inferredType = Context::numberType;
     }
 }
 
 void SymbolCollectorVisitor::visit(BoolNode* node, Context* context) {
-    if (node && !node->inferredType) {
+    if (node) {
         node->inferredType = Context::boolType;
     }
 }
 
 void SymbolCollectorVisitor::visit(StringNode* node, Context* context) {
-    if (node && !node->inferredType) {
+    if (node) {
         node->inferredType = Context::stringType;
     }
 }
@@ -151,30 +150,54 @@ void SymbolCollectorVisitor::visit(ArgsList* node, Context* context) {
         }
     }
     
-    node->inferredType = Context::voidType;
+    node->inferredType = Context::objectType;
 }
 
 void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
     if (!node) return;
+    std::vector<TypeAttribute> methodArgs = std::vector<TypeAttribute>();
 
     for (auto* arg: node->args->children) {
         arg->accept(this, context);
         
-        if (arg->inferredType) {
-            continue;
-        }
         if (arg->id_type.empty() || arg->id_type == "none") {
             arg->inferredType = Context::numberType;
         } else {
             arg->inferredType = context->getType(arg->id_type);
         }
+
+        if (arg->inferredType == nullptr) {
+            addError("Type error in line " + std::to_string(node->line) + ": Could not resolve type '" + arg->id_type + "' for argument '" + arg->id_name + "'");
+            continue;
+        }
+
+        methodArgs.push_back(TypeAttribute{arg->id_name, globalContext->getType(arg->inferredType->name)});
     }
 
     node->body->accept(this, context);
     node->inferredType = node->body->inferredType;
 
     if (!currentTypeName.empty()) {
-       processMethodDefinition(node, currentTypeName, context);
+        if (node->inferredType == nullptr) {
+            addError("Type error in line " + std::to_string(node->line) + ": Could not infer return type for method '" + node->func_name + "' in type '" + currentTypeName + "'");
+        }
+        
+        auto returnType = node->inferredType ? context->getType(node->inferredType->name) : Context::objectType;
+        std::shared_ptr<TypeInfo> currentType = context->getType(currentTypeName);
+
+        if (!currentType->defineMethod(node->func_name, returnType, methodArgs)) {
+            addError("Could not define method '" + node->func_name + "' in type '" + currentTypeName + "'");
+            return;
+        }
+    } else {
+        if (node->inferredType == nullptr) {
+            addError("Type error in line " + std::to_string(node->line) + ": Could not infer return type for function '" + node->func_name + "' in global scope");
+        }
+
+        auto returnType = node->inferredType ? context->getType(node->inferredType->name) : Context::objectType;
+        if (!context->defineFunc(node->func_name, returnType, methodArgs)) {
+            addError("Could not define function '" + node->func_name + "' in global scope");
+        }
     }
 }
 
@@ -191,7 +214,7 @@ void SymbolCollectorVisitor::visit(LetAssign* node, Context* context) {
         node->body->accept(this, context);
         node->inferredType = node->body->inferredType;
     } else {
-        node->inferredType = Context::voidType;
+        node->inferredType = Context::objectType;
     }
 }
 
@@ -199,7 +222,6 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
     if (!node) return;
     
     // Debug output
-    // std::cout << "SymbolCollector: Processing VarAssign '" << node->var_id->id_name 
     //           << "' - currentTypeName: '" << currentTypeName 
     //           << "', insideMethodBody: " << (insideMethod ? "true" : "false") << std::endl;
 
@@ -209,18 +231,20 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
     node->var_id->inferredType = node->inferredType;
     
     if (!currentTypeName.empty() && !insideMethod) {
-        // std::cout << "  -> Processing as type attribute" << std::endl;
-        processAttributeDefinition(node, currentTypeName, context);
+
+        std::shared_ptr<TypeInfo> currentType = globalContext->getType(currentTypeName);
+
+        if (!currentType->hasAttribute(node->var_id->id_name)) {
+            currentType->defineAttribute(node->var_id->id_name, node->value->inferredType);
+        }
     } 
     // else {
-        // std::cout << "  -> Processing as variable definition" << std::endl;
     //     processVariableDefinition(node, "global", context);
     // }
 }
 
 void SymbolCollectorVisitor::visit(NewTypeNode* node, Context* context) {
     if (node) {
-        // cout << "Setting inferredType for NewTypeNode '" << globalContext->getType(node->id_type_name)->name << "'" << std::endl;
         node->inferredType = globalContext->getType(node->id_type_name);
     }
 }
@@ -239,7 +263,7 @@ void SymbolCollectorVisitor::visit(VarAssignType* node, Context* context) {
         if (node->new_type && node->new_type->inferredType) {
             node->inferredType = node->new_type->inferredType;
         } else {
-            node->inferredType = Context::voidType;
+            node->inferredType = Context::objectType;
         }
     }
 }
@@ -334,7 +358,6 @@ void SymbolCollectorVisitor::visit(ForNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     if (!node) return;
     
-    // std::cout << "SymbolCollector: Processing type body for '" << node->id->id_name << "'" << std::endl;
     currentTypeName = node->id->id_name;
 
     for (auto* element : node->body) {
@@ -343,19 +366,16 @@ void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
         }
     }
     
-    if (globalContext) {
-        auto typeInfo = globalContext->getType(node->id->id_name);
-        if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            // std::cout << "Type '" << node->id->id_name << "' inherits from '" 
-                    //  << typeInfo->typeDef->parentType->name << "'" << std::endl;
+    // if (globalContext) {
+    //     auto typeInfo = globalContext->getType(node->id->id_name);
+    //     if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
+    //                 //  << typeInfo->typeDef->parentType->name << "'" << std::endl;
             
-            auto inheritedAttrs = getAttributesForType(typeInfo->typeDef->parentType->name, true);
-            // std::cout << "Inherited " << inheritedAttrs.size() << " attributes from parent types" << std::endl;
+    //         auto inheritedAttrs = getAttributesForType(typeInfo->typeDef->parentType->name, true);
             
-            auto inheritedMethods = getMethodsForType(typeInfo->typeDef->parentType->name, true);
-            // std::cout << "Inherited " << inheritedMethods.size() << " methods from parent types" << std::endl;
-        }
-    }
+    //         auto inheritedMethods = getMethodsForType(typeInfo->typeDef->parentType->name, true);
+    //     }
+    // }
     
     currentTypeName.clear();
     
@@ -363,7 +383,7 @@ void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
     if (declaredType) {
         node->inferredType = declaredType;
     } else {
-        node->inferredType = Context::voidType;
+        node->inferredType = Context::objectType;
     }
 }
 
@@ -414,14 +434,44 @@ void SymbolCollectorVisitor::visit(ProgramNode* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(AccessNode* node, Context* context) {
     if (!node) return;
+    std::cout << "Visiting AccessNode: " << node->member->get_name() << std::endl;
+    if (node->var_name == "self") {
+        if (currentTypeName.empty()) {
+            addError("Type error in line " + std::to_string(node->line) + ": 'self' reference outside of type context");
+            return;
+        }
 
-    
+        auto currentType = context->getType(currentTypeName);
+        if (!currentType) {
+            addError("Type error in line " + std::to_string(node->line) + ": Current type '" + currentTypeName + "' not found");
+            return;
+        }
+        if (node->member->get_form() == TypeAssMember::Form::Method) {
+            if (!currentType->hasMethod(node->member->get_name())) {
+                addError("Type error in line " + std::to_string(node->line) + ": Type '" + currentTypeName + 
+                         "' does not have method '" + node->member->get_name() + "'");
+                return;
+            }
+            std::cout << "Method found: " << node->member->get_name() << std::endl;
+            node->inferredType = currentType->getMethod(node->member->get_name()).returnType;
+        } else {
+            if (!currentType->hasAttribute(node->member->get_name())) {
+                addError("Type error in line " + std::to_string(node->line) + ": Type '" + currentTypeName + 
+                         "' does not have attribute '" + node->member->get_name() + "'");
+                return;
+            }
+            std::cout << "Attribute found: " << node->member->get_name() << std::endl;
+            node->inferredType = currentType->getAttribute(node->member->get_name()).type;
+        }
+        
+        node->member->inferredType = node->inferredType;
+    }
 }
 
 void SymbolCollectorVisitor::visit(TypeAssMember* node, Context* context) {
     if (!node) return;
     
-    node->inferredType = Context::voidType;
+    node->inferredType = Context::objectType;
 }
 
 void SymbolCollectorVisitor::visit(AttributeMember* node, Context* context) {
@@ -439,7 +489,7 @@ void SymbolCollectorVisitor::visit(MethodMember* node, Context* context) {
         }
     }
     
-    node->inferredType = Context::voidType;
+    node->inferredType = Context::objectType;
 }
 
 void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
@@ -466,16 +516,11 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
         if (subTypeName == superTypeName) return true;
         
         auto subType = context->getType(subTypeName);
-        if (!subType || !subType->typeDef) return false;
-        
-        std::shared_ptr<TypeInfo> current = subType;
-        while (current && current->typeDef && current->typeDef->parentType) {
-            current = current->typeDef->parentType;
-            if (current->name == superTypeName) {
-                return true;
-            }
+        if (!subType) {
+            return false;
         }
-        return false;
+        
+        return subType->isCompatibleWith(superTypeName);
     };
     
     bool isValidCast = false;
@@ -489,9 +534,6 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
     else if (isSubclassOfByName(targetType->name, sourceType->name)) {
         isValidCast = true;
     }
-    else if (sourceType->isCompatibleWith(targetType)) {
-        isValidCast = true;
-    }
     
     if (!isValidCast) {
         addError("Invalid cast: Cannot cast from type '" + sourceType->name + 
@@ -499,60 +541,8 @@ void SymbolCollectorVisitor::visit(TypeCastNode* node, Context* context) {
         return;
     }
     
-    // cout << "Casting from type '" << sourceType->name 
         //  << "' to type '" << targetType->name << "'" << std::endl;
     node->inferredType = targetType;
-}
-
-void SymbolCollectorVisitor::processMethodDefinition(AssignFuncNode* node, const std::string& typeName, Context* context) {
-    if (!node) {
-        addError("Null AssignFuncNode in processMethodDefinition");
-        return;
-    }
-    
-    // std::cout << "Processing method '" << node->func_name << "' in type '" << typeName << "'" << std::endl;
-    
-    std::vector<std::shared_ptr<TypeInfo>> paramTypes;
-    std::vector<std::string> paramNames;
-    
-    if (!node->args) {
-        // std::cout << "Method '" << node->func_name << "' has null args, treating as no parameters" << std::endl;
-    } else if (node->args->children.empty()) {
-        // std::cout << "Method '" << node->func_name << "' has no parameters" << std::endl;
-    } else {
-        for (auto* param : node->args->children) {
-            if (!param) {
-                addError("Null parameter in method '" + node->func_name + "' in type '" + typeName + "'");
-                continue;
-            }
-            paramNames.push_back(param->id_name);
-            
-            std::shared_ptr<TypeInfo> paramType = Context::numberType;
-            if (!param->id_type.empty()) {
-                auto explicitType = context->getType(param->id_type);
-                if (explicitType) {
-                    paramType = explicitType;
-                }
-            }
-            paramTypes.push_back(paramType);
-        }
-    }
-    
-    Context* methodContext = createMethodContext(MethodInfo(node->func_name, nullptr, paramTypes, paramNames, typeName), context);
-    
-    for (size_t i = 0; i < paramNames.size(); i++) {
-        methodContext->defineVar(paramNames[i], paramTypes[i]);
-    }
-    
-    if (node->body) {
-        node->body->accept(this, methodContext);
-    }
-    
-    MethodInfo method(node->func_name, node->body->inferredType, paramTypes, paramNames, typeName, false, 0);
-    
-    methodsByType[typeName].push_back(method);
-    
-    // std::cout << "Added method '" << node->func_name << "' to type '" << typeName << "'" << std::endl;
 }
 
 void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const std::string& typeName, Context* context) {
@@ -561,9 +551,20 @@ void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const s
         return;
     }
     
-    // std::cout << "Processing attribute '" << node->var_id->id_name << "' in type '" << typeName << "'" << std::endl;
+
     
     std::shared_ptr<TypeInfo> attrType = Context::numberType; // Default type
+
+    if (!currentTypeName.empty()) {
+        auto currentType = globalContext->getType(currentTypeName);
+
+        if (!currentType->hasAttribute(node->var_id->id_name)) {
+            attrType = node->value->inferredType;
+            
+            currentType->defineAttribute(node->var_id->id_name, attrType);
+        }
+    }
+
     if (node->value) {
         node->value->accept(this, context);
         if (node->value->inferredType) {
@@ -577,15 +578,10 @@ void SymbolCollectorVisitor::processAttributeDefinition(VarAssign* node, const s
             attrType = explicitType;
         }
     }
-    
-    AttributeInfo attr(node->var_id->id_name, attrType, typeName, false, 0);
-    
-    attributesByType[typeName].push_back(attr);
-    
+        
     node->var_id->inferredType = attrType;
     node->inferredType = attrType;
     
-    // std::cout << "Added attribute '" << node->var_id->id_name << "' to type '" << typeName << "'" << std::endl;
 }
 
 void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const std::string& scope, Context* context) {
@@ -602,7 +598,7 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
                 return;
             }
             
-            if (!valueType->isCompatibleWith(declaredType) && !valueType->isSubtypeOf(declaredType)) {
+            if (!valueType->isCompatibleWith(declaredType->name) && !declaredType->isCompatibleWith(valueType->name)) {
                 addError("Type mismatch: Cannot assign value of type '" + valueType->name + 
                         "' to variable '" + node->var_id->id_name + "' of type '" + declaredType->name + "'");
                 return;
@@ -615,17 +611,12 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
         
         node->var_id->inferredType = varType;
         node->inferredType = varType;
-        
-        VariableInfo varInfo(node->var_id->id_name, varType, scope, false, 0);
-        globalVariables.push_back(varInfo);
-        
-        // std::cout << "Added variable '" << node->var_id->id_name << "' with type '" << varType->name << "' in scope '" << scope << "'" << std::endl;
+                
     }
 }
 
 void SymbolCollectorVisitor::processGlobalFunction(AssignFuncNode* node, Context* context) {
     if (node) {
-        // std::cout << "Processing global function '" << node->func_name << "'" << std::endl;
         for (auto* arg : node->args->children) {
             if (arg) {
                 arg->accept(this, context);
@@ -643,135 +634,4 @@ void SymbolCollectorVisitor::processGlobalFunction(AssignFuncNode* node, Context
         node->body->accept(this, context);
         node->inferredType = node->body->inferredType;
     }
-}
-
-Context* SymbolCollectorVisitor::createMethodContext(const MethodInfo& method, Context* parentContext) {
-    Context* methodContext = parentContext->createChildContext();
-    
-    if (!method.ownerType.empty()) {
-        auto selfType = globalContext->getType(method.ownerType);
-        if (selfType) {
-            methodContext->defineVar("self", selfType);
-        }
-    }
-    
-    return methodContext;
-}
-
-const std::unordered_map<std::string, std::vector<MethodInfo>>& 
-SymbolCollectorVisitor::getMethodsByType() const {
-    return methodsByType;
-}
-
-const std::unordered_map<std::string, std::vector<AttributeInfo>>& 
-SymbolCollectorVisitor::getAttributesByType() const {
-    return attributesByType;
-}
-
-const std::vector<VariableInfo>& SymbolCollectorVisitor::getGlobalVariables() const {
-    return globalVariables;
-}
-
-std::vector<MethodInfo> SymbolCollectorVisitor::getMethodsForType(const std::string& typeName, bool includeInherited) const {
-    std::vector<MethodInfo> result;
-    
-    auto it = methodsByType.find(typeName);
-    if (it != methodsByType.end()) {
-        result = it->second;
-    }
-    
-    if (includeInherited && globalContext) {
-        auto typeInfo = globalContext->getType(typeName);
-        if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            auto parentMethods = getMethodsForType(typeInfo->typeDef->parentType->name, true);
-            
-            for (const auto& parentMethod : parentMethods) {
-                bool isOverridden = false;
-                for (const auto& currentMethod : result) {
-                    if (currentMethod.name == parentMethod.name && 
-                        currentMethod.paramTypes.size() == parentMethod.paramTypes.size()) {
-                        isOverridden = true;
-                        break;
-                    }
-                }
-                if (!isOverridden) {
-                    result.push_back(parentMethod);
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
-std::vector<AttributeInfo> SymbolCollectorVisitor::getAttributesForType(const std::string& typeName, bool includeInherited) const {
-    std::vector<AttributeInfo> result;
-
-    auto it = attributesByType.find(typeName);
-    if (it != attributesByType.end()) {
-        result = it->second;
-    }
-    
-    if (includeInherited && globalContext) {
-        auto typeInfo = globalContext->getType(typeName);
-        if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            auto parentAttributes = getAttributesForType(typeInfo->typeDef->parentType->name, true);
-            
-            for (const auto& parentAttribute : parentAttributes) {
-                bool isOverridden = false;
-                for (const auto& currentAttribute : result) {
-                    if (currentAttribute.name == parentAttribute.name) {
-                        isOverridden = true;
-                        break;
-                    }
-                }
-                if (!isOverridden) {
-                    result.push_back(parentAttribute);
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
-MethodInfo* SymbolCollectorVisitor::findMethod(const std::string& typeName, const std::string& methodName, 
-                      const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const {
-    auto it = methodsByType.find(typeName);
-    if (it != methodsByType.end()) {
-        for (auto& method : it->second) {
-            if (method.name == methodName && method.paramTypes.size() == paramTypes.size()) {
-                return const_cast<MethodInfo*>(&method);
-            }
-        }
-    }
-    
-    if (globalContext) {
-        auto typeInfo = globalContext->getType(typeName);
-        if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            return findMethod(typeInfo->typeDef->parentType->name, methodName, paramTypes);
-        }
-    }
-    
-    return nullptr;
-}
-
-AttributeInfo* SymbolCollectorVisitor::findAttribute(const std::string& typeName, const std::string& attrName) const {
-    auto it = attributesByType.find(typeName);
-    if (it != attributesByType.end()) {
-        for (auto& attr : it->second) {
-            if (attr.name == attrName) {
-                return const_cast<AttributeInfo*>(&attr);
-            }
-        }
-    }
-    
-    if (globalContext) {
-        auto typeInfo = globalContext->getType(typeName);
-        if (typeInfo && typeInfo->typeDef && typeInfo->typeDef->parentType) {
-            return findAttribute(typeInfo->typeDef->parentType->name, attrName);
-        }
-    }
-    
-    return nullptr;
 }

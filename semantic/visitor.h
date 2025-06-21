@@ -77,17 +77,13 @@ class SemanticCheckerVisitor : public Visitor {
     public:
     SemanticCheckerVisitor() {
         globalContext = new Context(nullptr);
-        Context::initializeBuiltinTypes();
         
-        if (Context::objectType && Context::objectType->typeDef) {
-            globalContext->defineType("Object", Context::objectType->typeDef);
+        if (Context::objectType) {
+            globalContext->defineType("Object");
         }
         
-        std::vector<std::shared_ptr<TypeInfo>> printParams = {Context::stringType};
+        std::vector<TypeAttribute> printParams = {{"x", Context::stringType}};
         globalContext->defineFunc("print", Context::voidType, printParams);
-        
-        std::vector<std::shared_ptr<TypeInfo>> readParams;
-        globalContext->defineFunc("read", Context::stringType, readParams);
     }
     
     ~SemanticCheckerVisitor() {
@@ -156,9 +152,9 @@ class SemanticCheckerVisitor : public Visitor {
     void checkTypeCompatibility(std::shared_ptr<TypeInfo> expected, std::shared_ptr<TypeInfo> actual, const std::string& operation, int line) {
         if (!expected || !actual) return;
         
-        if (!globalContext->canAssign(actual, expected)) {
-            addError("Type error in " + operation + " in line "+ std::to_string(line) +" : Cannot operate " + 
-                    actual->name + " to " + expected->name);
+        if (actual->name != expected->name) {
+            addError("Type error in line "+ std::to_string(line) + ": Cannot operate " + 
+                    actual->name + " to " + expected->name + " in operation '" + operation + "'");
         }
     }
     
@@ -173,7 +169,7 @@ class SemanticCheckerVisitor : public Visitor {
         }
         
         for (size_t i = 0; i < expectedParamTypes.size(); i++) {
-            if (!globalContext->canAssign(actualParamTypes[i], expectedParamTypes[i])) {
+            if (actualParamTypes[i]->name != expectedParamTypes[i]->name) {
                 addError("Function '" + funcName + "' parameter " + std::to_string(i+1) + 
                         " expects type '" + expectedParamTypes[i]->name + 
                         "', got '" + actualParamTypes[i]->name + "'");
@@ -209,15 +205,11 @@ class SemanticCheckerVisitor : public Visitor {
         return Context::voidType;
     }
     
-    // Type inference helper methods - implemented in .cpp file
-    std::shared_ptr<TypeInfo> inferReturnType(ASTNode* body, Context* functionContext);
-    std::shared_ptr<TypeInfo> inferBlockReturnType(BlockNode* block, Context* functionContext);
-    std::shared_ptr<TypeInfo> inferConditionalReturnType(Conditional* cond, Context* functionContext);
     
 private:
     Context* globalContext;
     bool inMethodContext = false;
-    std::shared_ptr<TypeDef> currentTypeDef = nullptr;
+    std::shared_ptr<TypeInfo> currentTypeDef = nullptr;
     std::vector<std::string> errors; // Store semantic errors
 };
 

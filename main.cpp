@@ -1,5 +1,5 @@
 #include <stdio.h>
-// #include "hulk/parser.tab.h"
+#include "hulk/parser.tab.h"
 #include "Ast/ast.hpp"
 #include "semantic/visitor.h"
 #include "semantic/type_collector_visitor.h"
@@ -16,6 +16,8 @@ using namespace std;
 
 // // using namespace manipulation;
 
+extern FILE *yyin;
+extern int yyparse();
 ASTNode* root = nullptr;
 
 // Create the new two-pass semantic analysis system
@@ -25,36 +27,29 @@ SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
-    std::string file_path = "script.hulk"; // Default file path
+    // std::string file_path = "script.hulk"; // Default file path
     
-    // Si se proporciona un argumento, utilizarlo como ruta del archivo
-    if (argc > 1) {
-        file_path = argv[1];
-        std::cout << "Usando archivo: " << file_path << std::endl;
-    }
-
-    Grammar hulk_grammar = getHulkGrammar();
-    // if (!std::filesystem::exists("hulk/lexer.l") || !std::filesystem::exists("hulk/parser.p")) {
-    //     bool success = create_artifacts(hulk_grammar, false); // false for no verbose output
-    //     if (!success) {
-    //         std::cerr << "Error al crear los artefactos" << std::endl;
-    //         return 1;
-    //     }
+    // // Si se proporciona un argumento, utilizarlo como ruta del archivo
+    // if (argc > 1) {
+    //     file_path = argv[1];
+    //     std::cout << "Usando archivo: " << file_path << std::endl;
     // }
 
-    std::string error_message;
-    std::string script_content = read_source_file(file_path, error_message);
-    if (script_content.empty()) {
-        std::cerr << "Error: " << error_message << std::endl;
-        return 1;
-    }
+    // Grammar hulk_grammar = getHulkGrammar();
 
-    root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+    // std::string error_message;
+    // std::string script_content = read_source_file(file_path, error_message);
+    // if (script_content.empty()) {
+    //     std::cerr << "Error: " << error_message << std::endl;
+    //     return 1;
+    // }
 
-    if (!root) {
-        std::cerr << "Error al compilar el script: " << error_message << std::endl;
-        return 1;
-    }
+    // root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+
+    // if (!root) {
+    //     std::cerr << "Error al compilar el script: " << error_message << std::endl;
+    //     return 1;
+    // }
 
     // Simple test to avoid segfaults
     std::cout << "=== HULK Compiler Starting ===" << std::endl;
@@ -87,16 +82,16 @@ int main(int argc, char* argv[]) {
     // return 0;
 
     // //region: Flex/Bison setup
-    // const char* filename = "script.hulk"; //default
-    // if (argc > 1) {
-	// 	filename = argv[1];
-    // }
-	// yyin = fopen(filename, "r");
-	// if (!yyin) {
-	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-	// 	return 1;
-	// }
-    // yyparse();
+    const char* filename = "script.hulk"; //default
+    if (argc > 1) {
+		filename = argv[1];
+    }
+	yyin = fopen(filename, "r");
+	if (!yyin) {
+		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+		return 1;
+	}
+    yyparse();
     // //endregion
 
     if (!root) {
@@ -126,7 +121,7 @@ int main(int argc, char* argv[]) {
     //     std::cout << "Type collection completed successfully." << std::endl;
     //     std::cout << "Collected " << typeCollectorVisitor->getCollectedTypes().size() << " types" << std::endl;
 
-        globalContext->localTypes = typeCollectorVisitor->getCollectedTypes();
+        // globalContext->localTypes = typeCollectorVisitor->getCollectedTypes();
 
         
     //     // PASS 2: Symbol Collection
@@ -138,6 +133,41 @@ int main(int argc, char* argv[]) {
             std::cerr << "Symbol collection failed with the following errors:" << std::endl;
             symbolCollectorVisitor->printErrors();
         }
+
+        for (auto typex : globalContext->localTypes) {
+            std::cout << "Type: " << typex.first << std::endl;
+            std::cout << "With parent: " << typex.second->parents.size() << " parents" << std::endl;
+            if (!typex.second->parents.empty()) {
+                std::cout << "Parent types: ";
+                for (const auto& parent : typex.second->parents) {
+                    std::cout << parent->name << " ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "Attributes: " << typex.second->attributes.size() << std::endl;
+            for (const auto& attr : typex.second->attributes) {
+                std::cout << "  Attribute: " << attr.name << " of type " << attr.type->name << std::endl;
+            }
+            for (const auto& method : typex.second->methods) {
+                std::cout << "  Method: " << method.name << " returns " 
+                          << (method.returnType ? method.returnType->name : "void") 
+                          << " with parameters: ";
+                for (const auto& param : method.arguments) {
+                    std::cout << param.name << ": " << param.type->name << ", ";
+                }
+                std::cout << std::endl;
+            }
+        }
+
+        for (auto func : globalContext->localFuncs) {
+            std::cout << "Function: " << func.name << " returns " 
+                      << (func.returnType ? func.returnType->name : "void") 
+                      << " with parameters: ";
+            for (const auto& param : func.paramTypes) {
+                std::cout << param.name << ": " << param.type->name << ", ";
+            }
+            std::cout << std::endl;
+        }
         
     //     std::cout << "Symbol collection completed successfully." << std::endl;
         
@@ -146,9 +176,9 @@ int main(int argc, char* argv[]) {
     //     std::cout << "Symbol data successfully stored in context." << std::endl;
         
     //     // Display collected symbols
-        globalContext->methodsByType = symbolCollectorVisitor->getMethodsByType();
-        globalContext->attributesByType = symbolCollectorVisitor->getAttributesByType();
-        globalContext->globalVariables = symbolCollectorVisitor->getGlobalVariables();
+        // globalContext->methodsByType = symbolCollectorVisitor->getMethodsByType();
+        // globalContext->attributesByType = symbolCollectorVisitor->getAttributesByType();
+        // globalContext->globalVariables = symbolCollectorVisitor->getGlobalVariables();
         
     //     if (!globalContext->methodsByType.empty() || !globalContext->attributesByType.empty() || !globalContext->globalVariables.empty()) {
     //         std::cout << "\n=== Collected Symbols Summary ===" << std::endl;
@@ -203,20 +233,20 @@ int main(int argc, char* argv[]) {
         
     //     std::cout << "All semantic analysis passes completed successfully!" << std::endl;
 
-    //     std::cout << "\n=== Generating Code ===" << std::endl;
+        std::cout << "\n=== Generating Code ===" << std::endl;
     //     // Initialize the codegen visitor
     //     codegenVisitor->initialize();
         
-    // //     // Set the root node and context
-    // //     codegenVisitor->setRootNode(root, globalContext);
+    // // //     // Set the root node and context
+    //     codegenVisitor->setRootNode(root, globalContext);
         
-    // //     // Generate and execute code
-    // //     codegenVisitor->generateCode();
-    // //     std::cout << "Code generation completed." << std::endl;
-    //     // Clean up
+    // // //     // Generate and execute code
+    //     codegenVisitor->generateCode();
+    //     std::cout << "Code generation completed." << std::endl;
+    // //     // Clean up
     //     delete symbolCollectorVisitor;
     //     delete globalContext;
-	// 	    delete root;
+    //     delete root;
 	// }
 
 	// // fclose(yyin);

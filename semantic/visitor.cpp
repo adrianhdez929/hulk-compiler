@@ -55,7 +55,7 @@ void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
     node->node->accept(this, context);
     
     if (node->op == "!") {
-        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::boolType)) {
+        if (node->node->inferredType && node->node->inferredType->name == Context::boolType->name) {
             addError("Type error in line " + std::to_string(node->line) + " Boolean negation requires boolean operand, got " + 
                     node->node->inferredType->name);
             return;
@@ -63,7 +63,7 @@ void SemanticCheckerVisitor::visit(UnaryOpNode* node, Context* context) {
         node->inferredType = Context::boolType;
         node->semanticValue = "bool_negation(" + node->node->semanticValue + ")";
     } else if (node->op == "-") {
-        if (node->node->inferredType && !context->canAssign(node->node->inferredType, Context::numberType)) {
+        if (node->node->inferredType && node->node->inferredType->name == Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + ": Arithmetic unary operation requires numeric operand, got " + 
                     node->node->inferredType->name);
             return;
@@ -122,34 +122,34 @@ void SemanticCheckerVisitor::visit(BinOpNode* node, Context* context) {
         checkTypeCompatibility(Context::boolType, node->left->inferredType, "left operand of " + node->op, node->line);
         checkTypeCompatibility(Context::boolType, node->right->inferredType, "right operand of " + node->op, node->line);
     } else if (node->op == "@") {
-        if (node->left->inferredType && !context->canAssign(node->left->inferredType, Context::stringType)) {
+        if (node->left->inferredType && node->left->inferredType->name == Context::stringType->name) {
             addError("Type error in line " + std::to_string(node->line) + ": Left operand of @ must be a string, got " + 
                                    node->left->inferredType->name);
             return;
         }
         if (node->right->inferredType && 
-            !context->canAssign(node->right->inferredType, Context::stringType) &&
-            !context->canAssign(node->right->inferredType, Context::numberType)) {
+            node->right->inferredType->name != Context::stringType->name &&
+            node->right->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Right operand of @ must be a string or number, got " + 
                                    node->right->inferredType->name);
             return;
         }
     } else if (node->op == "@@") {
-        if (node->left->inferredType && !context->canAssign(node->left->inferredType, Context::stringType)) {
+        if (node->left->inferredType && node->left->inferredType->name != Context::stringType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Left operand of @@ must be a string, got " + 
                                    node->left->inferredType->name);
             return;
         }
         if (node->right->inferredType && 
-            !context->canAssign(node->right->inferredType, Context::stringType) &&
-            !context->canAssign(node->right->inferredType, Context::numberType)) {
+            node->right->inferredType->name != Context::stringType->name &&
+            node->right->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + ": Right operand of @@ must be a string or number, got " + 
                                    node->right->inferredType->name);
             return;
         }
     } else if (node->op == "=" || node->op == ":=") {
         if (node->left->inferredType && node->right->inferredType) {
-            if (!context->canAssign(node->right->inferredType, node->left->inferredType)) {
+            if (node->right->inferredType->name != node->left->inferredType->name) {
                 addError("Type error in line " + std::to_string(node->line) + " : Cannot assign " + node->right->inferredType->name + 
                                        " to " + node->left->inferredType->name);
                 return;
@@ -178,7 +178,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     } else if (node->func_name == "sin") {
         node->argument->accept(this, context);
         auto* arg = dynamic_cast<ASTNodeVector*>(node->argument);
-        if (arg && arg->children[0]->inferredType && !context->canAssign(arg->children[0]->inferredType, Context::numberType)) {
+        if (arg && arg->children[0]->inferredType && arg->children[0]->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Argument for 'sin' must be a number, got " + 
                                    arg->children[0]->inferredType->name);
             return;
@@ -188,7 +188,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     } else if (node->func_name == "cos") {
         node->argument->accept(this, context);
         auto* arg = dynamic_cast<ASTNodeVector*>(node->argument);
-        if (arg && arg->children[0]->inferredType && !context->canAssign(arg->children[0]->inferredType, Context::numberType)) {
+        if (arg && arg->children[0]->inferredType && arg->children[0]->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Argument for 'cos' must be a number, got " + 
                                    arg->children[0]->inferredType->name);
             return;
@@ -198,7 +198,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     } else if (node->func_name == "sqrt") {
         node->argument->accept(this, context);
         auto* arg = dynamic_cast<ASTNodeVector*>(node->argument);
-        if (arg && arg->children[0]->inferredType && !context->canAssign(arg->children[0]->inferredType, Context::numberType)) {
+        if (arg && arg->children[0]->inferredType && arg->children[0]->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Argument for 'sqrt' must be a number, got " + 
                                    arg->children[0]->inferredType->name);
             return;
@@ -208,7 +208,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     } else if (node->func_name == "exp") {
         node->argument->accept(this, context);
         auto* arg = dynamic_cast<ASTNodeVector*>(node->argument);
-        if (arg && arg->children[0]->inferredType && !context->canAssign(arg->children[0]->inferredType, Context::numberType)) {
+        if (arg && arg->children[0]->inferredType && arg->children[0]->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Argument for 'exp' must be a number, got " + 
                                    arg->children[0]->inferredType->name);
             return;
@@ -218,7 +218,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     } else if (node->func_name == "log") {
         node->argument->accept(this, context);
         auto* arg = dynamic_cast<ASTNodeVector*>(node->argument);
-        if (arg && arg->children[0]->inferredType && !context->canAssign(arg->children[0]->inferredType, Context::numberType)) {
+        if (arg && arg->children[0]->inferredType && arg->children[0]->inferredType->name != Context::numberType->name) {
             addError("Type error in line " + std::to_string(node->line) + " : Argument for 'log' must be a number, got " + 
                                    arg->children[0]->inferredType->name);
             return;
@@ -272,35 +272,35 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
     if (!returnType && context->currentType) {
         // cout << "Function '" << node->func_name << "' not found as global function, checking current type methods" << endl;
         
-        auto collectedMethods = context->getMethodsForType(context->currentType->name, true);
+        // auto collectedMethods = std::vector<MethodInfo>(); // context->getMethodsForType(context->currentType->name, true);
         
-        for (const auto& method : collectedMethods) {
-            if (method.name == node->func_name) {
-                // cout << "Found method '" << node->func_name << "' in type '" << context->currentType->name << "'" << endl;
+        // for (const auto& method : collectedMethods) {
+        //     if (method.name == node->func_name) {
+        //         // cout << "Found method '" << node->func_name << "' in type '" << context->currentType->name << "'" << endl;
                 
-                if (method.paramTypes.size() == argTypes.size()) {
-                    bool typesMatch = true;
-                    for (size_t i = 0; i < argTypes.size(); i++) {
-                        if (!context->canAssign(argTypes[i], method.paramTypes[i])) {
-                            typesMatch = false;
-                            break;
-                        }
-                    }
+        //         if (method.paramTypes.size() == argTypes.size()) {
+        //             bool typesMatch = true;
+        //             for (size_t i = 0; i < argTypes.size(); i++) {
+        //                 if (argTypes[i]->name != method.paramTypes[i]->name) {
+        //                     typesMatch = false;
+        //                     break;
+        //                 }
+        //             }
                     
-                    if (typesMatch) {
-                        returnType = method.returnType;
-                        isMethodCall = true;
-                        // cout << "Method call '" << node->func_name << "' resolved with return type: " 
-                            //  << (returnType ? returnType->name : "void") << endl;
+        //             if (typesMatch) {
+        //                 returnType = method.returnType;
+        //                 isMethodCall = true;
+        //                 // cout << "Method call '" << node->func_name << "' resolved with return type: " 
+        //                     //  << (returnType ? returnType->name : "void") << endl;
                         
-                        addError("Semantic error in line " + std::to_string(node->line) + 
-                                " : Method '" + node->func_name + "' cannot be called directly. " +
-                                "Use 'self." + node->func_name + "()' instead.");
-                        break;
-                    }
-                }
-            }
-        }
+        //                 addError("Semantic error in line " + std::to_string(node->line) + 
+        //                         " : Method '" + node->func_name + "' cannot be called directly. " +
+        //                         "Use 'self." + node->func_name + "()' instead.");
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
     }
     
     if (!returnType) {
@@ -309,7 +309,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
         
         for (auto& argType : argTypes) {
             if (argType->name == "Number" || argType->name == "number" || 
-                context->canAssign(argType, Context::numberType)) {
+                argType->name == Context::numberType->name) {
                 coercedTypes.push_back(Context::numberType);
             } else {
                 coercedTypes.push_back(argType);
@@ -328,20 +328,20 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
         int argCount = argTypes.size();
         if (!context->isDefined(node->func_name, argCount)) {
             if (context->currentType) {
-                auto collectedMethods = context->getMethodsForType(context->currentType->name, true);
+                // auto collectedMethods = std::vector<MethodInfo>(); //context->getMethodsForType(context->currentType->name, true);
                 bool isMethodWithDifferentArity = false;
                 
-                for (const auto& method : collectedMethods) {
-                    if (method.name == node->func_name) {
-                        isMethodWithDifferentArity = true;
-                        addError("Semantic error in line " + std::to_string(node->line) + 
-                                " : Method '" + node->func_name + "' exists in type '" + 
-                                context->currentType->name + "' but with different parameter count. " +
-                                "Expected " + to_string(method.paramTypes.size()) + " parameter(s), got " + 
-                                to_string(argCount) + ". Use 'self." + node->func_name + "()' to call the method.");
-                        return;
-                    }
-                }
+                // for (const auto& method : collectedMethods) {
+                //     if (method.name == node->func_name) {
+                //         isMethodWithDifferentArity = true;
+                //         addError("Semantic error in line " + std::to_string(node->line) + 
+                //                 " : Method '" + node->func_name + "' exists in type '" + 
+                //                 context->currentType->name + "' but with different parameter count. " +
+                //                 "Expected " + to_string(method.paramTypes.size()) + " parameter(s), got " + 
+                //                 to_string(argCount) + ". Use 'self." + node->func_name + "()' to call the method.");
+                //         return;
+                //     }
+                // }
                 
                 if (!isMethodWithDifferentArity) {
                     addError("Semantic error in line " + std::to_string(node->line) + 
@@ -363,7 +363,7 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
         string expectedTypes = "";
         for (size_t i = 0; i < funcInfo.paramTypes.size(); i++) {
             if (i > 0) expectedTypes += ", ";
-            expectedTypes += funcInfo.paramTypes[i]->name;
+            expectedTypes += funcInfo.paramTypes[i].name;
         }
         
         string actualTypes = "";
@@ -476,7 +476,7 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
     Context* functionContext = context->createChildContext();
     
     
-    std::vector<std::shared_ptr<TypeInfo>> argTypes = std::vector<std::shared_ptr<TypeInfo>>();
+    std::vector<TypeAttribute> argTypes = std::vector<TypeAttribute>();
     
     for (auto* arg : node->args->children) {
         if (arg->inferredType) {
@@ -496,14 +496,14 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
         }
         
         functionContext->defineVar(arg->id_name, arg->inferredType ? arg->inferredType : Context::numberType); // Default to number type
-        argTypes.push_back(arg->inferredType);
+        argTypes.push_back(TypeAttribute{arg->id_name, globalContext->getType(arg->inferredType->name)});
         
         arg->accept(this, functionContext);
     }
 
     if (context->currentType) {
-        auto selfType = std::make_shared<TypeInfo>(context->currentType->name, TypeKind::CLASS);
-        selfType->typeDef = context->currentType->typeDef;
+        auto selfType = std::make_shared<TypeInfo>(context->currentType->name);
+        selfType = context->currentType;
     } else {
        context->defineFunc(node->func_name, node->inferredType, argTypes);
     }
@@ -541,7 +541,7 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
 
     if (context->isDefined(node->var_id->id_name)) {
         auto existingType = context->getVarType(node->var_id->id_name);
-        if (existingType && !context->canAssign(node->value->inferredType, existingType)) {
+        if (existingType && node->value->inferredType->name != existingType->name) {
             addError("Semantic error in line " + std::to_string(node->line) + " : Cannot assign " + 
                                    node->value->inferredType->name + " to existing variable " + 
                                    node->var_id->id_name + " of type " + existingType->name);
@@ -776,6 +776,10 @@ void SemanticCheckerVisitor::visit(AccessNode* node, Context* context) {
 		return;
     }
 
+    if (node->var_name == "self") {
+        return;
+    }
+
     if (!context->isDefined(node->var_name)) {
         addError("Semantic error in line " + std::to_string(node->line) + " : Variable '" + node->var_name + "' is not defined");
         return;
@@ -787,44 +791,29 @@ void SemanticCheckerVisitor::visit(AccessNode* node, Context* context) {
         return;
     }
 
-    // cout << "Variable '" << node->var_name << "' has type '" << objectType->name << "'" << endl;
     
     std::string memberName = node->member->get_name();
     std::string objectTypeName = objectType->name;
     
-    bool memberFound = false;
-    
-    auto collectedAttributes = context->getAttributesForType(objectTypeName, true);
-    for (const auto& attr : collectedAttributes) {
-        if (attr.name == memberName) {
-            memberFound = true;
-            cout << "Found attribute '" << memberName << "' in type '" << objectTypeName << "'" << " of type " << attr.type->name << endl;
-            node->inferredType = attr.type;
-            break;
+    if (node->get_form() == TypeAssMember::Form::Attribute) {
+        if (!objectType->hasAttribute(memberName)) {
+            addError("Semantic error in line " + std::to_string(node->line) + " : Attribute '" + memberName + 
+                                   "' not found in type '" + objectTypeName + "'");
+            return;
         }
-    }
-
-    if (!memberFound) {
-        auto collectedMethods = context->getMethodsForType(objectTypeName, true);
-        for (const auto& method : collectedMethods) {
-            if (method.name == memberName) {
-                memberFound = true;
-                node->inferredType = method.returnType;
-                break;
-            }
+        
+        node->inferredType = objectType->getAttribute(memberName).type;
+    } else {
+        if (!objectType->hasMethod(memberName)) {
+            addError("Semantic error in line " + std::to_string(node->line) + " : Method '" + memberName + 
+                                   "' not found in type '" + objectTypeName + "'");
+            return;
         }
-    }
-    
-    if (!memberFound) {
-        addError("Semantic error in line " + std::to_string(node->line) + " : Member '" + memberName + 
-                "' not found in type '" + objectTypeName + "'");
-        return;
+        
+        node->inferredType = objectType->getMethod(memberName).returnType;
     }
     
     node->member->accept(this, context);
-      
-    // std::cout << "Member access resolved to type: " << 
-                // (node->inferredType ? node->inferredType->name : "unknown") << std::endl;
 }
 
 void SemanticCheckerVisitor::visit(TypeAssMember* node, Context* context) {
@@ -844,7 +833,7 @@ void SemanticCheckerVisitor::visit(AttributeMember* node, Context* context) {
     // std::cout << "Visiting AttributeMember: " << node->name << std::endl;
     
     if (!node->inferredType) {
-        node->inferredType = std::make_shared<TypeInfo>("unknown", TypeKind::INFERRED);
+        node->inferredType = std::make_shared<TypeInfo>("unknown");
     }
     
     // std::cout << "AttributeMember '" << node->name << "' processed" << std::endl;
@@ -878,66 +867,4 @@ void SemanticCheckerVisitor::visit(TypeCastNode* node, Context* context) {
     node->semanticValue = "type_cast(" + node->expr->semanticValue + ", " + node->target_type + ")";
     
     // std::cout << "Type cast from '" << sourceType->name << "' to '" << targetType->name << "' is valid" << std::endl;
-}
-
-std::shared_ptr<TypeInfo> SemanticCheckerVisitor::inferReturnType(ASTNode* body, Context* functionContext) {
-    if (!body || !body->inferredType) {
-        return Context::voidType;
-    }
-    
-    if (auto* blockNode = dynamic_cast<BlockNode*>(body)) {
-        return inferBlockReturnType(blockNode, functionContext);
-    } else if (auto* boolExprNode = dynamic_cast<BoolExprNode*>(body)) {
-        return Context::boolType;
-    } else if (auto* binOpNode = dynamic_cast<BinOpNode*>(body)) {
-        return inferBinaryOperationType(binOpNode->op, 
-                                      binOpNode->left->inferredType, 
-                                      binOpNode->right->inferredType);
-    } else if (auto* conditional = dynamic_cast<Conditional*>(body)) {
-        return inferConditionalReturnType(conditional, functionContext);
-    } else if (auto* letAssign = dynamic_cast<LetAssign*>(body)) {
-        return letAssign->body ? letAssign->body->inferredType : Context::voidType;
-    } else if (auto* whileNode = dynamic_cast<WhileNode*>(body)) {
-        return Context::voidType;
-    } else if (auto* funcCall = dynamic_cast<FunctionCallNode*>(body)) {
-        return funcCall->inferredType ? funcCall->inferredType : Context::voidType;
-    } else {
-        return body->inferredType;
-    }
-}
-
-std::shared_ptr<TypeInfo> SemanticCheckerVisitor::inferBlockReturnType(BlockNode* block, Context* functionContext) {
-    if (!block || block->children.empty()) {
-        return Context::voidType;
-    }
-    
-    ASTNode* lastExpr = block->children.back();
-    if (lastExpr && lastExpr->inferredType) {
-        return inferReturnType(lastExpr, functionContext);
-    }
-    
-    return Context::voidType;
-}
-
-std::shared_ptr<TypeInfo> SemanticCheckerVisitor::inferConditionalReturnType(Conditional* cond, Context* functionContext) {
-    if (!cond) return Context::voidType;
-    
-    auto ifType = cond->if_body ? inferReturnType(cond->if_body, functionContext) : Context::voidType;
-    auto elseType = cond->else_body ? inferReturnType(cond->else_body, functionContext) : Context::voidType;
-    
-    if (ifType && elseType) {
-        auto commonType = globalContext->findCommonSupertype(ifType, elseType);
-        if (commonType && commonType->name != "Expression") {
-            return commonType;
-        }
-    }
-    
-    if (ifType && elseType && ifType->name == elseType->name) {
-        return ifType;
-    }
-    
-    if (ifType && ifType->name != "Expression" && ifType->name != "unknown") return ifType;
-    if (elseType && elseType->name != "Expression" && elseType->name != "unknown") return elseType;
-    
-    return Context::voidType;
 }

@@ -14,7 +14,6 @@ void TypeCollectorVisitor::visit(ASTNode* node, Context* context) {
     
     if (!globalContext) {
         globalContext = context;
-        registerBuiltinTypes(context);
     }
     
     node->accept(this, context);
@@ -219,48 +218,42 @@ void TypeCollectorVisitor::processTypeDeclaration(TypeDeclNode* node, Context* c
     const std::string& typeName = node->id->id_name;
     
     checkTypeRedefinition(typeName, node->line);
-    if (hasErrors()) return;
-    
-    std::string parentName = "";
-    if (!node->parents.empty()) {
-        parentName = node->parents[0]; // HULK supports single inheritance
-        
-        if (!isValidParentType(parentName, context)) {
-            addError("Type error in line " + std::to_string(node->line) + " :Type '" + typeName + "' cannot inherit from undefined type '" + parentName + "'");
-            return;
-        }
-        
-        if (detectCircularInheritance(typeName, parentName)) {
-            addError("Type error in line " + std::to_string(node->line) + " :Circular inheritance detected: type '" + typeName + "' cannot inherit from '" + parentName + "'");
-            return;
-        }
-        
-        inheritanceMap[typeName] = parentName;
-    }
-    
-    auto typeDef = createTypeDef(typeName, parentName);
-    if (!typeDef) {
-        throw std::runtime_error("Failed to create type definition for '" + typeName + "'");
+
+    if (!context->defineType(typeName)) {
+        throw std::runtime_error("Failed to register type '" + typeName + "' in context");
         return;
+    }
+
+    std::shared_ptr<TypeInfo> typeDef = context->getType(typeName);
+    
+    if (!node->parents.empty()) {
+        for (std::string parent : node->parents) {
+            if (!isValidParentType(parent, context)) {
+                addError("Type error in line " + std::to_string(node->line) + " :Type '" + typeName + "' cannot inherit from undefined type '" + parent + "'");
+                return;
+            }
+            
+            if (detectCircularInheritance(typeName, parent)) {
+                addError("Type error in line " + std::to_string(node->line) + " :Circular inheritance detected: type '" + typeName + "' cannot inherit from '" + parent + "'");
+                return;
+            }
+            
+            inheritanceMap[typeName] = parent;
+            std::shared_ptr<TypeInfo> parentType = context->getType(parent);
+
+            if (!parentType) {
+                addError("Type error in line " + std::to_string(node->line) + " :Parent type '" + parent + "' is not defined for type '" + typeName + "'");
+                return;
+            }
+            
+            typeDef->defineParent(parentType);
+            std::cout << "Added parent " << parent << " to type " << typeName << std::endl;
+        }
     }
     
     collectedTypes[typeName] = typeDef;
     
-    if (!context->defineType(typeName, typeDef)) {
-        throw std::runtime_error("Failed to register type '" + typeName + "' in context");
-        return;
-    }
     
-    // std::cout << "TypeCollector: Successfully collected type '" << typeName << "'";
-    if (!parentName.empty()) {
-        // std::cout << " inheriting from '" << parentName << "'";
-    }
-    // std::cout << std::endl;
-}
-
-void TypeCollectorVisitor::registerBuiltinTypes(Context* context) {
-    context->initializeBuiltinTypes();
-    // std::cout << "TypeCollector: Built-in types registered" << std::endl;
 }
 
 bool TypeCollectorVisitor::detectCircularInheritance(const std::string& typeName, const std::string& parentName) {
@@ -311,18 +304,6 @@ void TypeCollectorVisitor::validateInheritanceChain(const std::string& typeName)
     }
 }
 
-std::shared_ptr<TypeDef> TypeCollectorVisitor::createTypeDef(const std::string& typeName, const std::string& parentName) {
-    auto typeDef = std::make_shared<TypeDef>(typeName);
-    
-    if (!parentName.empty()) {
-        typeDef->parentType = std::make_shared<TypeInfo>(parentName, TypeKind::CLASS);
-    } else if (typeName != "Object") {
-        typeDef->parentType = Context::objectType;
-    }
-    
-    return typeDef;
-}
-
 bool TypeCollectorVisitor::isValidParentType(const std::string& parentName, Context* context) {
     if (parentName == "Object" || parentName == "String" || parentName == "Number" || parentName == "Boolean") {
         return true;
@@ -364,19 +345,3 @@ void TypeCollectorVisitor::printErrors() const {
     }
 }
 
-const std::unordered_map<std::string, std::shared_ptr<TypeDef>>& TypeCollectorVisitor::getCollectedTypes() const {
-    return collectedTypes;
-}
-
-const std::unordered_map<std::string, std::string>& TypeCollectorVisitor::getInheritanceMap() const {
-    return inheritanceMap;
-}
-
-bool TypeCollectorVisitor::isTypeCollected(const std::string& typeName) const {
-    return collectedTypes.find(typeName) != collectedTypes.end();
-}
-
-std::shared_ptr<TypeDef> TypeCollectorVisitor::getTypeDef(const std::string& typeName) const {
-    auto it = collectedTypes.find(typeName);
-    return (it != collectedTypes.end()) ? it->second : nullptr;
-}
