@@ -50,13 +50,15 @@ class Grammar {
         vector<std::shared_ptr<Terminal>> Terminals();
 
         shared_ptr<Symbol> GetSymbol(const string& name);
-        const AttrProd& GetProduction(const std::string& name) const {
+        const std::vector<AttrProd>& GetProductionsFrom(const std::string& name) const {
+            // Buscar todas las producciones que tienen el símbolo no terminal `name` como lado izquierdo
+            std::vector<AttrProd> productions;
             for (const auto& production : productions) {
                 if (production.Left()->Name() == name) {
-                    return production;
+                    productions.push_back(production);
                 }
             }
-            throw std::runtime_error("Production not found: " + name);
+            return productions;
         }
         
         const AttrProd& GetProduction(int id) const {

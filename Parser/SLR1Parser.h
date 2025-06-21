@@ -7,6 +7,7 @@
 #include "../Grammar/grammar.h"
 #include "../Automata/state.h"
 #include "../Lexer/Token.h"
+#include "../Ast/ast.hpp"
 
 /**
  * @class ParsingError
@@ -92,7 +93,7 @@ public:
      * @param tokens Vector de strings (nombres de tokens).
      * @return Par de vectores: ids de producciones y acciones realizadas.
      */
-    std::pair<std::vector<int>, std::vector<std::string>>
+    virtual std::pair<std::vector<int>, std::vector<std::string>>
     Parse(const std::vector<std::string>& tokens);
 
     /**
@@ -103,11 +104,6 @@ public:
      */
     std::pair<std::vector<int>, std::vector<std::string>>
     Parse(const std::vector<Token>& tokens);
-
-    /**
-     * @brief Construye las tablas de análisis sintáctico (action y goto).
-     */
-    void BuildParsingTable();
 
     /**
      * @brief Calcula los conjuntos FIRST para la gramática.
@@ -178,12 +174,24 @@ public:
      */
     static SLR1Parser* deserialize_parser(const std::string& filename, const std::string& directory, Grammar& grammar);
 
-private:
+protected:
     Grammar& G_;
     bool verbose_;
     std::map<std::pair<int, Symbol>, std::pair<std::string, int>> action_;
     std::map<std::pair<int, Symbol>, int> goto_;
     std::vector<State*> automaton_states_;
+    // Para que las clases derivadas puedan registrar transiciones
+    std::map<std::pair<int, std::string>, int> transitions_;
+    
+    /**
+     * @brief Construye las tablas de análisis sintáctico (action y goto).
+     * 
+     * Este método es virtual para permitir que las clases derivadas implementen
+     * algoritmos diferentes para la construcción de las tablas.
+     */
+    virtual void BuildParsingTable();
+
+private:
     
     // Constructor privado para deserialización
     SLR1Parser(Grammar& G, 

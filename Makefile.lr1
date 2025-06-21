@@ -1,0 +1,62 @@
+# Makefile para compilar el test del parser LR1
+
+# Compilador y opciones
+CXX = g++
+CXXFLAGS = -std=c++17 -g -Wall -Wextra -I .
+
+# Directorios
+SRCDIR = .
+OBJDIR = build
+
+# Archivos fuente comunes
+COMMON_SOURCES = Grammar/grammar.cpp \
+                Grammar/production.cpp \
+                Grammar/symbol.cpp \
+                Grammar/sentence.cpp \
+                Automata/utils/ContainerSet.cpp \
+                Automata/utils/aut_manipulation.cpp \
+                Automata/state.cpp \
+                Automata/nfa.cpp \
+                Automata/dfa.cpp \
+                Automata/operations/operations.cpp \
+                Parser/Item.cpp \
+                Parser/LR1Item.cpp \
+                Parser/SLR1Parser.cpp \
+                Parser/LR1Parser.cpp \
+                Ast/ast.cpp
+
+# Archivos fuente para el test simple
+TEST_SOURCES = $(COMMON_SOURCES) test_lr1_parser.cpp
+
+# Archivos fuente para el parser de Hulk
+HULK_SOURCES = $(COMMON_SOURCES) hulk_lr1_parser.cpp
+
+# Objetos generados
+TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
+HULK_OBJECTS = $(HULK_SOURCES:.cpp=.o)
+
+# Nombres de ejecutables
+TEST_EXECUTABLE = test_lr1_parser
+HULK_EXECUTABLE = hulk_lr1_parser
+
+# Regla principal
+all: test hulk
+
+# Regla para el test simple
+test: $(TEST_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(TEST_EXECUTABLE) $^
+
+# Regla para el parser de Hulk
+hulk: $(HULK_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(HULK_EXECUTABLE) $^
+
+# Regla genérica para compilar archivos .cpp a .o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Limpieza
+clean:
+	rm -f $(TEST_OBJECTS) $(HULK_OBJECTS) $(TEST_EXECUTABLE) $(HULK_EXECUTABLE)
+
+# Phony targets
+.PHONY: all test hulk clean

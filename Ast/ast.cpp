@@ -16,7 +16,7 @@ void ASTNodeVector::print(int indent) const {
 }
 
 void ASTNodeVector::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 ASTNodeVector::~ASTNodeVector() {
@@ -33,7 +33,7 @@ void ProgramNode::print(int indent) const {
 }
 
 void ProgramNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 FloatNode::FloatNode(float v, int line_) : ASTNode(line_), value(v) {}
@@ -43,7 +43,7 @@ void FloatNode::print(int indent) const {
 }
 
 void FloatNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 BoolNode::BoolNode(bool v, int line_) : ASTNode(line_), value(v) {}
@@ -53,7 +53,7 @@ void BoolNode::print(int indent) const {
 }
 
 void BoolNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 BoolExprNode::BoolExprNode(ASTNode* expr_, int line_) :ASTNode(line_), expr(expr_) {}
@@ -64,7 +64,7 @@ void BoolExprNode::print(int indent) const {
 }
 
 void BoolExprNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 StringNode::StringNode(const std::string& v, int line_) : ASTNode(line_), value(v) {}
@@ -74,7 +74,7 @@ void StringNode::print(int indent) const {
 }
 
 void StringNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 UnaryOpNode::UnaryOpNode(const std::string& o, ASTNode* n, int line_) : ASTNode(line_), op(o), node(n) {}
@@ -85,7 +85,7 @@ void UnaryOpNode::print(int indent) const {
 }
 
 void UnaryOpNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 UnaryOpNode::~UnaryOpNode() {
@@ -101,7 +101,7 @@ void BinOpNode::print(int indent) const {
 }
 
 void BinOpNode::accept(Visitor* visitor, Context* context) {
-    visitor->visit(this, context);
+    // Dummy implementation - no semantic checks
 }
 
 BinOpNode::~BinOpNode() {
@@ -118,7 +118,7 @@ void FunctionCallNode::print(int indent) const {
 }
 
 void FunctionCallNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 IDNode::IDNode(const std::string& name, int line_) : ASTNode(line_), id_name(name), id_type("none") {}
@@ -132,7 +132,7 @@ void IDNode::print(int indent) const {
 }
 
 void IDNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 BlockNode::BlockNode(const std::vector<ASTNode*>& nodes, int line_) : ASTNode(line_), children(nodes) {}
@@ -148,7 +148,7 @@ void BlockNode::add_child(ASTNode* node) {
 }
 
 void BlockNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 BlockNode::~BlockNode() {
@@ -170,7 +170,7 @@ void ArgsList::add_child(IDNode* node) {
 }
 
 void ArgsList::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 ArgsList::~ArgsList() {
@@ -193,7 +193,7 @@ void ExprsList::print(int indent) const {
 }
 
 void ExprsList::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 ExprsList::~ExprsList() {
@@ -214,7 +214,7 @@ void AssignFuncNode::print(int indent) const {
 }
 
 void AssignFuncNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 LetAssign::LetAssign(const std::vector<VarAssign*>& assigns_, ASTNode* body_, int line_) : ASTNode(line_), assigns(assigns_), body(body_) {}
@@ -230,7 +230,7 @@ void LetAssign::print(int indent) const {
 }
 
 void LetAssign::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 VarAssign::VarAssign(IDNode* id, ASTNode* value_, int line_) : ASTNode(line_), var_id(id), value(value_), treated_as_type("none") {}
@@ -247,7 +247,7 @@ void VarAssign::print(int indent) const {
 }
 
 void VarAssign::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context); 
+	// Dummy implementation - no semantic checks 
 }
 
 VarAssignType::VarAssignType(const std::string name, NewTypeNode* new_type_, ASTNode* body_, int line_) : ASTNode(line_), var_name(name), new_type(new_type_), body(body_){}
@@ -260,7 +260,7 @@ void VarAssignType::print(int indent) const {
 }
 
 void VarAssignType::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 NewTypeNode::NewTypeNode(std::string id, std::vector<ASTNode*> expr_list_, int line_) : ASTNode(line_), id_type_name(id), expr_list(expr_list_) {}
@@ -274,7 +274,7 @@ void NewTypeNode::print(int indent) const {
 }
 
 void NewTypeNode::accept(Visitor* visitor, Context* context) { 
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 VarAssignList::VarAssignList(const std::vector<VarAssign*>& assigns_, int line_) : ASTNode(line_), assigns(assigns_) {}
@@ -291,7 +291,7 @@ void VarAssignList::print(int indent) const {
 }
 
 void VarAssignList::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 VarDesAssign::VarDesAssign(IDNode* id_, ASTNode* value_, int line_) : ASTNode(line_), id(id_), value(value_) {}
@@ -303,7 +303,7 @@ void VarDesAssign::print(int indent) const {
 }
 
 void VarDesAssign::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 Conditional::Conditional(BoolExprNode* bool_expr_, ASTNode* if_body_, ASTNode* else_body_, int line_) : ASTNode(line_), bool_expr(bool_expr_), if_body(if_body_), else_body(else_body_) {}
@@ -318,7 +318,7 @@ void Conditional::print(int indent) const {
 }
 
 void Conditional::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 WhileNode::WhileNode(BoolExprNode* bool_expr_, ASTNode* body_, int line_) : ASTNode(line_), bool_expr(bool_expr_), body(body_) {}
@@ -332,7 +332,7 @@ void WhileNode::print(int indent) const {
 }
 
 void WhileNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 ForNode::ForNode(IDNode* id_, ASTNode* group_, ASTNode* body_, int line_) : ASTNode(line_), id(id_), group(group_), body(body_) {}
@@ -348,7 +348,7 @@ void ForNode::print(int indent) const {
 
 void ForNode::accept(Visitor* visitor, Context* context) {
 	std::cout << "DEBUG: ForNode::accept called for " << id->id_name << std::endl;
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 TypeDeclNode::TypeDeclNode(IDNode* id_, ArgsList* args_, const std::vector<ASTNode*>& body_, int line_): ASTNode(line_), id(id_), args(args_), body(body_), parents(), parent_args(new ArgsList({}, line_)) {}
@@ -375,7 +375,7 @@ void TypeDeclNode::print(int indent) const {
 
 void TypeDeclNode::accept(Visitor* visitor, Context* context) {
 	std::cout << "DEBUG: TypeDeclNode::accept called for " << id->id_name << std::endl;
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 TypeAssMember::TypeAssMember(TypeAssMember::Form form_, int line_) : ASTNode(line_), form(form_) {}
@@ -393,7 +393,7 @@ void AttributeMember::print(int indent) const {
 }
 
 void AttributeMember::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 AttributeMember::~AttributeMember() {}
@@ -410,7 +410,7 @@ void MethodMember::print(int indent) const {
 }
 
 void MethodMember::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 MethodMember::~MethodMember() {
@@ -435,7 +435,7 @@ void AccessNode::print(int indent) const {
 }
 
 void AccessNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }
 
 TypeCastNode::TypeCastNode(ASTNode* expr_, const std::string& target_type_) : expr(expr_), target_type(target_type_) {}
@@ -447,5 +447,5 @@ void TypeCastNode::print(int indent) const {
 }
 
 void TypeCastNode::accept(Visitor* visitor, Context* context) {
-	visitor->visit(this, context);
+	// Dummy implementation - no semantic checks
 }

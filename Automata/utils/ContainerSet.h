@@ -40,7 +40,7 @@ class ContainerSet {
         }
         bool extend(const vector<T>& values){
             bool changed = false;
-            for (int value : values) {
+            for (const T& value : values) {
                 changed |= add(value);
             }
             return changed;
@@ -85,6 +85,20 @@ class ContainerSet {
             bool set_updated = update(other);
             bool epsilon_updated = epsilon_update(other);
             return set_updated || epsilon_updated;
+        }
+        
+        /**
+         * @brief Elimina un elemento del conjunto.
+         * @param value El valor a eliminar.
+         * @return true si el elemento estaba presente y fue eliminado, false si no existía.
+         */
+        bool erase(const T& value) {
+            auto it = set_.find(value);
+            if (it != set_.end()) {
+                set_.erase(it);
+                return true;
+            }
+            return false;
         }
 
         bool contains(T value) const {

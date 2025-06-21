@@ -7,11 +7,13 @@
 #include <stdexcept>
 #include <string>
 
-#include "../semantic/context.h"
-#include "../semantic/visitor.h"
-
 #ifndef AST_H
 #define AST_H
+
+// Forward declarations para eliminar dependencias
+class Context;
+class Visitor;
+class TypeInfo;
 
 using namespace std;
 
