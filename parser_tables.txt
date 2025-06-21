@@ -1,7 +1,7 @@
 ==================================
        ANÁLISIS DE PARSER LR1      
 ==================================
-Generado el: Thu Jun 19 08:16:31 2025
+Generado el: Sat Jun 21 01:33:48 2025
 
 ==================================
        INFORMACIÓN GRAMÁTICA      
@@ -119,7 +119,8 @@ Producciones:
 ==================================
          CONJUNTOS FIRST          
 ==================================
-FIRST(epsilon) = { }
+FIRST(epsilon) = { ε }
+FIRST(EOF) = { EOF }
 FIRST(input) = { var_id type let ! function string bool while if { }
 FIRST({) = { { }
 FIRST({ lines }) = { { }
@@ -205,7 +206,7 @@ FIRST(type_id) = { type_id }
 FIRST(line) = { var_id type let ! function if string bool while }
 FIRST(line lines_block) = { var_id type let ! function if string bool while }
 FIRST(lines_block) = { { }
-FIRST(lines) = { var_id type let ! function if string bool while }
+FIRST(lines) = { var_id type let ! function if string bool while ε }
 FIRST(non_empty_lines) = { var_id type let ! function if string bool while }
 FIRST(non_empty_lines line) = { var_id type let ! function if string bool while }
 FIRST(expr) = { var_id let ! if string bool while }
@@ -236,8 +237,8 @@ FIRST(id_expr = expr as var_id ;) = { var_id }
 FIRST(id_expr = expr as type_id) = { var_id }
 FIRST(id_expr = new_expr) = { var_id }
 FIRST(bool_expr) = { var_id let ! if string while bool }
-FIRST(args_list) = { var_id }
-FIRST(args_list , id_expr) = { var_id }
+FIRST(args_list) = { var_id , ε }
+FIRST(args_list , id_expr) = { var_id , }
 FIRST(let_exp) = { let }
 FIRST(var_assign_list) = { var_id }
 FIRST(var_assign_list , id_expr = expr) = { var_id }
@@ -245,16 +246,16 @@ FIRST(var_assign_list , id_expr = expr as type_id) = { var_id }
 FIRST(var_assign_list , id_expr = new_expr) = { var_id }
 FIRST(conditional) = { ( }
 FIRST(while_expr) = { ( }
-FIRST(type_body_elements) = { }
-FIRST(type_body_elements attribute) = { }
-FIRST(type_body_elements method) = { }
+FIRST(type_body_elements) = { var_id ε }
+FIRST(type_body_elements attribute) = { var_id }
+FIRST(type_body_elements method) = { var_id }
 FIRST(attribute) = { var_id }
 FIRST(method) = { var_id }
 FIRST(member_access_expr) = { var_id }
 FIRST(new_expr) = { new }
-FIRST(expr_list) = { var_id let ! new if string bool while }
-FIRST(expr_list , expr) = { var_id let ! new if string bool while }
-FIRST(expr_list , new_expr) = { var_id let ! new if string bool while }
+FIRST(expr_list) = { var_id , let ! new if string bool while ε }
+FIRST(expr_list , expr) = { var_id let ! new if string bool while , }
+FIRST(expr_list , new_expr) = { var_id , let ! new if string bool while }
 FIRST(func_call) = { var_id }
 FIRST(func_call is type_id) = { var_id }
 FIRST(term) = { ( var_id number - }

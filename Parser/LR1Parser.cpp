@@ -421,47 +421,120 @@ State LR1Parser::BuildLR1Automaton() {
         }
     }
 
-    // // Guardar todos los estados creados para liberarlos después
-    // for (auto& [items, state] : visited) {
-    //     if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
-    //         automaton_states_.push_back(state);
-    //     }
-    // }
+    // Guardar todos los estados creados para liberarlos después
+    for (auto& [items, state] : visited) {
+        if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
+            automaton_states_.push_back(state);
+        }
+    }
     
     return automaton;
 }
 
 
 map<Sentence, ContainerSet<string>> LR1Parser::compute_firsts() {
+    if (verbose_) {
+        std::cout << "===== LR1Parser::compute_firsts() =====" << std::endl;
+        std::cout << "Inicializando estructuras para cálculo de FIRST..." << std::endl;
+    }
+    
     map<Sentence, ContainerSet<string>> firsts;
     bool changed = true;
     
     // Inicializar primeros para terminales
+    if (verbose_) {
+        std::cout << "Inicializando FIRST para terminales..." << std::endl;
+        std::cout << "Total terminales: " << G_.Terminals().size() << std::endl;
+    }
+    
+    int terminal_count = 0;
     for (const auto& terminal : G_.Terminals()) {
+        if (verbose_) {
+            std::cout << "Procesando terminal #" << terminal_count << ": '" << terminal->Name() << "'";
+            std::cout << (terminal->IsEndOfFile() ? " (EOF)" : "") << std::endl;
+        }
+        
+        terminal_count++;
         if (terminal->IsEndOfFile()) {
-            continue; // Skip EndOfFile terminal
+            // For EOF terminal, add its own name to its FIRST set
+            ContainerSet<string> eof_set;
+            eof_set.add(terminal->Name());
+            firsts[Sentence(terminal)] = eof_set;
+
+            if (verbose_) {
+                std::cout << "  FIRST(EOF) = {" << terminal->Name() << "}" << std::endl;
+            }
+            continue;
         }
         ContainerSet<string> cs;
         cs.add(terminal->Name());
         firsts[Sentence(terminal)] = cs;
+
+        if (verbose_) {
+            std::cout << "  FIRST(" << terminal->Name() << ") = {" << terminal->Name() << "}" << std::endl;
+        }
     }
-    // firsts[Sentence(G_.GetEndOfFile())] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
+    
+    // Ensure EOF is in firsts map
+    auto eof = G_.GetEndOfFile();
+    if (eof) {
+        Sentence eof_sent(eof);
+        if (firsts.find(eof_sent) == firsts.end()) {
+            ContainerSet<string> eof_set;
+            eof_set.add(eof->Name());
+            firsts[eof_sent] = eof_set;
+
+            if (verbose_) {
+                std::cout << "Agregando EOF faltante: FIRST(EOF) = {" << eof->Name() << "}" << std::endl;
+            }
+        }
+    } else if (verbose_) {
+        std::cout << "¡ADVERTENCIA: No se encontró símbolo EOF en la gramática!" << std::endl;
+    }
     
     // Inicializar primeros para no terminales
+    if (verbose_) {
+        std::cout << "Inicializando FIRST para no terminales..." << std::endl;
+        std::cout << "Total no terminales: " << G_.NonTerminals().size() << std::endl;
+    }
+    
+    int nonterminal_count = 0;
     for (const auto& nonterminal : G_.NonTerminals()) {
+        if (verbose_) {
+            std::cout << "Inicializando FIRST(" << nonterminal->Name() << ") = {}" << std::endl;
+        }
         firsts[Sentence(nonterminal)] = ContainerSet<string>();
+        nonterminal_count++;
     }
 
+    // Inicializar FIRST para las partes derechas de las producciones
+    if (verbose_) {
+        std::cout << "Inicializando FIRST para las partes derechas de todas las producciones..." << std::endl;
+        std::cout << "Total producciones: " << G_.Productions().size() << std::endl;
+    }
+    
     // for (const auto& prod : G_.Productions()) {
     //     auto right = prod.Right();
     //     firsts[right] = ContainerSet<string>();
     // }
+    
+    int iteration = 0;
     while (changed == true) {
+        iteration++;
+        if (verbose_) {
+            std::cout << "\n==== Iteración #" << iteration << " del algoritmo FIRST ====" << std::endl;
+        }
         changed = false;
 
+        int prod_count = 0;
         for (const auto& prod : G_.Productions()) {
+            prod_count++;
             const auto& X = Sentence(prod.Left());
             const auto& alpha = prod.Right();
+
+            if (verbose_) {
+                std::cout << "Procesando producción #" << prod_count << ": " << prod.ToString() << std::endl;
+            }
 
             // Firsts de X
             auto& first_X = firsts[X];
@@ -469,70 +542,220 @@ map<Sentence, ContainerSet<string>> LR1Parser::compute_firsts() {
             // Firsts de alpha
             auto& first_alpha = firsts[alpha];
 
-            ContainerSet<string> local_first = compute_local_firsts(alpha, firsts, G_);
+            if (verbose_) {
+                std::cout << "  Calculando FIRST local para el lado derecho: " << alpha.ToString() << std::endl;
+            }
+            ContainerSet<string> local_first = compute_local_firsts(alpha, firsts, G_, verbose_);
+
+            if (verbose_) {
+                std::cout << "  FIRST local calculado: { ";
+                for (const auto& terminal : local_first.get_values()) {
+                    std::cout << terminal << " ";
+                }
+                if (local_first.contains_epsilon()) {
+                    std::cout << "epsilon ";
+                }
+                std::cout << "}" << std::endl;
+            }
 
             bool changed_alpha = first_alpha.hard_update(local_first);
-            // bool changed_alpha = hard_update_container_set(first_alpha, local_first);
             bool changed_X = first_X.hard_update(local_first);
-            // bool changed_X = hard_update_container_set(first_X, local_first);
-            changed = changed || changed_alpha || changed_X;
+
+            if (verbose_ && (changed_alpha || changed_X)) {
+                std::cout << "  ¡Cambio detectado!" << std::endl;
+                if (changed_alpha) {
+                    std::cout << "    - FIRST(" << alpha.ToString() << ") actualizado" << std::endl;
+                }
+                if (changed_X) {
+                    std::cout << "    - FIRST(" << X.ToString() << ") actualizado" << std::endl;
+                }
+            }
             
+            changed = changed || changed_alpha || changed_X;
+        }
+
+        if (verbose_) {
+            if (!changed) {
+                std::cout << "No se detectaron cambios en esta iteración. ¡Algoritmo FIRST convergió!" << std::endl;
+            } else {
+                std::cout << "Se detectaron cambios. Continuando con la siguiente iteración..." << std::endl;
+            }
         }
     }
+
+    if (verbose_) {
+        std::cout << "\n==== Conjuntos FIRST finales ====" << std::endl;
+        for (const auto& [sentence, first_set] : firsts) {
+            std::cout << "FIRST(" << sentence.ToString() << ") = { ";
+            for (const auto& terminal : first_set.get_values()) {
+                std::cout << terminal << " ";
+            }
+            if (first_set.contains_epsilon()) {
+                std::cout << "epsilon ";
+            }
+            std::cout << "}" << std::endl;
+        }
+        std::cout << "===== Fin de LR1Parser::compute_firsts() =====" << std::endl;
+    }
+    
     return firsts;
 };
 
-ContainerSet<string> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G) {
+ContainerSet<string> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
+    if (verbose) {
+        std::cout << "    compute_local_firsts para: \"" << alpha.ToString() << "\"" << std::endl;
+    }
+    
     //Compute local first
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
-    // If alpha is epsilon, add epsilon to local first
+    
+    // If alpha is empty (epsilon), set epsilon flag
+    if (symbols.empty()) {
+        local_first.set_epsilon();
+        if (verbose) {
+            std::cout << "      Alpha está vacía, retornando {epsilon}" << std::endl;
+        }
+        return local_first;
+    }
+    
+    // If alpha is explicitly epsilon, add epsilon to local first
     bool alpha_is_epsilon = false;
     for (const auto& symbol : symbols) {
         if (symbol->IsEpsilon()) {
             alpha_is_epsilon = true;
+            if (verbose) {
+                std::cout << "      Alpha contiene explícitamente epsilon" << std::endl;
+            }
             break;
         }
     }
+    
     if (alpha_is_epsilon) {
         local_first.set_epsilon();
-    } else {
-        // local_first.update(firsts.at(symbols[0]));
-        if (symbols[0]->IsEndOfFile()){
-            auto EOFile = G.GetEndOfFile();
-            local_first.add(EOFile->Name());
-        } else {
-            local_first.update(firsts.at(Sentence(symbols[0])));
+        if (verbose) {
+            std::cout << "      Alpha es epsilon, retornando {epsilon}" << std::endl;
         }
-        // update_container_set(local_first, firsts.at(symbols[0]));
-        int i = 0;
-        // std::shared_ptr<Symbol> s = symbols[i];
-        Sentence s = Sentence(symbols[i]);
-        while (firsts.at(s).contains_epsilon()) {
-            if (i == symbols.size() - 1) {
-                local_first.set_epsilon();
-                break;
+        return local_first;
+    }
+    
+    // Check if all symbols can derive epsilon
+    if (verbose) {
+        std::cout << "      Verificando si todos los símbolos pueden derivar epsilon..." << std::endl;
+    }
+    
+    bool all_epsilon = true;
+    for (const auto& symbol : symbols) {
+        Sentence sym_sent(symbol);
+        if (firsts.find(sym_sent) == firsts.end() || !firsts.at(sym_sent).contains_epsilon()) {
+            all_epsilon = false;
+            if (verbose) {
+                std::cout << "        " << symbol->Name() << " no puede derivar epsilon" << std::endl;
             }
-            i++;
-            s = Sentence(symbols[i]);
-                // i++;
-                // s = symbols[i];
-                // if (!firsts.at(Sentence(s)).contains_epsilon()) {
-                //     update_container_set(local_first, firsts.at(Sentence(s)));
-                //     break;
-                // }
-            
-            if (!firsts.at(s).contains_epsilon()) {
-                local_first.update(firsts.at(s));
-                break;
-            }
-            // } else {
-            //     local_first.add(G_.GetEpsilon());
-            //     local_first.set_epsilon(true);
-            //     break;
-            // }
+            break;
+        } else if (verbose) {
+            std::cout << "        " << symbol->Name() << " puede derivar epsilon" << std::endl;
         }
     }
+    
+    if (all_epsilon) {
+        local_first.set_epsilon();
+        if (verbose) {
+            std::cout << "      Todos los símbolos pueden derivar epsilon, agregando epsilon al resultado" << std::endl;
+        }
+    }
+    
+    // Calculate FIRST for the string
+    if (verbose) {
+        std::cout << "      Calculando FIRST para la cadena de símbolos..." << std::endl;
+    }
+    
+    for (size_t i = 0; i < symbols.size(); ++i) {
+        const auto& symbol = symbols[i];
+        Sentence sym_sent(symbol);
+        
+        if (verbose) {
+            std::cout << "        Procesando símbolo #" << (i+1) << ": " << symbol->Name();
+            if (symbol->IsTerminal()) {
+                std::cout << " (Terminal)";
+            } else if (symbol->IsNonTerminal()) {
+                std::cout << " (No Terminal)";
+            } else if (symbol->IsEndOfFile()) {
+                std::cout << " (EOF)";
+            }
+            std::cout << std::endl;
+        }
+        
+        if (symbol->IsEndOfFile()) {
+            local_first.add(G.GetEndOfFile()->Name());
+            if (verbose) {
+                std::cout << "          Es EOF, agregando '" << G.GetEndOfFile()->Name() << "' y terminando" << std::endl;
+            }
+            break;
+        }
+        
+        if (firsts.find(sym_sent) != firsts.end()) {
+            const auto& first_set = firsts.at(sym_sent);
+            if (verbose) {
+                std::cout << "          FIRST(" << symbol->Name() << ") = { ";
+                for (const auto& val : first_set.get_values()) {
+                    std::cout << val << " ";
+                }
+                if (first_set.contains_epsilon()) {
+                    std::cout << "epsilon ";
+                }
+                std::cout << "}" << std::endl;
+            }
+            
+            // Add all non-epsilon terminals
+            for (const auto& val : first_set.get_values()) {
+                // We only need to check if the symbol name is the epsilon symbol name
+                if (val != G.GetEpsilon()->Name()) {
+                    local_first.add(val);
+                    if (verbose) {
+                        std::cout << "          Agregando '" << val << "' al resultado" << std::endl;
+                    }
+                }
+            }
+            
+            // If the symbol doesn't derive epsilon, stop processing
+            if (!first_set.contains_epsilon()) {
+                if (verbose) {
+                    std::cout << "          Este símbolo no deriva epsilon, terminando el proceso" << std::endl;
+                }
+                break;
+            }
+            
+            // If it's the last symbol and it can derive epsilon, add epsilon to result
+            if (i == symbols.size() - 1) {
+                local_first.set_epsilon();
+                if (verbose) {
+                    std::cout << "          Es el último símbolo y puede derivar epsilon, agregando epsilon al resultado" << std::endl;
+                }
+            } else if (verbose) {
+                std::cout << "          Este símbolo puede derivar epsilon, continuando con el siguiente" << std::endl;
+            }
+        } else {
+            // Symbol not in firsts, it must be a terminal
+            local_first.add(symbol->Name());
+            if (verbose) {
+                std::cout << "          Símbolo no encontrado en firsts, asumiendo que es terminal y agregando '" << symbol->Name() << "'" << std::endl;
+            }
+            break;
+        }
+    }
+    
+    if (verbose) {
+        std::cout << "      FIRST local calculado: { ";
+        for (const auto& val : local_first.get_values()) {
+            std::cout << val << " ";
+        }
+        if (local_first.contains_epsilon()) {
+            std::cout << "epsilon ";
+        }
+        std::cout << "}" << std::endl;
+    }
+    
     return local_first;
 }
 // ContainerSet<string> LR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G) {
@@ -681,7 +904,7 @@ vector<Item> expand(const Item& item, const map<Sentence, ContainerSet<string>>&
     auto lookaheads = ContainerSet<string>();
     for (const auto& preview : item.Preview()) {
         // lookaheads.update(compute_local_firsts(Sentence(preview), firsts));
-        auto local_first = LR1Parser::compute_local_firsts(Sentence(get_symbols(preview, G_)), firsts, G_);
+        auto local_first = LR1Parser::compute_local_firsts(Sentence(get_symbols(preview, G_)), firsts, G_, false); // No verbose here
         // update_container_set(lookaheads, local_first);
         lookaheads.update(local_first);
     }
@@ -849,7 +1072,7 @@ bool LR1Parser::serialize_parser(const std::string& filename, const std::string&
         uint32_t version = 1;
         file.write(reinterpret_cast<const char*>(&version), sizeof(version));
         
-        // Escribir flag verbose_
+        // Escribir flag verbose
         file.write(reinterpret_cast<const char*>(&verbose_), sizeof(verbose_));
         
         // Serializar tabla action_
@@ -942,7 +1165,7 @@ LR1Parser* LR1Parser::deserialize_parser(const std::string& filename, const std:
             return nullptr;
         }
         
-        // Leer flag verbose_
+        // Leer flag verbose
         bool verbose;
         file.read(reinterpret_cast<char*>(&verbose), sizeof(verbose));
         

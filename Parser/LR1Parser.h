@@ -130,8 +130,12 @@ public:
     
     /**
      * @brief Calcula los conjuntos FIRST locales para una sentencia.
+     * @param sentence La sentencia para la que calcular FIRST
+     * @param firsts Mapa con los conjuntos FIRST ya calculados
+     * @param G La gramática
+     * @param verbose Si es true, muestra información de depuración
      */
-    static ContainerSet<string> compute_local_firsts(const Sentence& sentence, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G);
+    static ContainerSet<string> compute_local_firsts(const Sentence& sentence, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose = false);
     
     /**
      * @brief Calcula los conjuntos FOLLOW para la gramática.

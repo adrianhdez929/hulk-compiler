@@ -1,7 +1,7 @@
 ==================================
        ANÁLISIS DE PARSER LR1      
 ==================================
-Generado el: Thu Jun 19 08:16:31 2025
+Generado el: Sat Jun 21 01:33:48 2025
 
 ==================================
        INFORMACIÓN GRAMÁTICA      
@@ -39,43 +39,44 @@ Producciones:
 ==================================
 FIRST(symbol) = { symbol }
 FIRST()) = { ) }
-FIRST(A) = { symbol [ ( }
-FIRST(A +) = { symbol [ ( }
-FIRST(A *) = { symbol [ ( }
-FIRST(A ?) = { symbol [ ( }
-FIRST(E) = { symbol [ ( }
-FIRST(E | T) = { symbol [ ( }
-FIRST(S) = { symbol }
-FIRST(S R) = { symbol }
-FIRST(S P) = { symbol }
-FIRST(T) = { symbol [ ( }
-FIRST(T F) = { symbol [ ( }
+FIRST(A) = { symbol [ ( ε }
+FIRST(A ?) = { symbol [ ( ? }
+FIRST(A +) = { symbol [ + ( }
+FIRST(A *) = { symbol [ * ( }
+FIRST(?) = { ? }
 FIRST(R) = { symbol }
-FIRST(SS) = { symbol [ ( }
-FIRST(+) = { + }
 FIRST(|) = { | }
 FIRST(() = { ( }
 FIRST(( E )) = { ( }
-FIRST(]) = { ] }
-FIRST(*) = { * }
-FIRST([) = { [ }
-FIRST([ S ]) = { [ }
-FIRST(?) = { ? }
+FIRST(+) = { + }
 FIRST(P) = { symbol }
 FIRST(P - P) = { symbol }
-FIRST(F) = { symbol [ ( }
+FIRST(*) = { * }
 FIRST(-) = { - }
-FIRST(epsilon) = { }
+FIRST([) = { [ }
+FIRST([ S ]) = { [ }
+FIRST(]) = { ] }
+FIRST(SS) = { symbol | ? + * [ ( ε }
+FIRST(EOF) = { EOF }
+FIRST(epsilon) = { ε }
+FIRST(T) = { symbol ? + * [ ( ε }
+FIRST(T F) = { symbol ? + * [ ( ε }
+FIRST(E) = { symbol | ? + * [ ( ε }
+FIRST(E | T) = { symbol ? + * [ ( | }
+FIRST(S) = { symbol }
+FIRST(S R) = { symbol }
+FIRST(S P) = { symbol }
+FIRST(F) = { symbol ? + * [ ( ε }
 ----------------------------------------------------------
 ==================================
          CONJUNTOS FOLLOW         
 ==================================
-FOLLOW(A) = { ) ? | EOF ( + * [ symbol }
+FOLLOW(A) = { ) | EOF ( [ * + ? symbol }
+FOLLOW(R) = { ] symbol }
+FOLLOW(P) = { ) - symbol ? ] + * [ EOF ( | }
+FOLLOW(SS) = { EOF }
+FOLLOW(T) = { ) EOF ( [ * + ? symbol | }
 FOLLOW(E) = { EOF ) | }
 FOLLOW(S) = { symbol ] }
-FOLLOW(T) = { ) EOF ( [ symbol | }
-FOLLOW(R) = { ] symbol }
-FOLLOW(SS) = { EOF }
-FOLLOW(P) = { ) - symbol ] [ * + EOF ( | ? }
-FOLLOW(F) = { ) symbol [ EOF ( | }
+FOLLOW(F) = { ) symbol ? + * [ EOF ( | }
 ----------------------------------------------------------
