@@ -357,13 +357,12 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
             return;
         }
         
-        FuncInfo funcInfo;
-        context->getLocal(node->func_name, argCount, funcInfo);
+        TypeMethod funcInfo = context->getFunc(node->func_name, argTypes);
         
         string expectedTypes = "";
-        for (size_t i = 0; i < funcInfo.paramTypes.size(); i++) {
+        for (size_t i = 0; i < funcInfo.arguments.size(); i++) {
             if (i > 0) expectedTypes += ", ";
-            expectedTypes += funcInfo.paramTypes[i].name;
+            expectedTypes += funcInfo.arguments[i].name;
         }
         
         string actualTypes = "";
@@ -400,6 +399,33 @@ void SemanticCheckerVisitor::visit(FunctionCallNode* node, Context* context) {
 void SemanticCheckerVisitor::visit(IDNode* node, Context* context) {
     if (node == nullptr) {
         throw std::runtime_error("Node is null");
+        return;
+    }
+
+    if (!currentTypeName.empty()) {
+        std::cout << "Entering id node for type " << currentTypeName << " with id " << node->id_name << std::endl;
+        std::shared_ptr<TypeInfo> currentType = context->getType(currentTypeName);
+        
+        if (!currentFunctionName.empty()) {
+            if (currentType->hasMethod(currentFunctionName)) {
+                std::cout << "Inside method body for type " << currentTypeName << " with function " << currentFunctionName << std::endl;
+                auto method = currentType->getMethod(currentFunctionName);
+
+                for (auto attr: method.arguments) {
+                    std::cout << "Method " << currentFunctionName << " argument: " << attr.name << " of type " << attr.type->name << std::endl;
+                    if (attr.name == node->id_name) {
+                        node->inferredType = attr.type;
+                        return;
+                    }
+                }
+
+                addError("Error in line " + std::to_string(node->line) + ": Variable '" + node->id_name + 
+                            "' not found in method '" + currentFunctionName + "' of type '" + currentTypeName + "'");
+            } else {
+                addError("Error in line " + std::to_string(node->line) + ": Variable '" + node->id_name + " not found in method '" + currentFunctionName + "' of type '" + currentTypeName + "'");
+            }
+        }
+
         return;
     }
 
@@ -508,7 +534,9 @@ void SemanticCheckerVisitor::visit(AssignFuncNode* node, Context* context) {
        context->defineFunc(node->func_name, node->inferredType, argTypes);
     }
     
+    currentFunctionName = node->func_name;
     node->body->accept(this, functionContext);
+    currentFunctionName.clear();
 }
 
 void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
@@ -682,24 +710,24 @@ void SemanticCheckerVisitor::visit(VarDesAssign* node, Context* context) {
 }
 
 void SemanticCheckerVisitor::visit(ForNode* node, Context* context) {
-	if (node == nullptr) {
-		throw std::runtime_error("Node is null");
-		return;
-	}
+// 	if (node == nullptr) {
+// 		throw std::runtime_error("Node is null");
+// 		return;
+// 	}
 
-	// cout << "DEBUG: Visiting ForNode with iterator: " << node->id->id_name << endl;
+// 	// cout << "DEBUG: Visiting ForNode with iterator: " << node->id->id_name << endl;
 
-	node->group->accept(this, context);
+// 	node->group->accept(this, context);
 
-	Context* forContext = context->createChildContext();
+// 	Context* forContext = context->createChildContext();
 
-	if (!forContext->define(node->id->id_name)) {
-        addError("Semantic error in line: " + std::to_string(node->line) + " : Failed to define iterator variable '" + node->id->id_name + "'");
-	}
+// 	if (!forContext->define(node->id->id_name)) {
+//         addError("Semantic error in line: " + std::to_string(node->line) + " : Failed to define iterator variable '" + node->id->id_name + "'");
+// 	}
 
-	node->body->accept(this, forContext);
+// 	node->body->accept(this, forContext);
 	
-	// cout << "Semantic check: For loop processed successfully" << endl;
+// 	// cout << "Semantic check: For loop processed successfully" << endl;
 }
 
 void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
@@ -707,6 +735,8 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
         throw std::runtime_error("Node is null");
 		return;
     }
+
+    currentTypeName = node->id->id_name;
 
     auto typeInfo = context->getType(node->id->id_name);
     auto typeContext = context->createChildContext();
@@ -721,6 +751,7 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
     }
 
     context->currentType = nullptr;
+    currentTypeName.clear();
 }
 
 void SemanticCheckerVisitor::visit(ASTNodeVector* node, Context* context) {

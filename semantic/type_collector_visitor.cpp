@@ -252,8 +252,6 @@ void TypeCollectorVisitor::processTypeDeclaration(TypeDeclNode* node, Context* c
     }
     
     collectedTypes[typeName] = typeDef;
-    
-    
 }
 
 bool TypeCollectorVisitor::detectCircularInheritance(const std::string& typeName, const std::string& parentName) {

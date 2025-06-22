@@ -67,7 +67,7 @@ public:
     std::shared_ptr<TypeInfo> currentType;
 
     std::vector<VarInfo> localVars;
-    std::vector<FuncInfo> localFuncs;
+    std::vector<TypeMethod> localFuncs;
     std::unordered_map<std::string, std::shared_ptr<TypeInfo>> localTypes;
 
     int parentVarIndex;
@@ -85,12 +85,12 @@ public:
     virtual bool isDefined(const std::string& varname);
     virtual bool isDefined(const std::string& funcname, const int argcount);
     virtual bool isLocal(const std::string& varname);
-    virtual bool isLocal(const std::string& funcname, const int argcount);
+    // virtual bool isLocal(const std::string& funcname, const int argcount);
 
-    virtual bool define(const std::string& varname);
-    virtual bool define(const std::string& funcname, const int argcount);
+    // virtual bool define(const std::string& varname);
+    // virtual bool define(const std::string& funcname, const int argcount);
     virtual VarInfo getLocal(const std::string& varname, VarInfo& var);
-    virtual FuncInfo getLocal(const std::string& funcname, const int argcount, FuncInfo& func);
+    // virtual FuncInfo getLocal(const std::string& funcname, const int argcount, FuncInfo& func);
 
     virtual bool defineType(const std::string& typeName);
     virtual bool isTypeDefined(const std::string& typeName);
@@ -99,6 +99,8 @@ public:
     virtual bool defineVar(const std::string& varname, std::shared_ptr<TypeInfo> type);
     virtual std::shared_ptr<TypeInfo> getVarType(const std::string& varname);
     
+    virtual TypeMethod getFunc(const std::string& funcname, 
+                                                const std::vector<std::shared_ptr<TypeInfo>>& paramTypes);
     virtual bool defineFunc(const std::string& funcname, std::shared_ptr<TypeInfo> returnType, 
                            const std::vector<TypeAttribute> paramTypes);
     virtual std::shared_ptr<TypeInfo> getFuncReturnType(const std::string& funcname, 

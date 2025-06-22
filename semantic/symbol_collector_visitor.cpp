@@ -174,6 +174,8 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
         methodArgs.push_back(TypeAttribute{arg->id_name, globalContext->getType(arg->inferredType->name)});
     }
 
+    currentFunctionName = node->func_name;
+
     node->body->accept(this, context);
     node->inferredType = node->body->inferredType;
 
@@ -187,6 +189,7 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
 
         if (!currentType->defineMethod(node->func_name, returnType, methodArgs)) {
             addError("Could not define method '" + node->func_name + "' in type '" + currentTypeName + "'");
+            currentFunctionName = "";
             return;
         }
     } else {
@@ -195,10 +198,17 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
         }
 
         auto returnType = node->inferredType ? context->getType(node->inferredType->name) : Context::objectType;
+        if (node->func_name.empty()) {
+            addError("Error in line " + std::to_string(node->line) + ": Function name cannot be empty in line " + std::to_string(node->line));
+            currentFunctionName = "";
+            return;
+        }
         if (!context->defineFunc(node->func_name, returnType, methodArgs)) {
             addError("Could not define function '" + node->func_name + "' in global scope");
         }
     }
+
+    currentFunctionName = "";
 }
 
 void SymbolCollectorVisitor::visit(LetAssign* node, Context* context) {

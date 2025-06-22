@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Function: " << func.name << " returns " 
                       << (func.returnType ? func.returnType->name : "void") 
                       << " with parameters: ";
-            for (const auto& param : func.paramTypes) {
+            for (const auto& param : func.arguments) {
                 std::cout << param.name << ": " << param.type->name << ", ";
             }
             std::cout << std::endl;
@@ -235,21 +235,21 @@ int main(int argc, char* argv[]) {
 
         std::cout << "\n=== Generating Code ===" << std::endl;
     //     // Initialize the codegen visitor
-    //     codegenVisitor->initialize();
+        codegenVisitor->initialize();
         
-    // // //     // Set the root node and context
-    //     codegenVisitor->setRootNode(root, globalContext);
+    // //     // Set the root node and context
+        codegenVisitor->setRootNode(root, globalContext);
         
-    // // //     // Generate and execute code
-    //     codegenVisitor->generateCode();
-    //     std::cout << "Code generation completed." << std::endl;
-    // //     // Clean up
-    //     delete symbolCollectorVisitor;
-    //     delete globalContext;
-    //     delete root;
+    // //     // Generate and execute code
+        codegenVisitor->generateCode();
+        std::cout << "Code generation completed." << std::endl;
+    //     // Clean up
+        delete symbolCollectorVisitor;
+        delete globalContext;
+        delete root;
 	// }
 
-	// // fclose(yyin);
+	// fclose(yyin);
 
     return 0;
 }

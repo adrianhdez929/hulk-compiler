@@ -209,6 +209,8 @@ class SemanticCheckerVisitor : public Visitor {
 private:
     Context* globalContext;
     bool inMethodContext = false;
+    std::string currentFunctionName; // Track the current function being analyzed
+    std::string currentTypeName; // Track the current type being analyzed
     std::shared_ptr<TypeInfo> currentTypeDef = nullptr;
     std::vector<std::string> errors; // Store semantic errors
 };
