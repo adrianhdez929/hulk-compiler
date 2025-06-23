@@ -12,13 +12,12 @@
 // #include "validate_grammar.hpp"
 
 bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
-    try {
-        if (verbose) {
-            std::cout << "=== Creando artefactos del compilador Hulk ===" << std::endl;
-        }
+    if (verbose) {
+        std::cout << "=== Creando artefactos del compilador Hulk ===" << std::endl;
+    }
 
-        // Reset production counter to ensure fresh start
-        Grammar::ResetProductionCounter();
+    // Reset production counter to ensure fresh start
+    Grammar::ResetProductionCounter();
 
     // Verificar y crear directorio hulk
     if (!std::filesystem::exists("hulk")) {
@@ -64,7 +63,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     // Crear tabla de tokens para el lexer
     std::vector<std::pair<std::string, std::string>> token_table = {
         {"string", "\"([\\x20-!#-\\x7e])*\""},
-        {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+        {"number", "((0|[1-9][0-9]*)(\\.[0-9]+)?)"}, // Regular expression for numbers
         {"bool", "true|false"},  // Regular expression for boolean values
 
         {"space", " +"}, // Regular expression for spaces
@@ -158,7 +157,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     }
     
     // Crear lexer
-    Lexer lexer(token_table, lexer_grammar, parser); // El constructor del Lexer no acepta parámetro verbose
+    Lexer lexer(token_table, lexer_grammar, parser, verbose); // Pasando el parámetro verbose
     
     if (verbose) {
         std::cout << "Lexer creado correctamente." << std::endl;

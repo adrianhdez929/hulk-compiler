@@ -58,8 +58,8 @@ private:
 std::vector<std::shared_ptr<Symbol>> get_lr1_symbols(const std::vector<std::string>& symbols, Grammar& G);
 std::vector<Item> lr1_expand(const Item& item, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G);
 std::set<Item> lr1_compress(const std::vector<Item>& items);
-std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G);
-std::vector<Item> goto_lr1(const std::vector<Item>& items, std::shared_ptr<Symbol> symbol, const std::map<Sentence, ContainerSet<string>>& firsts, bool just_kernel, Grammar& G);
+std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G_);
+
 State build_lr1_automaton(Grammar& G);
 
 /**
@@ -136,7 +136,7 @@ public:
      * @param verbose Si es true, muestra información de depuración
      */
     static ContainerSet<string> compute_local_firsts(const Sentence& sentence, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose = false);
-    
+
     /**
      * @brief Calcula los conjuntos FOLLOW para la gramática.
      */
@@ -146,6 +146,7 @@ public:
      * @brief Construye el autómata LR(1) para la gramática.
      */
     State BuildLR1Automaton();
+    State BuildLALR1Automaton();
 
     /**
      * @brief Registra una acción en la tabla action.
@@ -160,7 +161,26 @@ public:
     void Register(std::map<std::pair<int, Symbol>, int>& table,
                   const std::pair<int, Symbol>& key, 
                   int value);
-                  
+
+    /**
+     * @brief Calcula el cierre LR(1) de un conjunto de ítems.
+     * @param items Conjunto de ítems sobre el que calcular el cierre
+     * @param firsts Conjuntos FIRST ya calculados
+     * @param G_ Gramática utilizada
+     * @return Conjunto de ítems que forman el cierre LR(1)
+     */
+    std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts);
+
+    /**
+     * @brief Realiza la transición goto en un conjunto de ítems.
+     * @param items Conjunto de ítems sobre el que realizar la transición
+     * @param symbol Símbolo sobre el cual se realiza la transición
+     * @param firsts Conjuntos FIRST ya calculados
+     * @param just_kernel Si es true, solo devuelve el núcleo del conjunto
+     * @return Nuevo conjunto de ítems resultante de la transición
+     */
+    std::vector<Item> goto_lr1(const std::vector<Item>& items, std::shared_ptr<Symbol> symbol, const std::map<Sentence, ContainerSet<string>>& firsts, bool just_kernel);
+    
     /**
      * @brief Libera la memoria de los estados del autómata LR(1).
      */

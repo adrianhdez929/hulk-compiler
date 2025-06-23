@@ -37,6 +37,14 @@ public:
     const ContainerSet<string>& lookaheads() const { return lookaheads_; }
 
     /**
+     * @brief Fusiona los lookaheads de otro ítem en este ítem.
+     * @param other El ítem del cual se fusionarán los lookaheads.
+     */
+    void merge_lookaheads(const ContainerSet<string>& other) {
+        lookaheads_.add(other.get_values());
+    }
+
+    /**
      * @brief Indica si el ítem es de reducción (el punto está al final).
      */
     bool IsReduceItem() const;
@@ -73,6 +81,23 @@ public:
      * @brief Devuelve una representación en string del ítem.
      */
     std::string ToString() const;
+    /**
+     * @brief Devuelve los símbolos beta (los que siguen al punto en la producción).
+     * 
+     * Los símbolos beta son aquellos que están después del punto en la producción.
+     * 
+     * @return Un vector de shared_ptr a Symbol representando los símbolos beta.
+     */
+    vector<shared_ptr<Symbol>> GetBetaSymbols() const {
+        vector<shared_ptr<Symbol>> beta;
+        const auto& right = production_->Right().Symbols();
+        if (pos_ + 1 < right.size()) {
+            for (size_t i = pos_ + 1; i < right.size(); ++i) {
+                beta.push_back(right[i]);
+            }
+        }
+        return beta;
+    }
 
 
 private:
@@ -86,6 +111,7 @@ inline bool operator==(const Item& lhs, const Item& rhs) {
     // Comparamos el contenido de las producciones, no solo los punteros
     return (lhs.production() && rhs.production() && 
             lhs.production()->ToString() == rhs.production()->ToString()) &&
+            lhs.production()->get_id() == rhs.production()->get_id() &&
            (lhs.pos() == rhs.pos()) &&
            (lhs.lookaheads() == rhs.lookaheads());
 }

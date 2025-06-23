@@ -30,7 +30,7 @@ inline Grammar getHulkGrammar(){
 	// Debe ser muy similar si no identica a la tabla de tokens del lexer.
 	std::vector<std::pair<std::string, std::string>> table = {
         {"string", "\"([\\x20-!#-\\x7e])*\""},
-        {"number", "(0|[1-9][0-9]*)(.[0-9]+)?"}, // Regular expression for numbers
+        {"number", "((0|[1-9][0-9]*)(\\.[0-9]+)?)"}, // Regular expression for numbers
         {"bool", "true|false"},  // Regular expression for boolean values
         {"type_id", "[A-Z][_a-zA-Z0-9]*"},
         {"var_id", "[_a-z][_a-zA-Z0-9]*"},
