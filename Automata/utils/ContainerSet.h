@@ -102,7 +102,23 @@ class ContainerSet {
         }
 
         bool operator==(const ContainerSet& other) const {
-            return set_ == other.set_ && contains_epsilon_ == other.contains_epsilon_;
+            //Si algun elemento de alguno de los conjuntos no esta en el otro, son diferentes
+            if (set_.size() != other.set_.size()) {
+                return false;
+            }
+            for (const T& value : set_) {
+                if (other.set_.find(value) == other.set_.end()) {
+                    return false; // Un elemento de set_ no está en other.set_
+                }
+            }
+            for (const T& value : other.set_) {
+                if (set_.find(value) == set_.end()) {
+                    return false; // Un elemento de other.set_ no está en set_
+                }
+            }
+            // Si ambos conjuntos tienen el mismo tamaño y todos los elementos coinciden, son iguales
+            return contains_epsilon_ == other.contains_epsilon_;
+            // return set_ == other.set_ && contains_epsilon_ == other.contains_epsilon_;
         }
         bool operator!=(const ContainerSet& other) const {
             return !(*this == other);
