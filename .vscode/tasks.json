@@ -19,7 +19,7 @@
                 "Automata/state.cpp",
                 "Parser/Item.cpp",
                 "Parser/SLR1Parser.cpp",
-                "Parser/LR1Parser.cpp",
+                "Parser/LALR1Parser.cpp",
                 "Ast/ast.cpp",
                 "execute.cpp",
                 "${file}",

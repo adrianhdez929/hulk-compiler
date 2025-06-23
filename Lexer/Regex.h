@@ -8,7 +8,7 @@
 #include "../Automata/nfa.h"
 #include "../Automata/utils/aut_manipulation.h"
 #include "../Automata/operations/operations.h"
-#include "../Parser/LR1Parser.h"
+#include "../Parser/LALR1Parser.h"
 #include "../Parser/reverse_evaluate.h"
 
 /**
@@ -24,7 +24,7 @@ using namespace std;
 class Regex {
 public:
     // Constructor
-    Regex(const std::string& pattern, Grammar& grammar, LR1Parser& parser, bool verbose = false) 
+    Regex(const std::string& pattern, Grammar& grammar, LALR1Parser& parser, bool verbose = false) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
         if (verbose_) {
             std::cout << "Construyendo DFA para patrón: '" << pattern_ << "'" << std::endl;
@@ -130,7 +130,7 @@ public:
         return tokens;
     }
 
-    DFA build_dfa(LR1Parser& parser) {
+    DFA build_dfa(LALR1Parser& parser) {
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
@@ -190,7 +190,7 @@ public:
             }
             
             return mini_dfa;
-        } catch (const LR1ParsingError& e) {
+        } catch (const LALR1ParsingError& e) {
             std::cerr << "Error de parsing en regex '" << pattern_ << "': " << e.what() << std::endl;
             throw;
         } catch (const std::exception& e) {
