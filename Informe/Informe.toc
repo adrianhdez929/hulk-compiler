@@ -9,21 +9,21 @@
 \contentsline {subsection}{\numberline {2.3}Implementación}{2}{}%
 \contentsline {section}{\numberline {3}Análisis Sintáctico}{2}{}%
 \contentsline {subsection}{\numberline {3.1}Gramática}{2}{}%
-\contentsline {subsection}{\numberline {3.2}Tipo de Parser}{2}{}%
-\contentsline {subsection}{\numberline {3.3}Árbol de Sintaxis Abstracta (AST)}{2}{}%
-\contentsline {subsection}{\numberline {3.4}Implementación}{2}{}%
-\contentsline {section}{\numberline {4}Análisis Semántico}{2}{}%
-\contentsline {subsection}{\numberline {4.1}Comprobación de Tipos}{2}{}%
-\contentsline {subsection}{\numberline {4.2}Reglas de Alcance (Scope)}{2}{}%
-\contentsline {subsection}{\numberline {4.3}Tabla de Símbolos}{2}{}%
-\contentsline {subsection}{\numberline {4.4}Manejo de Errores}{2}{}%
-\contentsline {section}{\numberline {5}Generación de Código}{2}{}%
-\contentsline {subsection}{\numberline {5.1}Representación Intermedia}{2}{}%
-\contentsline {subsection}{\numberline {5.2}Arquitectura de Destino}{2}{}%
-\contentsline {subsection}{\numberline {5.3}Proceso de Generación}{2}{}%
-\contentsline {section}{\numberline {6}Pruebas}{2}{}%
-\contentsline {section}{\numberline {7}Conclusiones}{2}{}%
-\contentsline {subsection}{\numberline {7.1}Resumen del Trabajo}{2}{}%
-\contentsline {subsection}{\numberline {7.2}Trabajo Futuro}{2}{}%
-\contentsline {section}{\numberline {A}Gramática Completa}{3}{}%
-\contentsline {section}{\numberline {B}Fragmentos de Código Fuente}{5}{}%
+\contentsline {subsection}{\numberline {3.2}Tipo de Parser}{3}{}%
+\contentsline {subsection}{\numberline {3.3}Árbol de Sintaxis Abstracta (AST)}{3}{}%
+\contentsline {subsection}{\numberline {3.4}Implementación}{3}{}%
+\contentsline {section}{\numberline {4}Análisis Semántico}{3}{}%
+\contentsline {subsection}{\numberline {4.1}Type Collector}{3}{}%
+\contentsline {subsection}{\numberline {4.2}Symbol Collector}{3}{}%
+\contentsline {subsection}{\numberline {4.3}Semantic Checker}{3}{}%
+\contentsline {subsection}{\numberline {4.4}Contexto y Búsqueda Recursiva}{3}{}%
+\contentsline {section}{\numberline {5}Generación de Código}{4}{}%
+\contentsline {subsection}{\numberline {5.1}Representación Intermedia (LLVM IR)}{4}{}%
+\contentsline {subsection}{\numberline {5.2}Visitor de Generación de Código}{4}{}%
+\contentsline {subsection}{\numberline {5.3}Intérprete JIT (Just-In-Time)}{4}{}%
+\contentsline {section}{\numberline {6}Pruebas}{4}{}%
+\contentsline {section}{\numberline {7}Conclusiones}{4}{}%
+\contentsline {subsection}{\numberline {7.1}Resumen del Trabajo}{4}{}%
+\contentsline {subsection}{\numberline {7.2}Trabajo Futuro}{4}{}%
+\contentsline {section}{\numberline {A}Gramática Completa}{5}{}%
+\contentsline {section}{\numberline {B}Fragmentos de Código Fuente}{7}{}%
