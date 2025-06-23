@@ -2072,8 +2072,23 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
     std::string methodFuncName = typeName + "_" + node->name;
     llvm::Function* methodFunc = TheModule->getFunction(methodFuncName);
     
+    // If method not found in current class, search in parent classes
     if (!methodFunc) {
-        throw std::runtime_error("Method function not found: " + methodFuncName);
+        std::string currentType = typeName;
+        while (!methodFunc && typeInheritanceMap.find(currentType) != typeInheritanceMap.end()) {
+            std::string parentType = typeInheritanceMap[currentType];
+            std::string parentMethodName = parentType + "_" + node->name;
+            methodFunc = TheModule->getFunction(parentMethodName);
+            if (methodFunc) {
+                methodFuncName = parentMethodName; // Update the method name for proper resolution
+                break;
+            }
+            currentType = parentType;
+        }
+        
+        if (!methodFunc) {
+            throw std::runtime_error("Method function not found: " + methodFuncName + " (searched inheritance chain)");
+        }
     }
     
     // Determine the return type of the method

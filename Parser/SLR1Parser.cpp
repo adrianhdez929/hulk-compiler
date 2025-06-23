@@ -991,6 +991,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         state_stack.push(action_value.second);
                         symbol_stack.push(current_token);
                         actions.push_back(SHIFT);
+                        cout << "SHIFT: " << current_token.ToString() << endl;
                         index++;
                     } 
                     else if (action_value.first == REDUCE) {
@@ -1000,6 +1001,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                             std::cout << "Reducing by production: " << production.ToString() << std::endl;
                         }
                         production_ids.push_back(production.get_id());
+                        std::cout << "REDUCE: " << "Producción: " << production.ToString() << std::endl;
                         actions.push_back(REDUCE);
                         
                         for (int i = 0; i < production.Right().Symbols().size(); i++) {
@@ -1018,7 +1020,6 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                             if (verbose_) {
                                 std::cout << "Error: No se encontró transición GOTO" << std::endl;
                             }
-                            
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
                                                 production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());
                             throw std::runtime_error(error_msg);

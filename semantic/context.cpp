@@ -8,92 +8,157 @@ std::shared_ptr<TypeInfo> Context::boolType = nullptr;
 std::shared_ptr<TypeInfo> Context::voidType = nullptr;
 std::shared_ptr<TypeInfo> Context::objectType = nullptr;
 
-bool TypeInfo::isCompatibleWith(const std::shared_ptr<TypeInfo>& other) const {
-    if (name == other->name) return true;
-    if (kind == TypeKind::INFERRED || other->kind == TypeKind::INFERRED) return true;
-    return isSubtypeOf(other);
-}
-
-bool TypeInfo::isSubtypeOf(const std::shared_ptr<TypeInfo>& other) const {
-    if (name == other->name) return true;
-    if (typeDef && other->typeDef) {
-        return typeDef->isSubclassOf(other->typeDef);
+void Context::initializeBuiltinTypes() {
+    if (numberType == nullptr) {
+        numberType = std::make_shared<TypeInfo>("Number");
+        stringType = std::make_shared<TypeInfo>("String");  
+        boolType = std::make_shared<TypeInfo>("Boolean");
+        voidType = std::make_shared<TypeInfo>("Expression");
+        objectType = std::make_shared<TypeInfo>("Object");
     }
-    return false;
 }
 
-bool TypeDef::hasMethod(const std::string& methodName, const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const {
-    for (const auto& method : methods) {
-        if (method.name == methodName && method.paramTypes.size() == paramTypes.size()) {
-            bool matches = true;
-            for (size_t i = 0; i < paramTypes.size(); i++) {
-                if (!paramTypes[i]->isCompatibleWith(method.paramTypes[i])) {
-                    matches = false;
-                    break;
-                }
-            }
-            if (matches) return true;
+
+TypeInfo::TypeInfo(std::string name) : name(std::move(name)) {
+    this->attributes = std::vector<TypeAttribute>();
+    this->methods = std::vector<TypeMethod>();
+    this->parents = std::vector<std::shared_ptr<TypeInfo>>();
+}
+
+TypeAttribute TypeInfo::getAttribute(const std::string& name) {
+    for (const auto& attr : this->attributes) {
+        if (attr.name == name) {
+            return attr; // Return the found attribute
         }
     }
-    if (parentType && parentType->typeDef) {
-        return parentType->typeDef->hasMethod(methodName, paramTypes);
-    }
-    return false;
-}
-
-MethodMemberInfo* TypeDef::findMethod(const std::string& methodName, const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) {
-    for (auto& method : methods) {
-        if (method.name == methodName && method.paramTypes.size() == paramTypes.size()) {
-            bool matches = true;
-            for (size_t i = 0; i < paramTypes.size(); i++) {
-                if (!paramTypes[i]->isCompatibleWith(method.paramTypes[i])) {
-                    matches = false;
-                    break;
-                }
+    for (const auto& parent : this->parents) {
+        if (parent) {
+            TypeAttribute parentAttr = parent->getAttribute(name);
+            if (!parentAttr.name.empty()) {
+                return parentAttr; // Return attribute from parent type if found
             }
-            if (matches) return &method;
         }
     }
-    if (parentType && parentType->typeDef) {
-        return parentType->typeDef->findMethod(methodName, paramTypes);
-    }
-    return nullptr;
+    return TypeAttribute{"", nullptr}; // Return an empty attribute if not found
 }
 
-bool TypeDef::hasProperty(const std::string& propName) const {
-    for (const auto& prop : properties) {
-        if (prop.name == propName) return true;
+bool TypeInfo::hasAttribute(const std::string& name) const {
+    bool exists = std::any_of(attributes.begin(), attributes.end(), 
+                       [&name](const TypeAttribute& attr) { return attr.name == name; });
+    if (!exists) {
+        for (const auto& parent : parents) {
+            if (parent && parent->hasAttribute(name)) {
+                return true; // Check in parent types
+            }
+        }
     }
-    if (parentType && parentType->typeDef) {
-        return parentType->typeDef->hasProperty(propName);
+    return exists; // Return true if attribute exists in this type or its parents
+}
+
+TypeMethod TypeInfo::getMethod(const std::string& name) {
+    for (const auto& method : this->methods) {
+        if (method.name == name) {
+            return method; // Return the found method
+        }
     }
+    for (const auto& parent : this->parents) {
+        if (parent) {
+            TypeMethod parentMethod = parent->getMethod(name);
+            if (!parentMethod.name.empty()) {
+                return parentMethod; // Return method from parent type if found
+            }
+        }
+    }
+    return TypeMethod{"", nullptr, {}}; // Return an empty method if not found
+}
+
+bool TypeInfo::hasMethod(const std::string& name) const {
+    bool exists = std::any_of(methods.begin(), methods.end(), 
+                       [&name](const TypeMethod& method) { return method.name == name; });
+    if (!exists) {
+        for (const auto& parent : parents) {
+            if (parent && parent->hasMethod(name)) {
+                return true; // Check in parent types
+            }
+        }
+    }
+    return exists; // Return true if method exists in this type or its parents
+}
+
+bool TypeInfo::isCompatibleWith(const std::string& name) const {
+    if (this->name == name) return true;
+
+    for (std::shared_ptr<TypeInfo> parent : this->parents) {
+        if (parent && parent->name == name) return true;
+        if (parent && parent->isCompatibleWith(name)) return true;
+    }
+
     return false;
 }
 
-PropertyMemberInfo* TypeDef::findProperty(const std::string& propName) {
-    for (auto& prop : properties) {
-        if (prop.name == propName) return &prop;
+bool TypeInfo::defineAttribute(const std::string& name, std::shared_ptr<TypeInfo> type) {
+    for (const auto& attr : this->attributes) {
+        if (attr.name == name) {
+            std::cerr << "Attribute '" << name << "' already defined in type '" << this->name << "'" << std::endl;
+            return false; // Attribute already exists
+        }
     }
-    if (parentType && parentType->typeDef) {
-        return parentType->typeDef->findProperty(propName);
-    }
-    return nullptr;
+    
+    TypeAttribute newAttr{name, type};
+    this->attributes.push_back(newAttr);
+    return true;
 }
 
-bool TypeDef::isSubclassOf(const std::shared_ptr<TypeDef>& other) const {
-    if (name == other->name) return true;
-    if (parentType && parentType->typeDef) {
-        return parentType->typeDef->isSubclassOf(other);
+bool TypeInfo::defineParent(const std::shared_ptr<TypeInfo>& parent) {
+    if (parent == nullptr) {
+        std::cout << "Cannot define null parent for type '" << this->name << "'" << std::endl;
+        return false; // Cannot define null parent
     }
-    return false;
+
+    // Check if parent is already added
+    for (const auto& existingParent : this->parents) {
+        if (existingParent->name == parent->name) {
+            std::cout << "Parent '" << parent->name << "' already exists for type '" << this->name << "'" << std::endl;
+            return false; // Parent already exists
+        }
+    }
+
+    // Check for circular inheritance - but exclude self-reference check
+    if (this->name != parent->name && parent->isCompatibleWith(this->name)) {
+        std::cout << "Circular inheritance detected when trying to add parent '" 
+                  << parent->name << "' to type '" << this->name << "'" << std::endl;
+        return false; // Circular inheritance
+    }
+
+    this->parents.push_back(parent);
+    std::cout << "Debug: Added parent '" << parent->name << "' to type '" << this->name 
+              << "'. Parents count: " << this->parents.size() << std::endl;
+    return true;
+}
+
+bool TypeInfo::defineMethod(const std::string& name, std::shared_ptr<TypeInfo> returnType, 
+    const std::vector<TypeAttribute>& arguments) {
+    for (const auto& method : this->methods) {
+        if (method.name == name) {
+            std::cerr << "Method '" << name << "' already defined in type '" << this->name << "'" << std::endl;
+            return false; // Method already exists
+        }
+    }
+
+    TypeMethod newMethod{name, returnType, arguments};
+    this->methods.push_back(newMethod);
+    return true;
 }
 
 Context::Context(Context *parent)
 {
+    // Initialize builtin types first
+    initializeBuiltinTypes();
+    
     this->parent = parent;
     this->localVars = std::vector<VarInfo>();
-    this->localFuncs = std::vector<FuncInfo>();
-    this->localTypes = std::unordered_map<std::string, std::shared_ptr<TypeDef>>();
+    this->localFuncs = std::vector<TypeMethod>();
+    this->localTypes = std::unordered_map<std::string, std::shared_ptr<TypeInfo>>();
 
     if (parent != nullptr) {
         this->parentVarIndex = parent->localVars.size();
@@ -106,33 +171,24 @@ Context::Context(Context *parent)
     this->children = std::list<Context*>();
     
     if (parent == nullptr) {
-        initializeBuiltinTypes();
         initializeBuiltinFunctions();
     }
 }
 
-void Context::initializeBuiltinTypes() {
-    if (numberType == nullptr) {
-        numberType = std::make_shared<TypeInfo>("Number", TypeKind::PRIMITIVE);
-        stringType = std::make_shared<TypeInfo>("String", TypeKind::PRIMITIVE);
-        boolType = std::make_shared<TypeInfo>("Boolean", TypeKind::PRIMITIVE);
-        voidType = std::make_shared<TypeInfo>("Expression", TypeKind::PRIMITIVE);
-        
-        auto objectTypeDef = std::make_shared<TypeDef>("Object");
-        objectType = std::make_shared<TypeInfo>("Object", TypeKind::CLASS);
-        objectType->typeDef = objectTypeDef;
-    }
-}
-
 void Context::initializeBuiltinFunctions() {
+    // Ensure builtin types are initialized before using them
+    if (numberType == nullptr) {
+        initializeBuiltinTypes();
+    }
+    
     // Mathematical functions with one parameter
     std::vector<std::string> singleParamFuncs = {"sqrt", "sin", "cos", "exp"};
     for (const auto& funcName : singleParamFuncs) {
-        defineFunc(funcName, numberType, {numberType});
+        defineFunc(funcName, numberType, {{"x", numberType}});
     }
     
     // Log function with two parameters (base, value)
-    defineFunc("log", numberType, {numberType, numberType});
+    defineFunc("log", numberType, {{"x", numberType}, {"y", numberType}});
     
     // Random function with no parameters
     defineFunc("rand", numberType, {});
@@ -145,6 +201,7 @@ Context* Context::createChildContext()
     this->children.push_back(child);
     return child;
 }
+
 bool Context::isDefined(const std::string &varname)
 {
     for (int i = 0; i < this->localVars.size(); i++) {
@@ -159,21 +216,17 @@ bool Context::isDefined(const std::string &varname)
 }
 bool Context::isDefined(const std::string &funcname, const int argcount)
 {
-    std::cout << "Debug: Searching for function '" << funcname << "' with " << argcount << " params in context " << this << std::endl;
-    std::cout << "Debug: Context has " << this->localFuncs.size() << " local functions" << std::endl;
-    
+    // Simple search without excessive debugging
     for (int i = 0; i < this->localFuncs.size(); i++) {
-        std::cout << "Debug: Found function '" << this->localFuncs[i].name << "' with " << this->localFuncs[i].params << " params" << std::endl;
-        if (this->localFuncs[i].name == funcname && this->localFuncs[i].params == argcount) {
-            std::cout << "Debug: Match found!" << std::endl;
+        if (!this->localFuncs[i].name.empty() && 
+            this->localFuncs[i].name == funcname && 
+            this->localFuncs[i].arguments.size() == argcount) {
             return true;
         }
     }
     if (this->parent != nullptr) {
-        std::cout << "Debug: Checking parent context" << std::endl;
         return this->parent->isDefined(funcname, argcount);
     }
-    std::cout << "Debug: Function not found" << std::endl;
     return false;
 }
 
@@ -186,37 +239,37 @@ bool Context::isLocal(const std::string &varname)
     }
     return false;
 }
-bool Context::isLocal(const std::string &funcname, const int argcount)
-{
-    for (int i = 0; i < this->localFuncs.size(); i++) {
-        if (this->localFuncs[i].name == funcname && this->localFuncs[i].params == argcount) {
-            return true;
-        }
-    }
-    return false;
-}
+// bool Context::isLocal(const std::string &funcname, const int argcount)
+// {
+//     for (int i = 0; i < this->localFuncs.size(); i++) {
+//         if (this->localFuncs[i].name == funcname && this->localFuncs[i].params == argcount) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
-bool Context::define(const std::string &varname)
-{
-    if (this->isDefined(varname)) {
-        return false;
-    }
-    VarInfo var(varname);
-    this->localVars.push_back(var);
-    return true;
-}
-bool Context::define(const std::string &funcname, const int argcount)
-{
-    std::cout << "Debug: define() called for '" << funcname << "' with " << argcount << " params in context " << this << std::endl;
-    if (this->isDefined(funcname, argcount)) {
-        std::cout << "Debug: Function already exists, returning false" << std::endl;
-        return false;
-    }
-    FuncInfo func(funcname, argcount);
-    this->localFuncs.push_back(func);
-    std::cout << "Debug: Function added successfully. Context now has " << this->localFuncs.size() << " functions" << std::endl;
-    return true;
-}
+// bool Context::define(const std::string &varname)
+// {
+//     if (this->isDefined(varname)) {
+//         return false;
+//     }
+//     VarInfo var(varname);
+//     this->localVars.push_back(var);
+//     return true;
+// }
+// bool Context::define(const std::string &funcname, const int argcount)
+// {
+//     std::cout << "Debug: define() called for '" << funcname << "' with " << argcount << " params in context " << this << std::endl;
+//     if (this->isDefined(funcname, argcount)) {
+//         std::cout << "Debug: Function already exists, returning false" << std::endl;
+//         return false;
+//     }
+//     TypeMethod func(funcname, argcount);
+//     this->localFuncs.push_back(func);
+//     std::cout << "Debug: Function added successfully. Context now has " << this->localFuncs.size() << " functions" << std::endl;
+//     return true;
+// }
 
 VarInfo Context::getLocal(const std::string &varname, VarInfo &var)
 {
@@ -232,25 +285,25 @@ VarInfo Context::getLocal(const std::string &varname, VarInfo &var)
     return var;
 }
 
-FuncInfo Context::getLocal(const std::string &funcname, const int argcount, FuncInfo &func)
-{
-    for (int i = 0; i < this->localFuncs.size(); i++) {
-        if (this->localFuncs[i].name == funcname && this->localFuncs[i].params == argcount) {
-            func = this->localFuncs[i];
-            return func;
-        }
-    }
-    if (this->parent != nullptr) {
-        return this->parent->getLocal(funcname, argcount, func);
-    }
-    return func;
-}
+// FuncInfo Context::getLocal(const std::string &funcname, const int argcount, FuncInfo &func)
+// {
+//     for (int i = 0; i < this->localFuncs.size(); i++) {
+//         if (this->localFuncs[i].name == funcname && this->localFuncs[i].arguments.size() == argcount) {
+//             func = this->localFuncs[i];
+//             return func;
+//         }
+//     }
+//     if (this->parent != nullptr) {
+//         return this->parent->getLocal(funcname, argcount, func);
+//     }
+//     return func;
+// }
 
-bool Context::defineType(const std::string& typeName, std::shared_ptr<TypeDef> typeDef) {
+bool Context::defineType(const std::string& typeName) {
     if (isTypeDefined(typeName)) {
         return false;
     }
-    localTypes[typeName] = typeDef;
+    localTypes[typeName] = std::make_shared<TypeInfo>(typeName);
     return true;
 }
 
@@ -264,31 +317,28 @@ bool Context::isTypeDefined(const std::string& typeName) {
     return false;
 }
 
-std::shared_ptr<TypeDef> Context::getTypeDef(const std::string& typeName) {
-    auto it = localTypes.find(typeName);
-    if (it != localTypes.end()) {
-        return it->second;
+std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {    
+    // std::cout << "Debug: getType() called for '" << typeName << "' in context " << this << std::endl;
+    if (typeName.empty()) {
+        std::cout << "Warning: Empty typeName in getType()" << std::endl;
+        return objectType;
     }
-    if (parent != nullptr) {
-        return parent->getTypeDef(typeName);
-    }
-    return nullptr;
-}
-
-std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
+        
     if (typeName == "Number") return numberType;
     if (typeName == "String") return stringType;
     if (typeName == "Boolean") return boolType;
     if (typeName == "Expression") return voidType;
     if (typeName == "Object") return objectType;
     
-    auto typeDef = getTypeDef(typeName);
-    if (typeDef) {
-        auto typeInfo = std::make_shared<TypeInfo>(typeName, TypeKind::CLASS);
-        typeInfo->typeDef = typeDef;
-        return typeInfo;
+    auto localType = localTypes.find(typeName);
+    if (localType != localTypes.end()) {
+        return localType->second;
     }
-    return nullptr;
+    if (parent != nullptr) {
+        return parent->getType(typeName);
+    }
+
+    return objectType;
 }
 
 bool Context::defineVar(const std::string& varname, std::shared_ptr<TypeInfo> type) {
@@ -312,296 +362,100 @@ std::shared_ptr<TypeInfo> Context::getVarType(const std::string& varname) {
     return nullptr;
 }
 
-bool Context::defineFunc(const std::string& funcname, std::shared_ptr<TypeInfo> returnType, 
-                        const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) {
-    if (isLocal(funcname, paramTypes.size())) {
-        return false;
+TypeMethod Context::getFunc(const std::string& funcname, 
+                                              const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) {
+    for (const auto& func : localFuncs) {
+        if (func.name == funcname && func.arguments.size() == paramTypes.size()) {
+            bool matches = true;
+            for (size_t i = 0; i < paramTypes.size(); i++) {
+                if (!paramTypes[i]->isCompatibleWith(func.arguments[i].name)) {
+                    matches = false;
+                    break;
+                }
+            }
+            if (matches) {
+                return {func.name, func.returnType, func.arguments};
+            }
+        }
     }
-    FuncInfo func(funcname, paramTypes.size(), returnType);
-    func.paramTypes = paramTypes;
+    if (parent != nullptr) {
+        return parent->getFunc(funcname, paramTypes);
+    }
+    return {"", nullptr, {}};
+}
+
+bool Context::defineFunc(const std::string& funcname, std::shared_ptr<TypeInfo> returnType, 
+                        const std::vector<TypeAttribute> paramTypes) {
+    if (funcname.empty() || returnType == nullptr) {
+        std::cerr << "Function name or return type cannot be empty or null." << std::endl;
+        return false; // Invalid function definition
+    }
+    std::cout << "defining function " << funcname << std::endl;
+    if (isDefined(funcname, paramTypes.size())) {
+        std::cerr << "Function '" << funcname << "' with " << paramTypes.size() 
+                  << " parameters already defined in this context." << std::endl;
+        return false; // Function already exists
+    }
+    TypeMethod func = {funcname, returnType, paramTypes};
     localFuncs.push_back(func);
     return true;
 }
 
 std::shared_ptr<TypeInfo> Context::getFuncReturnType(const std::string& funcname, 
                                                      const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) {
-    for (const auto& func : localFuncs) {
-        if (func.name == funcname && func.paramTypes.size() == paramTypes.size()) {
-            bool matches = true;
-            for (size_t i = 0; i < paramTypes.size(); i++) {
-                if (!paramTypes[i]->isCompatibleWith(func.paramTypes[i])) {
-                    matches = false;
-                    break;
-                }
-            }
-            if (matches) return func.returnType;
+    // Robust safety checks to prevent crashes from corrupted data
+    try {
+        // Check if funcname is valid
+        if (funcname.empty() || funcname.size() > 1000) {
+            return nullptr;
         }
-    }
-    if (parent != nullptr) {
-        return parent->getFuncReturnType(funcname, paramTypes);
-    }
-    return nullptr;
-}
-
-std::shared_ptr<TypeInfo> Context::inferType(const std::string& expression) {
-    return std::make_shared<TypeInfo>("inferred", TypeKind::INFERRED);
-}
-
-std::shared_ptr<TypeInfo> Context::unifyTypes(std::shared_ptr<TypeInfo> type1, std::shared_ptr<TypeInfo> type2) {
-    if (type1->name == type2->name) {
-        return type1;
-    }
-    if (type1->kind == TypeKind::INFERRED) {
-        return type2;
-    }
-    if (type2->kind == TypeKind::INFERRED) {
-        return type1;
-    }
-    return findCommonSupertype(type1, type2);
-}
-
-std::shared_ptr<TypeInfo> Context::findCommonSupertype(std::shared_ptr<TypeInfo> type1, std::shared_ptr<TypeInfo> type2) {
-    if (type1->name == type2->name) {
-        return type1;
-    }
-    if (isSubtype(type1, type2)) {
-        return type2;
-    }
-    if (isSubtype(type2, type1)) {
-        return type1;
-    }
-    return objectType;
-}
-
-bool Context::isSubtype(std::shared_ptr<TypeInfo> subtype, std::shared_ptr<TypeInfo> supertype) {
-    if (subtype->name == supertype->name) {
-        return true;
-    }
-    
-    if (supertype->name == "Object") {
-        return true;
-    }
-    
-    if (supertype->name == "Number" || supertype->name == "String" || supertype->name == "Boolean") {
-        return subtype->name == supertype->name;
-    }
-    
-    if (subtype->typeDef && supertype->typeDef) {
-        return subtype->typeDef->isSubclassOf(supertype->typeDef);
-    }
-    
-    return false;
-}
-
-bool Context::canAssign(std::shared_ptr<TypeInfo> fromType, std::shared_ptr<TypeInfo> toType) {
-    if (fromType->name == toType->name) return true;
-    if (toType->kind == TypeKind::INFERRED) return true;
-    return isSubtype(fromType, toType);
-}
-
-MethodMemberInfo* Context::resolveMethod(std::shared_ptr<TypeInfo> objType, const std::string& methodName, 
-                                    const std::vector<std::shared_ptr<TypeInfo>>& argTypes) {
-    if (objType->typeDef) {
-        return objType->typeDef->findMethod(methodName, argTypes);
-    }
-    return nullptr;
-}
-
-std::shared_ptr<TypeInfo> Context::instantiateGenericType(std::shared_ptr<TypeInfo> genericType, 
-                                                         const std::vector<std::shared_ptr<TypeInfo>>& typeArgs) {
-    if (genericType->kind != TypeKind::GENERIC) {
-        return genericType;
-    }
-    
-    auto instantiated = std::make_shared<TypeInfo>(genericType->name, TypeKind::CLASS);
-    instantiated->typeDef = genericType->typeDef;
-    instantiated->genericArgs = typeArgs;
-    return instantiated;
-}
-
-bool Context::matchesGenericConstraints(std::shared_ptr<TypeInfo> type, const std::string& genericParam) {
-    return true;
-}
-
-std::vector<MethodInfo> Context::getMethodsForType(const std::string& typeName, bool includeInherited) const {
-    std::vector<MethodInfo> result;
-    
-    // Get methods directly defined in this type - search current and parent contexts
-    auto it = methodsByType.find(typeName);
-    if (it != methodsByType.end()) {
-        for (const auto& method : it->second) {
-            if (!method.isInherited) {
-                result.push_back(method);
+        
+        // Check for printable characters
+        for (char c : funcname) {
+            if (c < 32 || c > 126) {
+                return nullptr;
             }
         }
-    } else if (parent != nullptr) {
-        // If not found in current context, check parent contexts
-        return parent->getMethodsForType(typeName, includeInherited);
+    } catch (...) {
+        return nullptr;
     }
     
-    // Include inherited methods if requested
-    if (includeInherited) {
-        // Find the type definition to get parent information
-        auto typeIt = localTypes.find(typeName);
-        if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
-            std::string parentTypeName = typeIt->second->parentType->name;
+    // Ensure builtin types are initialized
+    if (numberType == nullptr) {
+        initializeBuiltinTypes();
+    }
+    
+    // Safely iterate through functions
+    try {
+        for (const auto& func : localFuncs) {
+            if (func.name.empty() || func.returnType == nullptr) {
+                continue;
+            }
             
-            // Recursively get parent methods
-            auto parentMethods = getMethodsForType(parentTypeName, true);
-            for (auto method : parentMethods) {
-                // Mark as inherited and add to result if not overridden
-                method.isInherited = true;
-                
-                // Check if method is overridden in current type
-                bool isOverridden = false;
-                for (const auto& currentMethod : result) {
-                    if (currentMethod.name == method.name && 
-                        currentMethod.paramTypes.size() == method.paramTypes.size()) {
-                        bool paramsMatch = true;
-                        for (size_t i = 0; i < currentMethod.paramTypes.size(); i++) {
-                            if (currentMethod.paramTypes[i]->name != method.paramTypes[i]->name) {
-                                paramsMatch = false;
-                                break;
-                            }
-                        }
-                        if (paramsMatch) {
-                            isOverridden = true;
-                            break;
-                        }
+            if (func.name == funcname && func.arguments.size() == paramTypes.size()) {
+                bool matches = true;
+                for (size_t i = 0; i < paramTypes.size(); i++) {
+                    if (paramTypes[i] == nullptr || func.arguments[i].type == nullptr) {
+                        matches = false;
+                        break;
                     }
-                }
-                
-                if (!isOverridden) {
-                    result.push_back(method);
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
-std::vector<AttributeInfo> Context::getAttributesForType(const std::string& typeName, bool includeInherited) const {
-    std::vector<AttributeInfo> result;
-    
-    // Get attributes directly defined in this type - search current and parent contexts
-    auto it = attributesByType.find(typeName);
-    if (it != attributesByType.end()) {
-        for (const auto& attr : it->second) {
-            if (!attr.isInherited) {
-                result.push_back(attr);
-            }
-        }
-    } else if (parent != nullptr) {
-        // If not found in current context, check parent contexts
-        return parent->getAttributesForType(typeName, includeInherited);
-    }
-    
-    // Include inherited attributes if requested
-    if (includeInherited) {
-        // Find the type definition to get parent information
-        auto typeIt = localTypes.find(typeName);
-        if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
-            std::string parentTypeName = typeIt->second->parentType->name;
-            
-            // Recursively get parent attributes
-            auto parentAttrs = getAttributesForType(parentTypeName, true);
-            for (auto attr : parentAttrs) {
-                // Mark as inherited and add to result if not redefined
-                attr.isInherited = true;
-                
-                // Check if attribute is redefined in current type
-                bool isRedefined = false;
-                for (const auto& currentAttr : result) {
-                    if (currentAttr.name == attr.name) {
-                        isRedefined = true;
+                    if (!paramTypes[i]->isCompatibleWith(func.arguments[i].type->name)) {
+                        matches = false;
                         break;
                     }
                 }
-                
-                if (!isRedefined) {
-                    result.push_back(attr);
+                if (matches) {
+                    return func.returnType;
                 }
             }
         }
+    } catch (...) {
+        return nullptr;
     }
-
-    // for (auto res : result) {
-    //     std::cout << "Collected Attribute: " << res.name << " of type " << res.type->name 
-    //          << " in scope " << res.ownerType << (res.isInherited ? " (inherited)" : "") 
-    //          << " at line " << res.line << std::endl;
-    // }
     
-    return result;
-}
-
-MethodInfo* Context::findMethod(const std::string& typeName, const std::string& methodName, 
-                                                          const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const {
-    auto methods = getMethodsForType(typeName, true);
-    
-    for (auto& method : methods) {
-        if (method.name == methodName && method.paramTypes.size() == paramTypes.size()) {
-            bool paramsMatch = true;
-            for (size_t i = 0; i < paramTypes.size(); i++) {
-                if (!paramTypes[i]->isCompatibleWith(method.paramTypes[i])) {
-                    paramsMatch = false;
-                    break;
-                }
-            }
-            if (paramsMatch) {
-                // Note: This returns a pointer to a local variable, which is dangerous
-                // In a real implementation, you'd want to return by value or store the methods
-                // For now, we'll search the original storage
-                auto it = methodsByType.find(typeName);
-                if (it != methodsByType.end()) {
-                    for (auto& storedMethod : const_cast<std::vector<MethodInfo>&>(it->second)) {
-                        if (storedMethod.name == methodName && storedMethod.paramTypes.size() == paramTypes.size()) {
-                            bool match = true;
-                            for (size_t j = 0; j < paramTypes.size(); j++) {
-                                if (!paramTypes[j]->isCompatibleWith(storedMethod.paramTypes[j])) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-                            if (match) {
-                                return &storedMethod;
-                            }
-                        }
-                    }
-                }
-                
-                // Check parent types if not found in current type
-                auto typeIt = localTypes.find(typeName);
-                if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
-                    return findMethod(typeIt->second->parentType->name, methodName, paramTypes);
-                }
-            }
-        }
+    if (parent != nullptr) {
+        return parent->getFuncReturnType(funcname, paramTypes);
     }
     
     return nullptr;
-}
-
-AttributeInfo* Context::findAttribute(const std::string& typeName, const std::string& attrName) const {
-    // First check the current type
-    auto it = attributesByType.find(typeName);
-    if (it != attributesByType.end()) {
-        for (auto& attr : const_cast<std::vector<AttributeInfo>&>(it->second)) {
-            if (attr.name == attrName) {
-                return &attr;
-            }
-        }
-    }
-    
-    // Check parent types
-    auto typeIt = localTypes.find(typeName);
-    if (typeIt != localTypes.end() && typeIt->second && typeIt->second->parentType) {
-        return findAttribute(typeIt->second->parentType->name, attrName);
-    }
-    
-    return nullptr;
-}
-
-const std::vector<VariableInfo>& Context::getGlobalVariables() const {
-    return globalVariables;
 }

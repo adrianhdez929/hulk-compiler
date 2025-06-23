@@ -62,14 +62,14 @@ public:
     void printErrors() const;
 
     // Type collection results
-    const std::unordered_map<std::string, std::shared_ptr<TypeDef>>& getCollectedTypes() const;
+    const std::unordered_map<std::string, std::shared_ptr<TypeInfo>>& getCollectedTypes() const;
     const std::unordered_map<std::string, std::string>& getInheritanceMap() const;
     
     // Check if a type was successfully collected
     bool isTypeCollected(const std::string& typeName) const;
     
     // Get type definition by name
-    std::shared_ptr<TypeDef> getTypeDef(const std::string& typeName) const;
+    std::shared_ptr<TypeInfo> getTypeDef(const std::string& typeName) const;
     
     // Get the global context
     Context* getGlobalContext() const { return globalContext; }
@@ -79,16 +79,15 @@ private:
     std::vector<std::string> errors;
     
     // Type collection data structures
-    std::unordered_map<std::string, std::shared_ptr<TypeDef>> collectedTypes;
+    std::unordered_map<std::string, std::shared_ptr<TypeInfo>> collectedTypes;
     std::unordered_map<std::string, std::string> inheritanceMap; // child -> parent
     std::unordered_set<std::string> typesBeingProcessed; // For circular inheritance detection
     
     // Helper methods
     void processTypeDeclaration(TypeDeclNode* node, Context* context);
-    void registerBuiltinTypes(Context* context);
     bool detectCircularInheritance(const std::string& typeName, const std::string& parentName);
     void validateInheritanceChain(const std::string& typeName);
-    std::shared_ptr<TypeDef> createTypeDef(const std::string& typeName, const std::string& parentName = "");
+    std::shared_ptr<TypeInfo> createTypeDef(const std::string& typeName, const std::string& parentName = "");
     
     // Inheritance validation
     bool isValidParentType(const std::string& parentName, Context* context);

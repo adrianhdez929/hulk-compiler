@@ -65,19 +65,6 @@ public:
     const std::vector<std::string>& getErrors() const;
     void printErrors() const;
 
-    // Getters for collected symbols
-    const std::unordered_map<std::string, std::vector<MethodInfo>>& getMethodsByType() const;
-    const std::unordered_map<std::string, std::vector<AttributeInfo>>& getAttributesByType() const;
-    const std::vector<VariableInfo>& getGlobalVariables() const;
-    
-    // Query methods
-    std::vector<MethodInfo> getMethodsForType(const std::string& typeName, bool includeInherited = true) const;
-    std::vector<AttributeInfo> getAttributesForType(const std::string& typeName, bool includeInherited = true) const;
-    MethodInfo* findMethod(const std::string& typeName, const std::string& methodName, 
-                          const std::vector<std::shared_ptr<TypeInfo>>& paramTypes) const;
-    AttributeInfo* findAttribute(const std::string& typeName, const std::string& attrName) const;
-    
-
 private:
     // Error collection
     std::vector<std::string> errors;
@@ -85,12 +72,7 @@ private:
     // Reference to type collector for type information
     TypeCollectorVisitor* typeCollector;
     TypeCollectorVisitor* typeCollectorVisitor; // Alternative name used in code
-    
-    // Symbol collection data structures
-    std::unordered_map<std::string, std::vector<MethodInfo>> methodsByType;
-    std::unordered_map<std::string, std::vector<AttributeInfo>> attributesByType;
-    std::vector<VariableInfo> globalVariables;
-    
+        
     // Current context tracking
     std::string currentTypeName;
     std::string currentFunctionName;
@@ -100,7 +82,6 @@ private:
     
     // Helper methods
     void processTypeBody(TypeDeclNode* node, Context* context);
-    void processMethodDefinition(AssignFuncNode* node, const std::string& typeName, Context* context);
     void processAttributeDefinition(VarAssign* node, const std::string& typeName, Context* context);
     void processVariableDefinition(VarAssign* node, const std::string& scope, Context* context);
     void processGlobalFunction(AssignFuncNode* node, Context* context);
@@ -113,8 +94,6 @@ private:
     
     // Inheritance handling
     void inheritMethodsAndAttributes(const std::string& typeName);
-    void validateMethodOverride(const MethodInfo& method, const std::string& typeName);
-    void validateAttributeRedefinition(const AttributeInfo& attr, const std::string& typeName);
     
     // Scope management
     void enterScope(const std::string& scopeName);
@@ -122,13 +101,10 @@ private:
     std::string getCurrentScope() const;
     
     // Validation helpers
-    bool isValidMethodSignature(const MethodInfo& method) const;
-    bool isValidAttributeType(const AttributeInfo& attr) const;
     bool typesMatch(std::shared_ptr<TypeInfo> type1, std::shared_ptr<TypeInfo> type2) const;
     
     // Context setup
     void setupTypeContext(const std::string& typeName, Context* context);
-    Context* createMethodContext(const MethodInfo& method, Context* parentContext);
 };
 
 #endif // SYMBOL_COLLECTOR_VISITOR_H
