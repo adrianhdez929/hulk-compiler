@@ -13,7 +13,7 @@
 #include "Automata/utils/utils.h"
 #include "Parser/Item.h"
 #include "Lexer/grammar_parser.h"
-#include "Parser/LR1Parser.h"
+#include "Parser/LALR1Parser.h"
 // #include "Parser/SLR1Parser.h"
 #include <cassert>
 #include <stack>

@@ -150,18 +150,6 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                     // No se encontró una acción para este estado y token
                     auto [error_msg, expected_tokens] = generateErrorMessage(state_stack.top(), current_token.Name());
                     
-                    // // Enriquecer el mensaje con información de posición si el token es un Token
-                    // std::string enhanced_error = error_msg;
-                    
-                    // // Intentar hacer un cast dinámico a Token para obtener la información de línea y columna
-                    // const Token* token_with_position = dynamic_cast<const Token*>(&current_token);
-                    // if (token_with_position) {
-                    //     std::string position_info = " en línea " + std::to_string(token_with_position->Line()) + 
-                    //                               ", columna " + std::to_string(token_with_position->Column());
-                    //     enhanced_error += position_info;
-                    // }
-                    
-                    // Si estamos en modo verbose, mostramos información de depuración
                     if (verbose_) {
                         cout << "Actions:" << endl;
                         for (const auto& action : action_) {
@@ -333,221 +321,7 @@ void LALR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table,
     table[key] = value;
 }
 
-// State LR1Parser::BuildLR1Automaton() {
-//     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
-
-//     // Compute first sets
-//     auto firsts = compute_firsts();
-//     auto EOFile = Sentence(G_.GetEndOfFile());
-//     firsts[EOFile] = ContainerSet<string>();
-//     firsts[EOFile].add(G_.GetEndOfFile()->Name());
-
-//     // Initialize start production and item
-//     auto start_production = G_.GetStartSymbol()->productions[0];
-//     ContainerSet<string> lookahead_set;
-//     lookahead_set.add(G_.GetEndOfFile()->Name());
-//     auto start_item = Item(std::make_shared<Production>(start_production), 0, lookahead_set);
-//     std::vector<Item> start = {start_item};
-
-//     // Compute closure for the start state
-//     auto closure = closure_lr1(start, firsts, G_);
-//     int state_id = 0;
-//     auto automaton = State(state_id++, true);
-    
-//     // Añadir los ítems al estado inicial
-//     for (const auto& item : closure) {
-//         automaton.add_item(item);
-//     }
-
-//     // Map to associate states with their items
-//     std::map<std::set<Item>, State*> visited;
-//     visited[std::set<Item>(closure.begin(), closure.end())] = &automaton;
-
-//     // Queue for pending states
-//     std::queue<std::set<Item>> pending;
-//     pending.push(std::set<Item>(closure.begin(), closure.end()));
-
-//     while (!pending.empty()) {
-//         auto current = pending.front();
-//         pending.pop();
-//         auto current_state = visited[current];
-
-//         for (const auto& symbol : G_.Symbols()) {
-//             auto next_items = goto_lr1(std::vector<Item>(current.begin(), current.end()), symbol, firsts, true, G_);
-//             if (next_items.empty()) {
-//                 continue;
-//             }
-
-//             std::set<Item> next_set(next_items.begin(), next_items.end());
-//             State* next_state;
-
-//             if (visited.find(next_set) == visited.end()) {
-//                 auto next_closure = closure_lr1(next_items, firsts, G_);
-//                 next_state = new State(state_id++, true);
-//                 for (const auto& item : next_closure) {
-//                     next_state->add_item(item);
-//                 }
-//                 visited[next_set] = next_state;
-//                 pending.push(next_set);
-//             } else {
-//                 next_state = visited[next_set];
-//             }
-
-//             current_state->add_transition(symbol->Name(), next_state);
-//         }
-//     }
-
-//     // Guardar todos los estados creados para liberarlos después
-//     for (auto& [items, state] : visited) {
-//         if (state != &automaton) {  // No añadimos el estado automaton ya que se devuelve por valor
-//             automaton_states_.push_back(state);
-//         }
-//     }
-    
-//     return automaton;
-// }
-
-
-// map<Sentence, ContainerSet<string>> LR1Parser::compute_firsts() {
-//     if (verbose_) {
-//         std::cout << "===== LR1Parser::compute_firsts() =====" << std::endl;
-//         std::cout << "Inicializando estructuras para cálculo de FIRST..." << std::endl;
-//     }
-    
-//     map<Sentence, ContainerSet<string>> firsts;
-    
-//     // Inicializar primeros para terminales
-//     // if (verbose_) {
-//     //     std::cout << "Inicializando FIRST para terminales..." << std::endl;
-//     //     std::cout << "Total terminales: " << G_.Terminals().size() << std::endl;
-//     // }
-    
-//     int terminal_count = 0;
-//     for (const auto& terminal : G_.Terminals()) {
-//         // if (verbose_) {
-//         //     std::cout << "Procesando terminal #" << terminal_count << ": '" << terminal->Name() << "'";
-//         //     std::cout << (terminal->IsEndOfFile() ? " (EOF)" : "") << std::endl;
-//         // }
-        
-//         // terminal_count++;
-//         if (terminal->IsEndOfFile() || terminal->IsEpsilon()) continue; // No procesamos EOF ni epsilon aquí
-//             // For EOF terminal, add its own name to its FIRST set
-//             // ContainerSet<string> eof_set;
-//             // eof_set.add(terminal->Name());
-//             // firsts[Sentence(terminal)] = eof_set;
-
-//             // if (verbose_) {
-//             //     std::cout << "  FIRST(EOF) = {" << terminal->Name() << "}" << std::endl;
-//             // }
-//             // continue;
-//         // }
-//         ContainerSet<string> cs;
-//         cs.add(terminal->Name());
-//         firsts[Sentence(terminal)] = cs;
-
-//         if (verbose_) {
-//             std::cout << "  FIRST(" << terminal->Name() << ") = {" << terminal->Name() << "}" << std::endl;
-//         }
-//     }
-    
-//     // Ensure EOF is in firsts map
-//     // auto eof = G_.GetEndOfFile();
-//     // if (eof) {
-//     //     Sentence eof_sent(eof);
-//     //     if (firsts.find(eof_sent) == firsts.end()) {
-//     //         ContainerSet<string> eof_set;
-//     //         eof_set.add(eof->Name());
-//     //         firsts[eof_sent] = eof_set;
-
-//     //         if (verbose_) {
-//     //             std::cout << "Agregando EOF faltante: FIRST(EOF) = {" << eof->Name() << "}" << std::endl;
-//     //         }
-//     //     }
-//     // } else if (verbose_) {
-//     //     std::cout << "¡ADVERTENCIA: No se encontró símbolo EOF en la gramática!" << std::endl;
-//     // }
-    
-//     // Inicializar primeros para no terminales
-//     // if (verbose_) {
-//     //     std::cout << "Inicializando FIRST para no terminales..." << std::endl;
-//     //     std::cout << "Total no terminales: " << G_.NonTerminals().size() << std::endl;
-//     // }
-    
-//     // int nonterminal_count = 0;
-//     for (const auto& nonterminal : G_.NonTerminals()) {
-//         // if (verbose_) {
-//         //     std::cout << "Inicializando FIRST(" << nonterminal->Name() << ") = {}" << std::endl;
-//         // }
-//         firsts[Sentence(nonterminal)] = ContainerSet<string>();
-//         // nonterminal_count++;
-//     }
-
-//     // Inicializar FIRST para las partes derechas de las producciones
-//     // if (verbose_) {
-//     //     std::cout << "Inicializando FIRST para las partes derechas de todas las producciones..." << std::endl;
-//     //     std::cout << "Total producciones: " << G_.Productions().size() << std::endl;
-//     // }
-    
-//     bool changed = true;
-//     // int iteration = 0;
-//     while (changed == true) {
-//         // iteration++;
-//         // if (verbose_) {
-//         //     std::cout << "\n==== Iteración #" << iteration << " del algoritmo FIRST ====" << std::endl;
-//         // }
-//         changed = false;
-
-//         // int prod_count = 0;
-//         for (const auto& prod : G_.Productions()) {
-//             // prod_count++;
-//             const auto& X = Sentence(prod.Left());
-//             const auto& symbols = prod.Right().Symbols();
-
-//             ContainerSet<string> first_X = firsts[X];
-//             ContainerSet<string> new_first;
-
-//             bool all_apsilon = true;
-//             for (const auto& symbol : symbols) {
-//                 auto sym_sentence = Sentence(symbol);
-//                 if (firsts.find(sym_sentence) == firsts.end()) {
-//                     if (symbol->IsTerminal()) {
-//                         new_first.add(symbol->Name());
-//                     }
-//                     all_apsilon = false;
-//                     break;
-//                 }
-//                 const auto& first_sym = firsts.at(sym_sentence);
-//                 new_first.update(first_sym);
-
-//                 if (!first_sym.contains_epsilon()) {
-//                     all_apsilon = false;
-//                     break; // Si un símbolo no deriva epsilon, terminamos el cálculo
-//                 }
-//             }
-//             if (all_apsilon) {
-//                 new_first.set_epsilon();
-//             }
-//             if (firsts[X].update(new_first)) {
-//                 changed = true;
-//             }
-
-//             // if (verbose_) {
-//             //     std::cout << "Procesando producción #" << prod_count << ": " << prod.ToString() << std::endl;
-//             // }
-
-//             // auto local_first = compute_local_firsts(symbols, firsts, G_, verbose_);
-
-//             // if (firsts[X].update(local_first)) {
-//             //     changed = true;
-//             // }
-//         }
-//     }
-    
-//     return firsts;
-// };
 map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
-    cout << "===== LR1Parser::compute_firsts() =====" << endl;
-    cout << "Inicializando estructuras para cálculo de FIRST..." << endl;
     map<Sentence, ContainerSet<string>> firsts;
     bool changed = true;
     
@@ -567,10 +341,6 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
         firsts[Sentence(nonterminal)] = ContainerSet<string>();
     }
 
-    // for (const auto& prod : G_.Productions()) {
-    //     auto right = prod.Right();
-    //     firsts[right] = ContainerSet<string>();
-    // }
     while (changed == true) {
         changed = false;
 
@@ -598,8 +368,9 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 };
 
 ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
-    cout << "===== LR1Parser::compute_local_firsts() =====" << endl;
-    cout << "Calculando FIRST local para la secuencia: " << alpha.ToString() << endl;
+    if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
+        return firsts_cache_.at(alpha);
+    }
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
     bool all_epsilon = true;
@@ -607,10 +378,6 @@ ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, co
     for (const auto& symbol : symbols) {
         auto sym_sentence = Sentence(symbol);
         if (firsts.find(sym_sentence) == firsts.end()) {
-            // if (verbose) {
-            //     std::cout << "No se encontró FIRST(" << symbol->Name() << "), agregando {epsilon}" << std::endl;
-            // }
-            // local_first.set_epsilon();
             if (symbol->IsTerminal() && !symbol->IsEpsilon()) {
                 local_first.add(symbol->Name());
                 all_epsilon = false;
@@ -621,43 +388,25 @@ ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, co
         for (const auto& terminal : first_x.get_values()) {
             if (terminal != G.GetEpsilon()->Name()) {
                 local_first.add(terminal);
-                // if (verbose) {
-                //     std::cout << "Agregando '" << terminal << "' al conjunto FIRST local de " << alpha.ToString() << std::endl;
-                // }
-            // } else if (verbose) {
-            //     std::cout << "El símbolo '" << symbol->Name() << "' puede derivar epsilon, no se agrega al conjunto FIRST local" << std::endl;
             }
         }
 
         if (!first_x.contains_epsilon()) {
-            // if (verbose) {
-            //     std::cout << "El símbolo '" << symbol->Name() << "' no deriva epsilon, terminando el cálculo de FIRST local para " << alpha.ToString() << std::endl;
-            // }
             all_epsilon = false;
             break; // Si un símbolo no deriva epsilon, terminamos el cálculo
-    //     } else if (verbose) {
-    //         std::cout << "El símbolo '" << symbol->Name() << "' deriva epsilon, continuando con el siguiente símbolo" << std::endl;
-    //     }
         }
     }
     if (all_epsilon) {
         local_first.set_epsilon();
-        // if (verbose) {
-        //     std::cout << "Todos los símbolos de " << alpha.ToString() << " derivan epsilon, agregando epsilon al conjunto FIRST local" << std::endl;
-        // }
     }
 
-    // // Si el conjunto FIRST local no está vacío, lo agregamos a los FIRST globales
-    // if (!local_first.empty()) {
-    //     firsts.at(alpha) = local_first;
-    // }
-
+    // Almacenar en la caché para futuras consultas
+    firsts_cache_[alpha] = local_first;
+    
     return local_first;
 }
 
 std::map<Sentence, ContainerSet<string>> LALR1Parser::compute_follows(const map<Sentence, ContainerSet<string>>& symbol_firsts) {
-    cout << "===== LR1Parser::compute_follows() =====" << endl;
-    cout << "Calculando FOLLOW sets..." << endl;
     std::map<Sentence, ContainerSet<string>> follows;
     bool changed = true;
 
@@ -723,10 +472,8 @@ static vector<std::shared_ptr<Symbol>> get_symbols(vector<string> symbols, Gramm
     return result;
 }
 
-vector<Item> expand(const Item& item, const map<Sentence, ContainerSet<string>>& firsts, Grammar& G_) {
-    cout << "===== LR1Parser::expand() =====" << endl;
-    cout << "Expandiendo ítem: " << item.ToString() << endl;
-    vector<Item> expanded;
+std::vector<Item> LALR1Parser::expand(const Item& item, const map<Sentence, ContainerSet<string>>& firsts, Grammar& G) {
+    std::vector<Item> expanded;
     const auto& next_symbol = item.NextSymbol();
     if (next_symbol == nullptr || !next_symbol->IsNonTerminal()) {
         return expanded;
@@ -738,54 +485,31 @@ vector<Item> expand(const Item& item, const map<Sentence, ContainerSet<string>>&
     
     // Calcular FIRST(β) - sin epsilon
     Sentence beta_sentence(beta_symbols);
-    auto first_beta = LALR1Parser::compute_local_firsts(beta_sentence, firsts, G_, false);
+    auto first_beta = compute_local_firsts(beta_sentence, firsts, G, false);
     
     for (const auto& terminal : first_beta.get_values()) {
         // Añadir solo si no es epsilon
-        if (terminal != G_.GetEpsilon()->Name()) {
+        if (terminal != G.GetEpsilon()->Name()) {
             lookaheads.add(terminal);
         }
     }
     // Si FIRST(β) contiene epsilon, añadimos los lookaheads del ítem actual
     for (const auto& terminal : first_beta.get_values()) {
-        if (terminal != G_.GetEpsilon()->Name()) {
+        if (terminal != G.GetEpsilon()->Name()) {
             lookaheads.update(item.lookaheads());
         }
     }
     
-    for (const auto& prod : G_.Productions()) {
+    for (const auto& prod : G.Productions()) {
         if (prod.Left()->Name() == next_symbol->Name()) {
             auto prod_ptr = std::make_shared<Production>(prod);
             expanded.push_back(Item(prod_ptr, 0, lookaheads));
-            
-            // Añadimos debug para verificar si hay elementos duplicados
-            // std::cout << "Expandido: " << prod_ptr->ToString() << ", pos: 0, LA: " << lookaheads.str() << std::endl;
         }
     }
-    // for (const auto& preview : item.Preview()) {
-    //     // Calcular los firsts locales para la parte preview
-    //     auto local_first = LR1Parser::compute_local_firsts(Sentence(get_symbols(preview, G_)), firsts, G_, false); // No verbose here
-        
-    //     // Los terminales de lookahead no deben incluir epsilon
-    //     // Actualizamos lookaheads con los símbolos de first sin considerar epsilon
-    //     for (const auto& terminal : local_first.get_values()) {
-    //         // Añadir solo si no es epsilon
-    //         if (terminal != G_.GetEpsilon()->Name()) {
-    //             lookaheads.add(terminal);
-    //         }
-    //     }
-    // }
-    
-    // No lanzamos error por epsilon, simplemente nos aseguramos de que no se incluya
-    // en los lookaheads, ya que los lookaheads son terminales que pueden seguir a esta producción
-
-            
-            // Añadimos debug para verificar si hay elementos duplicados
-            // std::cout << "Expandido: " << prod_ptr->ToString() << ", pos: 0, LA: " << lookaheads.str() << std::endl;
         
     return expanded;
 }
-set<Item> compress(const vector<Item>& items) {
+std::set<Item> LALR1Parser::compress(const vector<Item>& items) {
     
     map<pair<string, int>, pair<shared_ptr<Production>, ContainerSet<string>>> centers;
     for (const auto& item : items) {
@@ -805,11 +529,6 @@ set<Item> compress(const vector<Item>& items) {
     return compressed;
 }
 
-/// @brief Cierra un conjunto de ítems LR(1)
-/// @param items El conjunto de ítems
-/// @param firsts Los conjuntos FIRST
-/// @param G_ La gramática
-/// @return El conjunto de cierre
 std::vector<Item> LALR1Parser::closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts) {
     // Inicializar el conjunto de cierre con los elementos iniciales
     ContainerSet<Item> closure;
@@ -831,7 +550,7 @@ std::vector<Item> LALR1Parser::closure_lr1(const std::vector<Item>& items, const
                 beta_symbols.push_back(sym);
             }
 
-            auto first_beta = LALR1Parser::compute_local_firsts(Sentence(beta_symbols), firsts, G_, false);
+            auto first_beta = compute_local_firsts(Sentence(beta_symbols), firsts, G_, false);
 
             ContainerSet<string> lookaheads;
             for (const auto& term : first_beta.get_values()) {
@@ -863,26 +582,6 @@ std::vector<Item> LALR1Parser::closure_lr1(const std::vector<Item>& items, const
                     }
                 }
             }
-            
-            // bool beta_nullable = IsNullable(beta_symbols, first_beta);
-            // if (beta_nullable) {
-            //     // Si β es nullable, añadimos los lookaheads del ítem actual
-            //     for (const auto& terminal : item.lookaheads().get_values()) {
-            //         first_beta.add(terminal);
-            //     }
-            // }
-
-            // for (const auto& prod : G_.Productions()) {
-            //     if (prod.Left()->Name() == next_sym->Name()) {
-            //         // Crear un nuevo ítem con la producción y el lookahead calculado
-            //         auto new_item = Item(std::make_shared<Production>(prod), 0, first_beta);
-            //         if (!closure.contains(new_item) && !new_items.contains(new_item)) {
-            //             new_items.add(new_item);
-            //             changed = true; // Si se añade un nuevo ítem, marcamos que hubo un cambio
-            //         }
-            //     }
-                
-            // }
         }
         if (changed) {
             closure.update(new_items);
@@ -905,15 +604,8 @@ vector<Item> LALR1Parser::goto_lr1(const vector<Item>& items, shared_ptr<Symbol>
     }
     return closure_lr1(goto_items, firsts);
 }
-// struct ItemCore {
-//     std::shared_ptr<Production> production;
-//     int pos;
-//
-//     bool operator<(const ItemCore& other) const {
-//         return std::tie(production, pos) < std::tie(other.production, other.pos);
-//     }
-// };
 State LALR1Parser::BuildLALR1Automaton() {
+    cout << "===== LALR1Parser::BuildLALR1Automaton() =====" << endl;
     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
 
     // Calcular conjuntos FIRST
@@ -987,12 +679,6 @@ State LALR1Parser::BuildLALR1Automaton() {
                         }
                     }
                 }
-                // vector<Item> combined_items = new_state->get_items();
-                // combined_items.insert(combined_items.end(), goto_items.begin(), goto_items.end());
-                // // Comprimir los ítems combinados
-                // auto compressed_items = compress(combined_items);
-                // new_state->set_items(vector<Item>(compressed_items.begin(), compressed_items.end()));
-            } else {
                 // Crear nuevo estado
                 new_state = new State(state_id++, true);
                 for (const auto& item : goto_items) {
@@ -1010,120 +696,6 @@ State LALR1Parser::BuildLALR1Automaton() {
     }
     return automaton;
 }
-
-
-        // Para cada símbolo en la gramática
-        // for (const auto& symbol : G_.Symbols()) {
-        //     std::cout << "  - Calculando GOTO para símbolo: " << symbol->Name() << std::endl;
-        //     // Calcular GOTO (solo kernel)
-        //     //goto_lr1 aplica el goto y, si just_kernel es false, también calcula la clausura
-        //     auto goto_items = goto_lr1(current_state->get_items(), symbol, firsts, true);
-        //     std::cout << "  - GOTO resultante: " << goto_items.size() << " ítems" << std::endl;
-        //     for (const auto& item : goto_items) {
-        //         std::cout << "    - " << item.ToString() << std::endl;
-        //     }
-        //     // std::vector<Item> goto_items;
-        //     // for (const auto& item : current_state->get_items()) {
-        //     //     if (item.NextSymbol() == symbol) {
-        //     //         auto next_item = item.NextItem();
-        //     //         if (next_item) {
-        //     //             goto_items.push_back(*next_item);
-        //     //         }
-        //     //     }
-        //     // }
-
-        //     if (goto_items.empty()) continue;
-
-        //     // Calcular clausura para el nuevo kernel
-        //     auto new_closure = closure_lr1(goto_items, firsts, G_);
-        //     std::cout << "  - Clausura resultante: " << new_closure.size() << " ítems" << std::endl;
-        //     for (const auto& item : new_closure) {
-        //         std::cout << "    - " << item.ToString() << std::endl;
-        //     }
-
-        //     std::set<std::pair<int, int>> new_kernel;
-        //     for (const auto& item : new_closure) {
-        //         new_kernel.insert({item.production()->get_id(), item.pos()});
-        //     }
-        //     State* new_state = nullptr;
-        //     if (visited.find(new_kernel) != visited.end()) {
-        //         // Crear lista con items de new_closure y del estado existente
-        //         new_state = visited[new_kernel];
-        //         std::cout << "  - Estado existente encontrado: " << new_state->get_id() << std::endl;
-        //         // Mostrar los ítems del estado existente
-        //         for (const auto& item : new_state->get_items()) {
-        //             std::cout << "    - Ítem existente: " << item.ToString() << std::endl;
-        //         }
-        //         // Unir los items de new_closure con los del estado existente
-        //         std::vector<Item> combined_items = new_state->get_items();
-        //         combined_items.insert(combined_items.end(), new_closure.begin(), new_closure.end());
-
-        //         // Comprimir los ítems combinados
-        //         auto compressed_items = compress(combined_items);
-        //         new_state->set_items(std::vector<Item>(compressed_items.begin(), compressed_items.end()));
-        //         std::cout << "  - Ítems combinados y comprimidos: " << new_state->get_items().size() << " ítems" << std::endl;
-        //         for (const auto& item : new_state->get_items()) {
-        //             std::cout << "    - Ítem combinado: " << item.ToString() << std::endl;
-        //         }
-        //     } else {
-        //         // Crear nuevo estado
-        //         new_state = new State(state_id++, true);
-        //         for (const auto& item : new_closure) {
-        //             new_state->add_item(item);
-        //         }
-                
-        //         std::cout << "  - Creando nuevo estado: " << new_state->get_id() << std::endl;
-        //         // Mostrar los ítems del nuevo estado
-        //         for (const auto& item : new_state->get_items()) {
-        //             std::cout << "    - Ítem nuevo: " << item.ToString() << std::endl;
-        //         }
-        //         // Registrar nuevo estado
-        //         visited[new_kernel] = new_state;
-        //         pending.push(new_state);
-        //         automaton_states_.push_back(new_state);// Esto es solo pa limpiar memoria cuando se borre el parser
-        //     }
-            
-        //     // // Extraer el núcleo del nuevo estado
-        //     // std::set<ItemCore> new_kernel;
-        //     // for (const auto& item : new_closure) {
-        //     //     new_kernel.insert({item.production(), item.pos()});
-        //     // }
-            
-        //     // // Buscar si ya existe un estado con este núcleo
-        //     // State* target_state = nullptr;
-        //     // if (kernel_to_state.find(new_kernel) != kernel_to_state.end()) {
-        //     //     // Estado existente: fusionar lookaheads
-        //     //     target_state = kernel_to_state[new_kernel];
-                
-        //     //     // Fusionar lookaheads de los ítems correspondientes
-        //     //     for (const auto& new_item : new_closure) {
-        //     //         for (auto& existing_item : target_state->get_mutable_items()) {
-        //     //             if (existing_item.production() == new_item.production() &&
-        //     //                 existing_item.pos() == new_item.pos()) 
-        //     //             {
-        //     //                 existing_item.merge_lookaheads(new_item.lookaheads());
-        //     //             }
-        //     //         }
-        //     //     }
-        //     // } else {
-        //     //     // Crear nuevo estado
-        //     //     target_state = new State(state_id++, true);
-        //     //     for (const auto& item : new_closure) {
-        //     //         target_state->add_item(item);
-        //     //     }
-                
-        //     //     // Registrar nuevo estado
-        //     //     kernel_to_state[new_kernel] = target_state;
-        //     //     state_to_kernel[target_state] = new_kernel;
-        //     //     pending.push(target_state);
-        //     //     automaton_states_.push_back(target_state);
-        //     // }
-            
-        //     // Añadir transición
-        //     current_state->add_transition(symbol->Name(), new_state);
-        // }
-    // }
-// }
 
 // Método para limpiar todos los estados creados
 void LALR1Parser::CleanupAutomatonStates() {

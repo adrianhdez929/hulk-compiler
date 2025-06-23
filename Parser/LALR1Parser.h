@@ -54,14 +54,6 @@ private:
     std::vector<std::string> expected_tokens_;
 };
 
-// Funciones auxiliares para el analizador LR(1)
-std::vector<std::shared_ptr<Symbol>> get_lr1_symbols(const std::vector<std::string>& symbols, Grammar& G);
-std::vector<Item> lr1_expand(const Item& item, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G);
-std::set<Item> lr1_compress(const std::vector<Item>& items);
-std::vector<Item> closure_lr1(const std::vector<Item>& items, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G_);
-
-State build_lr1_automaton(Grammar& G);
-
 /**
  * @class LR1Parser
  * @brief Implementa un parser LR(1) para analizar cadenas según una gramática dada.
@@ -71,7 +63,6 @@ State build_lr1_automaton(Grammar& G);
  * algoritmo LR(1) para mayor poder de análisis sintáctico.
  */
 class LALR1Parser {
-public:
 public:
     // Constants for parsing actions
     static constexpr const char* SHIFT = "SHIFT";
@@ -129,13 +120,13 @@ public:
     map<Sentence, ContainerSet<string>> compute_firsts();
     
     /**
-     * @brief Calcula los conjuntos FIRST locales para una sentencia.
+     * @brief Calcula los conjuntos FIRST locales para una sentencia con memoization.
      * @param sentence La sentencia para la que calcular FIRST
      * @param firsts Mapa con los conjuntos FIRST ya calculados
      * @param G La gramática
      * @param verbose Si es true, muestra información de depuración
      */
-    static ContainerSet<string> compute_local_firsts(const Sentence& sentence, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose = false);
+    ContainerSet<string> compute_local_firsts(const Sentence& sentence, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose = false);
 
     /**
      * @brief Calcula los conjuntos FOLLOW para la gramática.
@@ -180,7 +171,22 @@ public:
      * @return Nuevo conjunto de ítems resultante de la transición
      */
     std::vector<Item> goto_lr1(const std::vector<Item>& items, std::shared_ptr<Symbol> symbol, const std::map<Sentence, ContainerSet<string>>& firsts, bool just_kernel);
+
+    /**
+     * @brief Expande un ítem LR(1) para generar nuevos ítems.
+     * @param item Ítem a expandir
+     * @param firsts Conjuntos FIRST ya calculados
+     * @param G Gramática utilizada
+     * @return Vector de nuevos ítems generados a partir del ítem dado
+     */
+    std::vector<Item> expand(const Item& item, const std::map<Sentence, ContainerSet<string>>& firsts, Grammar& G);
     
+    /**
+     * @brief Comprime un vector de ítems combinando aquellos con el mismo núcleo.
+     * @param items Vector de ítems a comprimir
+     * @return Conjunto de ítems comprimidos
+     */
+    std::set<Item> compress(const std::vector<Item>& items);
     /**
      * @brief Libera la memoria de los estados del autómata LR(1).
      */
@@ -226,7 +232,9 @@ private:
     std::map<std::pair<int, Symbol>, std::pair<std::string, int>> action_;
     std::map<std::pair<int, Symbol>, int> goto_;
     std::vector<State*> automaton_states_;
-    
+    // local firsts cache
+    std::map<Sentence, ContainerSet<string>> firsts_cache_;
+
     // Constructor privado para deserialización
     LALR1Parser(Grammar& G, 
                const std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& action,

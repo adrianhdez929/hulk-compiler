@@ -22,39 +22,26 @@
 \newpage
 
 \section{Introducción}
-    \subsection{Motivación}
-    El desarrollo de un compilador es un ejercicio fundamental en las ciencias de la computación que permite comprender a fondo la estructura de los lenguajes de programación y el proceso de traducción de código fuente a código ejecutable. Este proyecto fue motivado por el deseo de aplicar los conceptos teóricos de la compilación en un proyecto práctico y completo, abordando los desafíos de cada una de sus fases.
-    \subsection{El Lenguaje HULK}
-    HULK es un lenguaje de programación diseñado para este proyecto, que incluye características como tipos definidos por el usuario, funciones, herencia y un sistema de tipos estático. Su sintaxis y semántica están pensadas para ser lo suficientemente ricas como para explorar los problemas clásicos de la compilación.
-    \subsection{Objetivos}
-    Los objetivos principales de este proyecto son:
-    \begin{itemize}
-        \item Diseñar e implementar un analizador léxico y sintáctico para el lenguaje HULK.
-        \item Construir un Árbol de Sintaxis Abstracta (AST) como representación intermedia del código fuente.
-        \item Implementar un analizador semántico robusto para la validación de tipos y reglas de alcance.
-        \item Generar código intermedio utilizando la infraestructura de LLVM.
-        \item Integrar un intérprete JIT para la ejecución dinámica del código generado.
-    \end{itemize}
-    \subsection{Estructura del Informe}
-    Este informe está organizado de la siguiente manera: las secciones 2, 3 y 4 describen los análisis léxico, sintáctico y semántico, respectivamente. La sección 5 detalla el proceso de generación de código. Finalmente, se presentan las conclusiones y el trabajo futuro.
+
+    Este informe presenta una propuesta de compilador para el lenguaje de programación HULK. Está organizado de la siguiente manera: las secciones 2, 3 y 4 describen los análisis léxico, sintáctico y semántico, respectivamente. La sección 5 detalla el proceso de generación de código.
 
 \section{Análisis Léxico}
     \subsection{Tokens}
-    El analizador léxico se encarga de leer el código fuente y agruparlo en una secuencia de tokens. Los tokens representan las unidades mínimas con significado del lenguaje, como palabras clave (`if`, `else`, `while`), identificadores, números, cadenas y operadores.
+    El analizador léxico se encarga de leer el código fuente y agruparlo en una secuencia de tokens. Los tokens representan las unidades mínimas con significado del lenguaje, como palabras clave (`if`, `else`, `while`), identificadores, números, cadenas y operadores, y para manipularlos fue creada la clase \textit{Token}, que además almacena información adicional como la posición en el código fuente.
     \subsection{Expresiones Regulares}
-    Cada tipo de token se define mediante una expresión regular que describe el patrón de caracteres que lo conforma. Por ejemplo, un identificador podría ser \texttt{[a-zA-Z_][a-zA-Z0-9_]*} y un número \texttt{[0-9]+}.
+    Cada tipo de token se define mediante una expresión regular que describe el patrón de caracteres que lo conforma. Por ejemplo, un identificador de variable está definido con la expresión regular \texttt{[a-z][\_a-zA-Z0-9]*}, indicando que puede ser cualquier combinación de letras mayúsculas, minúsculas y números, siempre que empiece con letra minúscula, y un número con \texttt{(0|[1-9][0-9]*)(.[0-9]+)?} asegurando que puede ser un número entero o decimal.
     \subsection{Implementación}
-    El analizador léxico se implementó utilizando la herramienta \textbf{Flex}, un generador rápido de analizadores léxicos. A partir de un archivo de especificación (`lexer.l`) que contiene las expresiones regulares y las acciones asociadas, Flex genera el código C++ del analizador.
+    El compilador utiliza un lexer personalizado, aunque se us\'o, en un inicio, herramientas como Flex/Bison para tokenizar y parsear. La implementación del lexer se basa en una tabla de especificaciones de tokens definida programáticamente en `hulkGrammar.hpp`. Esta tabla asocia nombres de tokens con sus correspondientes expresiones regulares. El lexer procesa el código fuente y, utilizando estas definiciones, genera una secuencia de tokens que alimenta al analizador sintáctico. Este enfoque ofrece un control más granular sobre el proceso de tokenización y facilita la integración con el resto del compilador.
 
 \section{Análisis Sintáctico}
     \subsection{Gramática}
     La estructura sintáctica del lenguaje HULK se define mediante una gramática libre de contexto, presentada en formato BNF (Backus-Naur Form). Esta gramática especifica cómo se pueden combinar los tokens para formar construcciones válidas como expresiones, declaraciones y sentencias. La gramática completa se encuentra en el apéndice de este informe.
     \subsection{Tipo de Parser}
-    Se utilizó un parser de tipo \textbf{LALR(1)} (Look-Ahead LR), que es capaz de analizar un amplio rango de gramáticas de forma eficiente.
+    Se utilizó un parser de tipo \textbf{SLR(1)} (Simple LR), que es capaz de analizar un amplio rango de gramáticas de forma eficiente.
     \subsection{Árbol de Sintaxis Abstracta (AST)}
     El resultado del análisis sintáctico es un Árbol de Sintaxis Abstracta (AST). El AST es una representación jerárquica del código fuente que captura su estructura esencial, eliminando detalles sintácticos irrelevantes como paréntesis o puntos y comas. Este árbol es la estructura de datos principal que se utiliza en las fases posteriores del compilador.
     \subsection{Implementación}
-    El analizador sintáctico se implementó con la herramienta \textbf{Bison}, un generador de parsers compatible con Yacc. A partir de un archivo de gramática (`parser.y`), Bison genera el código C++ del parser que, en conjunto con el analizador léxico, construye el AST.
+    Para el análisis sintáctico, se ha desarrollado un parser SLR(1) a medida, evitando el uso de generadores como Bison. La gramática del lenguaje HULK se define directamente en el código C++ dentro del fichero `hulkGrammar.hpp`. La clase `SLR1Parser` es la encargada de tomar esta gramática, construir las tablas de parseo SLR(1) (acción y goto) en tiempo de ejecución, y luego utilizar estas tablas para analizar la secuencia de tokens proveniente del lexer. Las acciones semánticas, que son las responsables de construir los nodos del Árbol de Sintaxis Abstracta (AST), se implementan como funciones lambda asociadas a cada producción de la gramática. Este diseño permite una integración más estrecha y un mayor control sobre el proceso de parsing y la construcción del AST.
 
 \section{Análisis Semántico}
 El chequeo semántico se realiza en tres fases principales, cada una implementada por un visitante (visitor) especializado que recorre el AST. Se utiliza un contexto global para almacenar información sobre tipos, variables y funciones.
@@ -95,26 +82,6 @@ El generador de código está basado en un patrón visitor que recorre el AST y 
 \section{Pruebas}
     % Describir cómo se probó el compilador.
     % Incluir ejemplos de código HULK y la salida del compilador.
-
-\section{Conclusiones}
-    \subsection{Resumen del Trabajo}
-    Este proyecto ha culminado con la implementación de un compilador funcional para el lenguaje HULK. Se ha desarrollado una arquitectura modular basada en visitors que facilita la separación de responsabilidades entre las distintas fases del compilador. El uso de herramientas estándar como Flex y Bison, junto con la potente infraestructura de LLVM, ha permitido construir un compilador robusto y extensible.
-    \subsection{Trabajo Futuro}
-    Como trabajo futuro, se podrían explorar varias mejoras:
-    \begin{itemize}
-        \item Implementar un sistema de módulos para organizar mejor el código.
-        \item Añadir más optimizaciones al código generado por LLVM.
-        \item Mejorar el reporte de errores con información más detallada sobre la ubicación y causa de los mismos.
-        \item Extender el lenguaje con nuevas características como genéricos o programación concurrente.
-    \end{itemize}
-
-\begin{thebibliography}{9}
-    % Listar las referencias bibliográficas.
-    \bibitem{aho_ullman}
-    Aho, A. V., Lam, M. S., Sethi, R., & Ullman, J. D. (2007).
-    \textit{Compilers: Principles, Techniques, and Tools}.
-    Pearson/Addison Wesley.
-\end{thebibliography}
 
 \appendix
 \section{Gramática Completa}
@@ -256,12 +223,5 @@ method -> var_id ( args_list ) => expr ;
 member_access_expr -> expr . var_id
     | expr . func_call
 \end{verbatim}
-
-\section{Fragmentos de Código Fuente}
-% Incluir fragmentos de código relevantes.
-\lstset{language=C++, basicstyle=\footnotesize}
-\begin{lstlisting}[caption={Ejemplo de código C++}]
-// Tu código aquí
-\end{lstlisting}
 
 \end{document}
