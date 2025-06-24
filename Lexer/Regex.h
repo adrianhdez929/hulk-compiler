@@ -24,7 +24,7 @@ using namespace std;
 class Regex {
 public:
     // Constructor
-    Regex(const std::string& pattern, Grammar& grammar, LALR1Parser& parser, bool verbose = false) 
+    Regex(const std::string& pattern, Grammar& grammar, SLR1Parser& parser, bool verbose = false) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
         if (verbose_) {
             std::cout << "Construyendo DFA para patrón: '" << pattern_ << "'" << std::endl;
@@ -130,7 +130,7 @@ public:
         return tokens;
     }
 
-    DFA build_dfa(LALR1Parser& parser) {
+    DFA build_dfa(SLR1Parser& parser) {
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
@@ -190,7 +190,7 @@ public:
             }
             
             return mini_dfa;
-        } catch (const LALR1ParsingError& e) {
+        } catch (const ParsingError& e) {
             std::cerr << "Error de parsing en regex '" << pattern_ << "': " << e.what() << std::endl;
             throw;
         } catch (const std::exception& e) {

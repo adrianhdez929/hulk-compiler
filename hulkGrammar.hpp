@@ -141,6 +141,7 @@ inline Grammar getHulkGrammar(){
 	auto non_empty_lines = g.SetNonTerminal("non_empty_lines");
 	auto expr = g.SetNonTerminal("expr");
 	auto func_assign = g.SetNonTerminal("func_assign");
+	auto func_def = g.SetNonTerminal("func_def");
 	auto func_full_assign = g.SetNonTerminal("func_full_assign");
 	auto type_node_decl = g.SetNonTerminal("type_node_decl");
 	auto type_elements = g.SetNonTerminal("type_elements");
