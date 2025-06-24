@@ -76,7 +76,6 @@ public:
     static std::shared_ptr<TypeInfo> numberType;
     static std::shared_ptr<TypeInfo> stringType;
     static std::shared_ptr<TypeInfo> boolType;
-    static std::shared_ptr<TypeInfo> voidType;
     static std::shared_ptr<TypeInfo> objectType;
 
     Context(Context* parent);

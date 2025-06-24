@@ -458,10 +458,9 @@ void SemanticCheckerVisitor::visit(BlockNode* node, Context* context) {
 
 	// cout << "Visiting BlockNode" << endl;
 	
-	Context* blockContext = context->createChildContext();
 	
 	for (auto* child : node->children) {
-		child->accept(this, blockContext);
+		child->accept(this, context);
 	}
 	
 	// cout << "Semantic check: Block processed with " << node->children.size() << " statements" << endl;
@@ -545,18 +544,13 @@ void SemanticCheckerVisitor::visit(LetAssign* node, Context* context) {
         return;
     }
 
-    // cout << "Visiting LetAssign with " << node->assigns.size() << " assignments" << endl;
-
-    Context* letContext = context->createChildContext();
-
     for (auto* assign : node->assigns) {        
-        assign->accept(this, letContext);        
+        assign->accept(this, context);        
     }
 
     // cout << "Entering LetAssign body" << endl;
-    node->body->accept(this, letContext);
+    node->body->accept(this, context);
     
-    // cout << "Let expression type: " << (node->inferredType ? node->inferredType->name : "Expression") << endl;
 }
 
 void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
@@ -569,7 +563,7 @@ void SemanticCheckerVisitor::visit(VarAssign* node, Context* context) {
 
     if (context->isDefined(node->var_id->id_name)) {
         auto existingType = context->getVarType(node->var_id->id_name);
-        if (existingType && node->value->inferredType->name != existingType->name) {
+        if (existingType && !node->value->inferredType->isCompatibleWith(existingType->name)) {
             addError("Semantic error in line " + std::to_string(node->line) + " : Cannot assign " + 
                                    node->value->inferredType->name + " to existing variable " + 
                                    node->var_id->id_name + " of type " + existingType->name);
@@ -647,13 +641,8 @@ void SemanticCheckerVisitor::visit(Conditional* node, Context* context) {
 	// cout << "Visiting Conditional (if-else)" << endl;
 
 	node->bool_expr->accept(this, context);
-
-	Context* ifContext = context->createChildContext();
-	Context* elseContext = context->createChildContext();
-
-	node->if_body->accept(this, ifContext);
-
-	node->else_body->accept(this, elseContext);
+	node->if_body->accept(this, context);
+	node->else_body->accept(this, context);
 	
 	// cout << "Semantic check: Conditional statement processed successfully" << endl;
 }
@@ -684,9 +673,8 @@ void SemanticCheckerVisitor::visit(WhileNode* node, Context* context) {
 
 	node->bool_expr->accept(this, context);
 
-	Context* whileContext = context->createChildContext();
 
-	node->body->accept(this, whileContext);
+	node->body->accept(this, context);
 	
 	// cout << "Semantic check: While loop processed successfully" << endl;
 }
@@ -736,18 +724,15 @@ void SemanticCheckerVisitor::visit(TypeDeclNode* node, Context* context) {
 		return;
     }
 
+    auto typeInfo = context->getType(node->id->id_name);
+
+    context->currentType = typeInfo;
     currentTypeName = node->id->id_name;
 
-    auto typeInfo = context->getType(node->id->id_name);
-    auto typeContext = context->createChildContext();
-    context->currentType = typeInfo;
-
-    typeContext->defineVar("self", typeInfo);
-
-    node->args->accept(this, typeContext);
+    node->args->accept(this, context);
 
     for (auto* element : node->body) {
-        element->accept(this, typeContext);
+        element->accept(this, context);
     }
 
     context->currentType = nullptr;

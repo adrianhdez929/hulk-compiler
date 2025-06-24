@@ -83,7 +83,7 @@ class SemanticCheckerVisitor : public Visitor {
         }
         
         std::vector<TypeAttribute> printParams = {{"x", Context::stringType}};
-        globalContext->defineFunc("print", Context::voidType, printParams);
+        globalContext->defineFunc("print", Context::objectType, printParams);
     }
     
     ~SemanticCheckerVisitor() {
@@ -202,7 +202,7 @@ class SemanticCheckerVisitor : public Visitor {
         } else if (op == "=" || op == ":=") {
             return leftType;
         }
-        return Context::voidType;
+        return Context::objectType;
     }
     
     

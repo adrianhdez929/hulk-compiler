@@ -5,7 +5,6 @@
 std::shared_ptr<TypeInfo> Context::numberType = nullptr;
 std::shared_ptr<TypeInfo> Context::stringType = nullptr;
 std::shared_ptr<TypeInfo> Context::boolType = nullptr;
-std::shared_ptr<TypeInfo> Context::voidType = nullptr;
 std::shared_ptr<TypeInfo> Context::objectType = nullptr;
 
 void Context::initializeBuiltinTypes() {
@@ -13,7 +12,6 @@ void Context::initializeBuiltinTypes() {
         numberType = std::make_shared<TypeInfo>("Number");
         stringType = std::make_shared<TypeInfo>("String");  
         boolType = std::make_shared<TypeInfo>("Boolean");
-        voidType = std::make_shared<TypeInfo>("Expression");
         objectType = std::make_shared<TypeInfo>("Object");
     }
 }
@@ -327,7 +325,6 @@ std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
     if (typeName == "Number") return numberType;
     if (typeName == "String") return stringType;
     if (typeName == "Boolean") return boolType;
-    if (typeName == "Expression") return voidType;
     if (typeName == "Object") return objectType;
     
     auto localType = localTypes.find(typeName);
@@ -338,7 +335,7 @@ std::shared_ptr<TypeInfo> Context::getType(const std::string& typeName) {
         return parent->getType(typeName);
     }
 
-    return objectType;
+    return nullptr;
 }
 
 bool Context::defineVar(const std::string& varname, std::shared_ptr<TypeInfo> type) {
@@ -368,7 +365,8 @@ TypeMethod Context::getFunc(const std::string& funcname,
         if (func.name == funcname && func.arguments.size() == paramTypes.size()) {
             bool matches = true;
             for (size_t i = 0; i < paramTypes.size(); i++) {
-                if (!paramTypes[i]->isCompatibleWith(func.arguments[i].name)) {
+                bool compatible = paramTypes[i]->isCompatibleWith(func.arguments[i].type->name);
+                if (!compatible) {
                     matches = false;
                     break;
                 }
@@ -381,15 +379,12 @@ TypeMethod Context::getFunc(const std::string& funcname,
     if (parent != nullptr) {
         return parent->getFunc(funcname, paramTypes);
     }
+    std::cout << "Function " << funcname << " not found in current context or parent contexts." << std::endl;
     return {"", nullptr, {}};
 }
 
 bool Context::defineFunc(const std::string& funcname, std::shared_ptr<TypeInfo> returnType, 
                         const std::vector<TypeAttribute> paramTypes) {
-    if (funcname.empty() || returnType == nullptr) {
-        std::cerr << "Function name or return type cannot be empty or null." << std::endl;
-        return false; // Invalid function definition
-    }
     std::cout << "defining function " << funcname << std::endl;
     if (isDefined(funcname, paramTypes.size())) {
         std::cerr << "Function '" << funcname << "' with " << paramTypes.size() 

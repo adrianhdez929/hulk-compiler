@@ -77,7 +77,7 @@ void SymbolCollectorVisitor::visit(BinOpNode* node, Context* context) {
         } else if (node->op == "@" || node->op == "@@") {
             node->inferredType = Context::stringType;
         } else {
-            node->inferredType = Context::voidType;
+            node->inferredType = Context::objectType;
         }
     }
 }
@@ -85,14 +85,28 @@ void SymbolCollectorVisitor::visit(BinOpNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(FunctionCallNode* node, Context* context) {
     if (!node) return;
     
+    auto funcArgs = std::vector<std::shared_ptr<TypeInfo>>();
+
     if (node->argument) {
         node->argument->accept(this, context);
+        std::cout << "Visiting FunctionCallNode: " << node->func_name << " with argument type " << node->argument->inferredType->name << std::endl;
+        funcArgs.push_back(node->argument->inferredType);
     }
 
-    std::shared_ptr<TypeInfo> returnType = Context::voidType;
+    std::cout << "Visiting FunctionCallNode: " << node->func_name << " searching function returnType in context" << std::endl;
+    TypeMethod func = globalContext->getFunc(node->func_name, funcArgs);
+    std::cout << "Function found: " << func.name << " with argument count " << func.arguments.size() << " with return type " << (func.returnType ? func.returnType->name : "void") << std::endl;
+    std::shared_ptr<TypeInfo> returnType; 
+    if (func.returnType) {
+        returnType = globalContext->getFunc(node->func_name, funcArgs).returnType;
+    } else {
+        returnType = Context::objectType;
+    }
+
+    std::cout << "Visiting FunctionCallNode: " << node->func_name << "with return type " << returnType->name << std::endl;
     
     if (node->func_name == "print") {
-        returnType = Context::voidType;
+        returnType = Context::objectType;
     } else if (node->func_name == "sin" || node->func_name == "cos" || 
                node->func_name == "sqrt" || node->func_name == "exp" || 
                node->func_name == "log" || node->func_name == "rand") {
@@ -127,11 +141,13 @@ void SymbolCollectorVisitor::visit(IDNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(BlockNode* node, Context* context) {
     if (!node) return;
     
-    std::shared_ptr<TypeInfo> lastType = Context::voidType;
+    std::shared_ptr<TypeInfo> lastType = Context::objectType;
+	Context* blockContext = context->createChildContext();
+
     
     for (auto* child : node->children) {
         if (child) {
-            child->accept(this, context);
+            child->accept(this, blockContext);
             if (child->inferredType) {
                 lastType = child->inferredType;
             }
@@ -157,13 +173,15 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
     if (!node) return;
     std::vector<TypeAttribute> methodArgs = std::vector<TypeAttribute>();
 
+    Context* functionContext = context->createChildContext();
+
     for (auto* arg: node->args->children) {
-        arg->accept(this, context);
+        arg->accept(this, functionContext);
         
         if (arg->id_type.empty() || arg->id_type == "none") {
             arg->inferredType = Context::numberType;
         } else {
-            arg->inferredType = context->getType(arg->id_type);
+            arg->inferredType = globalContext->getType(arg->id_type);
         }
 
         if (arg->inferredType == nullptr) {
@@ -176,16 +194,27 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
 
     currentFunctionName = node->func_name;
 
-    node->body->accept(this, context);
-    node->inferredType = node->body->inferredType;
+    node->body->accept(this, functionContext);   
+    if (!node->func_type.empty() && !(node->func_type == "none")) {
+        std::cout << "Annotated function "<< node->func_name << " return type is " << node->func_type << std::endl;
+        auto funcType = globalContext->getType(node->func_type);
+
+        if (!funcType) {
+            addError("Type error in line " + std::to_string(node->line) + ": Return type '" + node->func_type +"' of function '" + node->func_name + "' not found");
+        }
+
+        node->inferredType = node->body->inferredType;
+    } else {
+        node->inferredType = node->body->inferredType;
+    }
 
     if (!currentTypeName.empty()) {
         if (node->inferredType == nullptr) {
             addError("Type error in line " + std::to_string(node->line) + ": Could not infer return type for method '" + node->func_name + "' in type '" + currentTypeName + "'");
         }
         
-        auto returnType = node->inferredType ? context->getType(node->inferredType->name) : Context::objectType;
-        std::shared_ptr<TypeInfo> currentType = context->getType(currentTypeName);
+        auto returnType = node->inferredType ? globalContext->getType(node->inferredType->name) : Context::objectType;
+        std::shared_ptr<TypeInfo> currentType = globalContext->getType(currentTypeName);
 
         if (!currentType->defineMethod(node->func_name, returnType, methodArgs)) {
             addError("Could not define method '" + node->func_name + "' in type '" + currentTypeName + "'");
@@ -197,13 +226,13 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
             addError("Type error in line " + std::to_string(node->line) + ": Could not infer return type for function '" + node->func_name + "' in global scope");
         }
 
-        auto returnType = node->inferredType ? context->getType(node->inferredType->name) : Context::objectType;
+        auto returnType = node->inferredType ? globalContext->getType(node->inferredType->name) : Context::objectType;
         if (node->func_name.empty()) {
             addError("Error in line " + std::to_string(node->line) + ": Function name cannot be empty in line " + std::to_string(node->line));
             currentFunctionName = "";
             return;
         }
-        if (!context->defineFunc(node->func_name, returnType, methodArgs)) {
+        if (!globalContext->defineFunc(node->func_name, returnType, methodArgs)) {
             addError("Could not define function '" + node->func_name + "' in global scope");
         }
     }
@@ -214,14 +243,16 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(LetAssign* node, Context* context) {
     if (!node) return;
     
+    auto letContext = context->createChildContext();
+
     for (auto* assign : node->assigns) {
         if (assign) {
-            assign->accept(this, context);
+            assign->accept(this, letContext);
         }
     }
     
     if (node->body) {
-        node->body->accept(this, context);
+        node->body->accept(this, letContext);
         node->inferredType = node->body->inferredType;
     } else {
         node->inferredType = Context::objectType;
@@ -281,7 +312,7 @@ void SymbolCollectorVisitor::visit(VarAssignType* node, Context* context) {
 void SymbolCollectorVisitor::visit(VarAssignList* node, Context* context) {
     if (!node) return;
     
-    std::shared_ptr<TypeInfo> lastType = Context::voidType;
+    std::shared_ptr<TypeInfo> lastType = Context::objectType;
     
     for (auto* assign : node->assigns) {
         if (assign) {
@@ -297,9 +328,12 @@ void SymbolCollectorVisitor::visit(VarAssignList* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(Conditional* node, Context* context) {
     if (node) {
+        Context* ifContext = context->createChildContext();
+	    Context* elseContext = context->createChildContext();
+
         if (node->bool_expr) node->bool_expr->accept(this, context);
-        if (node->if_body) node->if_body->accept(this, context);
-        if (node->else_body) node->else_body->accept(this, context);
+        if (node->if_body) node->if_body->accept(this, ifContext);
+        if (node->else_body) node->else_body->accept(this, elseContext);
         
         if (node->if_body && node->if_body->inferredType) {
             node->inferredType = node->if_body->inferredType;
@@ -318,19 +352,20 @@ void SymbolCollectorVisitor::visit(BoolExprNode* node, Context* context) {
 
 void SymbolCollectorVisitor::visit(WhileNode* node, Context* context) {
     if (!node) return;
+
+	Context* whileContext = context->createChildContext();
     
     // Process the boolean condition
     if (node->bool_expr) {
         node->bool_expr->accept(this, context);
     }
     
-    // Process the loop body
-    
+    // Process the loop body    
     if (node->body) {
-        node->body->accept(this, context);
+        node->body->accept(this, whileContext);
     }
     
-    node->inferredType = node->body ? node->body->inferredType : Context::voidType;
+    node->inferredType = node->body ? node->body->inferredType : Context::objectType;
 }
 
 void SymbolCollectorVisitor::visit(VarDesAssign* node, Context* context) {
@@ -347,7 +382,7 @@ void SymbolCollectorVisitor::visit(VarDesAssign* node, Context* context) {
     if (node->value && node->value->inferredType) {
         node->inferredType = node->value->inferredType;
     } else {
-        node->inferredType = Context::voidType;
+        node->inferredType = Context::objectType;
     }
 }
 
@@ -362,7 +397,7 @@ void SymbolCollectorVisitor::visit(ForNode* node, Context* context) {
         node->body->accept(this, context);
     }
     
-    node->inferredType = Context::voidType;
+    node->inferredType = Context::objectType;
 }
 
 void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
@@ -400,7 +435,7 @@ void SymbolCollectorVisitor::visit(TypeDeclNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(ASTNodeVector* node, Context* context) {
     if (!node) return;
     
-    std::shared_ptr<TypeInfo> lastType = Context::voidType;
+    std::shared_ptr<TypeInfo> lastType = Context::objectType;
     
     for (auto* child : node->children) {
         if (child) {
@@ -417,7 +452,7 @@ void SymbolCollectorVisitor::visit(ASTNodeVector* node, Context* context) {
 void SymbolCollectorVisitor::visit(ExprsList* node, Context* context) {
     if (!node) return;
     
-    std::shared_ptr<TypeInfo> lastType = Context::voidType;
+    std::shared_ptr<TypeInfo> lastType = Context::objectType;
     
     for (auto* child : node->children) {
         if (child) {
@@ -438,7 +473,7 @@ void SymbolCollectorVisitor::visit(ProgramNode* node, Context* context) {
         node->getNode()->accept(this, context);
         node->inferredType = node->getNode()->inferredType;
     } else {
-        node->inferredType = Context::voidType;
+        node->inferredType = Context::objectType;
     }
 }
 
@@ -627,21 +662,32 @@ void SymbolCollectorVisitor::processVariableDefinition(VarAssign* node, const st
 
 void SymbolCollectorVisitor::processGlobalFunction(AssignFuncNode* node, Context* context) {
     if (node) {
+        auto funcContext = context->createChildContext();
+
         for (auto* arg : node->args->children) {
             if (arg) {
-                arg->accept(this, context);
+                arg->accept(this, funcContext);
                 if (arg->inferredType) {
                     continue;
                 }
                 if (!arg->id_type.empty()) {
-                    arg->inferredType = context->getType(arg->id_type);
+                    arg->inferredType = globalContext->getType(arg->id_type);
                 } else {
                     arg->inferredType = Context::numberType;
                 }
             }
         }
 
-        node->body->accept(this, context);
-        node->inferredType = node->body->inferredType;
+        node->body->accept(this, funcContext);
+        std::cout << "Type is " << node->func_type << std::endl;
+
+        if (!node->func_type.empty()) {
+            auto funcType = globalContext->getType(node->func_type);
+            node->inferredType = funcType;
+            
+            std::cout << "Function " << node->func_name << " return type is " << node->func_type << std::endl;
+        } else {
+            node->inferredType = node->body->inferredType;
+        }
     }
 }
