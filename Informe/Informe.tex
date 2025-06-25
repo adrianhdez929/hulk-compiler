@@ -1,0 +1,227 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Informe del Compilador HULK}
+\author{David S\'anchez}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Este documento presenta un informe técnico sobre el diseño e implementación de un compilador para el lenguaje de programación HULK. Se detallan las fases clave del proceso de compilación, incluyendo el análisis léxico, sintáctico y semántico, así como la generación de código intermedio y su ejecución mediante un intérprete JIT (Just-In-Time) basado en LLVM. El objetivo principal es proporcionar una visión clara de la arquitectura del compilador, las decisiones de diseño tomadas y las herramientas utilizadas en su desarrollo.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{Introducción}
+
+    Este informe presenta una propuesta de compilador para el lenguaje de programación HULK. Está organizado de la siguiente manera: las secciones 2, 3 y 4 describen los análisis léxico, sintáctico y semántico, respectivamente. La sección 5 detalla el proceso de generación de código.
+
+\section{Análisis Léxico}
+    \subsection{Tokens}
+    El analizador léxico se encarga de leer el código fuente y agruparlo en una secuencia de tokens. Los tokens representan las unidades mínimas con significado del lenguaje, como palabras clave (`if`, `else`, `while`), identificadores, números, cadenas y operadores, y para manipularlos fue creada la clase \textit{Token}, que además almacena información adicional como la posición en el código fuente.
+    \subsection{Expresiones Regulares}
+    Cada tipo de token se define mediante una expresión regular que describe el patrón de caracteres que lo conforma. Por ejemplo, un identificador de variable está definido con la expresión regular \texttt{[a-z][\_a-zA-Z0-9]*}, indicando que puede ser cualquier combinación de letras mayúsculas, minúsculas y números, siempre que empiece con letra minúscula, y un número con \texttt{(0|[1-9][0-9]*)(.[0-9]+)?} asegurando que puede ser un número entero o decimal.
+    \subsection{Implementación}
+    El compilador utiliza un lexer personalizado, aunque se us\'o, en un inicio, herramientas como Flex/Bison para tokenizar y parsear. La implementación del lexer se basa en una tabla de especificaciones de tokens definida programáticamente en `hulkGrammar.hpp`. Esta tabla asocia nombres de tokens con sus correspondientes expresiones regulares. El lexer procesa el código fuente y, utilizando estas definiciones, genera una secuencia de tokens que alimenta al analizador sintáctico. Este enfoque ofrece un control más granular sobre el proceso de tokenización y facilita la integración con el resto del compilador.
+
+\section{Análisis Sintáctico}
+    \subsection{Gramática}
+    La estructura sintáctica del lenguaje HULK se define mediante una gramática libre de contexto, presentada en formato BNF (Backus-Naur Form). Esta gramática especifica cómo se pueden combinar los tokens para formar construcciones válidas como expresiones, declaraciones y sentencias. La gramática completa se encuentra en el apéndice de este informe.
+    \subsection{Tipo de Parser}
+    Se utilizó un parser de tipo \textbf{SLR(1)} (Simple LR), que es capaz de analizar un amplio rango de gramáticas de forma eficiente.
+    \subsection{Árbol de Sintaxis Abstracta (AST)}
+    El resultado del análisis sintáctico es un Árbol de Sintaxis Abstracta (AST). El AST es una representación jerárquica del código fuente que captura su estructura esencial, eliminando detalles sintácticos irrelevantes como paréntesis o puntos y comas. Este árbol es la estructura de datos principal que se utiliza en las fases posteriores del compilador.
+    \subsection{Implementación}
+    Para el análisis sintáctico, se ha desarrollado un parser SLR(1) a medida, evitando el uso de generadores como Bison. La gramática del lenguaje HULK se define directamente en el código C++ dentro del fichero `hulkGrammar.hpp`. La clase `SLR1Parser` es la encargada de tomar esta gramática, construir las tablas de parseo SLR(1) (acción y goto) en tiempo de ejecución, y luego utilizar estas tablas para analizar la secuencia de tokens proveniente del lexer. Las acciones semánticas, que son las responsables de construir los nodos del Árbol de Sintaxis Abstracta (AST), se implementan como funciones lambda asociadas a cada producción de la gramática. Este diseño permite una integración más estrecha y un mayor control sobre el proceso de parsing y la construcción del AST.
+
+\section{Análisis Semántico}
+El chequeo semántico se realiza en tres fases principales, cada una implementada por un visitante (visitor) especializado que recorre el AST. Se utiliza un contexto global para almacenar información sobre tipos, variables y funciones.
+    \subsection{Type Collector}
+    Este visitor se encarga de recolectar las definiciones de tipos en el programa.
+    \begin{itemize}
+        \item \textbf{Lógica:} Recorre el AST y registra los tipos definidos por el usuario (clases, protocolos, etc.) en el contexto global.
+        \item \textbf{Propósito:} Garantizar que todos los tipos estén definidos antes de ser utilizados.
+    \end{itemize}
+    \subsection{Symbol Collector}
+    Este visitor recolecta las definiciones de variables y funciones.
+    \begin{itemize}
+        \item \textbf{Lógica:} Recorre el AST y registra las variables, funciones y métodos en el contexto correspondiente.
+        \item \textbf{Propósito:} Construir las tablas de símbolos para cada ámbito (global, local, de clase) y verificar que no haya redefiniciones.
+    \end{itemize}
+    \subsection{Semantic Checker}
+    Este visitor realiza el análisis semántico detallado.
+    \begin{itemize}
+        \item \textbf{Lógica:} Verifica que las operaciones sean válidas según los tipos de datos, que las variables estén declaradas antes de ser usadas y que las funciones sean llamadas con los argumentos correctos.
+        \item \textbf{Propósito:} Detectar errores semánticos como tipos incompatibles, uso de variables no declaradas o violaciones de las reglas del lenguaje.
+    \end{itemize}
+    \subsection{Contexto y Búsqueda Recursiva}
+    El contexto es una estructura central que almacena la información semántica. Cuando se busca una variable, función o tipo, el contexto realiza una búsqueda recursiva desde el ámbito actual hacia los ámbitos superiores, manejando correctamente los ámbitos anidados y la herencia.
+
+\section{Generación de Código}
+El generador de código está basado en un patrón visitor que recorre el AST y traduce cada nodo a instrucciones de bajo nivel utilizando la infraestructura de \textbf{LLVM}.
+    \subsection{Representación Intermedia (LLVM IR)}
+    Se utiliza LLVM Intermediate Representation (IR) como código intermedio. LLVM IR es un lenguaje de ensamblador de bajo nivel con un formato de tres direcciones (Three-Address Code), lo que permite que el código generado sea portable y susceptible a múltiples optimizaciones.
+    \subsection{Visitor de Generación de Código}
+    El visitor de generación de código implementa métodos para cada tipo de nodo del AST. Su función es transformar las construcciones del lenguaje HULK en instrucciones de LLVM IR.
+    \begin{itemize}
+        \item Gestiona la correspondencia entre variables del código fuente y sus representaciones en LLVM.
+        \item Genera la declaración de funciones, la reserva de memoria para variables y los bloques básicos para estructuras de control (condicionales, bucles).
+    \end{itemize}
+    \subsection{Intérprete JIT (Just-In-Time)}
+    Una vez generado el código LLVM IR, el compilador utiliza el intérprete JIT de LLVM para ejecutar el programa directamente en memoria, sin necesidad de compilar a un binario nativo. El JIT traduce dinámicamente el IR a código máquina para la plataforma actual y lo ejecuta, facilitando las pruebas y el desarrollo interactivo.
+
+\section{Pruebas}
+    % Describir cómo se probó el compilador.
+    % Incluir ejemplos de código HULK y la salida del compilador.
+
+\appendix
+\section{Gramática Completa}
+\begin{verbatim}
+input -> decl_list lines_block
+    | lines_block
+    | line lines_block
+
+decl_list -> epsilon
+    | declarations
+
+declarations -> decl
+    | declarations decl
+
+decl -> func_full_assign
+    | type_node_decl
+
+lines_block -> { lines }
+
+lines -> epsilon
+    | non_empty_lines
+
+non_empty_lines -> line
+    | non_empty_lines line
+
+line -> expr ;
+    | func_def ;
+
+expr -> arit_op
+    | bool_expr
+    | while while_expr
+    | string
+    | id_expr
+    | func_call
+    | let_exp
+    | if conditional
+    | member_access_expr
+    | expr := expr
+    | expr = expr
+    | expr @ expr
+    | expr @@ expr
+
+func_def -> function var_id ( args_list ) => expr
+    | function var_id ( args_list ) : type_id => expr
+
+func_full_assign -> function var_id ( args_list ) { lines }
+    | function var_id ( args_list ) : type_id { lines }
+
+args_list -> epsilon
+    | id_expr
+    | args_list , id_expr
+
+id_expr -> var_id : type_id
+    | var_id
+
+let_exp -> let var_assign_list in expr
+    | let var_assign_list in lines_block
+
+var_assign_list -> id_expr = expr
+    | id_expr = expr as type_id
+    | id_expr = new_expr
+    | var_assign_list , id_expr = expr
+    | var_assign_list , id_expr = expr as type_id
+    | var_assign_list , id_expr = new_expr
+
+new_expr -> new var_id ( expr_list )
+
+expr_list -> epsilon
+    | expr
+    | new_expr
+    | expr_list , expr
+    | expr_list , new_expr
+
+func_call -> var_id ( expr_list )
+
+arit_op -> arit_op + term
+    | arit_op - term
+    | term
+
+term -> term * factor
+    | term / factor
+    | term % factor
+    | factor
+
+factor -> sign ^ factor
+    | sign
+
+sign -> atom
+    | - atom
+
+atom -> number
+    | var_id
+    | ( expr )
+    | func_call
+    | member_access_expr
+
+bool_expr -> bool
+    | expr >= expr
+    | expr > expr
+    | expr <= expr
+    | expr < expr
+    | expr == expr
+    | expr != expr
+    | expr & expr
+    | expr | expr
+    | ! expr
+    | id_expr is type_id
+    | func_call is type_id
+
+conditional -> ( bool_expr ) expr else expr
+    | ( bool_expr ) lines_block else expr
+    | ( bool_expr ) expr else lines_block
+    | ( bool_expr ) lines_block else lines_block
+    | ( bool_expr ) expr elif conditional
+    | ( bool_expr ) lines_block elif conditional
+
+while_expr -> ( bool_expr ) lines_block
+    | ( bool_expr ) expr
+
+type_node_decl -> type type_id { type_body_elements }
+    | type type_id inherits type_id { type_body_elements }
+    | type type_id inherits type_id ( args_list ) { type_body_elements }
+    | type type_id ( args_list ) { type_body_elements }
+    | type type_id ( args_list ) inherits type_id { type_body_elements }
+    | type type_id ( args_list ) inherits type_id ( args_list ) { type_body_elements }
+
+type_body_elements -> epsilon
+    | type_body_elements attribute
+    | type_body_elements method
+
+attribute -> id_expr = expr ;
+    | id_expr = expr as type_id ;
+
+method -> var_id ( args_list ) => expr ;
+    | var_id ( args_list ) : type_id => expr ;
+    | var_id ( args_list ) { lines }
+    | var_id ( args_list ) : type_id { lines }
+
+member_access_expr -> expr . var_id
+    | expr . func_call
+\end{verbatim}
+
+\end{document}

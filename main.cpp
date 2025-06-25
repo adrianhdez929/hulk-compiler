@@ -27,7 +27,7 @@ SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
-    // std::string file_path = "script.hulk"; // Default file path
+    std::string file_path = "script.hulk"; // Default file path
     
     // // Si se proporciona un argumento, utilizarlo como ruta del archivo
     // if (argc > 1) {
@@ -35,21 +35,22 @@ int main(int argc, char* argv[]) {
     //     std::cout << "Usando archivo: " << file_path << std::endl;
     // }
 
-    // Grammar hulk_grammar = getHulkGrammar();
+    Grammar hulk_grammar = getHulkGrammar();
 
-    // std::string error_message;
-    // std::string script_content = read_source_file(file_path, error_message);
-    // if (script_content.empty()) {
-    //     std::cerr << "Error: " << error_message << std::endl;
-    //     return 1;
-    // }
+    std::string error_message;
+    std::string script_content = read_source_file(file_path, error_message);
+    if (script_content.empty()) {
+        std::cerr << "Error: " << error_message << std::endl;
+        return 1;
+    }
 
-    // root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+    root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
 
-    // if (!root) {
-    //     std::cerr << "Error al compilar el script: " << error_message << std::endl;
-    //     return 1;
-    // }
+    if (!root) {
+        std::cerr << "Error al compilar el script: " << error_message << std::endl;
+        return 1;
+    }
+    root->print();
 
     // Simple test to avoid segfaults
     std::cout << "=== HULK Compiler Starting ===" << std::endl;
@@ -82,25 +83,25 @@ int main(int argc, char* argv[]) {
     // return 0;
 
     // //region: Flex/Bison setup
-    const char* filename = "script.hulk"; //default
-    if (argc > 1) {
-		filename = argv[1];
-    }
-	yyin = fopen(filename, "r");
-	if (!yyin) {
-		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-		return 1;
-	}
-    yyparse();
-    // //endregion
+    // const char* filename = "script.hulk"; //default
+    // if (argc > 1) {
+	// 	filename = argv[1];
+    // }
+	// yyin = fopen(filename, "r");
+	// if (!yyin) {
+	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+	// 	return 1;
+	// }
+    // yyparse();
+    // // //endregion
 
-    if (!root) {
-        std::cerr << "Error: No se pudo construir el AST" << std::endl;
-        return 1;
-    }
+    // if (!root) {
+    //     std::cerr << "Error: No se pudo construir el AST" << std::endl;
+    //     return 1;
+    // }
 
-    std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-    root->print();
+    // std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+    // root->print();
     //     std::cout << "\n=== Starting Two-Pass Semantic Analysis ===" << std::endl;
         
     //     // Create a global context for semantic analysis (with null parent for root context)
