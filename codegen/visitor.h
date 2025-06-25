@@ -62,13 +62,18 @@ class CodegenVisitor : public Visitor {
     std::map<std::string, std::vector<std::string>> typeAttributeMap;
     std::map<std::string, llvm::Value*> objectInstances;
     std::map<std::string, std::string> objectTypes;
+    
+    // VTable infrastructure for polymorphism
+    std::map<std::string, std::vector<std::string>> typeMethodMap; // type -> method names in order
+    std::map<std::string, llvm::GlobalVariable*> typeVTableMap; // type -> vtable global
+    std::map<std::string, std::map<std::string, int>> methodIndexMap; // type -> method -> index
+    std::map<std::string, llvm::Function*> methodFunctionMap; // "type_method" -> function
+    
     // Add attribute type map for struct fields
     typedef std::map<std::string, llvm::Type*> AttributeTypeMap;
     std::map<std::string, AttributeTypeMap> typeAttributeTypeMap; 
     // Add inheritance map to track type hierarchies
-    std::map<std::string, std::string> typeInheritanceMap; // child -> parent
-    // Add method tracking map to track methods per type
-    std::map<std::string, std::vector<std::string>> typeMethodMap; // type -> methods 
+    std::map<std::string, std::string> typeInheritanceMap; // child -> parent 
     // Map to store default values for each attribute in each type
     // Store raw values instead of LLVM Values to avoid context issues
     struct DefaultValue {
@@ -83,6 +88,19 @@ class CodegenVisitor : public Visitor {
     
     void createStandardLibraryDeclarations();
     llvm::Function* createMainFunction();
+    
+    // VTable management
+    void createVTable(const std::string& typeName);
+    void addMethodToVTable(const std::string& typeName, const std::string& methodName, llvm::Function* methodFunc);
+    llvm::Value* callVirtualMethod(llvm::Value* objectPtr, const std::string& methodName, 
+                                  const std::vector<llvm::Value*>& args);
+    
+    // Function to perform proper vtable-based dynamic dispatch
+    llvm::Value* callVirtualMethodWithVTableLookup(llvm::Value* objectPtr, const std::string& methodName, 
+                                                   const std::vector<llvm::Value*>& args);
+    
+    // Function to determine runtime type from vtable pointer
+    std::string getRuntimeType(llvm::Value* objectPtr);
     
     void generateMethodFunction(const std::string& typeName, AssignFuncNode* method, 
                                llvm::StructType* structType, const std::vector<std::string>& attributes);

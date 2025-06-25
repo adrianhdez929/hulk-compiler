@@ -121,8 +121,15 @@ void SymbolCollectorVisitor::visit(IDNode* node, Context* context) {
         if (node->inferredType) {
             return;
         }
+        
+        if (!context->isDefined(node->id_name)) {
+            addError("Semantic error in line " + std::to_string(node->line) + " : Variable '" + node->id_name + "' is not defined");
+            return;
+        }
+
         if (context->isDefined(node->id_name)) {
             node->inferredType = context->getVarType(node->id_name);
+            std::cout << "Variable " << node->id_name << " type is " << node->inferredType->name << std::endl;
             return;
         }
 
@@ -160,9 +167,26 @@ void SymbolCollectorVisitor::visit(BlockNode* node, Context* context) {
 void SymbolCollectorVisitor::visit(ArgsList* node, Context* context) {
     if (!node) return;
     
-    for (auto* child : node->children) {
-        if (child) {
-            child->accept(this, context);
+    for (auto* arg : node->children) {
+        if (arg) {
+            
+            if (arg->id_type.empty() || arg->id_type == "none") {
+                arg->inferredType = Context::numberType;
+            } else {
+                arg->inferredType = globalContext->getType(arg->id_type);
+            }
+            
+            if (arg->inferredType == nullptr) {
+                addError("Type error in line " + std::to_string(node->line) + ": Could not resolve type '" + arg->id_type + "' for argument '" + arg->id_name + "'");
+                continue;
+            }
+            
+            if (!context->defineVar(arg->id_name, arg->inferredType)) {
+                addError("Error in line " + std::to_string(node->line) + ": Could not define argument variable " + arg->id_name + " of type " + arg->inferredType->name);
+                continue;
+            }
+
+            arg->accept(this, context);
         }
     }
     
@@ -175,35 +199,27 @@ void SymbolCollectorVisitor::visit(AssignFuncNode* node, Context* context) {
 
     Context* functionContext = context->createChildContext();
 
+    node->args->accept(this, functionContext);
+
     for (auto* arg: node->args->children) {
-        arg->accept(this, functionContext);
-        
-        if (arg->id_type.empty() || arg->id_type == "none") {
-            arg->inferredType = Context::numberType;
-        } else {
-            arg->inferredType = globalContext->getType(arg->id_type);
-        }
-
-        if (arg->inferredType == nullptr) {
-            addError("Type error in line " + std::to_string(node->line) + ": Could not resolve type '" + arg->id_type + "' for argument '" + arg->id_name + "'");
-            continue;
-        }
-
+        // arg->accept(this, functionContext);
         methodArgs.push_back(TypeAttribute{arg->id_name, globalContext->getType(arg->inferredType->name)});
     }
 
     currentFunctionName = node->func_name;
 
     node->body->accept(this, functionContext);   
+    
     if (!node->func_type.empty() && !(node->func_type == "none")) {
         std::cout << "Annotated function "<< node->func_name << " return type is " << node->func_type << std::endl;
         auto funcType = globalContext->getType(node->func_type);
 
         if (!funcType) {
             addError("Type error in line " + std::to_string(node->line) + ": Return type '" + node->func_type +"' of function '" + node->func_name + "' not found");
+            node->inferredType = node->body->inferredType;
+        } else {
+            node->inferredType = funcType;
         }
-
-        node->inferredType = node->body->inferredType;
     } else {
         node->inferredType = node->body->inferredType;
     }
@@ -278,10 +294,21 @@ void SymbolCollectorVisitor::visit(VarAssign* node, Context* context) {
         if (!currentType->hasAttribute(node->var_id->id_name)) {
             currentType->defineAttribute(node->var_id->id_name, node->value->inferredType);
         }
-    } 
-    // else {
-    //     processVariableDefinition(node, "global", context);
-    // }
+    } else {
+         if (context->isDefined(node->var_id->id_name)) {
+            auto existingType = context->getVarType(node->var_id->id_name);
+            if (existingType && !node->value->inferredType->isCompatibleWith(existingType->name)) {
+                addError("Semantic error in line " + std::to_string(node->line) + " : Cannot assign " + 
+                                    node->value->inferredType->name + " to existing variable " + 
+                                    node->var_id->id_name + " of type " + existingType->name);
+                return;
+            }
+        } else {
+            // cout << "Defining new variable: " << node->var_id->id_name << " with type " << 
+                    // (node->inferredType ? node->inferredType->name : "unknown") << endl;
+            context->defineVar(node->var_id->id_name, node->inferredType);
+        }
+    }
 }
 
 void SymbolCollectorVisitor::visit(NewTypeNode* node, Context* context) {
