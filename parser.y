@@ -222,7 +222,7 @@ conditional:
 
 while_expr:
 	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4, yylineno); }
-	| LPARENT bool_expr RPARENT expr { $$ = new WhileNode($2, $4, yylineno); }
+	| LPARENT bool_expr RPARENT expr SEMICOLON { $$ = new WhileNode($2, $4, yylineno); }
 	;
 
 //for_expr:
