@@ -451,7 +451,6 @@ bool State::serialize_to_file(const std::string& filename, const std::string& di
         }
         
         file.close();
-        std::cout << "Autómata serializado exitosamente en: " << full_path << std::endl;
         return true;
         
     } catch (const std::exception& e) {
@@ -529,9 +528,6 @@ State* State::deserialize_from_file(const std::string& filename, const std::stri
         file.close();
         
         State* result = deserialize_automaton(serialized);
-        if (result) {
-            std::cout << "Autómata deserializado exitosamente desde: " << full_path << std::endl;
-        }
         return result;
         
     } catch (const std::exception& e) {

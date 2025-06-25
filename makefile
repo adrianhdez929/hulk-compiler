@@ -17,16 +17,18 @@ PROGRAM = hulk
 GRAMMAR_SRC = $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp
 AUTOMATA_SRC = $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp $(SRC_DIR)/Automata/state.cpp $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp $(SRC_DIR)/Automata/operations/operations.cpp
 PARSER_SRC = $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp
+LOGGER_SRC = $(SRC_DIR)/Logger/Logger.cpp
 EXECUTE_SRC = $(SRC_DIR)/execute.cpp
 
 # Add object files for the grammar, automata, and parser
 GRAMMAR_OBJS = $(BUILDDIR)/grammar.o $(BUILDDIR)/production.o $(BUILDDIR)/symbol.o $(BUILDDIR)/sentence.o
 AUTOMATA_OBJS = $(BUILDDIR)/dfa.o $(BUILDDIR)/nfa.o $(BUILDDIR)/state.o $(BUILDDIR)/ContainerSet.o $(BUILDDIR)/aut_manipulation.o $(BUILDDIR)/operations.o
 PARSER_OBJS = $(BUILDDIR)/Item.o $(BUILDDIR)/SLR1Parser.o
+LOGGER_OBJS = $(BUILDDIR)/Logger.o
 EXECUTE_OBJS = $(BUILDDIR)/execute.o
 
 # Add the additional objects to the main objects list
-MAIN_OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o
+MAIN_OBJS = $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/ast.o $(BUILDDIR)/main.o $(BUILDDIR)/context.o $(BUILDDIR)/visitor.o $(BUILDDIR)/type_collector_visitor.o $(BUILDDIR)/symbol_collector_visitor.o $(BUILDDIR)/codegen.o $(BUILDDIR)/jit.o $(BUILDDIR)/Logger.o
 OBJS = $(MAIN_OBJS) $(GRAMMAR_OBJS) $(AUTOMATA_OBJS) $(PARSER_OBJS) $(EXECUTE_OBJS)
 
 # Define los archivos necesarios para el create_artifacts
@@ -50,6 +52,7 @@ create_artifacts: | $(BUILDDIR)
 		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
 		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
 		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp \
+		$(SRC_DIR)/Logger/Logger.cpp \
 		$(SRC_DIR)/Ast/ast.cpp
 	$(SRC_DIR)/create_artifacts
 
@@ -113,6 +116,10 @@ $(BUILDDIR)/symbol.o: $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/symbol.h 
 
 $(BUILDDIR)/sentence.o: $(SRC_DIR)/Grammar/sentence.cpp $(SRC_DIR)/Grammar/sentence.h | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Grammar/sentence.cpp -o $@
+
+# Rule for Logger object
+$(BUILDDIR)/Logger.o: $(SRC_DIR)/Logger/Logger.cpp $(SRC_DIR)/Logger/Logger.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Logger/Logger.cpp -o $@
 
 # Rules for Automata objects
 $(BUILDDIR)/dfa.o: $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/dfa.h | $(BUILDDIR)

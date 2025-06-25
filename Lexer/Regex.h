@@ -26,8 +26,8 @@ public:
     // Constructor
     Regex(const std::string& pattern, Grammar& grammar, SLR1Parser& parser, bool verbose = false) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
-        if (verbose_) {
-            std::cout << "Construyendo DFA para patrón: '" << pattern_ << "'" << std::endl;
+        if (false && verbose_) {
+            // Código omitido para evitar impresiones en consola
         }
         automaton_ = build_dfa(parser);
     }
@@ -37,8 +37,8 @@ public:
         std::vector<std::string> fixed_tokens = {"(", ")", "|", "*", "+", "-", "?", "[", "]", "symbol"};
         bool string_class = false;
         
-        if (verbose_) {
-            std::cout << "Tokenizando expresión regular: '" << input << "'" << std::endl;
+        if (false && verbose_) {
+            // Código omitido para evitar impresiones en consola
         }
         
         for (int i = 0; i < input.length(); ++i) {
@@ -56,24 +56,24 @@ public:
                         int hex_value = std::stoi(hex_string, nullptr, 16);
                         char current_char = static_cast<char>(hex_value);
                         tokens.push_back({std::string(1, current_char), "symbol"});
-                        if (verbose_) {
-                            std::cout << "  Escape hexadecimal: '\\x" << hex_string << "' -> símbolo: '" << current_char << "'" << std::endl;
+                        if (false && verbose_) {
+                            // Código omitido para evitar impresiones en consola
                         }
                         i += 3; // Skip '\', 'x', and two hex digits
                         continue;
                     } catch (const std::exception& e) {
                         // Not a valid hex sequence, treat \ as literal
                         tokens.push_back({std::string(1, c), "symbol"});
-                        if (verbose_) {
-                            std::cout << "  Escape hexadecimal inválido: tratando '\\' como símbolo" << std::endl;
+                        if (false && verbose_) {
+                            // Código omitido para evitar impresiones en consola
                         }
                         continue;
                     }
                 } else {
                     // Other escaped characters
                     tokens.push_back({std::string(1, next_char), "symbol"});
-                    if (verbose_) {
-                        std::cout << "  Otro carácter escapado: '\\" << next_char << "' -> símbolo" << std::endl;
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                     i += 1; // Skip the escaped character
                     continue;
@@ -84,47 +84,47 @@ public:
             if (c == ']' && string_class) {
                 string_class = false;
                 tokens.push_back({std::string(1, c), std::string(1, c)});
-                if (verbose_) {
-                    std::cout << "  Fin de clase: '" << c << "' -> " << c << std::endl;
+                if (false && verbose_) {
+                    // Código omitido para evitar impresiones en consola
                 }
             } else if (c == '[') {
                 string_class = true;
                 tokens.push_back({std::string(1, c), std::string(1, c)});
-                if (verbose_) {
-                    std::cout << "  Inicio de clase: '" << c << "' -> " << c << std::endl;
+                if (false && verbose_) {
+                    // Código omitido para evitar impresiones en consola
                 }
             } else if (string_class) {
                 // Inside character class, treat everything as symbols except '-'
                 if (c == '-') {
                     tokens.push_back({std::string(1, c), std::string(1, c)});
-                    if (verbose_) {
-                        std::cout << "  Rango en clase: '" << c << "' -> " << c << std::endl;
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                 } else {
                     tokens.push_back({std::string(1, c), "symbol"});
-                    if (verbose_) {
-                        std::cout << "  Símbolo en clase: '" << c << "' -> símbolo" << std::endl;
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                 }
             } else {
                 // Handle regular tokens outside character classes
                 if (std::find(fixed_tokens.begin(), fixed_tokens.end(), std::string(1, c)) != fixed_tokens.end()) {
                     tokens.push_back({std::string(1, c), std::string(1, c)});
-                    if (verbose_) {
-                        std::cout << "  Token especial: '" << c << "' -> " << c << std::endl;
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                 } else {
                     tokens.push_back({std::string(1, c), "symbol"});
-                    if (verbose_) {
-                        std::cout << "  Símbolo regular: '" << c << "' -> símbolo" << std::endl;
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                 }
             }
         }
         
         tokens.push_back({"EOF", "EOF"}); // Add EOF token
-        if (verbose_) {
-            std::cout << "  Agregado token EOF" << std::endl;
+        if (false && verbose_) {
+            // Código omitido para evitar impresiones en consola
         }
         
         return tokens;
@@ -134,12 +134,9 @@ public:
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
-        // Debug output - print tokenized regex
-        if (verbose_) {
-            std::cout << "Tokenizando regex: '" << pattern_ << "'" << std::endl;
-            for (const auto& token_pair : token_names) {
-                std::cout << "Token: '" << token_pair.first << "' -> Tipo: '" << token_pair.second << "'" << std::endl;
-            }
+        // Debug output - print tokenized regex (deshabilitado)
+        if (false && verbose_) {
+            // Código omitido para evitar impresiones en consola
         }
         
         for (int i = 0; i < token_names.size(); ++i) {
@@ -149,16 +146,8 @@ public:
         try {
             auto [production_ids, actions] = parser.Parse(tokens);
             
-            if (verbose_) {
-                std::cout << "Análisis sintáctico completado exitosamente" << std::endl;
-                std::cout << "Producciones:" << std::endl;
-                for (const auto& production_id : production_ids) {
-                    std::cout << grammar_.GetProduction(production_id).ToString() << std::endl;
-                }
-                std::cout << "Acciones:" << std::endl;
-                for (const auto& action : actions) {
-                    std::cout << action << std::endl;
-                }
+            if (false && verbose_) {
+                // Código omitido para evitar impresiones en consola
             }
             
             // Create a queue of productions from the production IDs
@@ -172,21 +161,21 @@ public:
             auto ast = reverse_evaluate(productions, actions, token_names, grammar_);
             auto nfa = ast->evaluate();
             
-            if (verbose_) {
-                std::cout << "NFA creado, convirtiendo a DFA..." << std::endl;
+            if (false && verbose_) {
+                // Código omitido para evitar impresiones en consola
             }
             
             // Convert NFA to DFA
             DFA dfa = nfa_to_dfa(*nfa);
             
-            if (verbose_) {
-                std::cout << "DFA creado con " << dfa.states() << " estados, minimizando..." << std::endl;
+            if (false && verbose_) {
+                // Código omitido para evitar impresiones en consola
             }
             
             DFA mini_dfa = automata_minimization(dfa);
             
-            if (verbose_) {
-                std::cout << "DFA minimizado con " << mini_dfa.states() << " estados" << std::endl;
+            if (false && verbose_) {
+                // Código omitido para evitar impresiones en consola
             }
             
             return mini_dfa;

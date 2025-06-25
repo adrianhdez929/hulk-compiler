@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include "../Lexer/Token.h"
+#include "../Logger/Logger.h"
 
 // ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
 
@@ -22,7 +23,7 @@ namespace {
             }
             return true;
         } catch (const std::exception& e) {
-            std::cerr << "Error creando directorio hulk: " << e.what() << std::endl;
+            LogError("Error creando directorio hulk: " + std::string(e.what()));
             return false;
         }
     }
@@ -38,7 +39,7 @@ namespace {
             }
             return true;
         } catch (const std::exception& e) {
-            std::cerr << "Error creando directorio " << directory << ": " << e.what() << std::endl;
+            LogError("Error creando directorio " + directory + ": " + std::string(e.what()));
             return false;
         }
     }
@@ -93,7 +94,7 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
                         if (verbose_) {
-                            cout << "Reducing by production: " << production.ToString() << endl;
+
                         }
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
@@ -110,17 +111,8 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                             state_stack.push(goto_[goto_key]);
                         } else {
                             // Error interno del parser - no se encontró una transición goto
-                            if (verbose_) {
-                                cout << "Actions:" << endl;
-                                for (const auto& action : action_) {
-                                    cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                        << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                                }
-                                cout << "Goto:" << endl;
-                                for (const auto& goto_action : goto_) {
-                                    cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                        << " -> Goto State: " << goto_action.second << endl;
-                                }
+                            if (false && verbose_) {
+                                // Código omitido para evitar impresiones en consola
                             }
                             
                             // Este es un error interno del parser, probablemente debido a una gramática mal construida
@@ -161,17 +153,8 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     // }
                     
                     // Si estamos en modo verbose, mostramos información de depuración
-                    if (verbose_) {
-                        cout << "Actions:" << endl;
-                        for (const auto& action : action_) {
-                            cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                        }
-                        cout << "Goto:" << endl;
-                        for (const auto& goto_action : goto_) {
-                            cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                << " -> Goto State: " << goto_action.second << endl;
-                        }
+                    if (false && verbose_) {
+                        // Código omitido para evitar impresiones en consola
                     }
                     
                     // Lanzar una excepción especializada con detalles del error
@@ -261,16 +244,9 @@ void SLR1Parser::BuildParsingTable() {
     }
     auto firsts = compute_firsts();
 
-    // Debug: Print FIRST sets
-    if (verbose_) {
-        std::cout << "FIRST sets:" << std::endl;
-        for (const auto& [nt, first_set] : firsts) {
-            std::cout << "FIRST(" << nt.ToString() << ") = { ";
-            for (const auto& t : first_set.get_values()) {
-                std::cout << t << " ";
-            }
-            std::cout << "}" << std::endl;
-        }
+    // Debug: Print FIRST sets (deshabilitado)
+    if (false && verbose_) {
+        // Código omitido para evitar impresiones en consola
     }
     
     // auto EOFile = Sentence(G_.GetEndOfFile());
@@ -278,16 +254,9 @@ void SLR1Parser::BuildParsingTable() {
 
     auto follows = compute_follows(firsts);
     
-    // Debug: Print FOLLOW sets
-    if (verbose_) {
-        std::cout << "FOLLOW sets:" << std::endl;
-        for (const auto& [nt, follow_set] : follows) {
-            std::cout << "FOLLOW(" << nt.ToString() << ") = { ";
-            for (const auto& t : follow_set.get_values()) {
-                std::cout << t << " ";
-            }
-            std::cout << "}" << std::endl;
-        }
+    // Debug: Print FOLLOW sets (deshabilitado)
+    if (false && verbose_) {
+        // Código omitido para evitar impresiones en consola
     }
     
     State* automaton = BuildLR0Automaton().to_deterministic();
@@ -332,16 +301,16 @@ void SLR1Parser::BuildParsingTable() {
 void SLR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  const std::pair<std::string, int>& value) {
-    if (verbose_) {
-        std::cout << "Registering action: " << key.first << ", " << key.second.Name() << " -> " << value.first << ", " << value.second << std::endl;
+    if (false && verbose_) {
+        // Código omitido para evitar impresiones en consola
     }
     table[key] = value;
 }
 void SLR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  int value) {
-    if (verbose_) {
-        std::cout << "Registering goto: " << key.first << ", " << key.second.Name() << " -> " << value << std::endl;
+    if (false && verbose_) {
+        // Código omitido para evitar impresiones en consola
     }
     table[key] = value;
 }
@@ -638,7 +607,7 @@ bool SLR1Parser::serialize_parser(const std::string& filename, const std::string
     std::ofstream file(filepath, std::ios::binary);
     
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para escritura: " << filepath << std::endl;
+        LogError("No se pudo abrir el archivo para escritura: " + filepath);
         return false;
     }
     
@@ -702,11 +671,11 @@ bool SLR1Parser::serialize_parser(const std::string& filename, const std::string
         }
         
         file.close();
-        std::cout << "Parser serializado exitosamente en: " << filepath << std::endl;
+
         return true;
         
     } catch (const std::exception& e) {
-        std::cerr << "Error durante la serialización del parser: " << e.what() << std::endl;
+        LogError("Error durante la serialización del parser: " + std::string(e.what()));
         file.close();
         return false;
     }
@@ -721,7 +690,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
     std::ifstream file(filepath, std::ios::binary);
     
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para lectura: " << filepath << std::endl;
+        LogError("No se pudo abrir el archivo para lectura: " + filepath);
         return nullptr;
     }
     
@@ -730,7 +699,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         char signature[11] = {0};
         file.read(signature, 10);
         if (std::string(signature) != "SLR1PARSER") {
-            std::cerr << "Error: Archivo no es un parser serializado válido" << std::endl;
+            LogError("Archivo no es un parser serializado válido");
             file.close();
             return nullptr;
         }
@@ -739,7 +708,7 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         uint32_t version;
         file.read(reinterpret_cast<char*>(&version), sizeof(version));
         if (version != 1) {
-            std::cerr << "Error: Versión de parser no soportada: " << version << std::endl;
+            LogError("Versión de parser no soportada: " + std::to_string(version));
             file.close();
             return nullptr;
         }
@@ -822,13 +791,13 @@ SLR1Parser* SLR1Parser::deserialize_parser(const std::string& filename, const st
         }
         
         file.close();
-        std::cout << "Parser deserializado exitosamente desde: " << filepath << std::endl;
+
         
         // Crear nuevo parser con las tablas deserializadas
         return new SLR1Parser(grammar, action, goto_table, verbose);
         
     } catch (const std::exception& e) {
-        std::cerr << "Error durante la deserialización del parser: " << e.what() << std::endl;
+        LogError("Error durante la deserialización del parser: " + std::string(e.what()));
         file.close();
         return nullptr;
     }
@@ -991,17 +960,16 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         state_stack.push(action_value.second);
                         symbol_stack.push(current_token);
                         actions.push_back(SHIFT);
-                        cout << "SHIFT: " << current_token.ToString() << endl;
+
                         index++;
                     } 
                     else if (action_value.first == REDUCE) {
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
-                        if (verbose_) {
-                            std::cout << "Reducing by production: " << production.ToString() << std::endl;
+                        if (false && verbose_) {
+                            // Código omitido para evitar impresiones en consola
                         }
                         production_ids.push_back(production.get_id());
-                        std::cout << "REDUCE: " << "Producción: " << production.ToString() << std::endl;
                         actions.push_back(REDUCE);
                         
                         for (int i = 0; i < production.Right().Symbols().size(); i++) {
@@ -1017,8 +985,8 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         } 
                         else {
                             // Error interno del parser - no se encontró una transición goto
-                            if (verbose_) {
-                                std::cout << "Error: No se encontró transición GOTO" << std::endl;
+                            if (false && verbose_) {
+                                // Código omitido para evitar impresiones en consola
                             }
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
                                                 production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include "../Lexer/Token.h"
-#include "SLR1Parser.h" // Para acceder a la clase ParsingError
+#include "../Logger/Logger.h"
 
 // ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
 
@@ -94,7 +94,7 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
                         if (verbose_) {
-                            cout << "Reducing by production: " << production.ToString() << endl;
+
                         }
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
@@ -112,16 +112,7 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         } else {
                             // Error interno del parser - no se encontró una transición goto
                             if (verbose_) {
-                                cout << "Actions:" << endl;
-                                for (const auto& action : action_) {
-                                    cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                        << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                                }
-                                cout << "Goto:" << endl;
-                                for (const auto& goto_action : goto_) {
-                                    cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                        << " -> Goto State: " << goto_action.second << endl;
-                                }
+
                             }
                             
                             // Este es un error interno del parser, probablemente debido a una gramática mal construida
@@ -151,16 +142,7 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                     auto [error_msg, expected_tokens] = generateErrorMessage(state_stack.top(), current_token.Name());
                     
                     if (verbose_) {
-                        cout << "Actions:" << endl;
-                        for (const auto& action : action_) {
-                            cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                        }
-                        cout << "Goto:" << endl;
-                        for (const auto& goto_action : goto_) {
-                            cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                << " -> Goto State: " << goto_action.second << endl;
-                        }
+
                     }
                     
                     // Lanzar una excepción especializada con detalles del error
@@ -250,16 +232,9 @@ void LALR1Parser::BuildParsingTable() {
     }
     auto firsts = compute_firsts();
 
-    // Debug: Print FIRST sets
-    if (verbose_) {
-        std::cout << "FIRST sets:" << std::endl;
-        for (const auto& [nt, first_set] : firsts) {
-            std::cout << "FIRST(" << nt.ToString() << ") = { ";
-            for (const auto& t : first_set.get_values()) {
-                std::cout << t << " ";
-            }
-            std::cout << "}" << std::endl;
-        }
+    // Debug: Print FIRST sets (deshabilitado)
+    if (false && verbose_) {
+        // Código omitido para evitar impresiones en consola
     }
     
     // auto EOFile = Sentence(G_.GetEndOfFile());
@@ -605,7 +580,7 @@ vector<Item> LALR1Parser::goto_lr1(const vector<Item>& items, shared_ptr<Symbol>
     return closure_lr1(goto_items, firsts);
 }
 State LALR1Parser::BuildLALR1Automaton() {
-    cout << "===== LALR1Parser::BuildLALR1Automaton() =====" << endl;
+
     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
 
     // Calcular conjuntos FIRST
@@ -815,7 +790,7 @@ bool LALR1Parser::serialize_parser(const std::string& filename, const std::strin
         }
         
         file.close();
-        std::cout << "Parser serializado exitosamente en: " << filepath << std::endl;
+
         return true;
         
     } catch (const std::exception& e) {

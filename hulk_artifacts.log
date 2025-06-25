@@ -1,0 +1,245 @@
+
+
+2025-06-24 23:10:31.175 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:10:31.175 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:10:31.175 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:10:31.176 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:10:31.176 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:10:31.176 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:10:31.176 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:10:31.176 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:10:31.176 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:10:31.176 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:10:31.176 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:10:31.176 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:10:31.176 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:10:31.179 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:10:31.179 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:10:31.179 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:10:31.179 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:10:31.179 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:11:22.042 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:11:22.048 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:11:22.048 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:11:22.048 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:11:22.048 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:11:22.117 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:11:22.118 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:11:22.118 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:11:22.120 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-24 23:12:15.039 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:12:15.039 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:12:15.039 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:12:15.040 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:12:15.040 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:12:15.040 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:12:15.040 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:12:15.040 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:12:15.040 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:12:15.040 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:12:15.040 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:12:15.040 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:12:15.040 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:12:15.043 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:12:15.043 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:12:15.055 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:12:15.055 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:12:15.055 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:13:08.943 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:13:08.948 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:13:08.948 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:13:08.948 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:13:08.948 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:13:09.016 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:13:09.017 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:13:09.017 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:13:09.019 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-24 23:16:15.057 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:16:15.057 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:16:15.057 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:16:15.058 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:16:15.058 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:16:15.058 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:16:15.058 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:16:15.058 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:16:15.058 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:16:15.058 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:16:15.058 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:16:15.058 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:16:15.058 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:16:15.061 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:16:15.061 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:16:15.061 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:16:15.061 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:16:15.061 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:17:02.396 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:17:02.401 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:17:02.401 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:17:02.401 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:17:02.401 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:17:02.467 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:17:02.468 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:17:02.468 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:17:02.469 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-24 23:19:18.338 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:19:18.338 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:19:18.338 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:19:18.338 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:19:18.338 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:19:18.338 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:19:18.338 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:19:18.338 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:19:18.338 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:19:18.338 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:19:18.338 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:19:18.338 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:19:18.338 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:19:18.341 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:19:18.341 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:19:18.341 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:19:18.341 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:19:18.341 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:20:09.103 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:20:09.108 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:20:09.108 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:20:09.108 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:20:09.108 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:20:09.176 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:20:09.189 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:20:09.189 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:20:09.192 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-24 23:31:59.059 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:31:59.059 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:31:59.059 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:31:59.059 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:31:59.059 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:31:59.059 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:31:59.059 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:31:59.059 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:31:59.059 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:31:59.059 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:31:59.059 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:31:59.059 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:31:59.060 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:31:59.062 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:31:59.062 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:31:59.062 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:31:59.062 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:31:59.062 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:32:50.022 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:32:50.030 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:32:50.030 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:32:50.030 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:32:50.030 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:32:50.097 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:32:50.098 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:32:50.098 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:32:50.099 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-24 23:35:35.670 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:35:35.670 [INFO] === HULK Artifact Creator Starting ===
+2025-06-24 23:35:35.670 [INFO] Obteniendo la gramática de Hulk
+2025-06-24 23:35:35.671 [INFO] Gramática obtenida con 114 producciones
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-24 23:35:35.671 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-24 23:35:35.671 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-24 23:35:35.671 [INFO] Comenzando la creación de artefactos
+2025-06-24 23:35:35.671 [INFO] Iniciando creación de artefactos del compilador
+2025-06-24 23:35:35.671 [DEBUG] Contador de producciones reiniciado
+2025-06-24 23:35:35.671 [DEBUG] Directorio 'hulk' ya existe
+2025-06-24 23:35:35.671 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-24 23:35:35.671 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-24 23:35:35.671 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-24 23:35:35.673 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-24 23:35:35.673 [INFO] Serializando parser en hulk/parser.p
+2025-06-24 23:35:35.674 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-24 23:35:35.674 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-24 23:35:35.674 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-24 23:36:24.871 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-24 23:36:24.879 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-24 23:36:24.879 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-24 23:36:24.879 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-24 23:36:24.879 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-24 23:36:24.944 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-24 23:36:24.945 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-24 23:36:24.945 [INFO] Artefactos del compilador creados exitosamente
+2025-06-24 23:36:24.947 [INFO] === Artefactos creados correctamente ===
+
+
+2025-06-25 00:04:53.390 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-25 00:04:53.390 [INFO] === HULK Artifact Creator Starting ===
+2025-06-25 00:04:53.390 [INFO] Obteniendo la gramática de Hulk
+2025-06-25 00:04:53.391 [INFO] Gramática obtenida con 114 producciones
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-06-25 00:04:53.391 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-06-25 00:04:53.391 [INFO] Se encontraron 7 producciones con epsilon
+2025-06-25 00:04:53.391 [INFO] Comenzando la creación de artefactos
+2025-06-25 00:04:53.391 [INFO] Iniciando creación de artefactos del compilador
+2025-06-25 00:04:53.391 [DEBUG] Contador de producciones reiniciado
+2025-06-25 00:04:53.391 [DEBUG] Directorio 'hulk' ya existe
+2025-06-25 00:04:53.391 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-06-25 00:04:53.391 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-06-25 00:04:53.391 [INFO] Creando parser SLR1 para la gramática del lexer
+2025-06-25 00:04:53.393 [DEBUG] Parser SLR1 para el lexer creado
+2025-06-25 00:04:53.393 [INFO] Serializando parser en hulk/parser.p
+2025-06-25 00:04:53.406 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-06-25 00:04:53.406 [INFO] Creando tabla de tokens para el lexer (49 tokens definidos)
+2025-06-25 00:04:53.406 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-06-25 00:05:44.209 [INFO] Serializando lexer en hulk/lexer.l
+2025-06-25 00:05:44.225 [INFO] Lexer serializado exitosamente en hulk/lexer.l
+2025-06-25 00:05:44.225 [INFO] Contador de producciones reiniciado para la gramática de Hulk
+2025-06-25 00:05:44.225 [INFO] Creando parser SLR1 para la gramática de Hulk
+2025-06-25 00:05:44.225 [DEBUG] La gramática de Hulk tiene 114 producciones y 35 no terminales
+2025-06-25 00:05:44.289 [INFO] Serializando parser de Hulk en hulk/hulk_parser.p
+2025-06-25 00:05:44.290 [INFO] Parser de Hulk serializado exitosamente en hulk/hulk_parser.p
+2025-06-25 00:05:44.290 [INFO] Artefactos del compilador creados exitosamente
+2025-06-25 00:05:44.291 [INFO] === Artefactos creados correctamente ===

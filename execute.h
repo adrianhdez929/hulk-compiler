@@ -7,6 +7,7 @@
 #include "Parser/SLR1Parser.h"
 #include "Grammar/grammar.h"
 #include "Ast/ast.hpp"
+#include "Logger/Logger.h"
 #include <string>
 #include <vector>
 

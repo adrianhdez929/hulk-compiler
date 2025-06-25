@@ -21,15 +21,9 @@ public:
           : regexs_(build_regex(token_table, grammar, parser, verbose)), 
             owns_automaton_(false),
             verbose_(verbose) {
-            if (verbose_) {
-                std::cout << "Construyendo autómata del lexer..." << std::endl;
-            }
             State* deterministic = build_automaton();
             automaton_ = deterministic;
             owns_automaton_ = true;
-            if (verbose_) {
-                std::cout << "Autómata del lexer construido exitosamente." << std::endl;
-            }
         }
         
     // Destructor para limpiar memoria si es necesario
@@ -47,13 +41,7 @@ public:
                                   Grammar& grammar_, SLR1Parser& parser, bool verbose = false) {
         std::vector<State> states;
         int index = 0;
-        if (verbose) {
-            std::cout << "Construyendo expresiones regulares para " << table.size() << " tokens:" << std::endl;
-        }
         for (const auto& [name, pattern] : table) {
-            if (verbose) {
-                std::cout << "  Procesando token '" << name << "' con patrón '" << pattern << "'" << std::endl;
-            }
             NFA nfa = Regex(pattern, grammar_, parser, verbose).Automaton();
             State state = *State::from_nfa(nfa);
             for (const auto& s : state.get_all_states()) {
@@ -63,38 +51,22 @@ public:
             }
             index++;
             states.push_back(state);
-            if (verbose) {
-                std::cout << "  Expresión regular para token '" << name << "' construida exitosamente" << std::endl;
-            }
         }
         return states;
     }
 
     State* build_automaton() {
         int id = 1;
-        if (verbose_) {
-            std::cout << "Configurando IDs para los estados del autómata..." << std::endl;
-        }
         for (auto& state : regexs_) {
             for (auto& s : state.get_all_states()) {
                 s->set_id(id++);
             }
         }
-        if (verbose_) {
-            std::cout << "Creando estado inicial y agregando transiciones epsilon..." << std::endl;
-        }
         State start = State(0);
         for (auto& state : regexs_) {
             start.add_epsilon_transition(&state);
         }
-        if (verbose_) {
-            std::cout << "Convirtiendo NFA a DFA..." << std::endl;
-            std::cout << "Número total de estados en el NFA: " << id << std::endl;
-        }
         State* deterministic = start.to_deterministic();
-        if (verbose_) {
-            std::cout << "DFA construido exitosamente con " << deterministic->get_all_states().size() << " estados." << std::endl;
-        }
         return deterministic;
     }
 
@@ -245,17 +217,7 @@ public:
      * @return true si la serialización fue exitosa, false en caso contrario
      */
     bool serialize_lexer(const std::string& filename) const {
-        if (verbose_) {
-            std::cout << "Serializando lexer en archivo '" << filename << "'..." << std::endl;
-        }
         bool result = automaton_->serialize_to_file(filename);
-        if (verbose_) {
-            if (result) {
-                std::cout << "Lexer serializado exitosamente." << std::endl;
-            } else {
-                std::cout << "Error al serializar el lexer." << std::endl;
-            }
-        }
         return result;
     }
     
@@ -266,17 +228,7 @@ public:
      * @return true si la serialización fue exitosa, false en caso contrario
      */
     bool serialize_lexer(const std::string& filename, const std::string& directory) const {
-        if (verbose_) {
-            std::cout << "Serializando lexer en '" << directory << "/" << filename << "'..." << std::endl;
-        }
         bool result = automaton_->serialize_to_file(filename, directory);
-        if (verbose_) {
-            if (result) {
-                std::cout << "Lexer serializado exitosamente." << std::endl;
-            } else {
-                std::cout << "Error al serializar el lexer." << std::endl;
-            }
-        }
         return result;
     }
     
@@ -286,20 +238,9 @@ public:
      * @return Puntero a un nuevo Lexer deserializado, o nullptr si hay error
      */
     static Lexer* deserialize_lexer(const std::string& filename, bool verbose = false) {
-        if (verbose) {
-            std::cout << "Deserializando lexer desde archivo '" << filename << "'..." << std::endl;
-        }
         State* deserialized_automaton = State::deserialize_from_file(filename);
         if (!deserialized_automaton) {
-            if (verbose) {
-                std::cout << "Error al deserializar el lexer." << std::endl;
-            }
             return nullptr;
-        }
-        
-        if (verbose) {
-            std::cout << "Lexer deserializado exitosamente." << std::endl;
-            std::cout << "Número de estados en el DFA: " << deserialized_automaton->get_all_states().size() << std::endl;
         }
         
         // Crear un nuevo lexer con el autómata deserializado
@@ -313,20 +254,9 @@ public:
      * @return Puntero a un nuevo Lexer deserializado, o nullptr si hay error
      */
     static Lexer* deserialize_lexer(const std::string& filename, const std::string& directory, bool verbose = false) {
-        if (verbose) {
-            std::cout << "Deserializando lexer desde '" << directory << "/" << filename << "'..." << std::endl;
-        }
         State* deserialized_automaton = State::deserialize_from_file(filename, directory);
         if (!deserialized_automaton) {
-            if (verbose) {
-                std::cout << "Error al deserializar el lexer." << std::endl;
-            }
             return nullptr;
-        }
-        
-        if (verbose) {
-            std::cout << "Lexer deserializado exitosamente." << std::endl;
-            std::cout << "Número de estados en el DFA: " << deserialized_automaton->get_all_states().size() << std::endl;
         }
         
         // Crear un nuevo lexer con el autómata deserializado

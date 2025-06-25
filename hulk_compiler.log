@@ -1,0 +1,172 @@
+
+
+2025-06-24 23:15:18.337 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:15:18.337 [INFO] === HULK Compiler Starting ===
+2025-06-24 23:15:18.337 [INFO] Usando archivo: ./script.hulk
+2025-06-24 23:15:18.337 [INFO] Cargando gramática de HULK
+2025-06-24 23:15:18.338 [INFO] Gramática HULK cargada con 114 producciones
+2025-06-24 23:15:18.338 [INFO] Intentando leer archivo fuente: ./script.hulk
+2025-06-24 23:15:18.338 [DEBUG] Archivo abierto, leyendo contenido
+2025-06-24 23:15:18.338 [INFO] Archivo leído exitosamente: ./script.hulk (237 bytes)
+2025-06-24 23:15:18.338 [INFO] Iniciando proceso de compilación HULK
+2025-06-24 23:15:18.338 [INFO] Longitud del código fuente: 237 bytes
+2025-06-24 23:15:18.338 [INFO] Cargando artefactos del compilador (lexer y parser)
+2025-06-24 23:15:18.346 [INFO] Artefactos del compilador cargados exitosamente
+2025-06-24 23:15:18.346 [INFO] Iniciando tokenización del código fuente
+2025-06-24 23:15:18.346 [INFO] Tokenizando código fuente (237 bytes)
+2025-06-24 23:15:18.348 [INFO] Tokenización completada con éxito, generados 80 tokens
+2025-06-24 23:15:18.348 [INFO] Iniciando construcción del AST
+2025-06-24 23:15:18.348 [INFO] Ejecutando análisis sintáctico
+2025-06-24 23:15:18.349 [ERROR] Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+2025-06-24 23:15:18.349 [ERROR] Error en la construcción del AST: Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+
+
+2025-06-24 23:20:56.896 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:20:56.896 [INFO] === HULK Compiler Starting ===
+2025-06-24 23:20:56.896 [INFO] Usando archivo: ./script.hulk
+2025-06-24 23:20:56.896 [INFO] Cargando gramática de HULK
+2025-06-24 23:20:56.897 [INFO] Gramática HULK cargada con 114 producciones
+2025-06-24 23:20:56.897 [INFO] Intentando leer archivo fuente: ./script.hulk
+2025-06-24 23:20:56.897 [DEBUG] Archivo abierto, leyendo contenido
+2025-06-24 23:20:56.897 [INFO] Archivo leído exitosamente: ./script.hulk (237 bytes)
+2025-06-24 23:20:56.897 [INFO] Iniciando proceso de compilación HULK
+2025-06-24 23:20:56.897 [INFO] Longitud del código fuente: 237 bytes
+2025-06-24 23:20:56.897 [INFO] Cargando artefactos del compilador (lexer y parser)
+2025-06-24 23:20:56.905 [INFO] Artefactos del compilador cargados exitosamente
+2025-06-24 23:20:56.905 [INFO] Iniciando tokenización del código fuente
+2025-06-24 23:20:56.905 [INFO] Tokenizando código fuente (237 bytes)
+2025-06-24 23:20:56.907 [INFO] Tokenización completada con éxito, generados 80 tokens
+2025-06-24 23:20:56.908 [INFO] Iniciando construcción del AST
+2025-06-24 23:20:56.908 [INFO] Ejecutando análisis sintáctico
+2025-06-24 23:20:56.908 [ERROR] Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+2025-06-24 23:20:56.908 [ERROR] Error en la construcción del AST: Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+
+
+2025-06-24 23:37:09.412 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-24 23:37:09.412 [INFO] === HULK Compiler Starting ===
+2025-06-24 23:37:09.412 [INFO] Usando archivo: ./script.hulk
+2025-06-24 23:37:09.412 [INFO] Cargando gramática de HULK
+2025-06-24 23:37:09.413 [INFO] Gramática HULK cargada con 114 producciones
+2025-06-24 23:37:09.413 [INFO] Intentando leer archivo fuente: ./script.hulk
+2025-06-24 23:37:09.413 [DEBUG] Archivo abierto, leyendo contenido
+2025-06-24 23:37:09.414 [INFO] Archivo leído exitosamente: ./script.hulk (237 bytes)
+2025-06-24 23:37:09.414 [INFO] Iniciando proceso de compilación HULK
+2025-06-24 23:37:09.414 [INFO] Longitud del código fuente: 237 bytes
+2025-06-24 23:37:09.414 [INFO] Cargando artefactos del compilador (lexer y parser)
+2025-06-24 23:37:09.422 [INFO] Artefactos del compilador cargados exitosamente
+2025-06-24 23:37:09.422 [INFO] Iniciando tokenización del código fuente
+2025-06-24 23:37:09.423 [INFO] Tokenizando código fuente (237 bytes)
+2025-06-24 23:37:09.425 [INFO] Tokenización completada con éxito, generados 80 tokens
+2025-06-24 23:37:09.425 [INFO] Iniciando construcción del AST
+2025-06-24 23:37:09.425 [INFO] Ejecutando análisis sintáctico
+2025-06-24 23:37:09.425 [ERROR] Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+2025-06-24 23:37:09.425 [ERROR] Error en la construcción del AST: Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+
+
+2025-06-25 00:06:07.356 [INFO] ======== LOGGING SESSION STARTED ========
+2025-06-25 00:06:07.356 [INFO] === HULK Compiler Starting ===
+2025-06-25 00:06:07.356 [INFO] Usando archivo: ./script.hulk
+2025-06-25 00:06:07.356 [INFO] Cargando gramática de HULK
+2025-06-25 00:06:07.357 [INFO] Gramática HULK cargada con 114 producciones
+2025-06-25 00:06:07.357 [INFO] Intentando leer archivo fuente: ./script.hulk
+2025-06-25 00:06:07.357 [DEBUG] Archivo abierto, leyendo contenido
+2025-06-25 00:06:07.357 [INFO] Archivo leído exitosamente: ./script.hulk (237 bytes)
+2025-06-25 00:06:07.357 [INFO] Iniciando proceso de compilación HULK
+2025-06-25 00:06:07.357 [INFO] Longitud del código fuente: 237 bytes
+2025-06-25 00:06:07.357 [INFO] Cargando artefactos del compilador (lexer y parser)
+2025-06-25 00:06:07.364 [INFO] Artefactos del compilador cargados exitosamente
+2025-06-25 00:06:07.365 [INFO] Iniciando tokenización del código fuente
+2025-06-25 00:06:07.365 [INFO] Tokenizando código fuente (237 bytes)
+2025-06-25 00:06:07.366 [INFO] Tokenización completada con éxito, generados 80 tokens
+2025-06-25 00:06:07.366 [INFO] Iniciando construcción del AST
+2025-06-25 00:06:07.366 [INFO] Ejecutando análisis sintáctico
+2025-06-25 00:06:07.367 [ERROR] Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+
+2025-06-25 00:06:07.367 [ERROR] Error en la construcción del AST: Error sintáctico: Error de sintaxis: token inesperado 'number'. Se esperaba: '!', 'bool', 'if', 'let', 'string', 'var_id' o 'while' en línea 3, columna 11
+
+Contexto del error:
+
+   ([3,6]:(
+   var_id[3,7]:x
+   >[3,9]:>
+>> number[3,11]:0 <<
+   )[3,12]:)
+   {[3,14]:{
+   var_id[4,5]:fibonacci
+

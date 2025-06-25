@@ -11,6 +11,7 @@
 #include <exception>
 #include "test.h"
 #include "execute.h"
+#include "Logger/Logger.h"
 
 using namespace std;
 
@@ -27,15 +28,23 @@ SemanticCheckerVisitor* semanticVisitor = new SemanticCheckerVisitor();
 CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
+    // Inicializar el sistema de registro
+    Logger::initialize("hulk_compiler.log", LogLevel::DEBUG);
+    LogInfo("=== HULK Compiler Starting ===");
+
     std::string file_path = "script.hulk"; // Default file path
     
-    // // Si se proporciona un argumento, utilizarlo como ruta del archivo
-    // if (argc > 1) {
-    //     file_path = argv[1];
-    //     std::cout << "Usando archivo: " << file_path << std::endl;
-    // }
+    // Si se proporciona un argumento, utilizarlo como ruta del archivo
+    if (argc > 1) {
+        file_path = argv[1];
+        LogInfo("Usando archivo: " + std::string(argv[1]));
+    } else {
+        LogInfo("Usando archivo por defecto: " + file_path);
+    }
 
+    LogInfo("Cargando gramática de HULK");
     Grammar hulk_grammar = getHulkGrammar();
+    LogInfo("Gramática HULK cargada con " + std::to_string(hulk_grammar.Productions().size()) + " producciones");
 
     std::string error_message;
     std::string script_content = read_source_file(file_path, error_message);
@@ -53,7 +62,6 @@ int main(int argc, char* argv[]) {
     root->print();
 
     // Simple test to avoid segfaults
-    std::cout << "=== HULK Compiler Starting ===" << std::endl;
     
     // Check if we have an input file
     // const char* filename = "script.hulk"; // default
@@ -229,12 +237,8 @@ int main(int argc, char* argv[]) {
             delete root;
             return 1;
         } else {
-            std::cout << "Semantic analysis completed successfully with no errors." << std::endl;
+            // Semantic analysis completed successfully
         }
-        
-    //     std::cout << "All semantic analysis passes completed successfully!" << std::endl;
-
-        std::cout << "\n=== Generating Code ===" << std::endl;
     //     // Initialize the codegen visitor
         codegenVisitor->initialize();
         
@@ -243,7 +247,6 @@ int main(int argc, char* argv[]) {
         
     // //     // Generate and execute code
         codegenVisitor->generateCode();
-        std::cout << "Code generation completed." << std::endl;
     //     // Clean up
         delete symbolCollectorVisitor;
         delete globalContext;
