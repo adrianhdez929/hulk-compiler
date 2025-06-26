@@ -8,7 +8,7 @@
  */
 int main(int argc, char* argv[]) {
     // Inicializar el sistema de registro
-    Logger::initialize("hulk_artifacts.log", LogLevel::DEBUG);
+    Logger::initialize("hulk_artifacts.log", LogLevel::DEBUG, "Artifact Creator");
     LogInfo("=== HULK Artifact Creator Starting ===");
 
     // Obtener la gramática de Hulk

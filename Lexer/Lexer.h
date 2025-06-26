@@ -6,6 +6,7 @@
 #include "Regex.h"
 #include "../Automata/nfa.h"
 #include "Token.h"
+#include "../Logger/Logger.h"
 
 /**
  * @class Lexer
@@ -79,33 +80,70 @@ public:
         }
         std::string token;
         std::string lex;
+        
+        if (verbose_ && input.length() > 0) {
+            std::string display_input = input.substr(0, std::min(size_t(20), input.length()));
+            if (input.length() > 20) display_input += "...";
+            LogDebug("Lexer: Analizando entrada: '" + display_input + "'");
+        }
+        
         for (char c : input) {
             bool found_transition = false;
+            
             for (const auto& [symbol, next_states] : current_state->transitions()) {
                 if (symbol == std::string(1, c)) {
                     // assert (next_states.size() == 1) && "Automaton should be deterministic.";
                     if (next_states.size() != 1) {
-                        throw std::runtime_error("Automaton is not deterministic, multiple transitions found for symbol: " + std::string(1, c));
+                        std::string error_msg = "Automaton is not deterministic, multiple transitions found for symbol: " + std::string(1, c);
+                        LogError("Lexer: " + error_msg);
+                        throw std::runtime_error(error_msg);
                     }
+                    
                     current_state = next_states[0];
                     lex += c;
                     found_transition = true;
+                    
+                    if (verbose_) {
+                        LogDebug("Lexer: Transición con '" + std::string(1, c) + "' al estado " + 
+                                std::to_string(current_state->id()) + ", lexema actual: '" + lex + "'");
+                    }
+                    
                     if (current_state->is_final()) {
                         token = lex;
                         final_state = *current_state;
+                        
+                        if (verbose_) {
+                            LogDebug("Lexer: Estado final alcanzado, tipo de token: '" + final_state.tag() + 
+                                    "', lexema completo: '" + token + "'");
+                        }
                     }
                 }
                 if (found_transition) break;
             }
+            
             if (!found_transition) {
                 if (!token.empty()) {
                     // If we found a token, return it
+                    if (verbose_) {
+                        LogDebug("Lexer: No hay transición con '" + std::string(1, c) + 
+                                "', devolviendo token encontrado: '" + token + "' (tipo: '" + final_state.tag() + "')");
+                    }
                     return {final_state, token};
                 }
+                
                 // If no token found, return error state
+                if (verbose_) {
+                    LogDebug("Lexer: No hay transición con '" + std::string(1, c) + 
+                            "' y no se encontró token válido");
+                }
                 return {State(-1), ""}; // No transition found, return error state
             }
         }
+        
+        if (verbose_ && !token.empty()) {
+            LogDebug("Lexer: Fin de entrada, devolviendo token: '" + token + "' (tipo: '" + final_state.tag() + "')");
+        }
+        
         return {final_state, token};
     }
 
@@ -136,14 +174,28 @@ public:
                     }
                 }
                 
+                if (verbose_) {
+                    LogDebug("Lexer: Token encontrado - Tipo: '" + token_type + "', Lexema: '" + token + "'");
+                }
+                
                 tokens.push_back(std::make_pair(token, token_type));
                 remaining_text = remaining_text.substr(token.size());
             }
             else {
-                tokens.push_back(std::make_pair(std::string(1, remaining_text[0]), "ERROR"));
+                std::string error_char(1, remaining_text[0]);
+                
+                LogError("Lexer: Caracter desconocido '" + error_char + "' en posición " + 
+                        std::to_string(input.length() - remaining_text.length()));
+                
+                tokens.push_back(std::make_pair(error_char, "ERROR"));
                 remaining_text = remaining_text.substr(1); // Skip one character on error
             }
         }
+        
+        if (verbose_) {
+            LogDebug("Lexer: Agregando token final EOF");
+        }
+        
         tokens.push_back(std::make_pair("EOF","EOF"));
         return tokens;
     }
@@ -192,9 +244,29 @@ public:
             // Filtrar espacios, tabulaciones, saltos de línea y comentarios
             if (state.tag() == "space" || state.tag() == "tab" || state.tag() == "newline" || state.tag() == "comment") {
                 // Ignorar estos tokens pero seguir rastreando posición
+                if (verbose_) {
+                    std::string tokenType = state.tag();
+                    std::string displayToken = token;
+                    
+                    // Para mejor legibilidad en los logs
+                    if (tokenType == "newline") displayToken = "\\n";
+                    else if (tokenType == "tab") displayToken = "\\t";
+                    else if (tokenType == "space" && token.empty()) displayToken = " ";
+                    
+                    LogDebug("Lexer: Ignorando token '" + tokenType + "' en línea " + 
+                             std::to_string(token_line) + ", columna " + std::to_string(token_column) + 
+                             " (lexema: '" + displayToken + "')");
+                }
             } else {
                 // Crear un token con información de posición
                 Token pos_token(state.tag(), token, grammar, token_line, token_column);
+                
+                if (verbose_) {
+                    LogDebug("Lexer: Generando token '" + state.tag() + "' en línea " + 
+                             std::to_string(token_line) + ", columna " + std::to_string(token_column) + 
+                             " (lexema: '" + token + "')");
+                }
+                
                 result.push_back(pos_token);
             }
             
@@ -204,6 +276,12 @@ public:
         
         // Añadir token de fin de archivo
         Token eof_token("EOF", "EOF", grammar, line, column);
+        
+        if (verbose_) {
+            LogDebug("Lexer: Agregando token final 'EOF' en línea " + 
+                     std::to_string(line) + ", columna " + std::to_string(column));
+        }
+        
         result.push_back(eof_token);
         
         return result;

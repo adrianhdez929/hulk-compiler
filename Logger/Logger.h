@@ -42,8 +42,10 @@ public:
     // Get singleton instance
     static Logger* getInstance();
     
-    // Initialize with log file and log level
-    static void initialize(const std::string& filename = "hulk_compiler.log", LogLevel level = LogLevel::INFO);
+    // Initialize with log file, log level and component name
+    static void initialize(const std::string& filename = "hulk_compiler.log", 
+                          LogLevel level = LogLevel::INFO,
+                          const std::string& component = "General");
     
     // Close the log file
     void close();

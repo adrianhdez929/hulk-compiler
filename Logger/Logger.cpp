@@ -6,18 +6,19 @@ std::mutex Logger::mutex;
 
 Logger::Logger(const std::string& filename, LogLevel level)
     : logLevel(level), enabled(true) {
+    // No hacemos nada con el encabezado aquí, ya que la inicialización real
+    // se maneja en el método initialize
     logFile.open(filename, std::ios::out | std::ios::app);
     
     if (!logFile.is_open()) {
         std::cerr << "Error: Could not open log file: " << filename << std::endl;
-    } else {
-        logFile << "\n\n" << getTimestamp() << " [INFO] ======== LOGGING SESSION STARTED ========" << std::endl;
+        std::cerr << "Please ensure the directory exists and has write permissions." << std::endl;
     }
 }
 
 Logger::~Logger() {
     if (logFile.is_open()) {
-        logFile << getTimestamp() << " [INFO] ======== LOGGING SESSION ENDED ========\n" << std::endl;
+        logFile << getTimestamp() << " [INFO] ========== LOGGING SESSION ENDED ==========\n" << std::endl;
         logFile.close();
     }
 }
@@ -26,23 +27,56 @@ Logger* Logger::getInstance() {
     if (instance == nullptr) {
         std::lock_guard<std::mutex> lock(mutex);
         if (instance == nullptr) {
+            // Si se llama a getInstance sin inicializar primero, creamos una instancia con valores por defecto
+            // y registramos que fue creada automáticamente
             instance = new Logger();
+            if (instance->logFile.is_open()) {
+                // Obtener timestamp actual para la sesión
+                std::string timestamp = instance->getTimestamp();
+                
+                // Encabezado de sesión para instancia creada automáticamente
+                instance->logFile << "\n\n" << timestamp << " [INFO] ========== HULK COMPILER LOGGING SESSION ===========" << std::endl;
+                instance->logFile << timestamp << " [INFO] Log file: hulk_compiler.log" << std::endl;
+                instance->logFile << timestamp << " [INFO] Log level: INFO" << std::endl;
+                instance->logFile << timestamp << " [INFO] Initialized automatically by getInstance()" << std::endl;
+                instance->logFile << timestamp << " [INFO] ==================================================" << std::endl;
+            }
         }
     }
     return instance;
 }
 
-void Logger::initialize(const std::string& filename, LogLevel level) {
+void Logger::initialize(const std::string& filename, LogLevel level, const std::string& component) {
     std::lock_guard<std::mutex> lock(mutex);
+    
+    // Verificar si ya existe una instancia
     if (instance != nullptr) {
-        delete instance;
+        // Si ya existe una instancia y es para el mismo archivo, solo registramos el componente
+        if (instance->logFile.is_open()) {
+            instance->info("Logger initialization requested from component: " + component);
+        }
+        return;
     }
+    
+    // Crear una nueva instancia si no existe
     instance = new Logger(filename, level);
+    
+    if (instance->logFile.is_open()) {
+        // Obtener timestamp actual para la sesión
+        std::string timestamp = instance->getTimestamp();
+        
+        // Encabezado de sesión mejorado y único
+        instance->logFile << "\n\n" << timestamp << " [INFO] ========== HULK COMPILER LOGGING SESSION ===========" << std::endl;
+        instance->logFile << timestamp << " [INFO] Log file: " << filename << std::endl;
+        instance->logFile << timestamp << " [INFO] Log level: " << instance->levelToString(level) << std::endl;
+        instance->logFile << timestamp << " [INFO] Initialized by component: " << component << std::endl;
+        instance->logFile << timestamp << " [INFO] ==================================================" << std::endl;
+    }
 }
 
 void Logger::close() {
     if (logFile.is_open()) {
-        logFile << getTimestamp() << " [INFO] ======== LOGGING SESSION ENDED ========\n" << std::endl;
+        logFile << getTimestamp() << " [INFO] ========== LOGGING SESSION ENDED ==========\n" << std::endl;
         logFile.close();
     }
 }

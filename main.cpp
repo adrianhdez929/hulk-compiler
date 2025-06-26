@@ -29,7 +29,7 @@ CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
     // Inicializar el sistema de registro
-    Logger::initialize("hulk_compiler.log", LogLevel::DEBUG);
+    Logger::initialize("hulk_compiler.log", LogLevel::DEBUG, "Main Compiler");
     LogInfo("=== HULK Compiler Starting ===");
 
     std::string file_path = "script.hulk"; // Default file path

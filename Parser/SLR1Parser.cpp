@@ -50,13 +50,37 @@ SLR1Parser::SLR1Parser(Grammar& G, bool verbose)
     // Initialize action and goto tables
     action_ = std::map<std::pair<int, Symbol>, std::pair<std::string, int>>();
     goto_ = std::map<std::pair<int, Symbol>, int>();
+    
+    if (verbose_) {
+        LogInfo("Inicializando parser SLR1 con gramática de " + std::to_string(G_.Productions().size()) + " producciones");
+        LogDebug("Detalle de la gramática:");
+        for (const auto& prod : G_.Productions()) {
+            LogDebug("  " + prod.ToString() + " (ID: " + std::to_string(prod.get_id()) + ")");
+        }
+    }
+    
     BuildParsingTable();
+    
+    if (verbose_) {
+        LogInfo("Tablas de análisis sintáctico creadas: " + std::to_string(action_.size()) + " entradas en ACTION, " 
+                + std::to_string(goto_.size()) + " entradas en GOTO");
+    }
 }
 
 //Parse method
 std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const std::vector<std::string>& tokens) {
     // Convert string tokens to Terminal objects
     std::vector<Terminal> terminal_tokens;
+    
+    LogInfo("Iniciando análisis sintáctico SLR1 con " + std::to_string(tokens.size()) + " tokens");
+    
+    if (verbose_) {
+        LogDebug("Lista de tokens recibidos por el parser:");
+        for (size_t i = 0; i < tokens.size(); i++) {
+            LogDebug("[" + std::to_string(i) + "] Token string: " + tokens[i]);
+        }
+    }
+    
     for (const auto& token : tokens) {
         terminal_tokens.push_back(Terminal(token, G_));
     }
@@ -89,17 +113,35 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         state_stack.push(action_value.second);
                         symbol_stack.push(current_token);
                         actions.push_back(SHIFT);
+                        
+                        if (verbose_) {
+                            LogDebug("SHIFT: Token '" + current_token.Name() + "' al estado " + 
+                                    std::to_string(action_value.second));
+                        }
+                        
                         index++;
                     } else if (action_value.first == REDUCE) {
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
+                        
                         if (verbose_) {
-
+                            LogDebug("REDUCE por producción: " + production.ToString() + 
+                                    " (ID: " + std::to_string(production.get_id()) + ")");
+                        } else {
+                            // Log básico incluso sin verbose
+                            LogDebug("REDUCE: " + production.ToString());
                         }
+                        
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
                         
-                        for (int i = 0; i < production.Right().Symbols().size(); i++) {
+                        int symbols_to_pop = production.Right().Symbols().size();
+                        if (verbose_) {
+                            LogDebug("Pop de " + std::to_string(symbols_to_pop) + 
+                                    " símbolos de las pilas de estados y símbolos");
+                        }
+                        
+                        for (int i = 0; i < symbols_to_pop; i++) {
                             state_stack.pop();
                             if (!symbol_stack.empty()) {
                                 symbol_stack.pop();
@@ -108,21 +150,29 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
 
                         auto goto_key = std::make_pair(state_stack.top(), *(production.Left()));
                         if (goto_.find(goto_key) != goto_.end()) {
-                            state_stack.push(goto_[goto_key]);
+                            int new_state = goto_[goto_key];
+                            state_stack.push(new_state);
+                            
+                            if (verbose_) {
+                                LogDebug("GOTO[" + std::to_string(state_stack.top()) + ", " + 
+                                        production.Left()->Name() + "] = " + std::to_string(new_state));
+                            }
                         } else {
                             // Error interno del parser - no se encontró una transición goto
-                            if (false && verbose_) {
-                                // Código omitido para evitar impresiones en consola
-                            }
-                            
-                            // Este es un error interno del parser, probablemente debido a una gramática mal construida
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
                                                 production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());
+                            LogError(error_msg);
                             throw std::runtime_error(error_msg);
                         }
                     } else if (action_value.first == OK) {
                         // Accept action
                         actions.push_back(OK);
+                        
+                        LogInfo("Parser SLR1: Entrada aceptada");
+                        
+                        if (verbose_) {
+                            LogDebug("ACCEPT: La entrada ha sido reconocida correctamente por la gramática");
+                        }
                         if (G_.IsAugmented()) {
                             // If the grammar is augmented, we can consider the production as accepted
                             for (const auto& production : G_.Productions()) {
@@ -243,21 +293,10 @@ void SLR1Parser::BuildParsingTable() {
         throw std::runtime_error("Grammar is not augmented");
     }
     auto firsts = compute_firsts();
-
-    // Debug: Print FIRST sets (deshabilitado)
-    if (false && verbose_) {
-        // Código omitido para evitar impresiones en consola
-    }
+    // Los conjuntos FIRST ya están registrados dentro de compute_firsts()
     
-    // auto EOFile = Sentence(G_.GetEndOfFile());
-    // firsts[EOFile] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
-
     auto follows = compute_follows(firsts);
-    
-    // Debug: Print FOLLOW sets (deshabilitado)
-    if (false && verbose_) {
-        // Código omitido para evitar impresiones en consola
-    }
+    // Los conjuntos FOLLOW ya están registrados dentro de compute_follows()
     
     State* automaton = BuildLR0Automaton().to_deterministic();
     for (const auto& state : automaton->get_all_states()) {
@@ -301,16 +340,30 @@ void SLR1Parser::BuildParsingTable() {
 void SLR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::string, int>>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  const std::pair<std::string, int>& value) {
-    if (false && verbose_) {
-        // Código omitido para evitar impresiones en consola
+    if (verbose_) {
+        std::string action_type = value.first;
+        std::string log_msg = "ACTION[" + std::to_string(key.first) + ", " + key.second.Name() + "] = ";
+        
+        if (action_type == SHIFT) {
+            log_msg += "SHIFT " + std::to_string(value.second);
+        } else if (action_type == REDUCE) {
+            auto production = G_.Productions()[value.second];
+            log_msg += "REDUCE by " + production.ToString() + " (ID: " + std::to_string(production.get_id()) + ")";
+        } else if (action_type == OK) {
+            log_msg += "ACCEPT";
+        } else {
+            log_msg += action_type + " " + std::to_string(value.second);
+        }
+        
+        LogDebug(log_msg);
     }
     table[key] = value;
 }
 void SLR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table, 
                                  const std::pair<int, Symbol>& key, 
                                  int value) {
-    if (false && verbose_) {
-        // Código omitido para evitar impresiones en consola
+    if (verbose_) {
+        LogDebug("GOTO[" + std::to_string(key.first) + ", " + key.second.Name() + "] = " + std::to_string(value));
     }
     table[key] = value;
 }
@@ -388,6 +441,8 @@ map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
     map<Sentence, ContainerSet<string>> firsts;
     bool changed = true;
     
+    LogDebug("Iniciando cálculo de conjuntos FIRST");
+    
     // Inicializar primeros para terminales
     for (const auto& terminal : G_.Terminals()) {
         if (terminal->IsEndOfFile()) {
@@ -396,20 +451,35 @@ map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
         ContainerSet<string> cs;
         cs.add(terminal->Name());
         firsts[Sentence(terminal)] = cs;
+        
+        if (verbose_) {
+            LogDebug("FIRST(" + terminal->Name() + ") = {" + terminal->Name() + "} (terminal)");
+        }
     }
     // firsts[Sentence(G_.GetEndOfFile())] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
     
     // Inicializar primeros para no terminales
     for (const auto& nonterminal : G_.NonTerminals()) {
         firsts[Sentence(nonterminal)] = ContainerSet<string>();
+        
+        if (verbose_) {
+            LogDebug("FIRST(" + nonterminal->Name() + ") inicializado como conjunto vacío");
+        }
     }
 
     // for (const auto& prod : G_.Productions()) {
     //     auto right = prod.Right();
     //     firsts[right] = ContainerSet<string>();
     // }
+    
+    int iteration = 0;
     while (changed == true) {
         changed = false;
+        iteration++;
+        
+        if (verbose_) {
+            LogDebug("Iteración " + std::to_string(iteration) + " del algoritmo de cálculo de FIRST");
+        }
 
         for (const auto& prod : G_.Productions()) {
             const auto& X = Sentence(prod.Left());
@@ -420,17 +490,67 @@ map<Sentence, ContainerSet<string>> SLR1Parser::compute_firsts() {
 
             // Firsts de alpha
             auto& first_alpha = firsts[alpha];
+            
+            // Si estamos en modo verbose, registramos la producción que estamos analizando
+            if (verbose_) {
+                LogDebug("Analizando producción: " + prod.ToString());
+            }
 
             ContainerSet<string> local_first = compute_local_firsts(alpha, firsts);
 
+            // Registramos los cambios si hay alguno
             bool changed_alpha = first_alpha.hard_update(local_first);
-            // bool changed_alpha = hard_update_container_set(first_alpha, local_first);
             bool changed_X = first_X.hard_update(local_first);
-            // bool changed_X = hard_update_container_set(first_X, local_first);
             changed = changed || changed_alpha || changed_X;
             
+            if (verbose_ && (changed_alpha || changed_X)) {
+                std::string first_str = "{";
+                bool first = true;
+                for (const auto& val : local_first.get_values()) {
+                    if (!first) first_str += ", ";
+                    first_str += val;
+                    first = false;
+                }
+                if (local_first.contains_epsilon()) {
+                    if (!first) first_str += ", ";
+                    first_str += "ε";
+                }
+                first_str += "}";
+                
+                if (changed_alpha) {
+                    LogDebug("FIRST de la parte derecha actualizado: FIRST(" + alpha.ToString() + ") = " + first_str);
+                }
+                
+                if (changed_X) {
+                    LogDebug("FIRST del no terminal actualizado: FIRST(" + X.ToString() + ") = " + first_str);
+                }
+            }
         }
     }
+    
+    // Registrar los conjuntos FIRST finales
+    if (verbose_) {
+        LogDebug("=== CONJUNTOS FIRST CALCULADOS ===");
+        for (const auto& [sentence, set] : firsts) {
+            std::string values = "{";
+            bool first = true;
+            for (const auto& val : set.get_values()) {
+                if (!first) values += ", ";
+                values += val;
+                first = false;
+            }
+            if (set.contains_epsilon()) {
+                if (!first) values += ", ";
+                values += "ε";
+            }
+            values += "}";
+            LogDebug("FIRST(" + sentence.ToString() + ") = " + values);
+        }
+    } else {
+        // Versión resumida para log siempre (no verbose)
+        LogInfo("Conjuntos FIRST calculados");
+    }
+    
     return firsts;
 };
 
@@ -492,37 +612,81 @@ std::map<Sentence, ContainerSet<string>> SLR1Parser::compute_follows(const map<S
     std::map<Sentence, ContainerSet<string>> follows;
     bool changed = true;
 
+    LogDebug("Iniciando cálculo de conjuntos FOLLOW");
+
+    // Inicializar FOLLOW para todos los no terminales
     for (const auto& nonterminal : G_.NonTerminals()) {
         follows[Sentence(nonterminal)] = ContainerSet<string>();
+        if (verbose_) {
+            LogDebug("FOLLOW(" + nonterminal->Name() + ") inicializado como conjunto vacío");
+        }
     }
+    
+    // Agregar EOF al FOLLOW del símbolo inicial
     Sentence start_sentence = Sentence(G_.GetStartSymbol());
     shared_ptr<Symbol> EOFile = G_.GetEndOfFile();
     follows[start_sentence] = ContainerSet<string>();
     follows[start_sentence].add(EOFile->Name());
+    
+    if (verbose_) {
+        LogDebug("FOLLOW(" + start_sentence.ToString() + ") = {" + EOFile->Name() + "} (símbolo inicial)");
+    }
 
+    int iteration = 0;
     while (changed == true) {
         changed = false;
-        auto prods = G_.Productions();
+        iteration++;
+        
+        if (verbose_) {
+            LogDebug("Iteración " + std::to_string(iteration) + " del algoritmo de cálculo de FOLLOW");
+        }
+        
         for (const auto& prod : G_.Productions()) {
             const auto& X = Sentence(prod.Left());
             const auto& alpha = prod.Right();
 
+            if (verbose_) {
+                LogDebug("Analizando producción: " + prod.ToString());
+            }
+
             auto& follows_x = follows[X];
 
-            // If alpha is epsilon, add epsilon to local first
+            // Si la parte derecha es epsilon, no hay nada que procesar
+            bool is_epsilon = false;
             for (const auto& symbol : alpha.Symbols()) {
                 if (symbol->IsEpsilon()) {
-                    continue;
+                    is_epsilon = true;
+                    break;
                 }
             }
             
+            if (is_epsilon) {
+                if (verbose_) {
+                    LogDebug("La parte derecha es epsilon, saltando esta producción");
+                }
+                continue;
+            }
             
             int n = alpha.Symbols().size() - 1;
             if (n == 0) {
                 auto& current_symbol = alpha.Symbols()[0];
                 if (current_symbol->IsNonTerminal()) {
-                    // changed |= update_container_set(follows[current_symbol], follows_x);
-                    changed |= follows[Sentence(current_symbol)].update(follows_x);
+                    bool updated = follows[Sentence(current_symbol)].update(follows_x);
+                    
+                    if (updated && verbose_) {
+                        std::string follow_str = "{";
+                        bool first = true;
+                        for (const auto& val : follows_x.get_values()) {
+                            if (!first) follow_str += ", ";
+                            follow_str += val;
+                            first = false;
+                        }
+                        follow_str += "}";
+                        
+                        LogDebug("FOLLOW(" + current_symbol->Name() + ") actualizado con FOLLOW(" + X.ToString() + ") = " + follow_str);
+                    }
+                    
+                    changed |= updated;
                 }
             }
             else {
@@ -531,26 +695,71 @@ std::map<Sentence, ContainerSet<string>> SLR1Parser::compute_follows(const map<S
                     auto& beta = alpha.Symbols()[i + 1];
                     Sentence Y_sentence = Sentence(Y);
                     Sentence beta_sentence = Sentence(beta);
+                    
                     if (Y->IsNonTerminal()) {
                         if (symbol_firsts.find(beta_sentence) != symbol_firsts.end()) {
-                            changed |= follows[Y_sentence].update(symbol_firsts.at(beta_sentence));
-                            // changed |= update_container_set(follows[Y], symbol_firsts.at(beta));
+                            bool updated_first = follows[Y_sentence].update(symbol_firsts.at(beta_sentence));
+                            
+                            if (updated_first && verbose_) {
+                                std::string first_str = "{";
+                                bool first = true;
+                                for (const auto& val : symbol_firsts.at(beta_sentence).get_values()) {
+                                    if (!first) first_str += ", ";
+                                    first_str += val;
+                                    first = false;
+                                }
+                                first_str += "}";
+                                
+                                LogDebug("FOLLOW(" + Y->Name() + ") actualizado con FIRST(" + beta->Name() + ") = " + first_str);
+                            }
+                            
+                            changed |= updated_first;
+                            
                             if (symbol_firsts.at(beta_sentence).contains_epsilon()) {
-                                changed |= follows[Y_sentence].update(follows_x);
-                                // changed |= update_container_set(follows[Y], follows_x);
+                                bool updated_follow = follows[Y_sentence].update(follows_x);
+                                
+                                if (updated_follow && verbose_) {
+                                    LogDebug("FIRST(" + beta->Name() + ") contiene epsilon, agregando FOLLOW(" + X.ToString() + ") a FOLLOW(" + Y->Name() + ")");
+                                }
+                                
+                                changed |= updated_follow;
                             }
                         }
                     }
-                    if (i == n-1 && beta->IsNonTerminal()) {
-                        // changed |= update_container_set(follows.at(beta_sentence), follows_x);
-                        changed |= follows[beta_sentence].update(follows_x);
-                    }
                     
-                    // auto& current_follow = follows[current_symbol]; // Remove or comment out if current_symbol is undefined
+                    if (i == n-1 && beta->IsNonTerminal()) {
+                        bool updated = follows[beta_sentence].update(follows_x);
+                        
+                        if (updated && verbose_) {
+                            LogDebug("Último símbolo en la parte derecha: agregando FOLLOW(" + X.ToString() + ") a FOLLOW(" + beta->Name() + ")");
+                        }
+                        
+                        changed |= updated;
+                    }
                 }
             }
         }
     }
+    
+    // Registrar los conjuntos FOLLOW finales
+    if (verbose_) {
+        LogDebug("=== CONJUNTOS FOLLOW CALCULADOS ===");
+        for (const auto& [sentence, set] : follows) {
+            std::string values = "{";
+            bool first = true;
+            for (const auto& val : set.get_values()) {
+                if (!first) values += ", ";
+                values += val;
+                first = false;
+            }
+            values += "}";
+            LogDebug("FOLLOW(" + sentence.ToString() + ") = " + values);
+        }
+    } else {
+        // Versión resumida para log siempre (no verbose)
+        LogInfo("Conjuntos FOLLOW calculados");
+    }
+    
     return follows;
 };
 // Método para limpiar todos los estados creados
@@ -943,6 +1152,20 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
 
     int index = 0;
     int current_position = 0;
+    
+    LogInfo("SLR1Parser: Analizando " + std::to_string(tokens.size()) + " tokens");
+    
+    
+    if (verbose_) {
+        LogInfo("Iniciando análisis sintáctico con " + std::to_string(tokens.size()) + " tokens");
+        LogDebug("Lista de tokens a analizar:");
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            LogDebug("  [" + std::to_string(i) + "] " + tokens[i].ToString() + 
+                     " (línea " + std::to_string(tokens[i].Line()) + 
+                     ", columna " + std::to_string(tokens[i].Column()) + 
+                     ", lexema: '" + tokens[i].Lexeme() + "')");
+        }
+    }
 
     try {
         while (index < tokens.size() || !symbol_stack.empty()) {
@@ -966,8 +1189,9 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     else if (action_value.first == REDUCE) {
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
-                        if (false && verbose_) {
-                            // Código omitido para evitar impresiones en consola
+                        if (verbose_) {
+                            LogDebug("REDUCE por producción: " + production.ToString() + 
+                                    " (ID: " + std::to_string(production.get_id()) + ")");
                         }
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
@@ -985,8 +1209,9 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                         } 
                         else {
                             // Error interno del parser - no se encontró una transición goto
-                            if (false && verbose_) {
-                                // Código omitido para evitar impresiones en consola
+                            if (verbose_) {
+                                LogError("Error interno: No se encontró transición GOTO para el no terminal '" + 
+                                       production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top()));
                             }
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
                                                 production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());
@@ -995,6 +1220,9 @@ std::pair<std::vector<int>, std::vector<std::string>> SLR1Parser::Parse(const st
                     } 
                     else if (action_value.first == OK) {
                         // Accept action
+                        if (verbose_) {
+                            LogInfo("Análisis sintáctico completado con éxito (ACCEPT)");
+                        }
                         actions.push_back(OK);
                         break;
                     } 
