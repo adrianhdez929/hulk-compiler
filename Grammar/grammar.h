@@ -1,5 +1,6 @@
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <memory>
 #include <variant>
 #include <typeindex>
@@ -120,14 +121,14 @@ class Grammar {
                 throw std::runtime_error("Symbol already has precedence defined: " + symbol);
             }
             precedences_[symbol] = {precedence, associativity};
-        }
+        };
 
         void SetProductionPrecedence(int id, const std::string& symbol) {
             if (production_precedences_.find(id) != production_precedences_.end()) {
                 throw std::runtime_error("Production ID already has precedence defined: " + std::to_string(id));
             }
             production_precedences_[id] = symbol;
-        }
+        };
 
         std::pair<int, Associativity> GetPrecedence(const std::string& symbol) const {
             auto it = precedences_.find(symbol);
@@ -135,7 +136,7 @@ class Grammar {
                 throw std::runtime_error("No precedence defined for symbol: " + symbol);
             }
             return it->second;
-        }
+        };
 
         std::string GetProductionPrecedence(int id) const {
             auto it = production_precedences_.find(id);
@@ -143,7 +144,7 @@ class Grammar {
                 throw std::runtime_error("No precedence defined for production ID: " + std::to_string(id));
             }
             return it->second;
-        }
+        };
 
 
 

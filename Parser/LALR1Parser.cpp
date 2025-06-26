@@ -476,9 +476,11 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 };
 
 ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
+    // Primero verificar si ya está calculado en la caché
     if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
         return firsts_cache_.at(alpha);
     }
+
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
     bool all_epsilon = true;
@@ -740,7 +742,8 @@ std::vector<Item> LALR1Parser::closure_lr1(const std::vector<Item>& items, const
                 beta_symbols.push_back(sym);
             }
 
-            auto first_beta = compute_local_firsts(Sentence(beta_symbols), firsts, G_, false);
+            // Calcular FIRST(β)
+            auto first_beta = compute_local_firsts(Sentence(beta_symbols), firsts, G_, verbose_);
 
             ContainerSet<string> lookaheads;
             for (const auto& term : first_beta.get_values()) {
@@ -869,6 +872,8 @@ State LALR1Parser::BuildLALR1Automaton() {
                         }
                     }
                 }
+            } else {
+                // Estado nuevo: crear y registrar
                 // Crear nuevo estado
                 new_state = new State(state_id++, true);
                 for (const auto& item : goto_items) {
