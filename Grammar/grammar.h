@@ -107,6 +107,47 @@ class Grammar {
         bool IsAugmented() const;
         //Sobreescribir el .tostring
         std::string ToString() const;
+
+        // ====== Asosiatividad y precedencia ======
+        enum Associativity {
+            LEFT,
+            RIGHT,
+            NONASSOC
+        };
+
+        void AddPrecedence(const std::string& symbol, int precedence, Associativity associativity) {
+            if (precedences_.find(symbol) != precedences_.end()) {
+                throw std::runtime_error("Symbol already has precedence defined: " + symbol);
+            }
+            precedences_[symbol] = {precedence, associativity};
+        }
+
+        void SetProductionPrecedence(int id, const std::string& symbol) {
+            if (production_precedences_.find(id) != production_precedences_.end()) {
+                throw std::runtime_error("Production ID already has precedence defined: " + std::to_string(id));
+            }
+            production_precedences_[id] = symbol;
+        }
+
+        std::pair<int, Associativity> GetPrecedence(const std::string& symbol) const {
+            auto it = precedences_.find(symbol);
+            if (it == precedences_.end()) {
+                throw std::runtime_error("No precedence defined for symbol: " + symbol);
+            }
+            return it->second;
+        }
+
+        std::string GetProductionPrecedence(int id) const {
+            auto it = production_precedences_.find(id);
+            if (it == production_precedences_.end()) {
+                throw std::runtime_error("No precedence defined for production ID: " + std::to_string(id));
+            }
+            return it->second;
+        }
+
+
+
+
     private:
         std::vector<std::shared_ptr<Symbol>> symbols;
         std::vector<std::shared_ptr<NonTerminal>> nonTerminals;
@@ -120,6 +161,10 @@ class Grammar {
         std::shared_ptr<Epsilon> epsilon;
         std::shared_ptr<EndOfFile> eof;
         std::unordered_map<std::string, Symbol*> symbolMap;
+
+
+        std::map<std::string, std::pair<int, Associativity>> precedences_;
+        std::map<int, std::string> production_precedences_;
 };
 
 #endif

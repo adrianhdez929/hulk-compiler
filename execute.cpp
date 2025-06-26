@@ -8,7 +8,7 @@
 #include <fstream>
 #include "Parser/reverse_evaluate.h"
 #include "hulkGrammar.hpp"
-#include "Parser/SLR1Parser.h"
+#include "Parser/LALR1Parser.h"
 // #include "validate_grammar.hpp"
 
 bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
@@ -38,10 +38,10 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     
     // Crear parser
     if (verbose) {
-        LogInfo("Creando parser SLR1 para la gramática del lexer");
+        LogInfo("Creando parser LALR1 para la gramática del lexer");
     }
-    SLR1Parser parser(lexer_grammar, verbose); // Usando SLR1Parser con modo verbose
-    LogDebug("Parser SLR1 para el lexer creado");
+    LALR1Parser parser(lexer_grammar, verbose); // Usando LALR1Parser con modo verbose
+    LogDebug("Parser LALR1 para el lexer creado");
     
     // Serializar parser
     if (verbose) {
@@ -106,8 +106,8 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
         {"as", "as"},          // Type cast keyword
         {"for", "for"},        // For loop keyword 
         {"new", "new"},         // Object instantiation keyword
-        {"type_id", "[A-Z][_a-zA-Z0-9]*"},
-        {"var_id", "[a-z][_a-zA-Z0-9]*"},
+        // {"type_id", "[A-Z][_a-zA-Z0-9]*"},
+        {"var_id", "[a-zA-Z][_a-zA-Z0-9]*"},
         {"tab", "\t"},
         {"newline", "\n"} // Regular expression for newlines
     };
@@ -164,11 +164,11 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
 
     // Crear parser de Hulk
     if (verbose) {
-        LogInfo("Creando parser SLR1 para la gramática de Hulk");
+        LogInfo("Creando parser LALR1 para la gramática de Hulk");
         LogDebug("La gramática de Hulk tiene " + std::to_string(hulk_grammar.Productions().size()) + 
                 " producciones y " + std::to_string(hulk_grammar.NonTerminals().size()) + " no terminales");
     }
-    SLR1Parser hulk_parser(hulk_grammar, verbose); // Modo verbose activado
+    LALR1Parser hulk_parser(hulk_grammar, verbose); // Modo verbose activado
     
     // Serializar parser de Hulk
     if (verbose) {
@@ -186,7 +186,7 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     return true;
 }
 
-std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose) {
+std::pair<Lexer*, LALR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose) {
     if (verbose) {
         LogInfo("Cargando artefactos del compilador");
     }
@@ -292,7 +292,7 @@ std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_messag
         LogInfo("Cargando parser desde hulk/hulk_parser.p");
     }
 
-    SLR1Parser* parser = SLR1Parser::deserialize_parser("hulk_parser.p", "hulk", parser_grammar);
+    LALR1Parser* parser = LALR1Parser::deserialize_parser("hulk_parser.p", "hulk", parser_grammar);
     if (!parser) {
         delete lexer; // Liberar memoria del lexer cargado
         error_message = "No se pudo cargar el parser. Es posible que la gramática utilizada para crear el parser serializado sea diferente de la gramática actual. Intenta recrear los artefactos.";
@@ -348,7 +348,7 @@ std::vector<Token> tokenize_source(const std::string& source_code, Lexer* lexer,
     }
 }
 
-ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* parser, 
+ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, LALR1Parser* parser, 
                               Grammar& hulk_grammar, std::string& error_message, bool verbose) {
     try {
         if (verbose) {

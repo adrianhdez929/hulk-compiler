@@ -24,7 +24,7 @@ using namespace std;
 class Regex {
 public:
     // Constructor
-    Regex(const std::string& pattern, Grammar& grammar, SLR1Parser& parser, bool verbose = false) 
+    Regex(const std::string& pattern, Grammar& grammar, LALR1Parser& parser, bool verbose = false) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
         if (false && verbose_) {
             // Código omitido para evitar impresiones en consola
@@ -130,7 +130,7 @@ public:
         return tokens;
     }
 
-    DFA build_dfa(SLR1Parser& parser) {
+    DFA build_dfa(LALR1Parser& parser) {
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
