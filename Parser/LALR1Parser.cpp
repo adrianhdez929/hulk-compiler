@@ -136,10 +136,6 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         if (goto_.find(goto_key) != goto_.end()) {
                             state_stack.push(goto_[goto_key]);
                         } else {
-                            // Error interno del parser - no se encontró una transición goto
-                            if (verbose_) {
-
-                            }
                             
                             // Este es un error interno del parser, probablemente debido a una gramática mal construida
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
@@ -166,10 +162,6 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                 } else {
                     // No se encontró una acción para este estado y token
                     auto [error_msg, expected_tokens] = generateErrorMessage(state_stack.top(), current_token.Name());
-                    
-                    if (verbose_) {
-
-                    }
                     
                     // Lanzar una excepción especializada con detalles del error
                     throw LALR1ParsingError(error_msg, state_stack.top(), current_token.Name(), expected_tokens);
@@ -477,9 +469,9 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 
 ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
     // Primero verificar si ya está calculado en la caché
-    if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
-        return firsts_cache_.at(alpha);
-    }
+    // if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
+    //     return firsts_cache_.at(alpha);
+    // }
 
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
@@ -511,7 +503,7 @@ ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, co
     }
 
     // Almacenar en la caché para futuras consultas
-    firsts_cache_[alpha] = local_first;
+    // firsts_cache_[alpha] = local_first;
     
     return local_first;
 }
@@ -710,7 +702,7 @@ std::set<Item> LALR1Parser::compress(const vector<Item>& items) {
             centers[key] = make_pair(item.production(), item.lookaheads());
         } else {
             // hard_update_container_set(centers[key].second, item.lookaheads());
-            centers[key].second.update(item.lookaheads());
+            centers[key].second.hard_update(item.lookaheads());
         }
         
     }

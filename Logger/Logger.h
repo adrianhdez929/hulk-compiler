@@ -16,6 +16,22 @@ enum class LogLevel {
     ERROR
 };
 
+// Estructura de configuración para el logger
+struct LoggerConfig {
+    std::string logFilename = "hulk_compiler.log";
+    LogLevel log_level = LogLevel::INFO;
+    std::string component = "General";
+    bool use_unique_filename = false;
+    bool log_to_console = false;
+    
+    // Método para configurar nombre único de archivo
+    LoggerConfig& withUniqueFilename(const std::string& baseFilename = "hulk_compiler") {
+        this->logFilename = baseFilename;
+        this->use_unique_filename = true;
+        return *this;
+    }
+};
+
 class Logger {
 private:
     static Logger* instance;
@@ -24,6 +40,7 @@ private:
     std::ofstream logFile;
     LogLevel logLevel;
     bool enabled;
+    bool log_to_console;
     
     // Private constructor for singleton
     Logger(const std::string& filename = "hulk_compiler.log", LogLevel level = LogLevel::INFO);
@@ -33,6 +50,9 @@ private:
     
     // Convert LogLevel to string
     std::string levelToString(LogLevel level) const;
+    
+    // Generate a unique log filename based on current date and time
+    static std::string generateUniqueLogFilename(const std::string& baseFilename = "hulk_compiler");
     
 public:
     // Delete copy constructor and assignment operator
@@ -47,6 +67,14 @@ public:
                           LogLevel level = LogLevel::INFO,
                           const std::string& component = "General");
     
+    // Initialize with a unique log file name (containing timestamp)
+    static void initializeWithUniqueFile(const std::string& baseFilename = "hulk_compiler", 
+                                       LogLevel level = LogLevel::INFO,
+                                       const std::string& component = "General");
+    
+    // Initialize with a LoggerConfig structure
+    static void Initialize(const LoggerConfig& config);
+    
     // Close the log file
     void close();
     
@@ -58,6 +86,9 @@ public:
     
     // Enable or disable logging
     void setEnabled(bool enable);
+    
+    // Enable or disable console logging
+    void setConsoleLogging(bool enable);
     
     // Log message with specified level
     void log(LogLevel level, const std::string& message);
