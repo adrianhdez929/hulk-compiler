@@ -909,63 +909,38 @@ void CodegenVisitor::visit(AssignFuncNode* node, Context* context) {
     }
 
     cout << "Generating code for AssignFuncNode: " << node->func_name << endl;
-
-    for (auto typex : typeAttributeMap) {
-        std::cout << "Type " << typex.first << std::endl;
-        for (auto field : typex.second) {
-            std::cout << "Field" << field << std::endl;
-        }
-    }
     
     // Determine argument types based on their declared types
     std::vector<llvm::Type*> argTypes;
     for (auto* arg : node->args->children) {
-        if (arg->id_type == Context::stringType->name) {
+        if (arg->id_type == "String") {
             argTypes.push_back(llvm::Type::getInt8PtrTy(*TheContext)); // String as char*
-        } else if (arg->id_type == Context::boolType->name) {
+        } else if (arg->id_type == "Boolean") {
             argTypes.push_back(llvm::Type::getInt1Ty(*TheContext)); // Boolean as i1
         }
-        else if (arg->id_type == Context::numberType->name) {
+        else {
             argTypes.push_back(llvm::Type::getDoubleTy(*TheContext)); // Default to double for Number
-        } else if (typeStructMap.find(arg->id_type) != typeStructMap.end()) {
-            llvm::StructType* returnStructType = typeStructMap[node->inferredType->name];
-            argTypes.push_back(llvm::PointerType::get(returnStructType, 0));
         }
     }
     
     // Create function type (returns double for simplicity)
     llvm::FunctionType* funcType;
-    if (node->inferredType->name == Context::stringType->name) {
+    if (node->inferredType->name == "String") {
         funcType = llvm::FunctionType::get(
             llvm::Type::getInt8PtrTy(*TheContext), // Return type for String
             argTypes,
             false
         );
-    } else if (node->inferredType->name == Context::boolType->name) {
+    } else if (node->inferredType->name == "Boolean") {
         funcType = llvm::FunctionType::get(
             llvm::Type::getInt1Ty(*TheContext), // Return type for Boolean
             argTypes,
             false
         );
-    } else if (node->inferredType->name == Context::numberType->name) {
+    } else {
         // Default to double return type
         funcType = llvm::FunctionType::get(
             llvm::Type::getDoubleTy(*TheContext),
-            argTypes,
-            false
-        );
-    } else if (typeStructMap.find(node->inferredType->name) != typeStructMap.end()) {
-        // User-defined type - return a pointer to the struct
-        llvm::StructType* returnStructType = typeStructMap[node->inferredType->name];
-        funcType = llvm::FunctionType::get(
-            llvm::PointerType::get(returnStructType, 0), // Return pointer to struct
-            argTypes,
-            false
-        );
-    } else {
-        // Default case - treat as Object type (base type with no fields/methods)
-        funcType = llvm::FunctionType::get(
-            llvm::Type::getDoubleTy(*TheContext), // Default return type
             argTypes,
             false
         );
@@ -1175,22 +1150,6 @@ void CodegenVisitor::visit(LetAssign* node, Context* context) {
         Builder->CreateStore(currentValue, alloca);
         
         NamedValues[assign->var_id->id_name] = alloca;
-        
-        // Track object types for function call results
-        if (allocaType->isPointerTy()) {
-            // For function calls that return objects, we need to use dynamic dispatch
-            // Mark the variable as requiring dynamic type resolution
-            if (auto* funcCallNode = dynamic_cast<FunctionCallNode*>(assign->value)) {
-                // Mark this variable as needing dynamic type resolution
-                objectTypes[assign->var_id->id_name] = "DYNAMIC";
-                cout << "DEBUG: Marked '" << assign->var_id->id_name 
-                     << "' for dynamic type resolution (function call result)" << endl;
-            } else if (assign->var_id->inferredType && assign->var_id->inferredType->name != "unknown") {
-                objectTypes[assign->var_id->id_name] = assign->var_id->inferredType->name;
-                cout << "DEBUG: Tracked object type for '" << assign->var_id->id_name 
-                     << "' as '" << assign->var_id->inferredType->name << "'" << endl;
-            }
-        }
         
         if (allocaType->isPointerTy() && assign->var_id->inferredType && 
             assign->var_id->inferredType->name == "String") {
@@ -1540,22 +1499,11 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
 
-    if (node->id == nullptr) {
-        throw std::runtime_error("TypeDeclNode id is null");
-    }
-
     cout << "Generating code for TypeDeclNode: " << node->id->id_name << endl;
-    
-    // Create a defensive copy of the type name to avoid string corruption issues
-    std::string typeName = std::string(node->id->id_name);
-    
-    // Debug: Verify the string is valid
-    cout << "DEBUG: typeName = '" << typeName << "', length = " << typeName.length() << endl;
+        
+    std::string typeName = node->id->id_name;
     
     std::vector<llvm::Type*> structFields;
-    
-    // Add vtable pointer as the first field in every struct
-    structFields.push_back(llvm::Type::getInt8PtrTy(*TheContext)); // vtable pointer
     
     std::vector<std::string> attributes;
     std::vector<AssignFuncNode*> methods;
@@ -1572,8 +1520,7 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         
         if (parentStructIt != typeStructMap.end() && parentAttributesIt != typeAttributeMap.end() && parentAttrTypeIt != typeAttributeTypeMap.end()) {
             llvm::StructType* parentStruct = parentStructIt->second;
-            // Skip the first field (vtable pointer) when inheriting, we'll add our own
-            for (unsigned i = 1; i < parentStruct->getNumElements(); ++i) {
+            for (unsigned i = 0; i < parentStruct->getNumElements(); ++i) {
                 structFields.push_back(parentStruct->getElementType(i));
             }
             
@@ -1638,28 +1585,11 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         cout << attrName << ": " << typeStr << ", ";
     }
     cout << endl;
-    
-    // Generate methods for this type and track them FIRST
-    std::vector<std::string> methodNames;
-    for (auto* funcNode : methods) {
-        generateMethodFunction(typeName, funcNode, structType, attributes);
-        methodNames.push_back(funcNode->func_name);
-        
-        // Store the method function in our map
-        std::string methodKey = typeName + "_" + funcNode->func_name;
-        llvm::Function* methodFunc = TheModule->getFunction(methodKey);
-        if (methodFunc) {
-            methodFunctionMap[methodKey] = methodFunc;
-        }
+    for (const auto& attr : attributes) {
+        cout << attr << " ";
     }
+    cout << endl;
     
-    // Store method names for vtable creation
-    typeMethodMap[typeName] = methodNames;
-    
-    // Create vtable for this type (includes inherited methods)
-    createVTable(typeName);
-    
-    // NOW create the constructor (after vtable exists)
     llvm::FunctionType* constructorType = llvm::FunctionType::get(
         llvm::PointerType::get(structType, 0),  
         {},                                     
@@ -1718,7 +1648,7 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
             }
             auto it = std::find(attributes.begin(), attributes.end(), varAssign->var_id->id_name);
             if (it != attributes.end()) {
-                size_t fieldIndex = std::distance(attributes.begin(), it) + 1; // +1 for vtable pointer
+                size_t fieldIndex = std::distance(attributes.begin(), it);
                 llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, newInstance, fieldIndex, "field_" + varAssign->var_id->id_name);
                 llvm::Type* fieldType = attrTypeMap[varAssign->var_id->id_name];
                 llvm::Value* defaultVal = nullptr;
@@ -1784,7 +1714,7 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
             
             // If not defined in current body, it's inherited - initialize with actual default value from parent
             if (!definedInCurrentBody) {
-                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, newInstance, i + 1, "inherited_field_" + attrName); // +1 for vtable pointer
+                llvm::Value* fieldPtr = constructorBuilder.CreateStructGEP(structType, newInstance, i, "inherited_field_" + attrName);
                 
                 // Try to get the actual default value from the parent type
                 llvm::Value* defaultVal = nullptr;
@@ -1869,20 +1799,12 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
         }
     }
     
-    // Set the vtable pointer as the first field (index 0)
-    auto vtableIt = typeVTableMap.find(typeName);
-    if (vtableIt != typeVTableMap.end()) {
-        llvm::Value* vtablePtr = constructorBuilder.CreateStructGEP(structType, newInstance, 0, "vtable_ptr");
-        llvm::Value* vtableGlobal = vtableIt->second;
-        // Cast vtable to i8* for storage
-        llvm::Value* vtableCast = constructorBuilder.CreateBitCast(vtableGlobal, llvm::Type::getInt8PtrTy(*TheContext), "vtable_cast");
-        constructorBuilder.CreateStore(vtableCast, vtablePtr);
-        cout << "Set vtable pointer for type " << typeName << endl;
-    } else {
-        cout << "Warning: No vtable found for type " << typeName << endl;
-    }
-    
     constructorBuilder.CreateRet(newInstance);
+    
+    // Generate methods for this type
+    for (auto* funcNode : methods) {
+        generateMethodFunction(typeName, funcNode, structType, attributes);
+    }
     
     // Handle inheritance forwarding using LLVM module method discovery
     if (!node->parents.empty()) {
@@ -2118,7 +2040,7 @@ void CodegenVisitor::visit(AttributeMember* node, Context* context) {
     if (it == attributes.end()) {
         throw std::runtime_error("Attribute not found: " + node->name);
     }
-    size_t index = std::distance(attributes.begin(), it) + 1; // +1 for vtable pointer
+    size_t index = std::distance(attributes.begin(), it);
     llvm::Type* fieldType = attrTypeMap.at(node->name);
     llvm::Value* fieldPtr = Builder->CreateStructGEP(structType, currentObjectPtr, index, "field_" + node->name);
     llvm::Value* fieldValue = Builder->CreateLoad(fieldType, fieldPtr, node->name);
@@ -2133,6 +2055,8 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
         throw std::runtime_error("Node is null");
     }
     
+    // std::cout << "Generating code for MethodMember: " << node->name << std::endl;
+    
     if (!currentObjectPtr) {
         throw std::runtime_error("No current object for method call: " + node->name);
     }
@@ -2145,52 +2069,53 @@ void CodegenVisitor::visit(MethodMember* node, Context* context) {
         throw std::runtime_error("Could not determine type for object: " + currentObjectName);
     }
     
-    // Prepare arguments for the method call
-    std::vector<llvm::Value*> methodArgs;
-    if (!node->args.empty()) {
-        for (ASTNode* argNode : node->args) {
-            argNode->accept(this, context);
-            methodArgs.push_back(currentValue);
+    std::string methodFuncName = typeName + "_" + node->name;
+    llvm::Function* methodFunc = TheModule->getFunction(methodFuncName);
+    
+    // If method not found in current class, search in parent classes
+    if (!methodFunc) {
+        std::string currentType = typeName;
+        while (!methodFunc && typeInheritanceMap.find(currentType) != typeInheritanceMap.end()) {
+            std::string parentType = typeInheritanceMap[currentType];
+            std::string parentMethodName = parentType + "_" + node->name;
+            methodFunc = TheModule->getFunction(parentMethodName);
+            if (methodFunc) {
+                methodFuncName = parentMethodName; // Update the method name for proper resolution
+                break;
+            }
+            currentType = parentType;
+        }
+        
+        if (!methodFunc) {
+            throw std::runtime_error("Method function not found: " + methodFuncName + " (searched inheritance chain)");
         }
     }
     
-    // Use virtual method dispatch for polymorphism
-    try {
-        currentValue = callVirtualMethod(currentObjectPtr, node->name, methodArgs);
-        cout << "CodeGen: Virtual method '" << node->name << "' called successfully on type " << typeName << endl;
-    } catch (const std::exception& e) {
-        // Fallback to direct method resolution (for compatibility)
-        cout << "Virtual dispatch failed, falling back to direct resolution: " << e.what() << endl;
-        
-        std::string methodFuncName = typeName + "_" + node->name;
-        llvm::Function* methodFunc = TheModule->getFunction(methodFuncName);
-        
-        // If method not found in current class, search in parent classes
-        if (!methodFunc) {
-            std::string currentType = typeName;
-            while (!methodFunc && typeInheritanceMap.find(currentType) != typeInheritanceMap.end()) {
-                std::string parentType = typeInheritanceMap[currentType];
-                std::string parentMethodName = parentType + "_" + node->name;
-                methodFunc = TheModule->getFunction(parentMethodName);
-                if (methodFunc) {
-                    methodFuncName = parentMethodName;
-                    break;
-                }
-                currentType = parentType;
-            }
-            
-            if (!methodFunc) {
-                throw std::runtime_error("Method function not found: " + methodFuncName + " (searched inheritance chain)");
-            }
+    // Determine the return type of the method
+    llvm::Type* returnType = methodFunc->getReturnType();
+    std::string returnTypeStr;
+    llvm::raw_string_ostream typeStream(returnTypeStr);
+    returnType->print(typeStream);
+    // std::cout << "DEBUG: Method '" << node->name << "' return type: " << typeStream.str() << std::endl;
+    
+    std::vector<llvm::Value*> args;
+    args.push_back(currentObjectPtr);
+    
+    if (!node->args.empty()) {
+        for (ASTNode* argNode : node->args) {
+            argNode->accept(this, context);
+            args.push_back(currentValue);
         }
-        
-        std::vector<llvm::Value*> args;
-        args.push_back(currentObjectPtr);
-        args.insert(args.end(), methodArgs.begin(), methodArgs.end());
-        
-        currentValue = Builder->CreateCall(methodFunc, args, "method_call");
-        cout << "CodeGen: Direct method '" << node->name << "' called successfully" << endl;
     }
+    
+    currentValue = Builder->CreateCall(methodFunc, args, "method_call");
+    
+    // Store the method's return type if needed for future type checking
+    if (returnType->isPointerTy()) {
+        // std::cout << "DEBUG: Method returns a pointer type (likely a String)" << std::endl;
+    }
+    
+    // std::cout << "CodeGen: MethodMember '" << node->name << "' called successfully" << std::endl;
 }
 
 void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignFuncNode* method, 
@@ -2345,7 +2270,7 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
                     auto typeIt = attrTypeMap.find(attrName);
                     if (typeIt != attrTypeMap.end()) fieldType = typeIt->second;
                 }
-                llvm::Value* fieldPtr = methodBuilder.CreateStructGEP(structType, selfPtr, fieldIndex + 1, "field_" + attrName); // +1 for vtable pointer
+                llvm::Value* fieldPtr = methodBuilder.CreateStructGEP(structType, selfPtr, fieldIndex, "field_" + attrName);
                 llvm::Value* fieldValue = methodBuilder.CreateLoad(fieldType, fieldPtr, attrName);
                 methodBuilder.CreateRet(fieldValue);
             } else {
@@ -2357,7 +2282,7 @@ void CodegenVisitor::generateMethodFunction(const std::string& typeName, AssignF
             
             auto it = std::find(attributes.begin(), attributes.end(), attrName);
             if (it != attributes.end() && !methodParams.empty()) {
-                size_t index = std::distance(attributes.begin(), it) + 1; // +1 for vtable pointer
+                size_t index = std::distance(attributes.begin(), it);
                 llvm::Value* fieldPtr = methodBuilder.CreateStructGEP(structType, selfPtr, index, "field_" + attrName);
                 methodBuilder.CreateStore(methodParams[0].second, fieldPtr);
                 methodBuilder.CreateRet(methodParams[0].second);
@@ -2504,7 +2429,7 @@ void CodegenVisitor::handleAssignment(BinOpNode* node, Context* context) {
             if (it == attributes.end()) {
                 throw std::runtime_error("Attribute not found: " + attrMember->name);
             }
-            size_t index = std::distance(attributes.begin(), it) + 1; // +1 for vtable pointer
+            size_t index = std::distance(attributes.begin(), it);
             
             // Create the GEP instruction and store the value
             llvm::Value* fieldPtr = Builder->CreateStructGEP(structType, objectPtr, index, "field_" + attrMember->name);
@@ -2751,317 +2676,5 @@ bool CodegenVisitor::isSubtypeOf(const std::string& childType, const std::string
     }
     
     return false;
-}
-
-// VTable Implementation for Virtual Method Dispatch
-void CodegenVisitor::createVTable(const std::string& typeName) {
-    cout << "Creating vtable for type: " << typeName << endl;
-    
-    // Collect all methods for this type (including inherited ones)
-    std::vector<std::string> allMethods;
-    std::vector<llvm::Function*> methodFunctions;
-    
-    // Start with parent methods if inheritance exists
-    auto parentIt = typeInheritanceMap.find(typeName);
-    if (parentIt != typeInheritanceMap.end()) {
-        std::string parentType = parentIt->second;
-        auto parentMethodsIt = typeMethodMap.find(parentType);
-        if (parentMethodsIt != typeMethodMap.end()) {
-            allMethods = parentMethodsIt->second;
-            
-            for (const std::string& methodName : allMethods) {
-                std::string parentMethodKey = parentType + "_" + methodName;
-                auto funcIt = methodFunctionMap.find(parentMethodKey);
-                if (funcIt != methodFunctionMap.end()) {
-                    methodFunctions.push_back(funcIt->second);
-                } else {
-                    methodFunctions.push_back(nullptr);
-                }
-            }
-            cout << "Inherited " << allMethods.size() << " methods from " << parentType << endl;
-        }
-    }
-    
-    // Add/override with current type methods
-    auto currentMethodsIt = typeMethodMap.find(typeName);
-    if (currentMethodsIt != typeMethodMap.end()) {
-        for (const std::string& methodName : currentMethodsIt->second) {
-            auto existingIt = std::find(allMethods.begin(), allMethods.end(), methodName);
-            
-            std::string currentMethodKey = typeName + "_" + methodName;
-            auto funcIt = methodFunctionMap.find(currentMethodKey);
-            llvm::Function* methodFunc = (funcIt != methodFunctionMap.end()) ? funcIt->second : nullptr;
-            
-            if (existingIt != allMethods.end()) {
-                size_t index = std::distance(allMethods.begin(), existingIt);
-                methodFunctions[index] = methodFunc;
-                cout << "Overriding method " << methodName << " at index " << index << endl;
-            } else {
-                allMethods.push_back(methodName);
-                methodFunctions.push_back(methodFunc);
-                cout << "Adding new method " << methodName << " at index " << (allMethods.size() - 1) << endl;
-            }
-        }
-    }
-    
-    // Create method index mapping
-    for (size_t i = 0; i < allMethods.size(); ++i) {
-        methodIndexMap[typeName][allMethods[i]] = i;
-    }
-    
-    if (allMethods.empty()) {
-        cout << "No methods found for type " << typeName << ", skipping vtable creation" << endl;
-        return;
-    }
-    
-    // Create vtable
-    llvm::Type* functionPtrType = llvm::Type::getInt8PtrTy(*TheContext);
-    llvm::ArrayType* vtableArrayType = llvm::ArrayType::get(functionPtrType, allMethods.size());
-    
-    std::vector<llvm::Constant*> vtableEntries;
-    for (size_t i = 0; i < methodFunctions.size(); ++i) {
-        if (methodFunctions[i] != nullptr) {
-            llvm::Constant* funcPtr = llvm::ConstantExpr::getBitCast(
-                methodFunctions[i], functionPtrType
-            );
-            vtableEntries.push_back(funcPtr);
-        } else {
-            vtableEntries.push_back(llvm::ConstantPointerNull::get(
-                llvm::cast<llvm::PointerType>(functionPtrType)
-            ));
-        }
-    }
-    
-    llvm::Constant* vtableArray = llvm::ConstantArray::get(vtableArrayType, vtableEntries);
-    llvm::GlobalVariable* vtableGlobal = new llvm::GlobalVariable(
-        *TheModule, vtableArrayType, true, llvm::GlobalValue::InternalLinkage,
-        vtableArray, "vtable_" + typeName
-    );
-    
-    typeVTableMap[typeName] = vtableGlobal;
-    
-    cout << "Created vtable for " << typeName << " with " << allMethods.size() << " methods" << endl;
-}
-
-void CodegenVisitor::addMethodToVTable(const std::string& typeName, const std::string& methodName, llvm::Function* methodFunc) {
-    std::string methodKey = typeName + "_" + methodName;
-    methodFunctionMap[methodKey] = methodFunc;
-    
-    auto& methods = typeMethodMap[typeName];
-    if (std::find(methods.begin(), methods.end(), methodName) == methods.end()) {
-        methods.push_back(methodName);
-    }
-}
-
-llvm::Value* CodegenVisitor::callVirtualMethod(llvm::Value* objectPtr, const std::string& methodName, 
-                                             const std::vector<llvm::Value*>& args) {
-    cout << "Calling virtual method: " << methodName << endl;
-    
-    // Determine object type dynamically if marked as DYNAMIC
-    std::string objectType;
-    auto typeIt = objectTypes.find(currentObjectName);
-    if (typeIt != objectTypes.end()) {
-        if (typeIt->second == "DYNAMIC") {
-            // For dynamic type resolution, use proper vtable-based dispatch
-            return callVirtualMethodWithVTableLookup(objectPtr, methodName, args);
-        } else {
-            objectType = typeIt->second;
-        }
-    }
-    
-    // Fallback for self references
-    if (objectType.empty() && currentObjectName == "self") {
-        auto selfTypeIt = objectTypes.find("self");
-        if (selfTypeIt != objectTypes.end()) {
-            objectType = selfTypeIt->second;
-        }
-    }
-    
-    if (!objectType.empty()) {
-        // Direct method call with polymorphism support
-        std::string methodKey = objectType + "_" + methodName;
-        auto funcIt = methodFunctionMap.find(methodKey);
-        if (funcIt != methodFunctionMap.end()) {
-            llvm::Function* directMethod = funcIt->second;
-            
-            std::vector<llvm::Value*> callArgs = {objectPtr};
-            callArgs.insert(callArgs.end(), args.begin(), args.end());
-            
-            cout << "DEBUG: Calling " << methodKey << " for static dispatch" << endl;
-            return Builder->CreateCall(directMethod, callArgs, "virtual_call");
-        }
-    }
-    
-    throw std::runtime_error("Virtual dispatch failed, cannot resolve method: " + methodName);
-}
-
-std::string CodegenVisitor::getRuntimeType(llvm::Value* objectPtr) {
-    cout << "DEBUG: Attempting runtime type resolution using vtable lookup..." << endl;
-    
-    // Get the vtable pointer from the object (first field at index 0)
-    // We need to use a more careful approach for opaque pointers
-    
-    // Create a runtime vtable comparison system
-    // For each known type, compare the vtable pointer
-    
-    // First, get the vtable pointer from the object
-    llvm::Value* vtablePtrPtr = nullptr;
-    
-    // Use a generic struct type for vtable pointer access
-    // Since all our objects have vtable pointer as first field, we can use a generic approach
-    std::vector<llvm::Type*> structFields = {llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0)};
-    llvm::StructType* genericStructType = llvm::StructType::get(*TheContext, structFields);
-    
-    vtablePtrPtr = Builder->CreateStructGEP(genericStructType, objectPtr, 0, "vtable_ptr_field");
-    llvm::Value* vtablePtr = Builder->CreateLoad(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0), vtablePtrPtr, "vtable_ptr");
-    
-    // Compare with known vtables - check derived types first
-    for (const auto& vtableEntry : typeVTableMap) {
-        const std::string& typeName = vtableEntry.first;
-        llvm::GlobalVariable* typeVTable = vtableEntry.second;
-        
-        // Cast the global vtable to i8* for comparison
-        llvm::Value* typeVTableCast = Builder->CreateBitCast(
-            typeVTable, 
-            llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0), 
-            "vtable_cast_" + typeName
-        );
-        
-        // Create a comparison
-        llvm::Value* isMatch = Builder->CreateICmpEQ(
-            vtablePtr, typeVTableCast, 
-            "is_" + typeName
-        );
-        
-        // Check derived types first (Dog, Cat) then base types (Animal)
-        if (typeName == "Dog") {
-            cout << "DEBUG: Checking if object is Dog type via vtable comparison" << endl;
-            return "Dog"; // This would be determined at runtime
-        } else if (typeName == "Cat") {
-            cout << "DEBUG: Checking if object is Cat type via vtable comparison" << endl; 
-            return "Cat"; // This would be determined at runtime
-        }
-    }
-    
-    // Default to base type
-    cout << "DEBUG: Defaulting to Animal type" << endl;
-    return "Animal";
-}
-
-llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* objectPtr, const std::string& methodName, 
-                                                              const std::vector<llvm::Value*>& args) {
-    cout << "DEBUG: Performing runtime vtable-based method dispatch for method: " << methodName << endl;
-    
-    // Get the vtable pointer from the object
-    llvm::Value* vtablePtrPtr = nullptr;
-    
-    // Cast object pointer to a generic struct type with vtable pointer as first field
-    // Since all our objects have vtable pointer as first field, we can use any struct type
-    std::vector<llvm::Type*> structFields = {llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0)};
-    llvm::StructType* genericStructType = llvm::StructType::get(*TheContext, structFields);
-    
-    vtablePtrPtr = Builder->CreateStructGEP(genericStructType, objectPtr, 0, "vtable_ptr_field");
-    llvm::Value* vtablePtr = Builder->CreateLoad(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0), vtablePtrPtr, "vtable_ptr");
-    
-    // Create a series of comparisons and conditional calls
-    llvm::Function* parentFunction = Builder->GetInsertBlock()->getParent();
-    llvm::BasicBlock* endBB = llvm::BasicBlock::Create(*TheContext, "end_virtual_call", parentFunction);
-    
-    // Create a PHI node to collect the results from different branches
-    llvm::Type* returnType = llvm::Type::getInt8PtrTy(*TheContext); // Assuming methods return strings
-    
-    std::vector<std::pair<llvm::Value*, llvm::BasicBlock*>> phiIncoming;
-    llvm::BasicBlock* currentBB = Builder->GetInsertBlock();
-    
-    // Check each known type in order (derived types first for correct dispatch)
-    std::vector<std::string> typeOrder = {"Cat", "Dog", "Animal"}; // Check derived types first
-    
-    for (size_t i = 0; i < typeOrder.size(); ++i) {
-        const std::string& typeName = typeOrder[i];
-        
-        auto vtableIt = typeVTableMap.find(typeName);
-        if (vtableIt == typeVTableMap.end()) continue;
-        
-        llvm::GlobalVariable* typeVTable = vtableIt->second;
-        
-        // Cast the global vtable to ptr for comparison
-        llvm::Value* typeVTablePtr = Builder->CreateBitCast(
-            typeVTable, 
-            llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0), 
-            "vtable_cast_" + typeName
-        );
-        
-        // Create a comparison
-        llvm::Value* isMatch = Builder->CreateICmpEQ(
-            vtablePtr, typeVTablePtr, 
-            "is_" + typeName
-        );
-        
-        // Create basic blocks for this type check
-        llvm::BasicBlock* typeBB = llvm::BasicBlock::Create(*TheContext, "call_" + typeName, parentFunction);
-        llvm::BasicBlock* nextBB = nullptr;
-        
-        if (i == typeOrder.size() - 1) {
-            // Last case - create a default case for unmatched vtables
-            nextBB = llvm::BasicBlock::Create(*TheContext, "default_case", parentFunction);
-        } else {
-            nextBB = llvm::BasicBlock::Create(*TheContext, "check_next_" + std::to_string(i+1), parentFunction);
-        }
-        
-        Builder->CreateCondBr(isMatch, typeBB, nextBB);
-        
-        // Generate the method call for this type
-        Builder->SetInsertPoint(typeBB);
-        std::string methodKey = typeName + "_" + methodName;
-        auto funcIt = methodFunctionMap.find(methodKey);
-        if (funcIt != methodFunctionMap.end()) {
-            llvm::Function* methodFunc = funcIt->second;
-            std::vector<llvm::Value*> callArgs = {objectPtr};
-            callArgs.insert(callArgs.end(), args.begin(), args.end());
-            
-            llvm::Value* result = Builder->CreateCall(methodFunc, callArgs, "call_" + typeName);
-            phiIncoming.push_back({result, typeBB});
-            Builder->CreateBr(endBB);
-            
-            cout << "DEBUG: Generated conditional call for " << methodKey << endl;
-        } else {
-            // If method not found for this type, create a null return or default
-            llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-            phiIncoming.push_back({nullResult, typeBB});
-            Builder->CreateBr(endBB);
-        }
-        
-        // Move to next check
-        if (nextBB != endBB) {
-            Builder->SetInsertPoint(nextBB);
-            currentBB = nextBB;
-            
-            // If this is the default case (last iteration), handle unmatched vtables
-            if (i == typeOrder.size() - 1) {
-                // Default case: return null or throw error
-                llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-                phiIncoming.push_back({nullResult, nextBB});
-                Builder->CreateBr(endBB);
-            }
-        }
-    }
-    
-    // Ensure any remaining unhandled case branches to endBB with a null result
-    if (Builder->GetInsertBlock() != endBB && !Builder->GetInsertBlock()->getTerminator()) {
-        llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-        phiIncoming.push_back({nullResult, Builder->GetInsertBlock()});
-        Builder->CreateBr(endBB);
-    }
-    
-    // Create PHI node to collect results
-    Builder->SetInsertPoint(endBB);
-    llvm::PHINode* result = Builder->CreatePHI(returnType, phiIncoming.size(), "virtual_method_result");
-    
-    for (auto& incoming : phiIncoming) {
-        result->addIncoming(incoming.first, incoming.second);
-    }
-    
-    cout << "DEBUG: Runtime vtable dispatch completed for method: " << methodName << endl;
-    return result;
 }
 
