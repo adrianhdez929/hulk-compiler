@@ -1,4 +1,6 @@
-
+type Point {
+  x = 3;
+}
 {
-  function fibonacci( x : Int) => fibonacci(x-1) + fibonacci(x-2);
+  function fibonacci(x : Int) => fibonacci(x-1) + fibonacci(x-2);
 }

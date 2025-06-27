@@ -1,0 +1,528 @@
+2025-06-27 13:11:21.866 [INFO] ========== HULK COMPILER LOGGING SESSION ===========
+2025-06-27 13:11:21.866 [INFO] Log file: hulk_compiler.log
+2025-06-27 13:11:21.866 [INFO] Log level: DEBUG
+2025-06-27 13:11:21.866 [INFO] Initialized by component: Main Compiler
+2025-06-27 13:11:21.866 [INFO] ==================================================
+2025-06-27 13:11:21.866 [INFO] === HULK Compiler Starting ===
+2025-06-27 13:11:21.866 [INFO] Usando archivo: ./script.hulk
+2025-06-27 13:11:21.866 [INFO] Cargando gramática de HULK
+2025-06-27 13:11:21.867 [INFO] Gramática HULK cargada con 83 producciones
+2025-06-27 13:11:21.867 [INFO] Intentando leer archivo fuente: ./script.hulk
+2025-06-27 13:11:21.867 [DEBUG] Archivo abierto, leyendo contenido
+2025-06-27 13:11:21.867 [INFO] Archivo leído exitosamente: ./script.hulk (94 bytes)
+2025-06-27 13:11:21.867 [INFO] Iniciando proceso de compilación HULK
+2025-06-27 13:11:21.867 [INFO] Longitud del código fuente: 94 bytes
+2025-06-27 13:11:21.867 [INFO] Cargando artefactos del compilador (lexer y parser)
+2025-06-27 13:11:21.874 [INFO] Artefactos del compilador cargados exitosamente
+2025-06-27 13:11:21.874 [INFO] Iniciando tokenización del código fuente
+2025-06-27 13:11:21.874 [INFO] Tokenizando código fuente (94 bytes)
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Analizando entrada: 'type Point {
+  x = 3...'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con 't' al estado 32, lexema actual: 't'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 't'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con 'y' al estado 42, lexema actual: 'ty'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'ty'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con 'p' al estado 43, lexema actual: 'typ'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'typ'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con 'e' al estado 44, lexema actual: 'type'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'type', lexema completo: 'type'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: 'type' (tipo: 'type')
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Generando token 'type' en línea 1, columna 1 (lexema: 'type')
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Analizando entrada: ' Point {
+  x = 3;
+}
+...'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.874 [DEBUG] Lexer: No hay transición con 'P', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Ignorando token 'space' en línea 1, columna 5 (lexema: ' ')
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Analizando entrada: 'Point {
+  x = 3;
+}
+{...'
+2025-06-27 13:11:21.874 [DEBUG] Lexer: Transición con 'P' al estado 24, lexema actual: 'P'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'P'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'o' al estado 24, lexema actual: 'Po'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'Po'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'Poi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'Poi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'n' al estado 24, lexema actual: 'Poin'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'Poin'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 't' al estado 24, lexema actual: 'Point'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'Point'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: 'Point' (tipo: 'var_id')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token 'var_id' en línea 1, columna 6 (lexema: 'Point')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: ' {
+  x = 3;
+}
+{
+  fu...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '{', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 1, columna 11 (lexema: ' ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '{
+  x = 3;
+}
+{
+  fun...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '{' al estado 34, lexema actual: '{'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '{', lexema completo: '{'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: '{' (tipo: '{')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token '{' en línea 1, columna 12 (lexema: '{')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '
+  x = 3;
+}
+{
+  func...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'newline' en línea 1, columna 13 (lexema: '\n')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '  x = 3;
+}
+{
+  funct...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: '  '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: '  '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con 'x', devolviendo token encontrado: '  ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 2, columna 1 (lexema: '  ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: 'x = 3;
+}
+{
+  functio...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'x' al estado 24, lexema actual: 'x'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'x'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: 'x' (tipo: 'var_id')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token 'var_id' en línea 2, columna 3 (lexema: 'x')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: ' = 3;
+}
+{
+  function...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '=', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 2, columna 4 (lexema: ' ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '= 3;
+}
+{
+  function ...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '=' al estado 21, lexema actual: '='
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '=', lexema completo: '='
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: '=' (tipo: '=')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token '=' en línea 2, columna 5 (lexema: '=')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: ' 3;
+}
+{
+  function f...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '3', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 2, columna 6 (lexema: ' ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '3;
+}
+{
+  function fi...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '3' al estado 17, lexema actual: '3'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'number', lexema completo: '3'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ';', devolviendo token encontrado: '3' (tipo: 'number')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token 'number' en línea 2, columna 7 (lexema: '3')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: ';
+}
+{
+  function fib...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ';' al estado 19, lexema actual: ';'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ';', lexema completo: ';'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: ';' (tipo: ';')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token ';' en línea 2, columna 8 (lexema: ';')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '
+}
+{
+  function fibo...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '}', devolviendo token encontrado: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'newline' en línea 2, columna 9 (lexema: '\n')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '}
+{
+  function fibon...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '}' al estado 36, lexema actual: '}'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '}', lexema completo: '}'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: '}' (tipo: '}')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token '}' en línea 3, columna 1 (lexema: '}')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '
+{
+  function fibona...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '{', devolviendo token encontrado: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'newline' en línea 3, columna 2 (lexema: '\n')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '{
+  function fibonac...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '{' al estado 34, lexema actual: '{'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '{', lexema completo: '{'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: '{' (tipo: '{')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token '{' en línea 4, columna 1 (lexema: '{')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '
+  function fibonacc...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'newline' en línea 4, columna 2 (lexema: '\n')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: '  function fibonacci...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: '  '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: '  '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con 'f', devolviendo token encontrado: '  ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 1 (lexema: '  ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: 'function fibonacci(x...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'f' al estado 28, lexema actual: 'f'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'f'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'u' al estado 62, lexema actual: 'fu'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fu'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'n' al estado 63, lexema actual: 'fun'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fun'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'c' al estado 64, lexema actual: 'func'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'func'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 't' al estado 65, lexema actual: 'funct'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'funct'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'i' al estado 66, lexema actual: 'functi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'functi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'o' al estado 67, lexema actual: 'functio'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'functio'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'n' al estado 68, lexema actual: 'function'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'function', lexema completo: 'function'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: 'function' (tipo: 'function')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Generando token 'function' en línea 5, columna 3 (lexema: 'function')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: ' fibonacci(x : Int) ...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.875 [DEBUG] Lexer: No hay transición con 'f', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 11 (lexema: ' ')
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Analizando entrada: 'fibonacci(x : Int) =...'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'f' al estado 28, lexema actual: 'f'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'f'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fi'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'b' al estado 24, lexema actual: 'fib'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fib'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'o' al estado 24, lexema actual: 'fibo'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibo'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'n' al estado 24, lexema actual: 'fibon'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibon'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'a' al estado 24, lexema actual: 'fibona'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibona'
+2025-06-27 13:11:21.875 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonac'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonac'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonacc'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacc'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fibonacci'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacci'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '(', devolviendo token encontrado: 'fibonacci' (tipo: 'var_id')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 12 (lexema: 'fibonacci')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '(x : Int) => fibonac...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '(' al estado 8, lexema actual: '('
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '(', lexema completo: '('
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con 'x', devolviendo token encontrado: '(' (tipo: '(')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token '(' en línea 5, columna 21 (lexema: '(')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: 'x : Int) => fibonacc...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'x' al estado 24, lexema actual: 'x'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'x'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: 'x' (tipo: 'var_id')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 22 (lexema: 'x')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' : Int) => fibonacci...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ':', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 23 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ': Int) => fibonacci(...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ':' al estado 18, lexema actual: ':'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ':', lexema completo: ':'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: ':' (tipo: ':')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token ':' en línea 5, columna 24 (lexema: ':')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' Int) => fibonacci(x...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con 'I', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 25 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: 'Int) => fibonacci(x-...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'I' al estado 24, lexema actual: 'I'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'I'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'n' al estado 24, lexema actual: 'In'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'In'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 't' al estado 24, lexema actual: 'Int'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'Int'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ')', devolviendo token encontrado: 'Int' (tipo: 'var_id')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 26 (lexema: 'Int')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ') => fibonacci(x-1) ...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ')' al estado 9, lexema actual: ')'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ')', lexema completo: ')'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: ')' (tipo: ')')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token ')' en línea 5, columna 29 (lexema: ')')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' => fibonacci(x-1) +...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '=', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 30 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '=> fibonacci(x-1) + ...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '=' al estado 21, lexema actual: '='
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '=', lexema completo: '='
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '>' al estado 80, lexema actual: '=>'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '=>', lexema completo: '=>'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: '=>' (tipo: '=>')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token '=>' en línea 5, columna 31 (lexema: '=>')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' fibonacci(x-1) + fi...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con 'f', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 33 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: 'fibonacci(x-1) + fib...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'f' al estado 28, lexema actual: 'f'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'f'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fi'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fi'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'b' al estado 24, lexema actual: 'fib'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fib'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'o' al estado 24, lexema actual: 'fibo'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibo'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'n' al estado 24, lexema actual: 'fibon'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibon'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'a' al estado 24, lexema actual: 'fibona'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibona'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonac'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonac'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonacc'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacc'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fibonacci'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacci'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '(', devolviendo token encontrado: 'fibonacci' (tipo: 'var_id')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 34 (lexema: 'fibonacci')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '(x-1) + fibonacci(x-...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '(' al estado 8, lexema actual: '('
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '(', lexema completo: '('
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con 'x', devolviendo token encontrado: '(' (tipo: '(')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token '(' en línea 5, columna 43 (lexema: '(')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: 'x-1) + fibonacci(x-2...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'x' al estado 24, lexema actual: 'x'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'x'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '-', devolviendo token encontrado: 'x' (tipo: 'var_id')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 44 (lexema: 'x')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '-1) + fibonacci(x-2)...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '-' al estado 13, lexema actual: '-'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '-', lexema completo: '-'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '1', devolviendo token encontrado: '-' (tipo: '-')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token '-' en línea 5, columna 45 (lexema: '-')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '1) + fibonacci(x-2);...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '1' al estado 17, lexema actual: '1'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'number', lexema completo: '1'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ')', devolviendo token encontrado: '1' (tipo: 'number')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token 'number' en línea 5, columna 46 (lexema: '1')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ') + fibonacci(x-2);
+...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ')' al estado 9, lexema actual: ')'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ')', lexema completo: ')'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: ')' (tipo: ')')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token ')' en línea 5, columna 47 (lexema: ')')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' + fibonacci(x-2);
+}...'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con '+', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 48 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: '+ fibonacci(x-2);
+}
+'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con '+' al estado 11, lexema actual: '+'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '+', lexema completo: '+'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con ' ', devolviendo token encontrado: '+' (tipo: '+')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Generando token '+' en línea 5, columna 49 (lexema: '+')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: ' fibonacci(x-2);
+}
+'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con ' ' al estado 3, lexema actual: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'space', lexema completo: ' '
+2025-06-27 13:11:21.876 [DEBUG] Lexer: No hay transición con 'f', devolviendo token encontrado: ' ' (tipo: 'space')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Ignorando token 'space' en línea 5, columna 50 (lexema: ' ')
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Analizando entrada: 'fibonacci(x-2);
+}
+'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'f' al estado 28, lexema actual: 'f'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'f'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fi'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fi'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'b' al estado 24, lexema actual: 'fib'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fib'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'o' al estado 24, lexema actual: 'fibo'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibo'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'n' al estado 24, lexema actual: 'fibon'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibon'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'a' al estado 24, lexema actual: 'fibona'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibona'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonac'
+2025-06-27 13:11:21.876 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonac'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con 'c' al estado 24, lexema actual: 'fibonacc'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacc'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con 'i' al estado 24, lexema actual: 'fibonacci'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'fibonacci'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '(', devolviendo token encontrado: 'fibonacci' (tipo: 'var_id')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 51 (lexema: 'fibonacci')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '(x-2);
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '(' al estado 8, lexema actual: '('
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '(', lexema completo: '('
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con 'x', devolviendo token encontrado: '(' (tipo: '(')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token '(' en línea 5, columna 60 (lexema: '(')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: 'x-2);
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con 'x' al estado 24, lexema actual: 'x'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'var_id', lexema completo: 'x'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '-', devolviendo token encontrado: 'x' (tipo: 'var_id')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token 'var_id' en línea 5, columna 61 (lexema: 'x')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '-2);
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '-' al estado 13, lexema actual: '-'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '-', lexema completo: '-'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '2', devolviendo token encontrado: '-' (tipo: '-')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token '-' en línea 5, columna 62 (lexema: '-')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '2);
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '2' al estado 17, lexema actual: '2'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'number', lexema completo: '2'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con ')', devolviendo token encontrado: '2' (tipo: 'number')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token 'number' en línea 5, columna 63 (lexema: '2')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: ');
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con ')' al estado 9, lexema actual: ')'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ')', lexema completo: ')'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con ';', devolviendo token encontrado: ')' (tipo: ')')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token ')' en línea 5, columna 64 (lexema: ')')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: ';
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con ';' al estado 19, lexema actual: ';'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: ';', lexema completo: ';'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: ';' (tipo: ';')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token ';' en línea 5, columna 65 (lexema: ';')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '
+}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '}', devolviendo token encontrado: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Ignorando token 'newline' en línea 5, columna 66 (lexema: '\n')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '}
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '}' al estado 36, lexema actual: '}'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: '}', lexema completo: '}'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: No hay transición con '
+', devolviendo token encontrado: '}' (tipo: '}')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Generando token '}' en línea 6, columna 1 (lexema: '}')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Analizando entrada: '
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Transición con '
+' al estado 2, lexema actual: '
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Estado final alcanzado, tipo de token: 'newline', lexema completo: '
+'
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Fin de entrada, devolviendo token: '
+' (tipo: 'newline')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Ignorando token 'newline' en línea 6, columna 2 (lexema: '\n')
+2025-06-27 13:11:21.877 [DEBUG] Lexer: Agregando token final 'EOF' en línea 7, columna 1
+2025-06-27 13:11:21.877 [INFO] Tokenización completada con éxito, generados 33 tokens
+2025-06-27 13:11:21.877 [INFO] Iniciando construcción del AST
+2025-06-27 13:11:21.877 [INFO] Ejecutando análisis sintáctico
+2025-06-27 13:11:21.877 [INFO] SLR1Parser: Analizando 33 tokens
+2025-06-27 13:11:21.877 [INFO] Iniciando análisis sintáctico con 33 tokens
+2025-06-27 13:11:21.877 [DEBUG] Lista de tokens a analizar:
+2025-06-27 13:11:21.877 [DEBUG]   [0] type[1,1]:type (línea 1, columna 1, lexema: 'type')
+2025-06-27 13:11:21.877 [DEBUG]   [1] var_id[1,6]:Point (línea 1, columna 6, lexema: 'Point')
+2025-06-27 13:11:21.877 [DEBUG]   [2] {[1,12]:{ (línea 1, columna 12, lexema: '{')
+2025-06-27 13:11:21.877 [DEBUG]   [3] var_id[2,3]:x (línea 2, columna 3, lexema: 'x')
+2025-06-27 13:11:21.877 [DEBUG]   [4] =[2,5]:= (línea 2, columna 5, lexema: '=')
+2025-06-27 13:11:21.877 [DEBUG]   [5] number[2,7]:3 (línea 2, columna 7, lexema: '3')
+2025-06-27 13:11:21.877 [DEBUG]   [6] ;[2,8]:; (línea 2, columna 8, lexema: ';')
+2025-06-27 13:11:21.877 [DEBUG]   [7] }[3,1]:} (línea 3, columna 1, lexema: '}')
+2025-06-27 13:11:21.877 [DEBUG]   [8] {[4,1]:{ (línea 4, columna 1, lexema: '{')
+2025-06-27 13:11:21.877 [DEBUG]   [9] function[5,3]:function (línea 5, columna 3, lexema: 'function')
+2025-06-27 13:11:21.877 [DEBUG]   [10] var_id[5,12]:fibonacci (línea 5, columna 12, lexema: 'fibonacci')
+2025-06-27 13:11:21.877 [DEBUG]   [11] ([5,21]:( (línea 5, columna 21, lexema: '(')
+2025-06-27 13:11:21.877 [DEBUG]   [12] var_id[5,22]:x (línea 5, columna 22, lexema: 'x')
+2025-06-27 13:11:21.877 [DEBUG]   [13] :[5,24]:: (línea 5, columna 24, lexema: ':')
+2025-06-27 13:11:21.877 [DEBUG]   [14] var_id[5,26]:Int (línea 5, columna 26, lexema: 'Int')
+2025-06-27 13:11:21.877 [DEBUG]   [15] )[5,29]:) (línea 5, columna 29, lexema: ')')
+2025-06-27 13:11:21.877 [DEBUG]   [16] =>[5,31]:=> (línea 5, columna 31, lexema: '=>')
+2025-06-27 13:11:21.877 [DEBUG]   [17] var_id[5,34]:fibonacci (línea 5, columna 34, lexema: 'fibonacci')
+2025-06-27 13:11:21.877 [DEBUG]   [18] ([5,43]:( (línea 5, columna 43, lexema: '(')
+2025-06-27 13:11:21.877 [DEBUG]   [19] var_id[5,44]:x (línea 5, columna 44, lexema: 'x')
+2025-06-27 13:11:21.877 [DEBUG]   [20] -[5,45]:- (línea 5, columna 45, lexema: '-')
+2025-06-27 13:11:21.877 [DEBUG]   [21] number[5,46]:1 (línea 5, columna 46, lexema: '1')
+2025-06-27 13:11:21.877 [DEBUG]   [22] )[5,47]:) (línea 5, columna 47, lexema: ')')
+2025-06-27 13:11:21.877 [DEBUG]   [23] +[5,49]:+ (línea 5, columna 49, lexema: '+')
+2025-06-27 13:11:21.877 [DEBUG]   [24] var_id[5,51]:fibonacci (línea 5, columna 51, lexema: 'fibonacci')
+2025-06-27 13:11:21.877 [DEBUG]   [25] ([5,60]:( (línea 5, columna 60, lexema: '(')
+2025-06-27 13:11:21.877 [DEBUG]   [26] var_id[5,61]:x (línea 5, columna 61, lexema: 'x')
+2025-06-27 13:11:21.877 [DEBUG]   [27] -[5,62]:- (línea 5, columna 62, lexema: '-')
+2025-06-27 13:11:21.877 [DEBUG]   [28] number[5,63]:2 (línea 5, columna 63, lexema: '2')
+2025-06-27 13:11:21.877 [DEBUG]   [29] )[5,64]:) (línea 5, columna 64, lexema: ')')
+2025-06-27 13:11:21.877 [DEBUG]   [30] ;[5,65]:; (línea 5, columna 65, lexema: ';')
+2025-06-27 13:11:21.877 [DEBUG]   [31] }[6,1]:} (línea 6, columna 1, lexema: '}')
+2025-06-27 13:11:21.877 [DEBUG]   [32] EOF[7,1]:EOF (línea 7, columna 1, lexema: 'EOF')
+2025-06-27 13:11:21.877 [DEBUG] REDUCE por producción: type_body_elements -> var_id = number ;  (ID: 72)
+2025-06-27 13:11:21.877 [DEBUG] REDUCE por producción: type_node_decl -> type var_id { type_body_elements }  (ID: 64)
+2025-06-27 13:11:21.877 [ERROR] Error sintáctico: Error de sintaxis: token inesperado 'var_id' en línea 5, columna 22
+
+Contexto del error:
+
+   function[5,3]:function
+   var_id[5,12]:fibonacci
+   ([5,21]:(
+>> var_id[5,22]:x <<
+   :[5,24]::
+   var_id[5,26]:Int
+   )[5,29]:)
+
+2025-06-27 13:11:21.877 [ERROR] Error en la construcción del AST: Error sintáctico: Error de sintaxis: token inesperado 'var_id' en línea 5, columna 22
+
+Contexto del error:
+
+   function[5,3]:function
+   var_id[5,12]:fibonacci
+   ([5,21]:(
+>> var_id[5,22]:x <<
+   :[5,24]::
+   var_id[5,26]:Int
+   )[5,29]:)
+

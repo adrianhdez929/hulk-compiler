@@ -186,27 +186,6 @@ inline Grammar getHulkGrammar(){
  * o un bloque de código entre llaves. Las producciones se han diseñado para manejar expresiones, 
  * declaraciones, estructuras de control y definiciones de tipos.
  */
-	
-	// ====================== IDENTIFICADORES ======================
-	/*
-	 * Los identificadores pueden ser simples o tener un tipo asociado
-	 */
-	
-	// id_expr -> ID_
-	// Identificador simple
-	g.AddProduction(AttrProd(id_expr, Sentence(ID_), [](const std::vector<ElementType>& args) -> ElementType {
-		Token id_token = std::get<Token>(args[0]);
-		return new IDNode(id_token.Lexeme(), id_token.Line());
-	}));
-	
-	// id_expr -> ID_ : ID_
-	// Identificador con tipo explícito
-	g.AddProduction(AttrProd(id_expr, Sentence({ID_, TWO_POINTS, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token id_token = std::get<Token>(args[0]);
-		Token type_token = std::get<Token>(args[2]);
-		int minLine = getMinLineFromArgs(args);
-		return new IDNode(id_token.Lexeme(), type_token.Lexeme(), minLine);
-	}));
 
 	// --------- Producción inicial del programa ---------
 	// input -> line
@@ -221,23 +200,6 @@ inline Grammar getHulkGrammar(){
 	g.AddProduction(AttrProd(input, Sentence(lines_block), [](const std::vector<ElementType>& args) -> ElementType {
 		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[0])); 
 		return (lines_block_node);
-	}));
-	
-	// input -> type_node_decl
-	// Declaración de tipo como programa completo
-	g.AddProduction(AttrProd(input, Sentence(type_node_decl), [](const std::vector<ElementType>& args) -> ElementType {
-		TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
-		return type_node_decl_node;
-	}));
-	
-	// input -> type_node_decl input
-	// Declaración de tipo seguida de otro código
-	g.AddProduction(AttrProd(input, Sentence({type_node_decl, input}), [](const std::vector<ElementType>& args) -> ElementType {
-		TypeDeclNode* type_node_decl_node = static_cast<TypeDeclNode*>(std::get<ASTNode*>(args[0]));
-		ASTNode* input_node = std::get<ASTNode*>(args[1]);
-		int minLine = getMinLineFromArgs(args);
-		BlockNode* block = new BlockNode({type_node_decl_node, input_node}, minLine);
-		return block;
 	}));
 
 	// --------- Bloques de código ---------
@@ -712,210 +674,376 @@ inline Grammar getHulkGrammar(){
 		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, lines_node, return_type.Lexeme(), minLine);
 	}));
 
-	// ====================== DECLARACIONES DE TIPOS ======================
-	/*
-	 * Las declaraciones de tipos definen nuevos tipos con atributos y métodos.
-	 * Los tipos pueden heredar de otros tipos y tener constructores con parámetros.
+	// ====================== LISTAS DE ARGUMENTOS ======================
+	/* 
+	 * Las listas de argumentos se utilizan en las declaraciones de funciones y llamadas.
+	 * Pueden estar vacías o contener uno o más identificadores separados por comas.
 	 */
 	
-	// type_node_decl -> type ID { type_body_elements }
-	// Declaración simple de tipo
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[3]));
+	// args_list -> ε
+	// Lista de argumentos vacía
+	g.AddProduction(AttrProd(args_list, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
 		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), new ArgsList({}, minLine), type_body_elements_node->children, minLine);
+		return new ArgsList({}, minLine);
 	}));
 	
-	// type_node_decl -> type ID inherits ID { type_body_elements }
-	// Declaración de tipo con herencia
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, INHERITS, ID_, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		Token inherits_name = std::get<Token>(args[3]);
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[5]));
+	// args_list -> id_expr
+	// Lista con un único argumento
+	g.AddProduction(AttrProd(args_list, Sentence(id_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), new ArgsList({}, minLine), type_body_elements_node->children, {inherits_name.Lexeme()}, minLine);
+		return new ArgsList({id_expr_node}, minLine);
 	}));
 	
-	// type_node_decl -> type ID inherits ID ( args_list ) { type_body_elements }
-	// Declaración de tipo con herencia y argumentos para el constructor del padre
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, INHERITS, ID_, LPARENT, args_list, RPARENT, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		Token inherits_name = std::get<Token>(args[3]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[5]));
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[8]));
-		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), new ArgsList({}, minLine), type_body_elements_node->children, {inherits_name.Lexeme()}, args_list_node, minLine);
-	}));
-	
-	// type_node_decl -> type ID ( args_list ) { type_body_elements }
-	// Declaración de tipo con parámetros de constructor
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, LPARENT, args_list, RPARENT, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[6]));
-		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), args_list_node, type_body_elements_node->children, minLine);
-	}));
-	
-	// type_node_decl -> type ID ( args_list ) inherits ID { type_body_elements }
-	// Declaración de tipo con parámetros y herencia
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, LPARENT, args_list, RPARENT, INHERITS, ID_, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
-		Token inherits_name = std::get<Token>(args[6]);
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[8]));
-		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), args_list_node, type_body_elements_node->children, {inherits_name.Lexeme()}, minLine);
-	}));
-	
-	// type_node_decl -> type ID ( args_list ) inherits ID ( args_list ) { type_body_elements }
-	// Declaración de tipo con parámetros y herencia con parámetros para el constructor padre
-	g.AddProduction(AttrProd(type_node_decl, Sentence({TYPE_, ID_, LPARENT, args_list, RPARENT, INHERITS, ID_, LPARENT, args_list, RPARENT, LKEY, type_body_elements, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token type_name = std::get<Token>(args[1]);
-		ArgsList* args_list_node1 = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
-		Token inherits_name = std::get<Token>(args[6]);
-		ArgsList* args_list_node2 = static_cast<ArgsList*>(std::get<ASTNode*>(args[8]));
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[11]));
-		int minLine = getMinLineFromArgs(args);
-		return new TypeDeclNode(new IDNode(type_name.Lexeme(), type_name.Line()), args_list_node1, type_body_elements_node->children, {inherits_name.Lexeme()}, args_list_node2, minLine);
+	// args_list -> args_list , id_expr
+	// Lista con múltiples argumentos (recursión a izquierda)
+	g.AddProduction(AttrProd(args_list, Sentence({args_list, COLON, id_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[0]));
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
+		args_list_node->add_child(id_expr_node);
+		return args_list_node;
 	}));
 
-	// --------- Elementos del cuerpo de un tipo ---------
-	// type_body_elements -> ε
-	// Cuerpo de tipo vacío (sin atributos ni métodos)
-	g.AddProduction(AttrProd(type_body_elements, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
-		int minLine = getMinLineFromArgs(args);
-		return new ASTNodeVector({}, minLine);
-	}));
+	// ====================== IDENTIFICADORES ======================
+	/*
+	 * Los identificadores pueden ser simples o tener un tipo asociado
+	 */
 	
-	// type_body_elements -> type_body_elements attribute
-	// Adición de un atributo a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, attribute}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
-		VarAssign* attribute_node = static_cast<VarAssign*>(std::get<ASTNode*>(args[1]));
-		type_body_elements_node->add_child(attribute_node);
-		return type_body_elements_node;
-	}));
-	
-	// Direct rule to connect type_body_elements to ID_ for the first attribute
-	g.AddProduction(AttrProd(type_body_elements, Sentence({ID_, EQUAL, NUMBER, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	// id_expr -> ID : ID_
+	// Identificador con tipo explícito
+	g.AddProduction(AttrProd(id_expr, Sentence({ID_, TWO_POINTS, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		Token id_token = std::get<Token>(args[0]);
-		Token number_token = std::get<Token>(args[2]);
-		float number = std::stof(number_token.Lexeme());
+		Token type_token = std::get<Token>(args[2]);
 		int minLine = getMinLineFromArgs(args);
-		
-		ASTNodeVector* body_elements = new ASTNodeVector({}, minLine);
-		VarAssign* attribute = new VarAssign(
-			new IDNode(id_token.Lexeme(), id_token.Line()), 
-			new FloatNode(number, number_token.Line()), 
-			minLine
-		);
-		body_elements->add_child(attribute);
-		return body_elements;
+		return new IDNode(id_token.Lexeme(), type_token.Lexeme(), minLine);
 	}));
 	
-	// type_body_elements -> type_body_elements method
-	// Adición de un método a los elementos de un tipo
-	g.AddProduction(AttrProd(type_body_elements, Sentence({type_body_elements, method}), [](const std::vector<ElementType>& args) -> ElementType {
-		ASTNodeVector* type_body_elements_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
-		AssignFuncNode* method_node = static_cast<AssignFuncNode*>(std::get<ASTNode*>(args[1]));
-		type_body_elements_node->add_child(method_node);
-		return type_body_elements_node;
+	// id_expr -> ID
+	// Identificador simple
+	g.AddProduction(AttrProd(id_expr, Sentence(ID_), [](const std::vector<ElementType>& args) -> ElementType {
+		Token id_token = std::get<Token>(args[0]);
+		return new IDNode(id_token.Lexeme(), id_token.Line());
 	}));
 
-	// --------- Atributos de tipos ---------
-	// attribute -> id_expr = expr ;
-	// Atributo con valor inicial
-	g.AddProduction(AttrProd(attribute, Sentence({id_expr, EQUAL, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	// ====================== ASIGNACIONES LET-IN ======================
+	/*
+	 * Las expresiones let-in permiten definir variables locales con su propio ámbito.
+	 * La asignación let-in incluye una lista de variables (var_assign_list) seguidas de
+	 * una expresión o un bloque de código que puede usar esas variables. Las variables
+	 * definidas sólo son válidas dentro del contexto del let-in.
+	 */
+	
+	// let_exp -> LET var_assign_list IN expr
+	// Asignación let-in con una expresión como cuerpo
+	g.AddProduction(AttrProd(let_exp, Sentence({LET, var_assign_list, IN, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[1]));
+		ASTNode* expr_node = std::get<ASTNode*>(args[3]);
+		int minLine = getMinLineFromArgs(args);
+		return new LetAssign(var_assign_list_node->assigns, expr_node, minLine);
+	}));
+	
+	// let_exp -> LET var_assign_list IN lines_block
+	// Asignación let-in con un bloque de código como cuerpo
+	g.AddProduction(AttrProd(let_exp, Sentence({LET, var_assign_list, IN, lines_block}), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[1]));
+		BlockNode* lines_block_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[3]));
+		int minLine = getMinLineFromArgs(args);
+		return new LetAssign(var_assign_list_node->assigns, lines_block_node, minLine);
+	}));
+
+	// --------- Lista de asignaciones de variables ---------
+	// var_assign_list -> id_expr = expr
+	// Asignación básica de una variable con una expresión
+	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, EQUAL, expr}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
-		return new VarAssign(id_expr_node, expr_node, minLine);
+		return new VarAssignList({new VarAssign(id_expr_node, expr_node, minLine)}, minLine);
 	}));
 	
-	// attribute -> var_id = expr ;
-	// Atributo con valor inicial usando var_id directamente
-	g.AddProduction(AttrProd(attribute, Sentence({ID_, EQUAL, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token id_token = std::get<Token>(args[0]);
-		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
-		int minLine = getMinLineFromArgs(args);
-		return new VarAssign(new IDNode(id_token.Lexeme(), id_token.Line()), expr_node, minLine);
-	}));
-	
-	// Additional variant for simple attribute - direct connection to help the parser
-	g.AddProduction(AttrProd(attribute, Sentence({ID_, EQUAL, NUMBER, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token id_token = std::get<Token>(args[0]);
-		Token number_token = std::get<Token>(args[2]);
-		int minLine = getMinLineFromArgs(args);
-		float number = std::stof(number_token.Lexeme());
-		return new VarAssign(new IDNode(id_token.Lexeme(), id_token.Line()), new FloatNode(number, number_token.Line()), minLine);
-	}));
-	
-	// attribute -> id_expr = expr as ID_ ;
-	// Atributo con valor inicial y tipo especificado
-	g.AddProduction(AttrProd(attribute, Sentence({id_expr, EQUAL, expr, AS_, ID_, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
+	// var_assign_list -> id_expr = expr as ID_
+	// Asignación de una variable con una expresión y especificación de tipo
+	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, EQUAL, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
 		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
 		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
 		Token type_name = std::get<Token>(args[4]);
 		int minLine = getMinLineFromArgs(args);
-		return new VarAssign(id_expr_node, expr_node, type_name.Lexeme(), minLine);
+		return new VarAssignList({new VarAssign(id_expr_node, expr_node, type_name.Lexeme(), minLine)}, minLine);
 	}));
 	
-	// attribute -> var_id = expr as ID_ ;
-	// Atributo con valor inicial y tipo especificado usando var_id directamente
-	g.AddProduction(AttrProd(attribute, Sentence({ID_, EQUAL, expr, AS_, ID_, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token id_token = std::get<Token>(args[0]);
-		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
-		Token type_name = std::get<Token>(args[4]);
+	// var_assign_list -> id_expr = new_expr
+	// Asignación de una variable con una expresión de creación de objeto
+	g.AddProduction(AttrProd(var_assign_list, Sentence({id_expr, EQUAL, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
+		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[2]));
 		int minLine = getMinLineFromArgs(args);
-		return new VarAssign(new IDNode(id_token.Lexeme(), id_token.Line()), expr_node, type_name.Lexeme(), minLine);
+		return new VarAssignList({new VarAssign(id_expr_node, new_expr_node, minLine)}, minLine);
+	}));
+	
+	// var_assign_list -> var_assign_list , id_expr = expr
+	// Lista de asignaciones de variables con una expresión adicional
+	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, EQUAL, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
+		ASTNode* expr_node = std::get<ASTNode*>(args[4]);
+		int minLine = getMinLineFromArgs(args);
+		var_assign_list_node->add_child(new VarAssign(id_expr_node, expr_node, minLine));
+		return var_assign_list_node;
+	}));
+	
+	// var_assign_list -> var_assign_list , id_expr = expr as ID_
+	// Lista de asignaciones de variables con una expresión adicional y tipo específico
+	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, EQUAL, expr, AS_, ID_}), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
+		ASTNode* expr_node = std::get<ASTNode*>(args[4]);
+		Token type_name = std::get<Token>(args[6]);
+		int minLine = getMinLineFromArgs(args);
+		var_assign_list_node->add_child(new VarAssign(id_expr_node, expr_node, type_name.Lexeme(), minLine));
+		return var_assign_list_node;
+	}));
+	
+	// var_assign_list -> var_assign_list , id_expr = new_expr
+	// Lista de asignaciones de variables con una instanciación de objeto
+	g.AddProduction(AttrProd(var_assign_list, Sentence({var_assign_list, COLON, id_expr, EQUAL, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		VarAssignList* var_assign_list_node = static_cast<VarAssignList*>(std::get<ASTNode*>(args[0]));
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[2]));
+		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[4]));
+		int minLine = getMinLineFromArgs(args);
+		var_assign_list_node->add_child(new VarAssign(id_expr_node, new_expr_node, minLine));
+		return var_assign_list_node;
 	}));
 
-	// --------- Métodos de tipos ---------
-	// method -> ID_ ( args_list ) => expr ;
-	// Método con expresión inline sin tipo de retorno
-	g.AddProduction(AttrProd(method, Sentence({ID_, LPARENT, args_list, RPARENT, INLINE, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token method_name = std::get<Token>(args[0]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[2]));
-		ASTNode* expr_node = std::get<ASTNode*>(args[5]);
+	// ====================== INSTANCIACIÓN DE OBJETOS ======================
+	/*
+	 * Las expresiones new_expr permiten crear instancias de tipos definidos por el usuario.
+	 * Se pueden pasar argumentos al constructor mediante expr_list.
+	 */
+	
+	// new_expr -> new ID_ ( expr_list )
+	// Creación de un nuevo objeto de un tipo específico con argumentos de constructor opcionales
+	g.AddProduction(AttrProd(new_expr, Sentence({NEW, ID_, LPARENT, expr_list, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token type_name = std::get<Token>(args[1]);
+		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[3]));
 		int minLine = getMinLineFromArgs(args);
-		return new AssignFuncNode(new IDNode(method_name.Lexeme(), method_name.Line()), args_list_node, expr_node, minLine);
+		return new NewTypeNode(type_name.Lexeme(), expr_list_node->children, minLine);
+	}));
+
+	// --------- Listas de expresiones ---------
+	// expr_list -> ε
+	// Lista vacía de expresiones
+	g.AddProduction(AttrProd(expr_list, Sentence(epsilon), [](const std::vector<ElementType>& args) -> ElementType {
+		int line = getMinLineFromArgs(args);
+		return new ASTNodeVector({}, line);
+	}));
+	// expr_list -> expr
+	// Lista con una única expresión
+	g.AddProduction(AttrProd(expr_list, Sentence(expr), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* expr_node = std::get<ASTNode*>(args[0]);
+		int minLine = getMinLineFromArgs(args);
+		return new ASTNodeVector({expr_node}, minLine);
+	}));
+	// expr_list -> new_expr
+	// Lista con una única expresión de creación de objeto
+	g.AddProduction(AttrProd(expr_list, Sentence(new_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[0]));
+		return new ASTNodeVector({new_expr_node}, new_expr_node->line);
+	}));
+	// expr_list -> expr_list , expr
+	// Lista de expresiones con una expresión adicional
+	g.AddProduction(AttrProd(expr_list, Sentence({expr_list, COLON, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		ASTNode* expr_node = std::get<ASTNode*>(args[2]);
+		expr_list_node->add_child(expr_node);
+		return expr_list_node;
+	}));
+	// expr_list -> expr_list , new_expr
+	// Lista de expresiones con una expresión de creación de objeto adicional
+	g.AddProduction(AttrProd(expr_list, Sentence({expr_list, COLON, new_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[0]));
+		NewTypeNode* new_expr_node = static_cast<NewTypeNode*>(std::get<ASTNode*>(args[2]));
+		expr_list_node->add_child(new_expr_node);
+		return expr_list_node;
+	}));
+
+	// ====================== LLAMADAS A FUNCIONES ======================
+	/*
+	 * Las llamadas a funciones permiten invocar funciones definidas previamente
+	 * pasando opcionalmente argumentos como expresiones.
+	 */
+	
+	// func_call -> ID ( expr_list )
+	// Llamada a una función con argumentos opcionales
+	g.AddProduction(AttrProd(func_call, Sentence({ID_, LPARENT, expr_list, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token func_name = std::get<Token>(args[0]);
+		ASTNodeVector* expr_list_node = static_cast<ASTNodeVector*>(std::get<ASTNode*>(args[2]));
+		int minLine = getMinLineFromArgs(args);
+		return new FunctionCallNode(func_name.Lexeme(), expr_list_node, minLine);
+	}));
+
+	// ====================== OPERACIONES ARITMÉTICAS ======================
+	/*
+	 * La estructura de expresiones aritméticas se redefine con no terminales específicos
+	 * para cada nivel de precedencia, siguiendo este orden:
+	 * 1. add_expr: sumas y restas (+, -)
+	 * 2. mult_expr: multiplicación, división y módulo (*, /, %)
+	 * 3. power_expr: potencia (^)
+	 * 4. unary_expr: operadores unarios (-)
+	 * 5. primary_expr: números, paréntesis, identificadores y llamadas
+	 */
+	
+	// add_expr -> mult_expr
+	g.AddProduction(AttrProd(add_expr, Sentence(mult_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[0]);
+		return mult_expr_node;
 	}));
 	
-	// method -> ID_ ( args_list ) : ID_ => expr ;
-	// Método con expresión inline y tipo de retorno especificado
-	g.AddProduction(AttrProd(method, Sentence({ID_, LPARENT, args_list, RPARENT, TWO_POINTS, ID_, INLINE, expr, SEMICOLON}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token method_name = std::get<Token>(args[0]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[2]));
-		Token return_type = std::get<Token>(args[5]);
-		ASTNode* expr_node = std::get<ASTNode*>(args[7]);
+	// add_expr -> add_expr + mult_expr
+	g.AddProduction(AttrProd(add_expr, Sentence({add_expr, PLUS, mult_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* add_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
-		return new AssignFuncNode(new IDNode(method_name.Lexeme(), method_name.Line()), args_list_node, expr_node, return_type.Lexeme(), minLine);
+		return new BinOpNode(add_expr_node, "+", mult_expr_node, minLine);
 	}));
 	
-	// method -> ID_ ( args_list ) { lines }
-	// Método con bloque de código sin tipo de retorno
-	g.AddProduction(AttrProd(method, Sentence({ID_, LPARENT, args_list, RPARENT, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token method_name = std::get<Token>(args[0]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[2]));
-		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[5]));
+	// add_expr -> add_expr - mult_expr
+	g.AddProduction(AttrProd(add_expr, Sentence({add_expr, MINUS, mult_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* add_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[2]);
 		int minLine = getMinLineFromArgs(args);
-		return new AssignFuncNode(new IDNode(method_name.Lexeme(), method_name.Line()), args_list_node, lines_node, minLine);
+		return new BinOpNode(add_expr_node, "-", mult_expr_node, minLine);
 	}));
 	
-	// method -> ID_ ( args_list ) : ID_ { lines }
-	// Método con bloque de código y tipo de retorno especificado
-	g.AddProduction(AttrProd(method, Sentence({ID_, LPARENT, args_list, RPARENT, TWO_POINTS, ID_, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
-		Token method_name = std::get<Token>(args[0]);
-		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[2]));
-		Token return_type = std::get<Token>(args[5]);
-		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[7]));
-		int minLine = getMinLineFromArgs(args);
-		return new AssignFuncNode(new IDNode(method_name.Lexeme(), method_name.Line()), args_list_node, lines_node, return_type.Lexeme(), minLine);
+	// mult_expr -> power_expr
+	g.AddProduction(AttrProd(mult_expr, Sentence(power_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* power_expr_node = std::get<ASTNode*>(args[0]);
+		return power_expr_node;
 	}));
 	
-	return g;
-}
+	// mult_expr -> mult_expr * power_expr
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, TIMES, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* power_expr_node = std::get<ASTNode*>(args[2]);
+		int minLine = getMinLineFromArgs(args);
+		return new BinOpNode(mult_expr_node, "*", power_expr_node, minLine);
+	}));
+	
+	// mult_expr -> mult_expr / power_expr
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, DIV, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* power_expr_node = std::get<ASTNode*>(args[2]);
+		int minLine = getMinLineFromArgs(args);
+		return new BinOpNode(mult_expr_node, "/", power_expr_node, minLine);
+	}));
+	
+	// mult_expr -> mult_expr % power_expr
+	g.AddProduction(AttrProd(mult_expr, Sentence({mult_expr, MOD, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* mult_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* power_expr_node = std::get<ASTNode*>(args[2]);
+		int minLine = getMinLineFromArgs(args);
+		return new BinOpNode(mult_expr_node, "%", power_expr_node, minLine);
+	}));
+	
+	// power_expr -> unary_expr
+	g.AddProduction(AttrProd(power_expr, Sentence(unary_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* unary_expr_node = std::get<ASTNode*>(args[0]);
+		return unary_expr_node;
+	}));
+	
+	// power_expr -> unary_expr ^ power_expr
+	g.AddProduction(AttrProd(power_expr, Sentence({unary_expr, POW, power_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* unary_expr_node = std::get<ASTNode*>(args[0]);
+		ASTNode* power_expr_node = std::get<ASTNode*>(args[2]);
+		int minLine = getMinLineFromArgs(args);
+		return new BinOpNode(unary_expr_node, "^", power_expr_node, minLine);
+	}));
+	
+	// unary_expr -> - unary_expr
+	g.AddProduction(AttrProd(unary_expr, Sentence({MINUS, unary_expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* unary_expr_node = std::get<ASTNode*>(args[1]);
+		int minLine = getMinLineFromArgs(args);
+		return new UnaryOpNode("-", unary_expr_node, minLine);
+	}));
+	
+	// unary_expr -> primary_expr
+	g.AddProduction(AttrProd(unary_expr, Sentence(primary_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* primary_expr_node = std::get<ASTNode*>(args[0]);
+		return primary_expr_node;
+	}));
+	
+	// primary_expr -> NUMBER
+	g.AddProduction(AttrProd(primary_expr, Sentence(NUMBER), [](const std::vector<ElementType>& args) -> ElementType {
+		Token number_token = std::get<Token>(args[0]);
+		float number = std::stof(number_token.Lexeme());
+		int line = number_token.Line();
+		return new FloatNode(number, line);
+	}));
+	
+	// primary_expr -> ( expr )
+	g.AddProduction(AttrProd(primary_expr, Sentence({LPARENT, expr, RPARENT}), [](const std::vector<ElementType>& args) -> ElementType {
+		ASTNode* expr_node = std::get<ASTNode*>(args[1]);
+		return expr_node;
+	}));
+	
+	// primary_expr -> id_expr
+	g.AddProduction(AttrProd(primary_expr, Sentence(id_expr), [](const std::vector<ElementType>& args) -> ElementType {
+		IDNode* id_expr_node = static_cast<IDNode*>(std::get<ASTNode*>(args[0]));
+		return id_expr_node;
+	}));
+	
+	// primary_expr -> func_call
+	g.AddProduction(AttrProd(primary_expr, Sentence(func_call), [](const std::vector<ElementType>& args) -> ElementType {
+		FunctionCallNode* func_call_node = static_cast<FunctionCallNode*>(std::get<ASTNode*>(args[0]));
+		return func_call_node;
+	}));
+	
+	// ====================== DEFINICIONES DE FUNCIONES ======================
+	/* 
+	 * Las funciones en HULK pueden definirse con expresiones inline (=>) o con bloques de código.
+	 * También pueden tener un tipo de retorno especificado o no.
+	 */
+	
+	// func_assign -> function ID ( args_list ) => expr
+	// Función con expresión inline sin tipo de retorno
+	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, INLINE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token func_name = std::get<Token>(args[1]);
+		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
+		ASTNode* expr_node = std::get<ASTNode*>(args[6]);
+		int minLine = getMinLineFromArgs(args);
+		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, expr_node, minLine);
+	}));
+	
+	// func_assign -> function ID ( args_list ) : ID_ => expr
+	// Función con expresión inline con tipo de retorno especificado
+	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, TWO_POINTS, ID_, INLINE, expr}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token func_name = std::get<Token>(args[1]);
+		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
+		Token return_type = std::get<Token>(args[6]);
+		ASTNode* expr_node = std::get<ASTNode*>(args[8]);
+		int minLine = getMinLineFromArgs(args);
+		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, expr_node, return_type.Lexeme(), minLine);
+	}));
+	
+	// func_assign -> function ID ( args_list ) { lines }
+	// Función con bloque de código sin tipo de retorno
+	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token func_name = std::get<Token>(args[1]);
+		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
+		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[6]));
+		int minLine = getMinLineFromArgs(args);
+		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, lines_node, minLine);
+	}));
+	
+	// func_assign -> function ID ( args_list ) : ID_ { lines }
+	// Función con bloque de código con tipo de retorno especificado
+	g.AddProduction(AttrProd(func_assign, Sentence({FUNCTION_, ID_, LPARENT, args_list, RPARENT, TWO_POINTS, ID_, LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+		Token func_name = std::get<Token>(args[1]);
+		ArgsList* args_list_node = static_cast<ArgsList*>(std::get<ASTNode*>(args[3]));
+		Token return_type = std::get<Token>(args[6]);
+		BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[8]));
+		int minLine = getMinLineFromArgs(args);
+		return new AssignFuncNode(new IDNode(func_name.Lexeme(), func_name.Line()), args_list_node, lines_node, return_type.Lexe
+
+
 
 
