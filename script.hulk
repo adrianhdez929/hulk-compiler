@@ -1,18 +1,4 @@
 
-function fibonacci(x:Int) {
-  if (x > 0) {
-    fibonacci(x-1) + fibonacci(x-2);
-  }
-  else {
-    x = 1;
-  };
-}
-type Point {
-  x = 3;
-}
-type OtroType {
-  y = "25";
-}
 {
   function fibonacci( x : Int) => fibonacci(x-1) + fibonacci(x-2);
 }

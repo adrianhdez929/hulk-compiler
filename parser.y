@@ -44,11 +44,12 @@ extern ASTNode* root;
 	class NewTypeNode* new_t_n;
 }
 
-
-
+%token NUMBER
+%token BOOLEAN
+%token STRING
+%token ID_ 
 %token PLUS MINUS TIMES DIV POW LPARENT RPARENT SEMICOLON COLON LKEY RKEY FUNCTION_ INLINE ASSIGN ASS_DES IF ELSE ELIF WHILE FOR ACCESS UMINUS TWOPOINTS NEW INHERITS IS AS_ 
 %token GREATER_EQUAL GREATER LESS_EQUAL LESS EQUAL DISTINCT AND_ NOT_ OR_ ARROBA_ D_ARROBA_
-
 %token LET
 %token IN
 %token TYPE
@@ -90,7 +91,7 @@ extern ASTNode* root;
 %left PLUS MINUS
 %left TIMES DIV
 %right POW
-%left UMINUS
+%right UMINUS
 
 %%
 
@@ -116,7 +117,7 @@ non_empty_lines:
 line:
 	expr SEMICOLON { $$ = $1; }
 	| func_asign SEMICOLON { $$ = $1; } 
-	| type_node_decl { root = $1; }
+	| type_node_decl { $$ = $1; }
 	;
 
 expr: 
@@ -134,7 +135,6 @@ expr:
 	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3, yylineno); }
 	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3, yylineno); }
 	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3, yylineno); }
-	| expr AS_ ID_ { $$ = new TypeCastNode($1, $3, yylineno); }
     ;
 
 func_asign:
@@ -209,6 +209,7 @@ bool_expr:
 	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2, yylineno), yylineno); }
 	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
 	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
+	;
 
 conditional:
 	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
@@ -221,7 +222,7 @@ conditional:
 
 while_expr:
 	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4, yylineno); }
-	| LPARENT bool_expr RPARENT expr { $$ = new WhileNode($2, $4, yylineno); }
+	| LPARENT bool_expr RPARENT expr SEMICOLON { $$ = new WhileNode($2, $4, yylineno); }
 	;
 
 //for_expr:
@@ -267,5 +268,5 @@ member_access_expr:
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error en linea %d: %s\n", yylineno - 1, s);
+    fprintf(stderr, "Error en linea %d: %s\n", yylineno, s);
 }

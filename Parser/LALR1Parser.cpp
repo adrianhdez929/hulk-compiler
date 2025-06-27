@@ -6,7 +6,8 @@
 #include <fstream>
 #include <filesystem>
 #include "../Lexer/Token.h"
-#include "SLR1Parser.h" // Para acceder a la clase ParsingError
+#include "../Logger/Logger.h"
+#include <cassert>
 
 // ============= IMPLEMENTACIÓN DE SERIALIZACIÓN DEL PARSER =============
 
@@ -23,7 +24,7 @@ namespace {
             }
             return true;
         } catch (const std::exception& e) {
-            std::cerr << "Error creando directorio hulk: " << e.what() << std::endl;
+            LogError("Error creando directorio hulk: " + std::string(e.what()));
             return false;
         }
     }
@@ -39,7 +40,7 @@ namespace {
             }
             return true;
         } catch (const std::exception& e) {
-            std::cerr << "Error creando directorio " << directory << ": " << e.what() << std::endl;
+            LogError("Error creando directorio " + directory + ": " + std::string(e.what()));
             return false;
         }
     }
@@ -50,13 +51,39 @@ LALR1Parser::LALR1Parser(Grammar& G, bool verbose)
     // Initialize action and goto tables
     action_ = std::map<std::pair<int, Symbol>, std::pair<std::string, int>>();
     goto_ = std::map<std::pair<int, Symbol>, int>();
+    
+    if (verbose_) {
+        LogInfo("Inicializando parser LALR1 con gramática de " + std::to_string(G_.Productions().size()) + " producciones");
+        LogDebug("Detalle de la gramática:");
+        for (const auto& prod : G_.Productions()) {
+            LogDebug("  " + prod.ToString() + " (ID: " + std::to_string(prod.get_id()) + ")");
+        }
+    } else {
+        LogInfo("Inicializando parser LALR1");
+    }
+    
     BuildParsingTable();
+    
+    if (verbose_) {
+        LogInfo("Tablas de análisis LALR1 creadas: " + std::to_string(action_.size()) + " entradas en ACTION, " 
+                + std::to_string(goto_.size()) + " entradas en GOTO");
+    }
 }
 
 //Parse method
 std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const std::vector<std::string>& tokens) {
     // Convert string tokens to Terminal objects
     std::vector<Terminal> terminal_tokens;
+    
+    LogInfo("Iniciando análisis sintáctico LALR1 con " + std::to_string(tokens.size()) + " tokens");
+    
+    if (verbose_) {
+        LogDebug("Lista de tokens recibidos por el parser LALR1:");
+        for (size_t i = 0; i < tokens.size(); i++) {
+            LogDebug("[" + std::to_string(i) + "] Token string: " + tokens[i]);
+        }
+    }
+    
     for (const auto& token : tokens) {
         terminal_tokens.push_back(Terminal(token, G_));
     }
@@ -94,7 +121,7 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
                         if (verbose_) {
-                            cout << "Reducing by production: " << production.ToString() << endl;
+
                         }
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
@@ -110,19 +137,6 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         if (goto_.find(goto_key) != goto_.end()) {
                             state_stack.push(goto_[goto_key]);
                         } else {
-                            // Error interno del parser - no se encontró una transición goto
-                            if (verbose_) {
-                                cout << "Actions:" << endl;
-                                for (const auto& action : action_) {
-                                    cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                        << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                                }
-                                cout << "Goto:" << endl;
-                                for (const auto& goto_action : goto_) {
-                                    cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                        << " -> Goto State: " << goto_action.second << endl;
-                                }
-                            }
                             
                             // Este es un error interno del parser, probablemente debido a una gramática mal construida
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
@@ -149,19 +163,6 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                 } else {
                     // No se encontró una acción para este estado y token
                     auto [error_msg, expected_tokens] = generateErrorMessage(state_stack.top(), current_token.Name());
-                    
-                    if (verbose_) {
-                        cout << "Actions:" << endl;
-                        for (const auto& action : action_) {
-                            cout << "State: " << action.first.first << ", Token: " << action.first.second.Name() 
-                                << " -> Action: " << action.second.first << ", Value: " << action.second.second << endl;
-                        }
-                        cout << "Goto:" << endl;
-                        for (const auto& goto_action : goto_) {
-                            cout << "State: " << goto_action.first.first << ", NonTerminal: " << goto_action.first.second.Name() 
-                                << " -> Goto State: " << goto_action.second << endl;
-                        }
-                    }
                     
                     // Lanzar una excepción especializada con detalles del error
                     throw LALR1ParsingError(error_msg, state_stack.top(), current_token.Name(), expected_tokens);
@@ -244,30 +245,64 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
     return std::make_pair(production_ids, actions);
 }
 void LALR1Parser::BuildParsingTable() {
+    LogInfo("Construyendo tabla de análisis sintáctico LALR1");
+    
     G_.Augment();
     if (!G_.IsAugmented()) {
+        LogError("Error: La gramática no se pudo aumentar correctamente");
         throw std::runtime_error("Grammar is not augmented");
     }
-    auto firsts = compute_firsts();
-
-    // Debug: Print FIRST sets
+    
     if (verbose_) {
-        std::cout << "FIRST sets:" << std::endl;
-        for (const auto& [nt, first_set] : firsts) {
-            std::cout << "FIRST(" << nt.ToString() << ") = { ";
-            for (const auto& t : first_set.get_values()) {
-                std::cout << t << " ";
-            }
-            std::cout << "}" << std::endl;
-        }
+        LogDebug("Gramática aumentada correctamente");
+        LogDebug("Símbolo inicial: " + G_.GetStartSymbol()->Name());
     }
     
-    // auto EOFile = Sentence(G_.GetEndOfFile());
-    // firsts[EOFile] = ContainerSet<string>().add(G_.GetEndOfFile()->Name());
+    LogDebug("Calculando conjuntos FIRST para construcción de autómata LALR1");
+    auto firsts = compute_firsts();
+    // Los conjuntos FIRST ya están registrados dentro de compute_firsts()
 
-    State* automaton = BuildLALR1Automaton().to_deterministic();
+    LogDebug("Construyendo autómata LALR1");
+    State* automaton = BuildLALR1Automaton(firsts).to_deterministic();
+    
+    if (verbose_) {
+        LogDebug("Autómata LALR1 construido con " + std::to_string(automaton->get_all_states().size()) + " estados");
+    }
+    
+    LogDebug("Generando tablas ACTION y GOTO a partir del autómata");
     for (const auto& state : automaton->get_all_states()) {
         int state_id = state->id();
+        
+        if (verbose_) {
+            LogDebug("Procesando estado " + std::to_string(state_id) + " con " + 
+                    std::to_string(state->get_items().size()) + " items");
+            
+            for (const auto& item : state->get_items()) {
+                std::string dot_position = "";
+                // En LALR1Parser usamos NextSymbol() en lugar de position()
+                auto next_symbol = item.NextSymbol();
+                if (next_symbol) {
+                    dot_position = " (• antes de " + next_symbol->Name() + ")";
+                } else {
+                    dot_position = " (• al final)";
+                }
+                
+                LogDebug("  Item: " + item.production()->ToString() + dot_position);
+                
+                if (!item.lookaheads().get_values().empty()) {
+                    std::string lookaheads = "Lookaheads: {";
+                    bool first = true;
+                    for (const auto& look : item.lookaheads().get_values()) {
+                        if (!first) lookaheads += ", ";
+                        lookaheads += look;
+                        first = false;
+                    }
+                    lookaheads += "}";
+                    LogDebug("    " + lookaheads);
+                }
+            }
+        }
+        
         for (const auto& item : state->get_items()) {
             if (item.IsReduceItem()) {
                 // Reduce action
@@ -275,9 +310,20 @@ void LALR1Parser::BuildParsingTable() {
                 if (production->Left() == G_.GetStartSymbol()) {
                     // Accept action
                     Register(action_, {state_id, *(G_.GetEndOfFile())}, {OK, 0});
+                    
+                    if (verbose_) {
+                        LogDebug("Estado " + std::to_string(state_id) + ": ACCEPT con EOF");
+                    }
                 } else {
                     // Regular reduce action
                     auto lookaheads = item.lookaheads().get_values();
+                    
+                    if (verbose_ && !lookaheads.empty()) {
+                        LogDebug("Estado " + std::to_string(state_id) + ": REDUCE por " + 
+                                production->ToString() + " con lookaheads: " + 
+                                std::to_string(lookaheads.size()));
+                    }
+                    
                     for (const auto& lookahead : lookaheads) {
                         auto terminal_ptr = G_.GetSymbol(lookahead);
                         if (terminal_ptr) {
@@ -291,13 +337,31 @@ void LALR1Parser::BuildParsingTable() {
                 if (next_symbol && next_symbol->IsTerminal()) {
                     auto next_state = state->move(next_symbol->Name());
                     if (!next_state.empty()) {
-                        Register(action_, {state_id, *next_symbol}, {SHIFT, (*next_state.begin())->id()});
+                        int target_state = (*next_state.begin())->id();
+                        Register(action_, {state_id, *next_symbol}, {SHIFT, target_state});
+                        
+                        if (verbose_) {
+                            LogDebug("Estado " + std::to_string(state_id) + ": SHIFT con " + 
+                                    next_symbol->Name() + " al estado " + std::to_string(target_state));
+                        }
+                    } else if (verbose_) {
+                        LogDebug("Estado " + std::to_string(state_id) + ": No hay estado siguiente para " + 
+                                next_symbol->Name() + " (terminal)");
                     }
                 } else if (next_symbol && next_symbol->IsNonTerminal()) {
                     // Goto action
                     auto next_state = state->move(next_symbol->Name());
                     if (!next_state.empty()) {
-                        Register(goto_, {state_id, *next_symbol}, (*next_state.begin())->id());
+                        int target_state = (*next_state.begin())->id();
+                        Register(goto_, {state_id, *next_symbol}, target_state);
+                        
+                        if (verbose_) {
+                            LogDebug("Estado " + std::to_string(state_id) + ": GOTO con " + 
+                                    next_symbol->Name() + " al estado " + std::to_string(target_state));
+                        }
+                    } else if (verbose_) {
+                        LogDebug("Estado " + std::to_string(state_id) + ": No hay estado siguiente para " + 
+                                next_symbol->Name() + " (no terminal)");
                     }
                 }
             }
@@ -308,7 +372,21 @@ void LALR1Parser::Register(std::map<std::pair<int, Symbol>, std::pair<std::strin
                                  const std::pair<int, Symbol>& key, 
                                  const std::pair<std::string, int>& value) {
     if (verbose_) {
-        std::cout << "Registering action: " << key.first << ", " << key.second.Name() << " -> " << value.first << ", " << value.second << std::endl;
+        std::string action_type = value.first;
+        std::string log_msg = "ACTION[" + std::to_string(key.first) + ", " + key.second.Name() + "] = ";
+        
+        if (action_type == SHIFT) {
+            log_msg += "SHIFT " + std::to_string(value.second);
+        } else if (action_type == REDUCE) {
+            auto production = G_.Productions()[value.second];
+            log_msg += "REDUCE by " + production.ToString() + " (ID: " + std::to_string(production.get_id()) + ")";
+        } else if (action_type == OK) {
+            log_msg += "ACCEPT";
+        } else {
+            log_msg += action_type + " " + std::to_string(value.second);
+        }
+        
+        LogDebug(log_msg);
     }
     table[key] = value;
 }
@@ -316,7 +394,7 @@ void LALR1Parser::Register(std::map<std::pair<int, Symbol>, int>& table,
                                  const std::pair<int, Symbol>& key, 
                                  int value) {
     if (verbose_) {
-        std::cout << "Registering goto: " << key.first << ", " << key.second.Name() << " -> " << value << std::endl;
+        LogDebug("GOTO[" + std::to_string(key.first) + ", " + key.second.Name() + "] = " + std::to_string(value));
     }
     table[key] = value;
 }
@@ -343,7 +421,6 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 
     while (changed == true) {
         changed = false;
-
         for (const auto& prod : G_.Productions()) {
             const auto& X = Sentence(prod.Left());
             const auto& alpha = prod.Right();
@@ -353,9 +430,9 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 
             // Firsts de alpha
             auto& first_alpha = firsts[alpha];
-
+            
             ContainerSet<string> local_first = compute_local_firsts(alpha, firsts, G_, verbose_);
-
+            
             bool changed_alpha = first_alpha.hard_update(local_first);
             // bool changed_alpha = hard_update_container_set(first_alpha, local_first);
             bool changed_X = first_X.hard_update(local_first);
@@ -364,66 +441,166 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
             
         }
     }
+    // Registrar los conjuntos FIRST finales
+    if (verbose_) {
+        LogDebug("=== CONJUNTOS FIRST CALCULADOS ===");
+        for (const auto& [sentence, set] : firsts) {
+            std::string values = "{";
+            bool first = true;
+            for (const auto& val : set.get_values()) {
+                if (!first) values += ", ";
+                values += val;
+                first = false;
+            }
+            if (set.contains_epsilon()) {
+                if (!first) values += ", ";
+                values += "ε";
+            }
+            values += "}";
+            LogDebug("FIRST(" + sentence.ToString() + ") = " + values);
+        }
+    } else {
+        // Versión resumida para log siempre (no verbose)
+        LogInfo("Conjuntos FIRST calculados");
+    }
+    
     return firsts;
 };
 
 ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
+    // Primero verificar si ya está calculado en la caché
     if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
         return firsts_cache_.at(alpha);
     }
+
+
+
+    cout << "Calculando FIRST local para: " << alpha.ToString() << endl;
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
-    bool all_epsilon = true;
+    if (symbols.empty()) {
+        cout << "Alpha está vacío, devolviendo conjunto vacío." << endl;
+        return local_first; // Si alpha está vacío, devolvemos un conjunto vacío
+    }
+    if (symbols.size() == 1 && symbols[0]->IsEpsilon()) {
+        cout << "Alpha es epsilon, devolviendo conjunto con epsilon." << endl;
+        local_first.set_epsilon(); // Si alpha es epsilon, devolvemos un conjunto que contiene epsilon
+        return local_first;
+    }
+    // bool alpha_is_epsilon = true;
 
     for (const auto& symbol : symbols) {
-        auto sym_sentence = Sentence(symbol);
-        if (firsts.find(sym_sentence) == firsts.end()) {
-            if (symbol->IsTerminal() && !symbol->IsEpsilon()) {
-                local_first.add(symbol->Name());
-                all_epsilon = false;
-                continue; // Si no hay FIRST para el símbolo, asumimos que puede derivar epsilon
-            }
-        }
-        const auto& first_x = firsts.at(sym_sentence);
-        for (const auto& terminal : first_x.get_values()) {
-            if (terminal != G.GetEpsilon()->Name()) {
-                local_first.add(terminal);
-            }
-        }
-
-        if (!first_x.contains_epsilon()) {
-            all_epsilon = false;
-            break; // Si un símbolo no deriva epsilon, terminamos el cálculo
+        if (symbol->IsTerminal() && !symbol->IsEpsilon()) {
+            local_first.set_epsilon();
+            continue; // Si es terminal y no es epsilon, lo agregamos directamente
         }
     }
-    if (all_epsilon) {
-        local_first.set_epsilon();
-    }
+    cout << "FIRST local para " << alpha.ToString() << " es: " << endl;
+    local_first.update(firsts.at(Sentence(alpha.Symbols()[0]))); // Agregar el primer símbolo de alpha
+    cout << "FIRST local actualizado con el primer símbolo: " << alpha.Symbols()[0]->Name() << endl;
+    int i = 0;
+    cout << "Iterando sobre los símbolos de alpha..." << endl;
+    auto xi = alpha.Symbols()[i];
+    cout << "Procesando símbolo: " << xi->Name() << endl;
 
-    // Almacenar en la caché para futuras consultas
-    firsts_cache_[alpha] = local_first;
-    
+    while (firsts.at(Sentence(xi)).contains_epsilon()) {
+        cout << "El símbolo " << xi->Name() << " deriva epsilon." << endl;
+        if (i >= alpha.Symbols().size()) {
+            // Si llegamos al final de alpha y todos los símbolos anteriores derivan epsilon
+            local_first.set_epsilon();
+            break; // No hay más símbolos para procesar
+        }
+        i++;
+        if (i >= alpha.Symbols().size()) {
+            break; // Evitar acceso fuera de rango
+        }
+        xi = alpha.Symbols()[i];
+        if (!firsts.at(Sentence(xi)).contains_epsilon()) {
+            // Si el símbolo actual no deriva epsilon, terminamos
+            local_first.update(firsts.at(Sentence(xi)));
+            // all_epsilon = false;
+            break;
+        }
+    }
     return local_first;
+
+    // for (const auto& symbol : symbols) {
+    //     auto sym_sentence = Sentence(symbol);
+    //     if (firsts.find(sym_sentence) == firsts.end()) {
+    //         if (symbol->IsTerminal() && !symbol->IsEpsilon()) {
+    //             local_first.add(symbol->Name());
+    //             all_epsilon = false;
+    //             continue; // Si no hay FIRST para el símbolo, asumimos que puede derivar epsilon
+    //         }
+    //     }
+    //     const auto& first_x = firsts.at(sym_sentence);
+    //     for (const auto& terminal : first_x.get_values()) {
+    //         if (terminal != G.GetEpsilon()->Name()) {
+    //             local_first.add(terminal);
+    //         }
+    //     }
+
+    //     if (!first_x.contains_epsilon()) {
+    //         all_epsilon = false;
+    //         break; // Si un símbolo no deriva epsilon, terminamos el cálculo
+    //     }
+    // }
+    // if (all_epsilon) {
+    //     local_first.set_epsilon();
+    // }
+
+    // // Almacenar en la caché para futuras consultas
+    // firsts_cache_[alpha] = local_first;
+    
+    // return local_first;
 }
 
 std::map<Sentence, ContainerSet<string>> LALR1Parser::compute_follows(const map<Sentence, ContainerSet<string>>& symbol_firsts) {
+    LogDebug("Calculando conjuntos FOLLOW para LALR1");
+    
     std::map<Sentence, ContainerSet<string>> follows;
     bool changed = true;
 
+    // Inicializar los conjuntos FOLLOW para cada no terminal
     for (const auto& nonterminal : G_.NonTerminals()) {
         follows[Sentence(nonterminal)] = ContainerSet<string>();
+        
+        if (verbose_) {
+            LogDebug("FOLLOW(" + nonterminal->Name() + ") inicializado como conjunto vacío");
+        }
     }
+    
+    // El símbolo $ (fin de entrada) pertenece al conjunto FOLLOW del símbolo inicial
     Sentence start_sentence = Sentence(G_.GetStartSymbol());
     shared_ptr<Symbol> EOFile = G_.GetEndOfFile();
     follows[start_sentence] = ContainerSet<string>();
     follows[start_sentence].add(EOFile->Name());
+    
+    if (verbose_) {
+        LogDebug("FOLLOW(" + G_.GetStartSymbol()->Name() + ") = {" + EOFile->Name() + "} (inicial)");
+    }
 
+    int iteration = 0;
     while (changed == true) {
         changed = false;
+        iteration++;
+        
+        if (verbose_) {
+            LogDebug("Iteración " + std::to_string(iteration) + " del algoritmo de cálculo de FOLLOW");
+        }
+        
         auto prods = G_.Productions();
         for (const auto& prod : G_.Productions()) {
             const auto& X = Sentence(prod.Left());
             const auto& alpha = prod.Right().Symbols();
+            
+            if (verbose_) {
+                std::string production_str = prod.Left()->Name() + " -> ";
+                for (const auto& symbol : alpha) {
+                    production_str += symbol->Name() + " ";
+                }
+                LogDebug("Analizando producción: " + production_str);
+            }
 
             for (int i = 0; i < alpha.size(); i++) {
                 if (!alpha[i]->IsNonTerminal()) {
@@ -448,19 +625,73 @@ std::map<Sentence, ContainerSet<string>> LALR1Parser::compute_follows(const map<
                     }
                 }
 
-                if (follows[Y].update(first_rest)) {
-                    changed = true; // If follows[Y] was updated, set changed to true
+                bool updated = false;
+                
+                if (!first_rest.get_values().empty() && follows[Y].update(first_rest)) {
+                    changed = true;
+                    updated = true;
+                    
+                    if (verbose_) {
+                        std::string first_rest_str = "{";
+                        bool first = true;
+                        for (const auto& sym : first_rest.get_values()) {
+                            if (!first) first_rest_str += ", ";
+                            first_rest_str += sym;
+                            first = false;
+                        }
+                        first_rest_str += "}";
+                        
+                        LogDebug("Actualizado FOLLOW(" + Y.ToString() + ") con FIRST del resto: " + first_rest_str);
+                    }
                 }
 
                 if (has_epsilon || i == alpha.size() - 1) {
                     // If the last symbol or has epsilon, add follows[X] to follows[Y]
-                    if (follows[X].update(follows[Y])) {
-                        changed = true; // If follows[X] was updated, set changed to true
+                    if (follows[Y].update(follows[X])) {
+                        changed = true;
+                        updated = true;
+                        
+                        if (verbose_) {
+                            LogDebug("Actualizado FOLLOW(" + Y.ToString() + ") con FOLLOW(" + X.ToString() + ")");
+                        }
                     }
-                }   
+                }
+                
+                if (updated && verbose_) {
+                    std::string follow_str = "{";
+                    bool first = true;
+                    for (const auto& sym : follows[Y].get_values()) {
+                        if (!first) follow_str += ", ";
+                        follow_str += sym;
+                        first = false;
+                    }
+                    follow_str += "}";
+                    
+                    LogDebug("FOLLOW(" + Y.ToString() + ") actualizado: " + follow_str);
+                }
             }
         }
     }
+    
+    // Registrar los conjuntos FOLLOW finales en los logs
+    if (verbose_) {
+        LogDebug("=== CONJUNTOS FOLLOW CALCULADOS ===");
+        for (const auto& [key, value] : follows) {
+            std::string values = "{";
+            bool first = true;
+            for (const auto& val : value.get_values()) {
+                if (!first) values += ", ";
+                values += val;
+                first = false;
+            }
+            values += "}";
+            LogDebug("FOLLOW(" + key.ToString() + ") = " + values);
+        }
+    } else {
+        // Versión resumida para log siempre (no verbose)
+        LogInfo("Conjuntos FOLLOW calculados");
+    }
+    
     return follows;
 }
 
@@ -485,20 +716,22 @@ std::vector<Item> LALR1Parser::expand(const Item& item, const map<Sentence, Cont
     
     // Calcular FIRST(β) - sin epsilon
     Sentence beta_sentence(beta_symbols);
+    cout << "Calculando FIRST(β) para el ítem: " << item.ToString() << endl;
     auto first_beta = compute_local_firsts(beta_sentence, firsts, G, false);
+    cout << "FIRST(β) calculado: " << endl;
+    lookaheads.update(first_beta);
     
-    for (const auto& terminal : first_beta.get_values()) {
-        // Añadir solo si no es epsilon
-        if (terminal != G.GetEpsilon()->Name()) {
-            lookaheads.add(terminal);
-        }
-    }
-    // Si FIRST(β) contiene epsilon, añadimos los lookaheads del ítem actual
-    for (const auto& terminal : first_beta.get_values()) {
-        if (terminal != G.GetEpsilon()->Name()) {
-            lookaheads.update(item.lookaheads());
-        }
-    }
+    assert(!lookaheads.contains_epsilon() && "FIRST(β) no debe contener epsilon en la expansión de ítems LALR1");
+    // for (const auto& terminal : first_beta.get_values()) {
+    //     // Añadir solo si no es epsilon
+    //     if (terminal != G.GetEpsilon()->Name()) {
+    //         lookaheads.add(terminal);
+    //     }
+    // }
+    // // Si FIRST(β) contiene epsilon, añadimos los lookaheads del ítem actual
+    // if (first_beta.contains_epsilon()) {
+    //     lookaheads.update(item.lookaheads());
+    // }
     
     for (const auto& prod : G.Productions()) {
         if (prod.Left()->Name() == next_symbol->Name()) {
@@ -537,57 +770,69 @@ std::vector<Item> LALR1Parser::closure_lr1(const std::vector<Item>& items, const
     bool changed = true;
     while (changed) {
         changed = false;
-
+        cout  << "Calculando clausura LALR1, tamaño actual: " << closure.size() << endl;
         // Crear un nuevo conjunto para los nuevos elementos
         ContainerSet<Item> new_items;
         for (const auto& item : closure) {
-            auto next_sym = item.NextSymbol();
-            if (!next_sym || !next_sym->IsNonTerminal()) continue;
-
-            auto beta = item.GetBetaSymbols();
-            std::vector<shared_ptr<Symbol>> beta_symbols;
-            for (const auto& sym : beta) {
-                beta_symbols.push_back(sym);
+            //Expandir el ítem actual
+            cout << "Expandiendo ítem: " << item.ToString() << endl;
+            auto expanded_items = expand(item, firsts, G_);
+            cout << "Ítems expandidos: " << expanded_items.size() << endl;
+            for (const auto& expanded_item : expanded_items) {
+                new_items.add(expanded_item);
             }
+            // auto next_sym = item.NextSymbol();
+            // if (!next_sym || !next_sym->IsNonTerminal()) continue;
 
-            auto first_beta = compute_local_firsts(Sentence(beta_symbols), firsts, G_, false);
+            // auto beta = item.GetBetaSymbols();
+            // std::vector<shared_ptr<Symbol>> beta_symbols;
+            // for (const auto& sym : beta) {
+            //     beta_symbols.push_back(sym);
+            // }
 
-            ContainerSet<string> lookaheads;
-            for (const auto& term : first_beta.get_values()) {
-                // Añadir solo si no es epsilon
-                if (term != G_.GetEpsilon()->Name()) {
-                    lookaheads.add(term);
-                }
-            }
-            if (first_beta.contains_epsilon()) {
-                // Si FIRST(β) contiene epsilon, añadimos los lookaheads del ítem actual
-                lookaheads.update(item.lookaheads());
-            }
+            // // Calcular FIRST(β)
+            // auto first_beta = compute_local_firsts(Sentence(beta_symbols), firsts, G_, verbose_);
 
-            bool exists = false;
-            for (const auto& prod : G_.Productions()) {
-                if (prod.Left()->Name() == next_sym->Name()) {
-                    // Crear un nuevo ítem con la producción y el lookahead calculado
-                    auto new_item = Item(std::make_shared<Production>(prod), 0, lookaheads);
-                    for (const auto& existing : closure.get_set()) {
-                        if (existing == new_item) {
-                            // Si el ítem ya está en el cierre, no lo añadimos
-                            exists = true;
-                            break;
-                        }
-                    }
-                    if (!exists) {
-                        new_items.add(new_item);
-                        changed = true; // Si se añade un nuevo ítem, marcamos que hubo un cambio
-                    }
-                }
-            }
+            // ContainerSet<string> lookaheads;
+            // for (const auto& term : first_beta.get_values()) {
+            //     // Añadir solo si no es epsilon
+            //     if (term != G_.GetEpsilon()->Name()) {
+            //         lookaheads.add(term);
+            //     }
+            // }
+            // if (first_beta.contains_epsilon()) {
+            //     // Si FIRST(β) contiene epsilon, añadimos los lookaheads del ítem actual
+            //     lookaheads.update(item.lookaheads());
+            // }
+
+            // bool exists = false;
+            // for (const auto& prod : G_.Productions()) {
+            //     if (prod.Left()->Name() == next_sym->Name()) {
+            //         // Crear un nuevo ítem con la producción y el lookahead calculado
+            //         auto new_item = Item(std::make_shared<Production>(prod), 0, lookaheads);
+            //         for (const auto& existing : closure.get_set()) {
+            //             if (existing == new_item) {
+            //                 // Si el ítem ya está en el cierre, no lo añadimos
+            //                 exists = true;
+            //                 break;
+            //             }
+            //         }
+            //         if (!exists) {
+            //             new_items.add(new_item);
+            //             changed = true; // Si se añade un nuevo ítem, marcamos que hubo un cambio
+            //         }
+            //     }
+            // }
         }
-        if (changed) {
-            closure.update(new_items);
-        }
+        cout << "Nuevos ítems encontrados: " << new_items.size() << endl;
+        changed = closure.update(new_items);
+        // if (changed) {
+        //     closure.update(new_items);
+        // }
     }
-    return std::vector<Item>(closure.get_set().begin(), closure.get_set().end());
+    // return std::vector<Item>(closure.get_set().begin(), closure.get_set().end());
+    auto compressed_items = compress(std::vector<Item>(closure.get_set().begin(), closure.get_set().end()));
+    return std::vector<Item>(compressed_items.begin(), compressed_items.end());
 }
 vector<Item> LALR1Parser::goto_lr1(const vector<Item>& items, shared_ptr<Symbol> symbol, const map<Sentence, ContainerSet<string>>& firsts, bool just_kernel) {
     vector<Item> goto_items;
@@ -604,15 +849,17 @@ vector<Item> LALR1Parser::goto_lr1(const vector<Item>& items, shared_ptr<Symbol>
     }
     return closure_lr1(goto_items, firsts);
 }
-State LALR1Parser::BuildLALR1Automaton() {
-    cout << "===== LALR1Parser::BuildLALR1Automaton() =====" << endl;
+State LALR1Parser::BuildLALR1Automaton(std::map<Sentence, ContainerSet<string>>& firsts) {
+
     assert(G_.GetStartSymbol()->productions.size() == 1 && "Grammar must be augmented");
 
+    cout << "Calculando conjuntos FIRST..." << endl;
     // Calcular conjuntos FIRST
-    auto firsts = compute_firsts();
+    // auto firsts = compute_firsts();
     auto EOFile = Sentence(G_.GetEndOfFile());
     firsts[EOFile] = ContainerSet<string>();
     firsts[EOFile].add(G_.GetEndOfFile()->Name());
+    cout << "Conjuntos FIRST calculados." << endl;
 
     // Ítem inicial
     auto start_production = G_.GetStartSymbol()->productions[0];
@@ -620,9 +867,12 @@ State LALR1Parser::BuildLALR1Automaton() {
     lookahead_set.add(G_.GetEndOfFile()->Name());
     auto start_item = Item(std::make_shared<Production>(start_production), 0, lookahead_set);
 
+    cout << "Calculando clausura inicial..." << endl;
     // Calcular clausura inicial
     auto closure = closure_lr1({start_item}, firsts);
-    
+
+    cout << "Clausura inicial calculada." << endl;
+
     // Estado inicial
     int state_id = 0;
     auto automaton = State(state_id++, true);
@@ -639,6 +889,9 @@ State LALR1Parser::BuildLALR1Automaton() {
     kernel_to_state[initial_kernel] = &automaton;
     // state_to_kernel[&automaton] = initial_kernel;
 
+    // Memoization
+    // 
+
     // Cola para procesar estados
     std::deque<State*> pending;
     pending.push_back(&automaton);
@@ -647,6 +900,7 @@ State LALR1Parser::BuildLALR1Automaton() {
         auto current_state = pending.front();
         pending.pop_front();
 
+        cout << "Procesando estado: " << current_state->get_id() << endl;
         set<shared_ptr<Symbol>> trans_symbols;
         for (const auto& item : current_state->get_items()){
             if (item.NextSymbol() != nullptr) {
@@ -679,6 +933,8 @@ State LALR1Parser::BuildLALR1Automaton() {
                         }
                     }
                 }
+            } else {
+                // Estado nuevo: crear y registrar
                 // Crear nuevo estado
                 new_state = new State(state_id++, true);
                 for (const auto& item : goto_items) {
@@ -694,11 +950,16 @@ State LALR1Parser::BuildLALR1Automaton() {
             current_state->add_transition(symbol->Name(), new_state);
         }
     }
+    cout << "Autómata LALR1 construido con " << automaton.get_all_states().size() << " estados." << endl;
     return automaton;
 }
 
 // Método para limpiar todos los estados creados
 void LALR1Parser::CleanupAutomatonStates() {
+    if (!automaton_states_.empty()) {
+        LogDebug("Limpiando estados del autómata LALR1 (" + std::to_string(automaton_states_.size()) + " estados)");
+    }
+    
     // Crear un conjunto para evitar eliminar el mismo estado más de una vez
     std::unordered_set<State*> visited;
     
@@ -751,7 +1012,7 @@ bool LALR1Parser::serialize_parser(const std::string& filename, const std::strin
     std::ofstream file(filepath, std::ios::binary);
     
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para escritura: " << filepath << std::endl;
+        LogError("Error: No se pudo abrir el archivo para escritura: " + filepath);
         return false;
     }
     
@@ -815,11 +1076,11 @@ bool LALR1Parser::serialize_parser(const std::string& filename, const std::strin
         }
         
         file.close();
-        std::cout << "Parser serializado exitosamente en: " << filepath << std::endl;
+
         return true;
         
     } catch (const std::exception& e) {
-        std::cerr << "Error durante la serialización del parser: " << e.what() << std::endl;
+        LogError("Error durante la serialización del parser: " + std::string(e.what()));
         file.close();
         return false;
     }
@@ -834,7 +1095,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
     std::ifstream file(filepath, std::ios::binary);
     
     if (!file.is_open()) {
-        std::cerr << "Error: No se pudo abrir el archivo para lectura: " << filepath << std::endl;
+        LogError("Error: No se pudo abrir el archivo para lectura: " + filepath);
         return nullptr;
     }
     
@@ -843,7 +1104,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
         char signature[11] = {0};
         file.read(signature, 10);
         if (std::string(signature) != "LR1PARSER") {
-            std::cerr << "Error: Archivo no es un parser serializado válido" << std::endl;
+            LogError("Error: Archivo no es un parser serializado válido");
             file.close();
             return nullptr;
         }
@@ -852,7 +1113,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
         uint32_t version;
         file.read(reinterpret_cast<char*>(&version), sizeof(version));
         if (version != 1) {
-            std::cerr << "Error: Versión de parser no soportada: " << version << std::endl;
+            LogError("Error: Versión de parser no soportada: " + std::to_string(version));
             file.close();
             return nullptr;
         }
@@ -883,7 +1144,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
             // Buscar el símbolo en la gramática
             auto symbol_ptr = grammar.GetSymbol(symbol_name);
             if (!symbol_ptr) {
-                std::cerr << "Error: Símbolo no encontrado en gramática: " << symbol_name << std::endl;
+                LogError("Error: Símbolo no encontrado en gramática: " + symbol_name);
                 file.close();
                 return nullptr;
             }
@@ -922,7 +1183,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
             // Buscar el símbolo en la gramática
             auto symbol_ptr = grammar.GetSymbol(symbol_name);
             if (!symbol_ptr) {
-                std::cerr << "Error: Símbolo no encontrado en gramática: " << symbol_name << std::endl;
+                LogError("Error: Símbolo no encontrado en gramática: " + symbol_name);
                 file.close();
                 return nullptr;
             }
@@ -941,7 +1202,7 @@ LALR1Parser* LALR1Parser::deserialize_parser(const std::string& filename, const 
         return new LALR1Parser(grammar, action, goto_table, verbose);
         
     } catch (const std::exception& e) {
-        std::cerr << "Error durante la deserialización del parser: " << e.what() << std::endl;
+        LogError("Error durante la deserialización del parser: " + std::string(e.what()));
         file.close();
         return nullptr;
     }
@@ -962,6 +1223,19 @@ std::vector<std::string> LALR1Parser::getExpectedTokens(int state_id) const {
 
 std::pair<std::string, std::vector<std::string>> LALR1Parser::generateErrorMessage(int state_id, const std::string& token) const {
     std::vector<std::string> expected_tokens = getExpectedTokens(state_id);
+    
+    LogError("Error sintáctico en estado " + std::to_string(state_id) + ": token inesperado '" + token + "'");
+    
+    if (verbose_ && !expected_tokens.empty()) {
+        std::string expected = "Tokens esperados: ";
+        for (size_t i = 0; i < expected_tokens.size(); ++i) {
+            if (i > 0) {
+                expected += (i == expected_tokens.size() - 1) ? " o " : ", ";
+            }
+            expected += "'" + expected_tokens[i] + "'";
+        }
+        LogDebug(expected);
+    }
     
     std::string error_msg = "Error de sintaxis: token inesperado '" + token + "'";
     if (!expected_tokens.empty()) {
@@ -1087,6 +1361,18 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
 
     int index = 0;
     int current_position = 0;
+    
+    LogInfo("LALR1Parser: Analizando " + std::to_string(tokens.size()) + " tokens");
+    
+    if (verbose_) {
+        LogDebug("Lista de tokens a analizar en LALR1:");
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            LogDebug("  [" + std::to_string(i) + "] " + tokens[i].ToString() + 
+                     " (línea " + std::to_string(tokens[i].Line()) + 
+                     ", columna " + std::to_string(tokens[i].Column()) + 
+                     ", lexema: '" + tokens[i].Lexeme() + "')");
+        }
+    }
 
     try {
         while (index < tokens.size() || !symbol_stack.empty()) {
@@ -1104,18 +1390,39 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                         state_stack.push(action_value.second);
                         symbol_stack.push(current_token);
                         actions.push_back(SHIFT);
+                        
+                        if (verbose_) {
+                            LogDebug("SHIFT: Token '" + current_token.Name() + "' al estado " + 
+                                    std::to_string(action_value.second) + 
+                                    " (lexema: '" + current_token.Lexeme() + 
+                                    "', línea " + std::to_string(current_token.Line()) + 
+                                    ", columna " + std::to_string(current_token.Column()) + ")");
+                        }
+                        
                         index++;
                     } 
                     else if (action_value.first == REDUCE) {
                         // Reduce action
                         auto production = G_.Productions()[action_value.second];
+                        
                         if (verbose_) {
-                            std::cout << "Reducing by production: " << production.ToString() << std::endl;
+                            LogDebug("REDUCE por producción: " + production.ToString() + 
+                                    " (ID: " + std::to_string(production.get_id()) + ")");
+                        } else {
+                            // Log básico incluso sin verbose
+                            LogDebug("REDUCE: " + production.ToString());
                         }
+                        
                         production_ids.push_back(production.get_id());
                         actions.push_back(REDUCE);
                         
-                        for (int i = 0; i < production.Right().Symbols().size(); i++) {
+                        int symbols_to_pop = production.Right().Symbols().size();
+                        if (verbose_) {
+                            LogDebug("Pop de " + std::to_string(symbols_to_pop) + 
+                                    " símbolos de las pilas de estados y símbolos");
+                        }
+                        
+                        for (int i = 0; i < symbols_to_pop; i++) {
                             state_stack.pop();
                             if (!symbol_stack.empty()) {
                                 symbol_stack.pop();
@@ -1124,26 +1431,39 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
 
                         auto goto_key = std::make_pair(state_stack.top(), *(production.Left()));
                         if (goto_.find(goto_key) != goto_.end()) {
-                            state_stack.push(goto_[goto_key]);
+                            int new_state = goto_[goto_key];
+                            state_stack.push(new_state);
+                            
+                            if (verbose_) {
+                                LogDebug("GOTO[" + std::to_string(state_stack.top()) + ", " + 
+                                        production.Left()->Name() + "] = " + std::to_string(new_state));
+                            }
                         } 
                         else {
                             // Error interno del parser - no se encontró una transición goto
-                            if (verbose_) {
-                                std::cout << "Error: No se encontró transición GOTO" << std::endl;
-                            }
-                            
                             std::string error_msg = "Error interno del parser: no se encontró transición GOTO para el no terminal '" + 
                                                 production.Left()->Name() + "' en el estado " + std::to_string(state_stack.top());
+                            
+                            LogError(error_msg);
                             throw std::runtime_error(error_msg);
                         }
                     } 
                     else if (action_value.first == OK) {
                         // Accept action
                         actions.push_back(OK);
+                        
+                        LogInfo("Parser LALR1: Entrada aceptada");
+                        
+                        if (verbose_) {
+                            LogDebug("ACCEPT: La entrada ha sido reconocida correctamente por la gramática");
+                        }
+                        
                         break;
                     } 
                     else {
-                        throw std::runtime_error("Unknown action: " + action_value.first);
+                        std::string error_msg = "Acción desconocida: " + action_value.first;
+                        LogError(error_msg);
+                        throw std::runtime_error(error_msg);
                     }
                 } 
                 else {
@@ -1155,6 +1475,17 @@ std::pair<std::vector<int>, std::vector<std::string>> LALR1Parser::Parse(const s
                                                ", columna " + std::to_string(current_token.Column());
                     
                     std::string enhanced_error = error_msg + position_info;
+                    
+                    if (verbose_) {
+                        LogDebug("Contexto del error:");
+                        int context_start = std::max(0, current_position - 3);
+                        int context_end = std::min(static_cast<int>(tokens.size()) - 1, current_position + 3);
+                        
+                        for (int i = context_start; i <= context_end; ++i) {
+                            std::string marker = (i == current_position) ? " >> " : "    ";
+                            LogDebug(marker + tokens[i].ToString() + " (lexema: '" + tokens[i].Lexeme() + "')");
+                        }
+                    }
                     
                     // Lanzar LR1ParsingError con toda la información
                     throw LALR1ParsingError(enhanced_error, state_stack.top(), current_token.Name(), expected_tokens);
