@@ -137,7 +137,7 @@ public:
      * @brief Construye el autómata LR(1) para la gramática.
      */
     State BuildLR1Automaton();
-    State BuildLALR1Automaton();
+    State BuildLALR1Automaton(std::map<Sentence, ContainerSet<string>>& firsts);
 
     /**
      * @brief Registra una acción en la tabla action.

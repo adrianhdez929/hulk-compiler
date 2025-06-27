@@ -56,9 +56,6 @@ public:
                         int hex_value = std::stoi(hex_string, nullptr, 16);
                         char current_char = static_cast<char>(hex_value);
                         tokens.push_back({std::string(1, current_char), "symbol"});
-                        if (false && verbose_) {
-                            // Código omitido para evitar impresiones en consola
-                        }
                         i += 3; // Skip '\', 'x', and two hex digits
                         continue;
                     } catch (const std::exception& e) {
@@ -84,48 +81,29 @@ public:
             if (c == ']' && string_class) {
                 string_class = false;
                 tokens.push_back({std::string(1, c), std::string(1, c)});
-                if (false && verbose_) {
-                    // Código omitido para evitar impresiones en consola
-                }
             } else if (c == '[') {
                 string_class = true;
                 tokens.push_back({std::string(1, c), std::string(1, c)});
-                if (false && verbose_) {
-                    // Código omitido para evitar impresiones en consola
-                }
+                
             } else if (string_class) {
                 // Inside character class, treat everything as symbols except '-'
                 if (c == '-') {
                     tokens.push_back({std::string(1, c), std::string(1, c)});
-                    if (false && verbose_) {
-                        // Código omitido para evitar impresiones en consola
-                    }
+                    
                 } else {
                     tokens.push_back({std::string(1, c), "symbol"});
-                    if (false && verbose_) {
-                        // Código omitido para evitar impresiones en consola
-                    }
                 }
             } else {
                 // Handle regular tokens outside character classes
                 if (std::find(fixed_tokens.begin(), fixed_tokens.end(), std::string(1, c)) != fixed_tokens.end()) {
                     tokens.push_back({std::string(1, c), std::string(1, c)});
-                    if (false && verbose_) {
-                        // Código omitido para evitar impresiones en consola
-                    }
                 } else {
                     tokens.push_back({std::string(1, c), "symbol"});
-                    if (false && verbose_) {
-                        // Código omitido para evitar impresiones en consola
-                    }
                 }
             }
         }
         
         tokens.push_back({"EOF", "EOF"}); // Add EOF token
-        if (false && verbose_) {
-            // Código omitido para evitar impresiones en consola
-        }
         
         return tokens;
     }
@@ -134,21 +112,12 @@ public:
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
-        // Debug output - print tokenized regex (deshabilitado)
-        if (false && verbose_) {
-            // Código omitido para evitar impresiones en consola
-        }
-        
         for (int i = 0; i < token_names.size(); ++i) {
             tokens.push_back(token_names[i].second);
         }
         
         try {
             auto [production_ids, actions] = parser.Parse(tokens);
-            
-            if (false && verbose_) {
-                // Código omitido para evitar impresiones en consola
-            }
             
             // Create a queue of productions from the production IDs
             std::queue<std::shared_ptr<AttrProd>> productions;
@@ -161,25 +130,12 @@ public:
             auto ast = reverse_evaluate(productions, actions, token_names, grammar_);
             auto nfa = ast->evaluate();
             
-            if (false && verbose_) {
-                // Código omitido para evitar impresiones en consola
-            }
-            
             // Convert NFA to DFA
             DFA dfa = nfa_to_dfa(*nfa);
-            
-            if (false && verbose_) {
-                // Código omitido para evitar impresiones en consola
-            }
-            
             DFA mini_dfa = automata_minimization(dfa);
             
-            if (false && verbose_) {
-                // Código omitido para evitar impresiones en consola
-            }
-            
             return mini_dfa;
-        } catch (const ParsingError& e) {
+        } catch (const LALR1ParsingError& e) {
             std::cerr << "Error de parsing en regex '" << pattern_ << "': " << e.what() << std::endl;
             throw;
         } catch (const std::exception& e) {

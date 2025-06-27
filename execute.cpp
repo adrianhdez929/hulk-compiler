@@ -58,8 +58,8 @@ bool create_artifacts(Grammar& hulk_grammar, bool verbose) {
     
     // Crear tabla de tokens para el lexer
     std::vector<std::pair<std::string, std::string>> token_table = {
-        {"string", "\"([\\x20-!#-\\x7e])*\""},
-        {"number", "(0|[1-9][0-9]*)(\\.[0-9]+)?"}, // Regular expression for numbers
+        {"string", "\"|([\\x20-!#-\\x7e])*|\""},
+        {"number", "(0|[1-9]|[0-9]*)|(\\.|[0-9]+)?"}, // Regular expression for numbers
         {"bool", "true|false"},  // Regular expression for boolean values
 
         {"space", " +"}, // Regular expression for spaces
