@@ -233,7 +233,7 @@ private:
     std::map<std::pair<int, Symbol>, int> goto_;
     std::vector<State*> automaton_states_;
     // local firsts cache
-    std::map<Sentence, ContainerSet<string>> firsts_cache_;
+    mutable std::map<Sentence, ContainerSet<string>> firsts_cache_;
 
     // Constructor privado para deserialización
     LALR1Parser(Grammar& G, 

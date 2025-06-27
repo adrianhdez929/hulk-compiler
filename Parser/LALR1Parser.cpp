@@ -469,9 +469,9 @@ map<Sentence, ContainerSet<string>> LALR1Parser::compute_firsts() {
 
 ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, const map<Sentence, ContainerSet<string>>& firsts, const Grammar& G, bool verbose) {
     // Primero verificar si ya está calculado en la caché
-    // if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
-    //     return firsts_cache_.at(alpha);
-    // }
+    if (firsts_cache_.find(alpha) != firsts_cache_.end()) {
+        return firsts_cache_.at(alpha);
+    }
 
     ContainerSet<string> local_first = ContainerSet<string>();
     auto symbols = alpha.Symbols();
@@ -503,7 +503,7 @@ ContainerSet<string> LALR1Parser::compute_local_firsts(const Sentence& alpha, co
     }
 
     // Almacenar en la caché para futuras consultas
-    // firsts_cache_[alpha] = local_first;
+    firsts_cache_[alpha] = local_first;
     
     return local_first;
 }
@@ -824,6 +824,9 @@ State LALR1Parser::BuildLALR1Automaton() {
     kernel_to_state[initial_kernel] = &automaton;
     // state_to_kernel[&automaton] = initial_kernel;
 
+    // Memoization
+    // 
+
     // Cola para procesar estados
     std::deque<State*> pending;
     pending.push_back(&automaton);
@@ -832,6 +835,7 @@ State LALR1Parser::BuildLALR1Automaton() {
         auto current_state = pending.front();
         pending.pop_front();
 
+        cout << "Procesando estado: " << current_state->get_id() << endl;
         set<shared_ptr<Symbol>> trans_symbols;
         for (const auto& item : current_state->get_items()){
             if (item.NextSymbol() != nullptr) {
@@ -881,6 +885,7 @@ State LALR1Parser::BuildLALR1Automaton() {
             current_state->add_transition(symbol->Name(), new_state);
         }
     }
+    cout << "Autómata LALR1 construido con " << automaton.get_all_states().size() << " estados." << endl;
     return automaton;
 }
 

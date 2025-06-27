@@ -1,10 +1,4 @@
 
-type Point {
-  x = 3;
-}
-type OtroType {
-  y = "25";
-}
 {
   function fibonacci( x : Int) => fibonacci(x-1) + fibonacci(x-2);
 }
