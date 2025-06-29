@@ -73,6 +73,8 @@ public:
     // Métodos para manejar ítems de LR
     void add_item(const Item& item) { items_.push_back(item); }
     const std::vector<Item>& get_items() const { return items_; }
+    std::vector<Item>& get_mutable_items() { return items_; }
+    void set_items(const std::vector<Item>& items) { items_ = items; }
 
     // Method to retrieve all states in the automaton
     std::vector<State*> get_all_states() {

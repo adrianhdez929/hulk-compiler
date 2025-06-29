@@ -6,6 +6,7 @@
 #include "Regex.h"
 #include "../Automata/nfa.h"
 #include "Token.h"
+#include "../Logger/Logger.h"
 
 /**
  * @class Lexer
@@ -17,7 +18,10 @@
 class Lexer {
 public:
     Lexer(std::vector<std::pair<std::string, std::string>> token_table,  
-        Grammar& grammar, SLR1Parser& parser): regexs_(build_regex(token_table, grammar, parser)), owns_automaton_(false) {
+          Grammar& grammar, LALR1Parser& parser, bool verbose = false)
+          : regexs_(build_regex(token_table, grammar, parser, verbose)), 
+            owns_automaton_(false),
+            verbose_(verbose) {
             State* deterministic = build_automaton();
             automaton_ = deterministic;
             owns_automaton_ = true;
@@ -34,11 +38,12 @@ public:
         }
     }
 
-    std::vector<State> build_regex(std::vector<std::pair<std::string, std::string>> table, Grammar& grammar_, SLR1Parser& parser) {
+    std::vector<State> build_regex(std::vector<std::pair<std::string, std::string>> table, 
+                                  Grammar& grammar_, LALR1Parser& parser, bool verbose = false) {
         std::vector<State> states;
         int index = 0;
         for (const auto& [name, pattern] : table) {
-            NFA nfa = Regex(pattern, grammar_, parser).Automaton();
+            NFA nfa = Regex(pattern, grammar_, parser, verbose).Automaton();
             State state = *State::from_nfa(nfa);
             for (const auto& s : state.get_all_states()) {
                 if (s->is_final()) {
@@ -62,7 +67,8 @@ public:
         for (auto& state : regexs_) {
             start.add_epsilon_transition(&state);
         }
-        return start.to_deterministic();
+        State* deterministic = start.to_deterministic();
+        return deterministic;
     }
 
     std::pair<State, std::string> walk(const std::string& input) {
@@ -74,33 +80,70 @@ public:
         }
         std::string token;
         std::string lex;
+        
+        if (verbose_ && input.length() > 0) {
+            std::string display_input = input.substr(0, std::min(size_t(20), input.length()));
+            if (input.length() > 20) display_input += "...";
+            LogDebug("Lexer: Analizando entrada: '" + display_input + "'");
+        }
+        
         for (char c : input) {
             bool found_transition = false;
+            
             for (const auto& [symbol, next_states] : current_state->transitions()) {
                 if (symbol == std::string(1, c)) {
                     // assert (next_states.size() == 1) && "Automaton should be deterministic.";
                     if (next_states.size() != 1) {
-                        throw std::runtime_error("Automaton is not deterministic, multiple transitions found for symbol: " + std::string(1, c));
+                        std::string error_msg = "Automaton is not deterministic, multiple transitions found for symbol: " + std::string(1, c);
+                        LogError("Lexer: " + error_msg);
+                        throw std::runtime_error(error_msg);
                     }
+                    
                     current_state = next_states[0];
                     lex += c;
                     found_transition = true;
+                    
+                    if (verbose_) {
+                        LogDebug("Lexer: Transición con '" + std::string(1, c) + "' al estado " + 
+                                std::to_string(current_state->id()) + ", lexema actual: '" + lex + "'");
+                    }
+                    
                     if (current_state->is_final()) {
                         token = lex;
                         final_state = *current_state;
+                        
+                        if (verbose_) {
+                            LogDebug("Lexer: Estado final alcanzado, tipo de token: '" + final_state.tag() + 
+                                    "', lexema completo: '" + token + "'");
+                        }
                     }
                 }
                 if (found_transition) break;
             }
+            
             if (!found_transition) {
                 if (!token.empty()) {
                     // If we found a token, return it
+                    if (verbose_) {
+                        LogDebug("Lexer: No hay transición con '" + std::string(1, c) + 
+                                "', devolviendo token encontrado: '" + token + "' (tipo: '" + final_state.tag() + "')");
+                    }
                     return {final_state, token};
                 }
+                
                 // If no token found, return error state
+                if (verbose_) {
+                    LogDebug("Lexer: No hay transición con '" + std::string(1, c) + 
+                            "' y no se encontró token válido");
+                }
                 return {State(-1), ""}; // No transition found, return error state
             }
         }
+        
+        if (verbose_ && !token.empty()) {
+            LogDebug("Lexer: Fin de entrada, devolviendo token: '" + token + "' (tipo: '" + final_state.tag() + "')");
+        }
+        
         return {final_state, token};
     }
 
@@ -131,14 +174,28 @@ public:
                     }
                 }
                 
+                if (verbose_) {
+                    LogDebug("Lexer: Token encontrado - Tipo: '" + token_type + "', Lexema: '" + token + "'");
+                }
+                
                 tokens.push_back(std::make_pair(token, token_type));
                 remaining_text = remaining_text.substr(token.size());
             }
             else {
-                tokens.push_back(std::make_pair(std::string(1, remaining_text[0]), "ERROR"));
+                std::string error_char(1, remaining_text[0]);
+                
+                LogError("Lexer: Caracter desconocido '" + error_char + "' en posición " + 
+                        std::to_string(input.length() - remaining_text.length()));
+                
+                tokens.push_back(std::make_pair(error_char, "ERROR"));
                 remaining_text = remaining_text.substr(1); // Skip one character on error
             }
         }
+        
+        if (verbose_) {
+            LogDebug("Lexer: Agregando token final EOF");
+        }
+        
         tokens.push_back(std::make_pair("EOF","EOF"));
         return tokens;
     }
@@ -187,9 +244,29 @@ public:
             // Filtrar espacios, tabulaciones, saltos de línea y comentarios
             if (state.tag() == "space" || state.tag() == "tab" || state.tag() == "newline" || state.tag() == "comment") {
                 // Ignorar estos tokens pero seguir rastreando posición
+                if (verbose_) {
+                    std::string tokenType = state.tag();
+                    std::string displayToken = token;
+                    
+                    // Para mejor legibilidad en los logs
+                    if (tokenType == "newline") displayToken = "\\n";
+                    else if (tokenType == "tab") displayToken = "\\t";
+                    else if (tokenType == "space" && token.empty()) displayToken = " ";
+                    
+                    LogDebug("Lexer: Ignorando token '" + tokenType + "' en línea " + 
+                             std::to_string(token_line) + ", columna " + std::to_string(token_column) + 
+                             " (lexema: '" + displayToken + "')");
+                }
             } else {
                 // Crear un token con información de posición
                 Token pos_token(state.tag(), token, grammar, token_line, token_column);
+                
+                if (verbose_) {
+                    LogDebug("Lexer: Generando token '" + state.tag() + "' en línea " + 
+                             std::to_string(token_line) + ", columna " + std::to_string(token_column) + 
+                             " (lexema: '" + token + "')");
+                }
+                
                 result.push_back(pos_token);
             }
             
@@ -199,6 +276,12 @@ public:
         
         // Añadir token de fin de archivo
         Token eof_token("EOF", "EOF", grammar, line, column);
+        
+        if (verbose_) {
+            LogDebug("Lexer: Agregando token final 'EOF' en línea " + 
+                     std::to_string(line) + ", columna " + std::to_string(column));
+        }
+        
         result.push_back(eof_token);
         
         return result;
@@ -212,7 +295,8 @@ public:
      * @return true si la serialización fue exitosa, false en caso contrario
      */
     bool serialize_lexer(const std::string& filename) const {
-        return automaton_->serialize_to_file(filename);
+        bool result = automaton_->serialize_to_file(filename);
+        return result;
     }
     
     /**
@@ -222,7 +306,8 @@ public:
      * @return true si la serialización fue exitosa, false en caso contrario
      */
     bool serialize_lexer(const std::string& filename, const std::string& directory) const {
-        return automaton_->serialize_to_file(filename, directory);
+        bool result = automaton_->serialize_to_file(filename, directory);
+        return result;
     }
     
     /**
@@ -230,14 +315,14 @@ public:
      * @param filename Nombre del archivo con el lexer serializado
      * @return Puntero a un nuevo Lexer deserializado, o nullptr si hay error
      */
-    static Lexer* deserialize_lexer(const std::string& filename) {
+    static Lexer* deserialize_lexer(const std::string& filename, bool verbose = false) {
         State* deserialized_automaton = State::deserialize_from_file(filename);
         if (!deserialized_automaton) {
             return nullptr;
         }
         
         // Crear un nuevo lexer con el autómata deserializado
-        return new Lexer(deserialized_automaton);
+        return new Lexer(deserialized_automaton, verbose);
     }
     
     /**
@@ -246,23 +331,25 @@ public:
      * @param directory Carpeta donde buscar el archivo
      * @return Puntero a un nuevo Lexer deserializado, o nullptr si hay error
      */
-    static Lexer* deserialize_lexer(const std::string& filename, const std::string& directory) {
+    static Lexer* deserialize_lexer(const std::string& filename, const std::string& directory, bool verbose = false) {
         State* deserialized_automaton = State::deserialize_from_file(filename, directory);
         if (!deserialized_automaton) {
             return nullptr;
         }
         
         // Crear un nuevo lexer con el autómata deserializado
-        return new Lexer(deserialized_automaton);
+        return new Lexer(deserialized_automaton, verbose);
     }
 
 private:
     std::vector<State> regexs_;
     State* automaton_;  // Cambiar a puntero para manejar autómatas deserializados
     bool owns_automaton_; // Flag para saber si debemos limpiar la memoria
+    bool verbose_; // Flag para modo verbose
     
     // Constructor privado para deserialización
-    explicit Lexer(State* automaton) : automaton_(automaton), owns_automaton_(true) {
+    explicit Lexer(State* automaton, bool verbose = false) 
+        : automaton_(automaton), owns_automaton_(true), verbose_(verbose) {
         // Los regexs_ no son necesarios para un lexer deserializado
         // ya que toda la información está en el autómata final
     }

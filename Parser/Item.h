@@ -18,7 +18,7 @@ public:
      * @param production_ Producción asociada al ítem.
      * @param pos_ Posición del punto en la producción.
      */
-    Item(std::shared_ptr<Production> production_, int pos_);//, ContainerSet<string> lookaheads_);
+    Item(std::shared_ptr<Production> production_, int pos_, ContainerSet<string> lookaheads_);
 
     /**
      * @brief Devuelve la producción asociada al ítem.
@@ -28,7 +28,21 @@ public:
      * @brief Devuelve la posición del punto en la producción.
      */
     int pos() const { return pos_; }
-    //const ContainerSet<string>& lookaheads() const { return lookaheads_; }
+
+    /**
+     * @brief Devuelve los lookaheads asociados al ítem.
+     * 
+     * Los lookaheads son los símbolos que pueden aparecer después del ítem en la entrada.
+     */
+    const ContainerSet<string>& lookaheads() const { return lookaheads_; }
+
+    /**
+     * @brief Fusiona los lookaheads de otro ítem en este ítem.
+     * @param other El ítem del cual se fusionarán los lookaheads.
+     */
+    void merge_lookaheads(const ContainerSet<string>& other) {
+        lookaheads_.add(other.get_values());
+    }
 
     /**
      * @brief Indica si el ítem es de reducción (el punto está al final).
@@ -42,7 +56,14 @@ public:
      * @brief Devuelve el siguiente ítem (avanza el punto).
      */
     std::shared_ptr<Item> NextItem() const;
-    // std::vector<std::vector<string>> Preview(int skip = 1) const;
+
+    /**
+     * @brief Devuelve una lista de posibles secuencias de símbolos que siguen al ítem.
+     * 
+     * @param skip Número de símbolos a saltar después del punto (default es 1).
+     * @return Un vector de vectores de strings representando las secuencias.
+     */
+    std::vector<std::vector<string>> Preview(int skip = 1) const;
     /**
      * @brief Devuelve el ítem centrado (sin lookaheads).
      */
@@ -60,12 +81,29 @@ public:
      * @brief Devuelve una representación en string del ítem.
      */
     std::string ToString() const;
+    /**
+     * @brief Devuelve los símbolos beta (los que siguen al punto en la producción).
+     * 
+     * Los símbolos beta son aquellos que están después del punto en la producción.
+     * 
+     * @return Un vector de shared_ptr a Symbol representando los símbolos beta.
+     */
+    vector<shared_ptr<Symbol>> GetBetaSymbols() const {
+        vector<shared_ptr<Symbol>> beta;
+        const auto& right = production_->Right().Symbols();
+        if (pos_ + 1 < right.size()) {
+            for (size_t i = pos_ + 1; i < right.size(); ++i) {
+                beta.push_back(right[i]);
+            }
+        }
+        return beta;
+    }
 
 
 private:
     std::shared_ptr<Production> production_;
     int pos_;
-    //ContainerSet<string> lookaheads_;
+    ContainerSet<string> lookaheads_;
 };
 
 // Non-member operator== for Item
@@ -73,8 +111,9 @@ inline bool operator==(const Item& lhs, const Item& rhs) {
     // Comparamos el contenido de las producciones, no solo los punteros
     return (lhs.production() && rhs.production() && 
             lhs.production()->ToString() == rhs.production()->ToString()) &&
-           (lhs.pos() == rhs.pos()); //&&
-           //(lhs.lookaheads() == rhs.lookaheads());
+            lhs.production()->get_id() == rhs.production()->get_id() &&
+           (lhs.pos() == rhs.pos()) &&
+           (lhs.lookaheads() == rhs.lookaheads());
 }
 
 // Non-member operator< for Item
@@ -91,14 +130,14 @@ inline bool operator<(const Item& lhs, const Item& rhs) {
     }
     
     // Si son iguales, comparamos las posiciones
-    // if (lhs.pos() != rhs.pos()) {
-    //     return lhs.pos() < rhs.pos();
-    // }
-    return lhs.pos() < rhs.pos();
+    if (lhs.pos() != rhs.pos()) {
+        return lhs.pos() < rhs.pos();
+    }
+    // return lhs.pos() < rhs.pos();
     
     // Si todo lo anterior es igual, comparamos los lookaheads
     // Ahora utilizamos el operador < de ContainerSet
-    //return lhs.lookaheads() < rhs.lookaheads();
+    return lhs.lookaheads() < rhs.lookaheads();
 }
 
 namespace std {
