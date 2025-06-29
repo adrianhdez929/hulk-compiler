@@ -2974,7 +2974,11 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
     llvm::BasicBlock* currentBB = Builder->GetInsertBlock();
     
     // Check each known type in order (derived types first for correct dispatch)
-    std::vector<std::string> typeOrder = {"Cat", "Dog", "Animal"}; // Check derived types first
+    // Build the type order dynamically from the registered types
+    std::vector<std::string> typeOrder;
+    for (const auto& vtablePair : typeVTableMap) {
+        typeOrder.push_back(vtablePair.first);
+    }
     
     for (size_t i = 0; i < typeOrder.size(); ++i) {
         const std::string& typeName = typeOrder[i];
