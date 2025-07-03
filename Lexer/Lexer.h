@@ -18,7 +18,9 @@
 class Lexer {
 public:
     Lexer(std::vector<std::pair<std::string, std::string>> token_table,  
-          Grammar& grammar, LALR1Parser& parser, bool verbose = false)
+          Grammar& grammar, SLR1Parser& parser, bool verbose = false)
+    // Lexer(std::vector<std::pair<std::string, std::string>> token_table,  
+    //       Grammar& grammar, LALR1Parser& parser, bool verbose = false)
           : regexs_(build_regex(token_table, grammar, parser, verbose)), 
             owns_automaton_(false),
             verbose_(verbose) {
@@ -39,7 +41,9 @@ public:
     }
 
     std::vector<State> build_regex(std::vector<std::pair<std::string, std::string>> table, 
-                                  Grammar& grammar_, LALR1Parser& parser, bool verbose = false) {
+                                  Grammar& grammar_, SLR1Parser& parser, bool verbose = false) {
+    // std::vector<State> build_regex(std::vector<std::pair<std::string, std::string>> table, 
+    //                               Grammar& grammar_, LALR1Parser& parser, bool verbose = false) {
         std::vector<State> states;
         int index = 0;
         for (const auto& [name, pattern] : table) {
