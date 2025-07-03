@@ -8,7 +8,8 @@
 #include "../Automata/nfa.h"
 #include "../Automata/utils/aut_manipulation.h"
 #include "../Automata/operations/operations.h"
-#include "../Parser/LALR1Parser.h"
+#include "../Parser/SLR1Parser.h"
+// #include "../Parser/LALR1Parser.h"
 #include "../Parser/reverse_evaluate.h"
 
 /**
@@ -24,8 +25,10 @@ using namespace std;
 class Regex {
 public:
     // Constructor
-    Regex(const std::string& pattern, Grammar& grammar, LALR1Parser& parser, bool verbose = false) 
+    Regex(const std::string& pattern, Grammar& grammar, SLR1Parser& parser, bool verbose = false) 
                     : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
+    // Regex(const std::string& pattern, Grammar& grammar, LALR1Parser& parser, bool verbose = false) 
+    //                 : pattern_(pattern), grammar_(grammar), automaton_(createEmptyDFA()), verbose_(verbose) {
         if (false && verbose_) {
             // Código omitido para evitar impresiones en consola
         }
@@ -108,7 +111,8 @@ public:
         return tokens;
     }
 
-    DFA build_dfa(LALR1Parser& parser) {
+    DFA build_dfa(SLR1Parser& parser) {
+    // DFA build_dfa(LALR1Parser& parser) {
         std::vector<std::pair<std::string, std::string>> token_names = regex_tokenizer(pattern_);
         vector<string> tokens;
         
@@ -135,7 +139,8 @@ public:
             DFA mini_dfa = automata_minimization(dfa);
             
             return mini_dfa;
-        } catch (const LALR1ParsingError& e) {
+        } catch (const ParsingError& e) {
+        // } catch (const LALR1ParsingError& e) {
             std::cerr << "Error de parsing en regex '" << pattern_ << "': " << e.what() << std::endl;
             throw;
         } catch (const std::exception& e) {

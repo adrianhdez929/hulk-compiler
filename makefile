@@ -16,14 +16,16 @@ PROGRAM = hulk
 # Include all necessary source files for grammar, automata, parser, and AST
 GRAMMAR_SRC = $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp
 AUTOMATA_SRC = $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp $(SRC_DIR)/Automata/state.cpp $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp $(SRC_DIR)/Automata/operations/operations.cpp
-PARSER_SRC = $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp
+PARSER_SRC = $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp
+# PARSER_SRC = $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp
 LOGGER_SRC = $(SRC_DIR)/Logger/Logger.cpp
 EXECUTE_SRC = $(SRC_DIR)/execute.cpp
 
 # Add object files for the grammar, automata, and parser
 GRAMMAR_OBJS = $(BUILDDIR)/grammar.o $(BUILDDIR)/production.o $(BUILDDIR)/symbol.o $(BUILDDIR)/sentence.o
 AUTOMATA_OBJS = $(BUILDDIR)/dfa.o $(BUILDDIR)/nfa.o $(BUILDDIR)/state.o $(BUILDDIR)/ContainerSet.o $(BUILDDIR)/aut_manipulation.o $(BUILDDIR)/operations.o
-PARSER_OBJS = $(BUILDDIR)/Item.o $(BUILDDIR)/LALR1Parser.o
+PARSER_OBJS = $(BUILDDIR)/Item.o $(BUILDDIR)/SLR1Parser.o
+# PARSER_OBJS = $(BUILDDIR)/Item.o $(BUILDDIR)/LALR1Parser.o
 LOGGER_OBJS = $(BUILDDIR)/Logger.o
 EXECUTE_OBJS = $(BUILDDIR)/execute.o
 
@@ -39,8 +41,16 @@ ARTIFACTS_SRC = $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR
                 $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
                 $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
                 $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
-                $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
+                $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp \
                 $(SRC_DIR)/Ast/ast.cpp
+# ARTIFACTS_SRC = $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR)/hulkGrammar.hpp \
+#                 $(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
+#                 $(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
+#                 $(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
+#                 $(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+#                 $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
+#                 $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
+#                 $(SRC_DIR)/Ast/ast.cpp
 
 compile: $(BUILDDIR)/libstandard.so create_artifacts $(BUILDDIR)/$(PROGRAM)
 
@@ -51,10 +61,20 @@ create_artifacts: | $(BUILDDIR)
 		$(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
 		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
 		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
-		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
+		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/SLR1Parser.cpp \
 		$(SRC_DIR)/Logger/Logger.cpp \
 		$(SRC_DIR)/Ast/ast.cpp
 	$(SRC_DIR)/create_artifacts
+# 	$(CC) $(CFLAGS) -o $(SRC_DIR)/create_artifacts $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp \
+# 		$(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
+# 		$(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
+# 		$(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
+# 		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+# 		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
+# 		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
+# 		$(SRC_DIR)/Logger/Logger.cpp \
+# 		$(SRC_DIR)/Ast/ast.cpp
+# 	$(SRC_DIR)/create_artifacts
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -144,8 +164,11 @@ $(BUILDDIR)/operations.o: $(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DI
 $(BUILDDIR)/Item.o: $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/Item.h | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/Item.cpp -o $@
 
-$(BUILDDIR)/LALR1Parser.o: $(SRC_DIR)/Parser/LALR1Parser.cpp $(SRC_DIR)/Parser/LALR1Parser.h | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/LALR1Parser.cpp -o $@
+$(BUILDDIR)/SLR1Parser.o: $(SRC_DIR)/Parser/SLR1Parser.cpp $(SRC_DIR)/Parser/SLR1Parser.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/SLR1Parser.cpp -o $@
+
+# $(BUILDDIR)/LALR1Parser.o: $(SRC_DIR)/Parser/LALR1Parser.cpp $(SRC_DIR)/Parser/LALR1Parser.h | $(BUILDDIR)
+# 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Parser/LALR1Parser.cpp -o $@
 
 # Rule for execute object
 $(BUILDDIR)/execute.o: $(SRC_DIR)/execute.cpp $(SRC_DIR)/execute.h | $(BUILDDIR)
