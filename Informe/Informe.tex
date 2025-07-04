@@ -29,19 +29,19 @@
     \subsection{Tokens}
     El analizador léxico se encarga de leer el código fuente y agruparlo en una secuencia de tokens. Los tokens representan las unidades mínimas con significado del lenguaje, como palabras clave (`if`, `else`, `while`), identificadores, números, cadenas y operadores, y para manipularlos fue creada la clase \textit{Token}, que además almacena información adicional como la posición en el código fuente.
     \subsection{Expresiones Regulares}
-    Cada tipo de token se define mediante una expresión regular que describe el patrón de caracteres que lo conforma. Por ejemplo, un identificador de variable está definido con la expresión regular \texttt{[a-z][\_a-zA-Z0-9]*}, indicando que puede ser cualquier combinación de letras mayúsculas, minúsculas y números, siempre que empiece con letra minúscula, y un número con \texttt{(0|[1-9][0-9]*)(.[0-9]+)?} asegurando que puede ser un número entero o decimal.
-    \subsection{Implementación}
-    El compilador utiliza un lexer personalizado, aunque se us\'o, en un inicio, herramientas como Flex/Bison para tokenizar y parsear. La implementación del lexer se basa en una tabla de especificaciones de tokens definida programáticamente en `hulkGrammar.hpp`. Esta tabla asocia nombres de tokens con sus correspondientes expresiones regulares. El lexer procesa el código fuente y, utilizando estas definiciones, genera una secuencia de tokens que alimenta al analizador sintáctico. Este enfoque ofrece un control más granular sobre el proceso de tokenización y facilita la integración con el resto del compilador.
+    Cada tipo de token se define mediante una expresión regular que describe el patrón de caracteres que lo conforma. Por ejemplo, un identificador de variable está definido con la expresión regular \texttt{[a-z][\\_a-zA-Z0-9]*}, indicando que puede ser cualquier combinación de letras mayúsculas, minúsculas y números, siempre que empiece con letra minúscula, y un número con \texttt{(0|[1-9][0-9]*)(.[0-9]+)?} asegurando que puede ser un número entero o decimal.
+    \subsection{Implementación con Flex}
+    Para el análisis léxico, el compilador utiliza Flex, un generador de analizadores léxicos rápido. Las definiciones de los tokens, basadas en expresiones regulares, se especifican en el fichero \texttt{lexer.l}. Flex genera automáticamente el código C para un lexer eficiente que procesa el código fuente y produce una secuencia de tokens. Estos tokens son consumidos por el analizador sintáctico generado por Bison.
 
 \section{Análisis Sintáctico}
     \subsection{Gramática}
     La estructura sintáctica del lenguaje HULK se define mediante una gramática libre de contexto, presentada en formato BNF (Backus-Naur Form). Esta gramática especifica cómo se pueden combinar los tokens para formar construcciones válidas como expresiones, declaraciones y sentencias. La gramática completa se encuentra en el apéndice de este informe.
     \subsection{Tipo de Parser}
-    Se utilizó un parser de tipo \textbf{SLR(1)} (Simple LR), que es capaz de analizar un amplio rango de gramáticas de forma eficiente.
+    Se utilizó un parser de tipo \textbf{LALR(1)} (Look-Ahead LR), generado por Bison. Este tipo de parser es potente y eficiente, capaz de analizar una amplia clase de gramáticas libres de contexto, siendo el estándar en muchas herramientas de compilación.
     \subsection{Árbol de Sintaxis Abstracta (AST)}
     El resultado del análisis sintáctico es un Árbol de Sintaxis Abstracta (AST). El AST es una representación jerárquica del código fuente que captura su estructura esencial, eliminando detalles sintácticos irrelevantes como paréntesis o puntos y comas. Este árbol es la estructura de datos principal que se utiliza en las fases posteriores del compilador.
-    \subsection{Implementación}
-    Para el análisis sintáctico, se ha desarrollado un parser SLR(1) a medida, evitando el uso de generadores como Bison. La gramática del lenguaje HULK se define directamente en el código C++ dentro del fichero `hulkGrammar.hpp`. La clase `SLR1Parser` es la encargada de tomar esta gramática, construir las tablas de parseo SLR(1) (acción y goto) en tiempo de ejecución, y luego utilizar estas tablas para analizar la secuencia de tokens proveniente del lexer. Las acciones semánticas, que son las responsables de construir los nodos del Árbol de Sintaxis Abstracta (AST), se implementan como funciones lambda asociadas a cada producción de la gramática. Este diseño permite una integración más estrecha y un mayor control sobre el proceso de parsing y la construcción del AST.
+    \subsection{Implementación con Bison}
+    Para el análisis sintáctico, se ha empleado Bison, un generador de parsers. La gramática del lenguaje HULK, junto con las acciones semánticas, se define en el fichero \texttt{parser.y}. Bison procesa este fichero para generar un parser LALR(1) en C++. Las acciones semánticas, escritas en C++, se encargan de construir el Árbol de Sintaxis Abstracta (AST) a medida que el parser reconoce las estructuras sintácticas. Este enfoque modular, combinado con Flex, facilita el mantenimiento y la escalabilidad del compilador.
 
 \section{Análisis Semántico}
 El chequeo semántico se realiza en tres fases principales, cada una implementada por un visitante (visitor) especializado que recorre el AST. Se utiliza un contexto global para almacenar información sobre tipos, variables y funciones.
@@ -83,21 +83,20 @@ El generador de código está basado en un patrón visitor que recorre el AST y 
     % Describir cómo se probó el compilador.
     % Incluir ejemplos de código HULK y la salida del compilador.
 
+\section{Implementaciones Propias Anteriores}
+En las fases iniciales del proyecto, se desarrollaron componentes a medida para el análisis léxico y sintáctico. Aunque finalmente se optó por las herramientas estándar Flex y Bison por su robustez y eficiencia, estas implementaciones propias sirvieron como una valiosa prueba de concepto y un profundo ejercicio de aprendizaje.
+
+\subsection{Lexer Personalizado}
+Se implementó un analizador léxico manual en C++. Este lexer utilizaba una tabla de especificaciones de tokens definida programáticamente en `hulkGrammar.hpp`, que asociaba nombres de tokens con sus correspondientes expresiones regulares. El lexer procesaba el código fuente y, utilizando estas definiciones, generaba una secuencia de tokens para el analizador sintáctico. Este enfoque ofrecía un control granular sobre el proceso de tokenización y facilitaba la integración con el resto del compilador.
+
+\subsection{Parser SLR(1) Personalizado}
+Paralelamente, se desarrolló un parser SLR(1) a medida. La clase `SLR1Parser` era la encargada de tomar una gramática definida en C++ (también en `hulkGrammar.hpp`), construir las tablas de parseo SLR(1) (acción y goto) en tiempo de ejecución, y luego utilizar estas tablas para analizar la secuencia de tokens. Las acciones semánticas, responsables de construir el AST, se implementaron como funciones lambda asociadas a cada producción. Este diseño permitía una integración estrecha y un control total sobre el proceso de parsing.
+
 \appendix
 \section{Gramática Completa}
 \begin{verbatim}
-input -> decl_list lines_block
+input -> line
     | lines_block
-    | line lines_block
-
-decl_list -> epsilon
-    | declarations
-
-declarations -> decl
-    | declarations decl
-
-decl -> func_full_assign
-    | type_node_decl
 
 lines_block -> { lines }
 
@@ -108,15 +107,16 @@ non_empty_lines -> line
     | non_empty_lines line
 
 line -> expr ;
-    | func_def ;
+    | func_asign ;
+    | type_node_decl
 
 expr -> arit_op
     | bool_expr
-    | while while_expr
+    | while_expr
     | string
     | id_expr
     | func_call
-    | let_exp
+    | let_assign
     | if conditional
     | member_access_expr
     | expr := expr
@@ -124,30 +124,29 @@ expr -> arit_op
     | expr @ expr
     | expr @@ expr
 
-func_def -> function var_id ( args_list ) => expr
-    | function var_id ( args_list ) : type_id => expr
-
-func_full_assign -> function var_id ( args_list ) { lines }
-    | function var_id ( args_list ) : type_id { lines }
+func_asign -> function ID ( args_list ) => expr
+    | function ID ( args_list ) : ID => expr
+    | function ID ( args_list ) { lines }
+    | function ID ( args_list ) : ID { lines }
 
 args_list -> epsilon
     | id_expr
     | args_list , id_expr
 
-id_expr -> var_id : type_id
-    | var_id
+id_expr -> ID : ID
+    | ID
 
-let_exp -> let var_assign_list in expr
+let_assign -> let var_assign_list in expr
     | let var_assign_list in lines_block
 
 var_assign_list -> id_expr = expr
-    | id_expr = expr as type_id
+    | id_expr = expr as ID
     | id_expr = new_expr
     | var_assign_list , id_expr = expr
-    | var_assign_list , id_expr = expr as type_id
+    | var_assign_list , id_expr = expr as ID
     | var_assign_list , id_expr = new_expr
 
-new_expr -> new var_id ( expr_list )
+new_expr -> new ID ( expr_list )
 
 expr_list -> epsilon
     | expr
@@ -155,30 +154,18 @@ expr_list -> epsilon
     | expr_list , expr
     | expr_list , new_expr
 
-func_call -> var_id ( expr_list )
+func_call -> ID ( expr_list )
 
-arit_op -> arit_op + term
-    | arit_op - term
-    | term
-
-term -> term * factor
-    | term / factor
-    | term % factor
-    | factor
-
-factor -> sign ^ factor
-    | sign
-
-sign -> atom
-    | - atom
-
-atom -> number
-    | var_id
+arit_op -> number
     | ( expr )
-    | func_call
-    | member_access_expr
+    | expr + expr
+    | expr - expr
+    | expr * expr
+    | expr / expr
+    | expr ^ expr
+    | - expr
 
-bool_expr -> bool
+bool_expr -> boolean
     | expr >= expr
     | expr > expr
     | expr <= expr
@@ -188,8 +175,8 @@ bool_expr -> bool
     | expr & expr
     | expr | expr
     | ! expr
-    | id_expr is type_id
-    | func_call is type_id
+    | id_expr is ID
+    | func_call is ID
 
 conditional -> ( bool_expr ) expr else expr
     | ( bool_expr ) lines_block else expr
@@ -198,29 +185,29 @@ conditional -> ( bool_expr ) expr else expr
     | ( bool_expr ) expr elif conditional
     | ( bool_expr ) lines_block elif conditional
 
-while_expr -> ( bool_expr ) lines_block
-    | ( bool_expr ) expr
+while_expr -> while ( bool_expr ) lines_block
+    | while ( bool_expr ) expr
 
-type_node_decl -> type type_id { type_body_elements }
-    | type type_id inherits type_id { type_body_elements }
-    | type type_id inherits type_id ( args_list ) { type_body_elements }
-    | type type_id ( args_list ) { type_body_elements }
-    | type type_id ( args_list ) inherits type_id { type_body_elements }
-    | type type_id ( args_list ) inherits type_id ( args_list ) { type_body_elements }
+type_node_decl -> type ID { type_body_elements }
+    | type ID inherits ID { type_body_elements }
+    | type ID inherits ID ( args_list ) { type_body_elements }
+    | type ID ( args_list ) { type_body_elements }
+    | type ID ( args_list ) inherits ID { type_body_elements }
+    | type ID ( args_list ) inherits ID ( args_list ) { type_body_elements }
 
 type_body_elements -> epsilon
     | type_body_elements attribute
     | type_body_elements method
 
 attribute -> id_expr = expr ;
-    | id_expr = expr as type_id ;
+    | id_expr = expr as ID ;
 
-method -> var_id ( args_list ) => expr ;
-    | var_id ( args_list ) : type_id => expr ;
-    | var_id ( args_list ) { lines }
-    | var_id ( args_list ) : type_id { lines }
+method -> ID ( args_list ) => expr ;
+    | ID ( args_list ) : ID => expr ;
+    | ID ( args_list ) { lines }
+    | ID ( args_list ) : ID { lines }
 
-member_access_expr -> expr . var_id
+member_access_expr -> expr . ID
     | expr . func_call
 \end{verbatim}
 

@@ -1,28 +1,7 @@
-
 {
-    type A {
-        test() => "A";
-    }
-
-    type B inherits A {
-        test() => "B";
-    }
-
-    type C inherits B {
-        test() => "C";
-    }
-
-    function foo(x: Number): A {
-        if (x==0) {
-            let a = new A() in a;
-        } elif (x==1) {
-            let a = new B() in a;
-        } else {
-            let a = new C() in a;
-        };
-    };
-
-    let x: A = foo(1) in {
-        print(x.test());
+    let a = 10 in if (a > 5) {
+        print("a es mayor que 5");
+    } else {
+        print("a no es mayor que 5");
     };
 }

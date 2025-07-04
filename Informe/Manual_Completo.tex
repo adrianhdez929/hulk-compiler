@@ -1,0 +1,510 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+\title{Compilador HULK: Manual de Usuario y Documentación Técnica}
+\author{David S\'anchez}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Este documento presenta una guía de usuario y documentación técnica del compilador para el lenguaje de programación HULK. Se describen los aspectos esenciales para utilizarlo, desde la instalación hasta la ejecución de programas, así como una visión general del diseño e implementación del compilador, incluyendo el análisis léxico, sintáctico, semántico y la generación de código.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{Introducción}
+
+HULK (Havana University Language for Kompilers) es un lenguaje de programación desarrollado con fines educativos. Este documento proporciona instrucciones sobre cómo compilar y utilizar el compilador de HULK, así como una descripción técnica de sus componentes principales.
+
+\section{Instalación y Compilación}
+
+Para utilizar el compilador, necesitarás tener Flex y Bison instalados, así como el compilador de C++ \textit{clang++}. El proyecto se compila utilizando un `makefile`.
+
+\subsection{Requisitos Previos}
+
+\begin{itemize}
+    \item Flex 2.6 o superior
+    \item Bison 3.0 o superior
+    \item Clang++ 17 o superior
+    \item LLVM 10.0 o superior
+\end{itemize}
+
+\subsection{Comandos del Makefile}
+
+El `makefile` proporcionado automatiza las tareas de compilación y limpieza. Los principales comandos son:
+
+\begin{itemize}
+    \item \textbf{Limpiar el proyecto (`make clean`)}: Elimina todos los ficheros objeto (`.o`) y el ejecutable final. Es útil para realizar una compilación desde cero.
+    \begin{verbatim}
+make clean
+    \end{verbatim}
+
+    \item \textbf{Compilar el proyecto (`make compile`)}: Compila todo el código fuente y genera los artefactos necesarios en la carpeta `hulk/`.
+    \begin{verbatim}
+make compile
+    \end{verbatim}
+
+    \item \textbf{Ejecutar el compilador (`make execute`)}: Este comando ejecuta el compilador. Si los artefactos no existen o el código fuente ha cambiado, primero compilará el proyecto y luego lo ejecutará.
+    \begin{verbatim}
+make execute
+    \end{verbatim}
+\end{itemize}
+
+\subsection{Compilar y Ejecutar un Programa HULK}
+
+Una vez que el compilador `hulk` ha sido generado, puedes usarlo para compilar y ejecutar tus propios ficheros de código HULK (con extensión `.hulk`).
+
+Para compilar y ejecutar un fichero, usa los comandos antes mencionados. Es importante que el fichero de codigo HULK est\'e en el directorio del proyecto y que haya uno solo con esa extensi\'on.
+
+\section{Sintaxis del Lenguaje HULK}
+
+A continuación se presenta un resumen de la sintaxis del lenguaje HULK.
+
+\subsection{Estructura General}
+
+Un programa en HULK consiste en una secuencia de declaraciones y expresiones. Las expresiones deben terminar con un punto y coma (`;`).
+
+\begin{verbatim}
+// Ejemplo de un programa simple
+let a = 42 in print(a);
+\end{verbatim}
+
+\subsection{Tipos de Datos}
+
+HULK soporta los siguientes tipos de datos básicos:
+\begin{itemize}
+    \item \textbf{Number}: Números, tanto enteros como decimales.
+    \item \textbf{String}: Cadenas de texto.
+    \item \textbf{Boolean}: Valores `true` o `false`.
+\end{itemize}
+
+También soporta la definición de nuevos tipos (clases) con herencia simple.
+
+\section{Arquitectura del Compilador}
+
+El compilador de HULK se compone de varias fases: análisis léxico, análisis sintáctico, análisis semántico y generación de código. A continuación se describe brevemente cada una de estas fases y su implementación.
+
+\subsection{Análisis Léxico con Flex}
+
+El analizador léxico se encarga de convertir el texto de entrada en una secuencia de tokens que representan las unidades mínimas de significado en el lenguaje. En el compilador HULK, esta fase se implementa utilizando Flex, un generador de analizadores léxicos.
+
+\subsubsection{Funcionamiento de Flex}
+
+Flex toma como entrada un archivo de definiciones léxicas (`lexer.l`) que contiene patrones (expresiones regulares) y acciones asociadas. Al compilar este archivo, Flex genera un programa en C/C++ (`lex.yy.c`) que implementa un autómata finito determinista para reconocer los tokens.
+
+En `lexer.l`, cada token se define mediante:
+\begin{itemize}
+    \item Una expresión regular que describe el patrón del token
+    \item El código a ejecutar cuando se reconoce ese patrón
+\end{itemize}
+
+Ejemplo de definición de tokens en HULK:
+
+\begin{verbatim}
+"true"      { yylval.boolean = true; return BOOLEAN; }
+"false"     { yylval.boolean = false; return BOOLEAN; }
+"function"  { return FUNCTION_; }
+"let"       { return LET; }
+[a-zA-Z_][a-zA-Z0-9]* { yylval.str = strdup(yytext); return ID_; }
+[0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
+\end{verbatim}
+
+\subsection{Análisis Sintáctico con Bison}
+
+El analizador sintáctico verifica que la secuencia de tokens siga las reglas gramaticales del lenguaje. En HULK, esta fase utiliza Bison, un generador de parsers LALR(1).
+
+\subsubsection{Funcionamiento de Bison}
+
+Bison toma como entrada un archivo de definición de gramática (`parser.y`) que contiene:
+\begin{itemize}
+    \item Declaraciones de tokens y tipos
+    \item Reglas de producción de la gramática
+    \item Acciones semánticas asociadas a cada regla
+\end{itemize}
+
+A partir de esta definición, Bison genera un analizador en C/C++ (`parser.tab.c` y `parser.tab.h`) que implementa un autómata con pila para reconocer la estructura sintáctica del programa.
+
+La gramática completa de HULK, tal como está definida en el archivo `parser.y`, se encuentra en el Apéndice \ref{sec:gramatica_bison}. Esta gramática define todas las construcciones sintácticas del lenguaje, junto con las acciones semánticas que construyen el AST correspondiente.
+
+\subsection{Árbol de Sintaxis Abstracta (AST)}
+
+Las acciones semánticas en Bison construyen un Árbol de Sintaxis Abstracta (AST), que es una representación jerárquica de la estructura del programa. Cada nodo del árbol representa un constructo del lenguaje (expresiones, sentencias, declaraciones, etc.).
+
+En HULK, cada tipo de nodo se implementa como una clase derivada de la clase base `ASTNode`. Por ejemplo, `BinOpNode` para operaciones binarias, `FloatNode` para constantes numéricas, etc.
+
+\subsection{Análisis Semántico}
+
+El análisis semántico verifica que el programa tenga sentido según las reglas del lenguaje: comprobación de tipos, existencia de variables y funciones, etc. En HULK, este análisis se implementa utilizando el patrón Visitor sobre el AST.
+
+El análisis se realiza en varias fases:
+
+\subsubsection{Recolector de Tipos}
+Implementado en `type\_collector\_visitor.cpp`, recorre el AST para registrar todos los tipos definidos por el usuario.
+
+\subsubsection{Recolector de Símbolos}
+Implementado en `symbol\_collector\_visitor.cpp`, recorre el AST para registrar todas las declaraciones de variables y funciones.
+
+\subsubsection{Verificador Semántico}
+Implementado como parte del visitor principal, verifica que las operaciones sean semánticamente válidas: tipos compatibles en operaciones, variables y funciones declaradas antes de usarse, etc.
+
+\subsection{Generación de Código}
+
+La fase final del compilador transforma el AST en código ejecutable. HULK utiliza LLVM (Low Level Virtual Machine) como backend para la generación de código.
+
+\subsubsection{LLVM y JIT}
+
+LLVM proporciona una representación intermedia (IR) del código, que luego puede ser optimizada y traducida a código máquina para diferentes arquitecturas. El compilador de HULK utiliza el compilador JIT (Just-In-Time) de LLVM para generar y ejecutar código directamente en memoria.
+
+El proceso de generación de código se implementa en:
+\begin{itemize}
+    \item `visitor.cpp` en el directorio `codegen/`: Visitante que recorre el AST y genera el IR de LLVM
+    \item `jit.cpp`: Clase que gestiona la compilación JIT y la ejecución del código
+\end{itemize}
+
+El visitor de generación de código traduce cada nodo del AST a instrucciones LLVM IR. Por ejemplo, un nodo `BinOpNode` se traduce en la correspondiente instrucción aritmética de LLVM, mientras que un nodo `IfNode` se traduce en bloques básicos con saltos condicionales.
+
+\section{Ejemplos de Código}
+
+\subsection{Hola Mundo}
+\begin{verbatim}
+print("Hello, World!");
+\end{verbatim}
+
+\subsection{Declaración de Variables y Expresiones}
+\begin{verbatim}
+{
+    let message = "El resultado es: " in {
+        let a = 10 , b = 32 in print(message @@ (a + b));
+    };
+}
+\end{verbatim}
+
+\subsection{Definición de Funciones}
+\begin{verbatim}
+{    
+    function add(a: Number, b: Number): Number => a + b;
+
+    print(add(5, 7));
+}
+\end{verbatim}
+
+\subsection{Estructuras Condicionales}
+\begin{verbatim}
+{
+    let a = 10 in if (a > 5) {
+        print("a es mayor que 5");
+    } else {
+        print("a no es mayor que 5");
+    };
+}
+\end{verbatim}
+
+\subsection{Definición de Tipos}
+\begin{verbatim}
+{
+    type Point {
+        x = 0;
+        y = 0;
+        distance(p: Point): Number {
+            let dx = this.x - p.x in {
+                let dy = this.y - p.y in {
+                    sqrt(dx * dx + dy * dy);
+                };
+            };
+        }
+    }
+
+    let p1 = new Point() in {
+        let p2 = new Point() in {
+            p2.x = 3;
+            p2.y = 4;
+            print(p1.distance(p2)); 
+        };
+    };  
+}
+\end{verbatim}
+
+\section{Resolución de Problemas}
+
+\subsection{Errores Comunes}
+
+\begin{itemize}
+    \item \textbf{Errores léxicos}: Se producen cuando el programa contiene caracteres o construcciones que no son reconocidos como tokens. El mensaje de error indicará la línea y el carácter no reconocido.
+    
+    \item \textbf{Errores sintácticos}: Se producen cuando la estructura del programa no sigue las reglas gramaticales. El mensaje indicará la línea y el token que no encaja en la gramática.
+    
+    \item \textbf{Errores semánticos}: Incluyen el uso de variables no declaradas, tipos incompatibles, etc. El mensaje de error intentará ser informativo sobre la naturaleza del problema.
+\end{itemize}
+
+\section{Conclusión}
+
+El compilador HULK implementa un lenguaje de programación funcional-imperativo con tipado estático. Utiliza herramientas estándar como Flex y Bison para las fases iniciales, y LLVM para la generación de código eficiente. El diseño orientado a objetos del compilador, con el extensivo uso del patrón Visitor, facilita su mantenimiento y extensión.
+
+Este manual proporciona la información básica para utilizar el compilador y comprender su funcionamiento interno, pero no reemplaza la lectura del código fuente para entender los detalles de la implementación.
+
+\section{Implementaciones Alternativas}
+
+Durante el desarrollo del proyecto, se implementaron versiones propias del analizador léxico y sintáctico como ejercicios educativos y para un control más granular del proceso de compilación. Aunque finalmente se optó por utilizar Flex y Bison en la versión principal del compilador debido a su robustez y eficiencia, estas implementaciones alternativas siguen siendo parte del proyecto y pueden ser utilizadas para fines académicos o experimentales.
+
+\subsection{Lexer Personalizado}
+
+El lexer personalizado, implementado en C++, se basa en la teoría de autómatas finitos. 
+
+\subsubsection{Características Principales}
+\begin{itemize}
+    \item \textbf{Definición programática de tokens}: Los tokens y sus patrones se definen directamente en C++ en el archivo \texttt{hulkGrammar.hpp}.
+    \item \textbf{Uso de expresiones regulares}: Cada token se define mediante una expresión regular que determina los patrones de caracteres que reconoce.
+    \item \textbf{Construcción de autómatas}: Las expresiones regulares se convierten en Autómatas Finitos No Deterministas (NFA) y luego en Autómatas Finitos Deterministas (DFA) para un reconocimiento eficiente de tokens.
+    \item \textbf{Manejo detallado de errores}: Proporciona información precisa sobre errores léxicos, incluyendo la posición y descripción del error.
+\end{itemize}
+
+\subsubsection{Implementación}
+La implementación se encuentra principalmente en el directorio \texttt{Automata/}, que contiene las clases para representar y manipular autómatas finitos:
+\begin{itemize}
+    \item \texttt{nfa.cpp/h}: Implementación de Autómatas Finitos No Deterministas
+    \item \texttt{dfa.cpp/h}: Implementación de Autómatas Finitos Deterministas
+    \item \texttt{operations/operations.cpp/h}: Operaciones sobre autómatas (unión, concatenación, clausura de Kleene, etc.)
+    \item \texttt{utils/ContainerSet.cpp/h}: Estructuras de datos para conjuntos utilizados en los algoritmos de autómatas
+\end{itemize}
+
+Las expresiones regulares y definiciones de tokens se establecen programáticamente en el archivo \texttt{hulkGrammar.hpp}.
+
+\subsection{Parser SLR1 Personalizado}
+
+El parser SLR1 (Simple LR) implementado manualmente proporciona un control completo sobre el proceso de análisis sintáctico, permitiendo personalizar aspectos como la construcción de la tabla de parsing y las acciones semánticas.
+
+\subsubsection{Características Principales}
+\begin{itemize}
+    \item \textbf{Gramática programable}: La gramática se define directamente en código C++, permitiendo una fácil modificación y experimentación.
+    \item \textbf{Cálculo automático de conjuntos FIRST y FOLLOW}: El parser calcula automáticamente los conjuntos FIRST y FOLLOW necesarios para la construcción de la tabla SLR(1).
+    \item \textbf{Construcción de la tabla de parsing}: Genera las tablas de acción y goto requeridas por el algoritmo LR.
+    \item \textbf{Manejo personalizado de errores sintácticos}: Proporciona mensajes de error detallados, incluyendo los tokens esperados en cada punto.
+    \item \textbf{Acciones semánticas flexibles}: Las acciones semánticas se definen como funciones lambda asociadas a cada producción, permitiendo una construcción muy personalizada del AST.
+\end{itemize}
+
+\subsubsection{Implementación}
+La implementación se encuentra principalmente en los directorios \texttt{Grammar/} y \texttt{Parser/}:
+\begin{itemize}
+    \item \texttt{Grammar/grammar.cpp/h}: Definición y manejo de gramáticas libres de contexto
+    \item \texttt{Grammar/symbol.cpp/h}: Representación de símbolos terminales y no terminales
+    \item \texttt{Grammar/production.cpp/h}: Representación de producciones gramaticales
+    \item \texttt{Parser/SLR1Parser.cpp/h}: Implementación del algoritmo de parsing SLR(1)
+    \item \texttt{Parser/Item.cpp/h}: Representación de ítems LR para la construcción de estados
+\end{itemize}
+
+La definición de la gramática de HULK para el parser SLR1 se encuentra en el archivo \texttt{hulkGrammar.hpp}, donde cada producción se define utilizando la función \texttt{AddProduction} con \texttt{AttrProd} (producciones con atributos). Las producciones se definen utilizando una sintaxis clara y declarativa donde las acciones semánticas se asocian directamente a las producciones:
+
+\begin{verbatim}
+// Ejemplo: input -> line
+g.AddProduction(AttrProd(input, Sentence(line), [](const std::vector<ElementType>& args) -> ElementType {
+    ASTNode* line_node = std::get<ASTNode*>(args[0]);
+    return line_node;
+}));
+
+// Ejemplo: lines_block -> { lines }
+g.AddProduction(AttrProd(lines_block, Sentence({LKEY, lines, RKEY}), [](const std::vector<ElementType>& args) -> ElementType {
+    BlockNode* lines_node = static_cast<BlockNode*>(std::get<ASTNode*>(args[1]));
+    return lines_node;
+}));
+\end{verbatim}
+
+\subsubsection{Estado Actual de la Implementación}
+Es importante destacar que la gramática definida en \texttt{hulkGrammar.hpp} es un trabajo en progreso. Este archivo representa un intento de transcribir la gramática definida en \texttt{parser.y} (utilizada por Bison) para su uso con el parser LALR1 personalizado que aún está en desarrollo. La implementación está incompleta y requiere revisión antes de poder ser utilizada como sustituto completo del parser generado por Bison e incluso del parser SLR1 personalizado.
+
+La versión actual de \texttt{hulkGrammar.hpp} sirve principalmente como demostración de las capacidades del framework de parsing desarrollado, mostrando cómo se pueden definir gramáticas programáticamente con acciones semánticas integradas, pero no debe considerarse una implementación completa y funcional de la gramática de HULK.
+
+Este enfoque permite una gran flexibilidad en la construcción del AST y facilita la experimentación con diferentes gramáticas y estrategias de análisis sintáctico.
+
+\appendix
+\section{Gramática Completa de HULK en Bison}
+\label{sec:gramatica_bison}
+
+A continuación se presenta la gramática completa del lenguaje HULK tal como está definida en el archivo \texttt{parser.y}. La gramática incluye las acciones semánticas que construyen el AST, pero se han omitido las declaraciones iniciales y las definiciones de tokens para mayor claridad.
+
+\begin{verbatim}
+input:    
+	line { root = $1; }
+	| lines_block { root = $1; }
+    ;
+
+lines_block:
+	LKEY lines RKEY { $$ = $2; }
+	;
+
+lines:
+	/* empty */	 { $$ = new BlockNode({}, yylineno); }
+	| non_empty_lines { $$ = $1; }
+	;
+
+non_empty_lines:
+	line { $$ = new BlockNode({$1}, yylineno); }
+	| non_empty_lines line { $1->add_child($2); $$ = $1; }
+	;
+
+line:
+	expr SEMICOLON { $$ = $1; }
+	| func_asign SEMICOLON { $$ = $1; } 
+	| type_node_decl { $$ = $1; }
+	;
+
+expr: 
+	arit_op { $$ = $1; }
+	| bool_expr { $$ = $1; }
+	| WHILE while_expr { $$ = $2; }
+	| STRING { $$ = new StringNode($1, yylineno); }
+	| id_expr %prec ASS_DES  { $$ = $1; }
+	| func_call { $$ = $1; }
+	| let_assign { $$ = $1; }
+	| IF conditional { $$ = $2; }
+	| member_access_expr { $$ = $1; }
+	| expr ASS_DES expr { $$ = new BinOpNode($1, ":=", $3, yylineno); }
+	| expr ASSIGN expr { $$ = new BinOpNode($1, "=", $3, yylineno); }
+	| expr ARROBA_ expr { $$ = new BinOpNode($1, "@", $3, yylineno); }
+	| expr D_ARROBA_ expr { $$ = new BinOpNode($1, "@@", $3, yylineno); }
+    ;
+
+func_asign:
+	FUNCTION_ ID_ LPARENT args_list RPARENT INLINE expr  { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $9, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $7, yylineno); }
+	| FUNCTION_ ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($2, yylineno), $4, $9, $7, yylineno); } 
+	;
+
+args_list:
+	/* empty */ { $$ = new ArgsList({}, yylineno); }
+	| id_expr { $$ = new ArgsList({$1}, yylineno); }
+	| args_list COLON id_expr { $1->add_child($3); $$ = $1; }
+	;
+
+id_expr:
+	ID_ TWOPOINTS ID_ { $$ = new IDNode($1, $3, yylineno); }
+	| ID_ { $$ = new IDNode($1, yylineno); }
+	;
+
+let_assign:
+	LET var_assign_list IN expr { $$ = new LetAssign($2->assigns, $4, yylineno); }
+	| LET var_assign_list IN lines_block { $$ = new LetAssign($2->assigns, $4, yylineno); }
+	;
+
+var_assign_list:
+	id_expr ASSIGN expr { $$ = new VarAssignList({ new VarAssign($1, $3, yylineno) }, yylineno); }
+	| id_expr ASSIGN expr AS_ ID_ { $$ = new VarAssignList({ new VarAssign($1, $3, $5, yylineno)}, yylineno); }
+	| id_expr ASSIGN new_expr { $$ = new VarAssignList({ new VarAssign($1, $3, yylineno)}, yylineno); }
+	| var_assign_list COLON id_expr ASSIGN expr { $1->add_child(new VarAssign($3, $5, yylineno)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN expr AS_ ID_ { $1->add_child(new VarAssign($3, $5, $7, yylineno)); $$ = $1; }
+	| var_assign_list COLON id_expr ASSIGN new_expr { $1->add_child(new VarAssign($3, $5, yylineno)); $$ = $1; }
+	;
+
+new_expr:
+	NEW ID_ LPARENT expr_list RPARENT { $$ = new NewTypeNode($2, $4->children, yylineno); }
+	;
+
+expr_list:
+	/* empty */ { $$ = new ASTNodeVector({}, yylineno); }
+	| expr { $$ = new ASTNodeVector({$1}, yylineno); }
+	| new_expr { $$ = new ASTNodeVector({$1}, yylineno); }
+	| expr_list COLON expr { $1->add_child($3); $$ = $1; }
+	| expr_list COLON new_expr { $1->add_child($3); $$ = $1; }
+	;
+
+func_call:
+	ID_ LPARENT expr_list RPARENT { $$ = new FunctionCallNode($1, $3, yylineno); }
+	;
+
+arit_op:
+	NUMBER { $$ = new FloatNode($1, yylineno); }
+	| LPARENT expr RPARENT { $$ = $2; }
+	| expr PLUS expr { $$ = new BinOpNode( $1, "+", $3, yylineno); }
+	| expr MINUS expr { $$ = new BinOpNode( $1, "-", $3, yylineno); }
+	| expr TIMES expr { $$ = new BinOpNode( $1, "*", $3, yylineno); }
+	| expr DIV expr { $$ = new BinOpNode( $1, "/", $3, yylineno); }
+	| expr POW expr { $$ = new BinOpNode( $1, "^", $3, yylineno); }
+	| MINUS expr %prec UMINUS { $$ = new UnaryOpNode("-", $2, yylineno); }
+	;
+
+bool_expr:
+	BOOLEAN { $$ = new BoolExprNode(new BoolNode($1, yylineno), yylineno); }
+	| expr GREATER_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, ">=", $3, yylineno), yylineno); }
+	| expr GREATER expr { $$ = new BoolExprNode(new BinOpNode($1, ">", $3, yylineno), yylineno); }
+	| expr LESS_EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "<=", $3, yylineno), yylineno); }
+	| expr LESS expr { $$ = new BoolExprNode(new BinOpNode($1, "<", $3, yylineno), yylineno); }
+	| expr EQUAL expr { $$ = new BoolExprNode(new BinOpNode($1, "==", $3, yylineno), yylineno); }
+	| expr DISTINCT expr { $$ = new BoolExprNode(new BinOpNode($1, "!=", $3, yylineno), yylineno); }
+	| expr AND_ expr { $$ = new BoolExprNode(new BinOpNode($1, "&", $3, yylineno), yylineno); }
+	| expr OR_ expr { $$ = new BoolExprNode(new BinOpNode($1, "|", $3, yylineno), yylineno); }
+	| NOT_ expr { $$ = new BoolExprNode(new UnaryOpNode("!", $2, yylineno), yylineno); }
+	| id_expr IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
+	| func_call IS ID_ { $$ = new BoolExprNode(new BinOpNode($1, "is", new IDNode($3, yylineno), yylineno), yylineno); }
+	;
+
+conditional:
+	LPARENT bool_expr RPARENT expr ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELSE expr { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT expr ELSE lines_block { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELSE lines_block { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT expr ELIF conditional { $$ = new Conditional($2, $4, $6, yylineno); }
+	| LPARENT bool_expr RPARENT lines_block ELIF conditional { $$ = new Conditional($2, $4, $6, yylineno); }
+	;
+
+while_expr:
+	LPARENT bool_expr RPARENT lines_block { $$ = new WhileNode($2, $4, yylineno); }
+	| LPARENT bool_expr RPARENT expr SEMICOLON { $$ = new WhileNode($2, $4, yylineno); }
+	;
+
+type_node_decl:
+	TYPE ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $4->children, yylineno); }
+	| TYPE ID_ INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $6->children, {$4}, yylineno); }
+	| TYPE ID_ INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), new ArgsList({}, yylineno), $9->children, {$4}, $6, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $7->children, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $9->children, {$7}, yylineno); }
+	| TYPE ID_ LPARENT args_list RPARENT INHERITS ID_ LPARENT args_list RPARENT LKEY type_body_elements RKEY { $$ = new TypeDeclNode(new IDNode($2, yylineno), $4, $12->children, {$7}, $9, yylineno); }
+	;
+
+type_body_elements:
+	/* empty */ { $$ = new ASTNodeVector({}, yylineno); }
+	| type_body_elements attribute { $1->add_child($2); $$ = $1; }
+	| type_body_elements method { $1->add_child($2); $$ = $1; }
+	;
+
+attribute:
+	id_expr ASSIGN expr SEMICOLON { $$ = new VarAssign($1, $3, yylineno); }
+	| id_expr ASSIGN expr AS_ ID_ SEMICOLON { $$ = new VarAssign($1, $3, $5, yylineno); }
+	;
+
+method:
+	ID_ LPARENT args_list RPARENT INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $6, yylineno); }
+	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ INLINE expr SEMICOLON { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $8, $6, yylineno); } 
+	| ID_ LPARENT args_list RPARENT LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $6, yylineno); }
+	| ID_ LPARENT args_list RPARENT TWOPOINTS ID_ LKEY lines RKEY { $$ = new AssignFuncNode(new IDNode($1, yylineno), $3, $8, $6, yylineno); }
+	;
+
+member_access_expr:
+	ID_ ACCESS ID_ { $$ = new AccessNode($1, new AttributeMember($3, yylineno), yylineno); }
+	| ID_ ACCESS ID_ LPARENT expr_list RPARENT { $$ = new AccessNode($1, new MethodMember($3, $5->children, yylineno), yylineno); } 
+	;
+\end{verbatim}
+
+\section{Notas sobre la Gramática}
+La gramática del lenguaje HULK se ha diseñado con varias características importantes:
+
+\begin{itemize}
+    \item \textbf{Soporte para programación funcional}: Con construcciones como expresiones `let-in` y funciones anónimas.
+    \item \textbf{Soporte para programación orientada a objetos}: Con definiciones de tipos (clases), herencia y acceso a miembros.
+    \item \textbf{Expresiones condicionales}: Estructuras `if-else` y `if-elif-else` para control de flujo.
+    \item \textbf{Bucles}: Construcciones `while` para iteración.
+    \item \textbf{Operadores sobrecargados}: Para operaciones aritméticas, lógicas y de concatenación (`@` y `@@`).
+\end{itemize}
+
+Las acciones semánticas (código entre llaves) son responsables de construir el AST mientras se analiza la estructura sintáctica del programa.
+
+\end{document}
