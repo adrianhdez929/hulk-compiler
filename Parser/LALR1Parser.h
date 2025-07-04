@@ -137,7 +137,7 @@ public:
      * @brief Construye el autómata LR(1) para la gramática.
      */
     State BuildLR1Automaton();
-    State BuildLALR1Automaton();
+    State BuildLALR1Automaton(std::map<Sentence, ContainerSet<string>>& firsts);
 
     /**
      * @brief Registra una acción en la tabla action.
@@ -233,7 +233,7 @@ private:
     std::map<std::pair<int, Symbol>, int> goto_;
     std::vector<State*> automaton_states_;
     // local firsts cache
-    std::map<Sentence, ContainerSet<string>> firsts_cache_;
+    mutable std::map<Sentence, ContainerSet<string>> firsts_cache_;
 
     // Constructor privado para deserialización
     LALR1Parser(Grammar& G, 

@@ -162,25 +162,35 @@ vector<vector<DFA::State>> distinguish_states(
     const DFA& automaton, 
     const DisjointSet<DFA::State>& partition) {
     
+    // Mapeamos cada estado a sus destinos (ya representados por sus representantes)
+    // Luego agrupamos los estados que tienen los mismos destinos
     map<vector<DFA::State>, vector<DFA::State>> split;
     set<DFA::Symbol> vocabulary = automaton.getVocab();
 
     for (DFA::State state : group) {
         vector<DFA::State> destinations;
+        
+        // Para cada símbolo, obtenemos el destino y lo representamos por su representante
         for (const auto& symbol : vocabulary) {
             DFA::State dest = automaton.getTransition(state, symbol);
             if (dest == -1) {
                 // Si no hay transición, usar un valor especial para distinguir
                 destinations.push_back(-1);
             } else {
-                DFA::State representative = partition.find(dest)->representative()->data;
+                auto dest_node = partition.find(dest);
+                if (dest_node == nullptr) {
+                    throw std::runtime_error("Estado destino no encontrado en la partición");
+                }
+                DFA::State representative = dest_node->representative()->data;
                 destinations.push_back(representative);
             }
         }
         
+        // Agrupamos estados con destinos idénticos
         split[destinations].push_back(state);
     }
 
+    // Convertimos el mapa a un vector de grupos
     vector<vector<DFA::State>> result;
     for (const auto& entry : split) {
         result.push_back(entry.second);
@@ -190,50 +200,66 @@ vector<vector<DFA::State>> distinguish_states(
 
 // Minimización de estados
 DisjointSet<DFA::State> state_minimization(const DFA& automaton) {
+    // Inicializamos la partición con todos los estados individuales
     DisjointSet<DFA::State> partition;
     for (DFA::State s = 0; s < automaton.states(); ++s) {
         partition.addItem(s);
     }
 
     // Partición inicial: finales vs no finales
-    set<DFA::State> finals(automaton.finalStates().begin(), automaton.finalStates().end());
-    vector<DFA::State> non_finals;
+    set<DFA::State> finals = automaton.finalStates();
+    vector<DFA::State> final_states;
+    vector<DFA::State> non_final_states;
+    
     for (DFA::State s = 0; s < automaton.states(); ++s) {
-        if (finals.find(s) == finals.end()) {
-            non_finals.push_back(s);
+        if (finals.find(s) != finals.end()) {
+            final_states.push_back(s);
+        } else {
+            non_final_states.push_back(s);
         }
     }
 
-    // Fusionar estados finales solo si hay estados finales
-    if (!finals.empty()) {
-        partition.merge(vector<DFA::State>(finals.begin(), finals.end()));
+    // Fusionar estados finales y no finales por separado
+    if (!final_states.empty()) {
+        partition.merge(final_states);
     }
-    // Fusionar estados no finales solo si hay estados no finales
-    if (!non_finals.empty()) {
-        partition.merge(non_finals);
+    if (!non_final_states.empty()) {
+        partition.merge(non_final_states);
     }
 
-    // Refinar partición
-    while (true) {
+    // Proceso de refinamiento de la partición
+    bool changed;
+    do {
+        changed = false;
         DisjointSet<DFA::State> new_partition;
+        
+        // Inicializar la nueva partición con todos los estados individuales
         for (DFA::State s = 0; s < automaton.states(); ++s) {
             new_partition.addItem(s);
         }
 
+        // Obtener los grupos actuales de la partición
         auto groups = partition.getGroups();
-        for (const auto& group_entry : groups) {
-            const auto& group = group_entry.second;
+        
+        // Para cada grupo, intentar separarlo en grupos más pequeños
+        for (const auto& [representative, group] : groups) {
             auto new_groups = distinguish_states(group, automaton, partition);
+            
+            // Fusionar los estados dentro de cada nuevo grupo
             for (const auto& new_group : new_groups) {
-                if (!new_group.empty()) {  // Solo fusionar grupos no vacíos
+                if (!new_group.empty()) {
                     new_partition.merge(new_group);
                 }
             }
         }
-
-        if (new_partition.size() == partition.size()) break;
-        partition = std::move(new_partition);
-    }
+        
+        // Verificar si la partición cambió
+        if (new_partition.size() != partition.size()) {
+            changed = true;
+            partition = std::move(new_partition);
+        }
+        
+    } while (changed);
 
     return partition;
 }
@@ -254,7 +280,7 @@ DFA automata_minimization(const DFA& automaton) {
         new_state_id++;
     }
 
-    // Construir transiciones
+    // Construir transiciones - aseguramos que son deterministas (solo un destino por par estado-símbolo)
     map<pair<DFA::State, DFA::Symbol>, vector<DFA::State>> new_transitions;
     for (const auto& group : groups) {
         DFA::State representative = group.first;
@@ -264,7 +290,9 @@ DFA automata_minimization(const DFA& automaton) {
             DFA::State old_dest = automaton.getTransition(representative, symbol);
             if (old_dest != -1) {  // Solo si hay transición válida
                 DFA::State new_dest = state_map[old_dest];
-                new_transitions[{new_source, symbol}].push_back(new_dest);
+                // En un DFA, solo debería haber un destino por par (estado, símbolo)
+                // Limpiamos el vector para asegurarnos de que solo hay un destino
+                new_transitions[{new_source, symbol}] = {new_dest};
             }
         }
     }
@@ -290,6 +318,13 @@ DFA automata_minimization(const DFA& automaton) {
 
     // El número total de estados es el número de grupos
     int total_states = groups.size();
+    
+    // Validación: verificar que el autómata resultante sigue siendo determinista
+    for (const auto& transition : new_transitions) {
+        if (transition.second.size() != 1) {
+            throw std::runtime_error("El autómata minimizado no es determinista");
+        }
+    }
     
     return DFA(total_states, new_finals, new_transitions, new_start);
 }

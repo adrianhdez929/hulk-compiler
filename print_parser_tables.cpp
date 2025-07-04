@@ -2,6 +2,7 @@
 #include "Parser/LR1Parser.h"
 #include "hulkGrammar.hpp"
 #include "Lexer/grammar_parser.h"
+#include "Logger/Logger.h"
 #include <iostream>
 #include <iomanip>
 #include <map>
@@ -150,9 +151,7 @@ int main() {
     // Nombre del archivo de salida
     const std::string outputFileName = "parser_tables.txt";
     
-    std::cout << "Analizando gramáticas y parsers LR1..." << std::endl;
-    std::cout << "Este proceso puede tomar un tiempo..." << std::endl;
-    std::cout << "Los resultados se guardarán en el archivo: " << outputFileName << std::endl;
+    // Processing grammars and LR1 parsers
     
     // Obtener la gramática de HULK desde hulkGrammar.hpp
     Grammar hulk_grammar = getHulkGrammar();
@@ -168,11 +167,10 @@ int main() {
     // Imprimir la información del parser de HULK
     hulkAnalyzer.printTables();
     
-    std::cout << "Análisis de gramática HULK completado." << std::endl;
+    // HULK grammar analysis completed
     
     // También podemos intentar analizar la gramática del lexer si está disponible
     try {
-        std::cout << "Intentando analizar gramática del lexer..." << std::endl;
         
         // Crear un nuevo archivo para la gramática del lexer
         const std::string lexerOutputFileName = "lexer_parser_tables.txt";
@@ -186,7 +184,7 @@ int main() {
         if (lexerAnalyzer.isOutputFileOpen()) {
             // Imprimir la información del parser del lexer
             lexerAnalyzer.printTables();
-            std::cout << "Análisis de gramática del lexer completado. Guardado en: " << lexerOutputFileName << std::endl;
+            // Lexer grammar analysis completed
         } else {
             std::cerr << "Error: No se pudo abrir el archivo de salida para el lexer." << std::endl;
         }
@@ -195,6 +193,6 @@ int main() {
         std::cerr << "Continuando solo con la gramática HULK." << std::endl;
     }
     
-    std::cout << "Proceso completado. Revise el archivo " << outputFileName << " para los detalles." << std::endl;
+    // Process completed
     return 0;
 }
