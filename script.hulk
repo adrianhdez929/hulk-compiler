@@ -1,7 +1,24 @@
 {
-    let a = 10 in if (a > 5) {
-        print("a es mayor que 5");
-    } else {
-        print("a no es mayor que 5");
-    };
+    type Point {
+        x = 0;
+        y = 0;
+
+        setX(x: Number) => self.x = x;
+        setY(y: Number) => self.y = y;
+    }
+
+    let p1 = new Point() in {
+        p1.setX(5);
+        p1.setY(6);
+        let p2 = new Point() in {
+            p2.setX(3);
+            p2.setY(4);
+            let dx = p1.x - p2.x in {
+                let dy = p1.y - p2.y in {
+                    print(sqrt(dx * dx + dy * dy));
+                };
+            };
+        };
+    };  
 }
+

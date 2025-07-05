@@ -28,7 +28,7 @@ HULK (Havana University Language for Kompilers) es un lenguaje de programación 
 
 \section{Instalación y Compilación}
 
-Para utilizar el compilador, necesitarás tener Flex y Bison instalados, así como el compilador de C++ \textit{clang++}. El proyecto se compila utilizando un `makefile`.
+Para utilizar el compilador, necesitarás tener Flex y Bison instalados, así como el compilador de C++ \textit{clang++}. El proyecto se compila utilizando un `makefile'.
 
 \subsection{Requisitos Previos}
 
@@ -41,20 +41,20 @@ Para utilizar el compilador, necesitarás tener Flex y Bison instalados, así co
 
 \subsection{Comandos del Makefile}
 
-El `makefile` proporcionado automatiza las tareas de compilación y limpieza. Los principales comandos son:
+El `makefile' proporcionado automatiza las tareas de compilación y limpieza. Los principales comandos son:
 
 \begin{itemize}
-    \item \textbf{Limpiar el proyecto (`make clean`)}: Elimina todos los ficheros objeto (`.o`) y el ejecutable final. Es útil para realizar una compilación desde cero.
+    \item \textbf{Limpiar el proyecto (`make clean')}: Elimina todos los ficheros objeto (`.o') y el ejecutable final. Es útil para realizar una compilación desde cero.
     \begin{verbatim}
 make clean
     \end{verbatim}
 
-    \item \textbf{Compilar el proyecto (`make compile`)}: Compila todo el código fuente y genera los artefactos necesarios en la carpeta `hulk/`.
+    \item \textbf{Compilar el proyecto (`make compile')}: Compila todo el código fuente y genera los artefactos necesarios en la carpeta `hulk/'.
     \begin{verbatim}
 make compile
     \end{verbatim}
 
-    \item \textbf{Ejecutar el compilador (`make execute`)}: Este comando ejecuta el compilador. Si los artefactos no existen o el código fuente ha cambiado, primero compilará el proyecto y luego lo ejecutará.
+    \item \textbf{Ejecutar el compilador (`make execute')}: Este comando ejecuta el compilador. Si los artefactos no existen o el código fuente ha cambiado, primero compilará el proyecto y luego lo ejecutará.
     \begin{verbatim}
 make execute
     \end{verbatim}
@@ -62,9 +62,9 @@ make execute
 
 \subsection{Compilar y Ejecutar un Programa HULK}
 
-Una vez que el compilador `hulk` ha sido generado, puedes usarlo para compilar y ejecutar tus propios ficheros de código HULK (con extensión `.hulk`).
+Una vez que el compilador `hulk' ha sido generado, puedes usarlo para compilar y ejecutar tus propios ficheros de código HULK (con extensión `.hulk').
 
-Para compilar y ejecutar un fichero, usa los comandos antes mencionados. Es importante que el fichero de codigo HULK est\'e en el directorio del proyecto y que haya uno solo con esa extensi\'on.
+Para compilar y ejecutar un fichero, usa los comandos antes mencionados. Es importante que el fichero de código HULK esté en el directorio del proyecto y que haya uno solo con esa extensión.
 
 \section{Sintaxis del Lenguaje HULK}
 
@@ -72,7 +72,7 @@ A continuación se presenta un resumen de la sintaxis del lenguaje HULK.
 
 \subsection{Estructura General}
 
-Un programa en HULK consiste en una secuencia de declaraciones y expresiones. Las expresiones deben terminar con un punto y coma (`;`).
+Un programa en HULK consiste en una secuencia de declaraciones y expresiones. Las expresiones deben terminar con un punto y coma (`;').
 
 \begin{verbatim}
 // Ejemplo de un programa simple
@@ -85,7 +85,7 @@ HULK soporta los siguientes tipos de datos básicos:
 \begin{itemize}
     \item \textbf{Number}: Números, tanto enteros como decimales.
     \item \textbf{String}: Cadenas de texto.
-    \item \textbf{Boolean}: Valores `true` o `false`.
+    \item \textbf{Boolean}: Valores `true' o `false'.
 \end{itemize}
 
 También soporta la definición de nuevos tipos (clases) con herencia simple.
@@ -100,9 +100,9 @@ El analizador léxico se encarga de convertir el texto de entrada en una secuenc
 
 \subsubsection{Funcionamiento de Flex}
 
-Flex toma como entrada un archivo de definiciones léxicas (`lexer.l`) que contiene patrones (expresiones regulares) y acciones asociadas. Al compilar este archivo, Flex genera un programa en C/C++ (`lex.yy.c`) que implementa un autómata finito determinista para reconocer los tokens.
+Flex toma como entrada un archivo de definiciones léxicas (`lexer.l') que contiene patrones (expresiones regulares) y acciones asociadas. Al compilar este archivo, Flex genera un programa en C/C++ (`lex.yy.c') que implementa un autómata finito determinista para reconocer los tokens.
 
-En `lexer.l`, cada token se define mediante:
+En `lexer.l', cada token se define mediante:
 \begin{itemize}
     \item Una expresión regular que describe el patrón del token
     \item El código a ejecutar cuando se reconoce ese patrón
@@ -125,22 +125,22 @@ El analizador sintáctico verifica que la secuencia de tokens siga las reglas gr
 
 \subsubsection{Funcionamiento de Bison}
 
-Bison toma como entrada un archivo de definición de gramática (`parser.y`) que contiene:
+Bison toma como entrada un archivo de definición de gramática (`parser.y') que contiene:
 \begin{itemize}
     \item Declaraciones de tokens y tipos
     \item Reglas de producción de la gramática
     \item Acciones semánticas asociadas a cada regla
 \end{itemize}
 
-A partir de esta definición, Bison genera un analizador en C/C++ (`parser.tab.c` y `parser.tab.h`) que implementa un autómata con pila para reconocer la estructura sintáctica del programa.
+A partir de esta definición, Bison genera un analizador en C/C++ (`parser.tab.c' y `parser.tab.h') que implementa un autómata con pila para reconocer la estructura sintáctica del programa.
 
-La gramática completa de HULK, tal como está definida en el archivo `parser.y`, se encuentra en el Apéndice \ref{sec:gramatica_bison}. Esta gramática define todas las construcciones sintácticas del lenguaje, junto con las acciones semánticas que construyen el AST correspondiente.
+La gramática completa de HULK, tal como está definida en el archivo `parser.y', se encuentra en el Apéndice \ref{sec:gramatica_bison}. Esta gramática define todas las construcciones sintácticas del lenguaje, junto con las acciones semánticas que construyen el AST correspondiente.
 
 \subsection{Árbol de Sintaxis Abstracta (AST)}
 
 Las acciones semánticas en Bison construyen un Árbol de Sintaxis Abstracta (AST), que es una representación jerárquica de la estructura del programa. Cada nodo del árbol representa un constructo del lenguaje (expresiones, sentencias, declaraciones, etc.).
 
-En HULK, cada tipo de nodo se implementa como una clase derivada de la clase base `ASTNode`. Por ejemplo, `BinOpNode` para operaciones binarias, `FloatNode` para constantes numéricas, etc.
+En HULK, cada tipo de nodo se implementa como una clase derivada de la clase base `ASTNode'. Por ejemplo, `BinOpNode' para operaciones binarias, `FloatNode' para constantes numéricas, etc.
 
 \subsection{Análisis Semántico}
 
@@ -149,10 +149,10 @@ El análisis semántico verifica que el programa tenga sentido según las reglas
 El análisis se realiza en varias fases:
 
 \subsubsection{Recolector de Tipos}
-Implementado en `type\_collector\_visitor.cpp`, recorre el AST para registrar todos los tipos definidos por el usuario.
+Implementado en `type\_collector\_visitor.cpp', recorre el AST para registrar todos los tipos definidos por el usuario.
 
 \subsubsection{Recolector de Símbolos}
-Implementado en `symbol\_collector\_visitor.cpp`, recorre el AST para registrar todas las declaraciones de variables y funciones.
+Implementado en `symbol\_collector\_visitor.cpp', recorre el AST para registrar todas las declaraciones de variables y funciones.
 
 \subsubsection{Verificador Semántico}
 Implementado como parte del visitor principal, verifica que las operaciones sean semánticamente válidas: tipos compatibles en operaciones, variables y funciones declaradas antes de usarse, etc.
@@ -167,11 +167,11 @@ LLVM proporciona una representación intermedia (IR) del código, que luego pued
 
 El proceso de generación de código se implementa en:
 \begin{itemize}
-    \item `visitor.cpp` en el directorio `codegen/`: Visitante que recorre el AST y genera el IR de LLVM
-    \item `jit.cpp`: Clase que gestiona la compilación JIT y la ejecución del código
+    \item `visitor.cpp' en el directorio `codegen/': Visitante que recorre el AST y genera el IR de LLVM
+    \item `jit.cpp': Clase que gestiona la compilación JIT y la ejecución del código
 \end{itemize}
 
-El visitor de generación de código traduce cada nodo del AST a instrucciones LLVM IR. Por ejemplo, un nodo `BinOpNode` se traduce en la correspondiente instrucción aritmética de LLVM, mientras que un nodo `IfNode` se traduce en bloques básicos con saltos condicionales.
+El visitor de generación de código traduce cada nodo del AST a instrucciones LLVM IR. Por ejemplo, un nodo `BinOpNode' se traduce en la correspondiente instrucción aritmética de LLVM, mientras que un nodo `IfNode' se traduce en bloques básicos con saltos condicionales.
 
 \section{Ejemplos de Código}
 
@@ -215,20 +215,22 @@ print("Hello, World!");
     type Point {
         x = 0;
         y = 0;
-        distance(p: Point): Number {
-            let dx = this.x - p.x in {
-                let dy = this.y - p.y in {
-                    sqrt(dx * dx + dy * dy);
-                };
-            };
-        }
+
+        setX(x: Number) => self.x = x;
+        setY(y: Number) => self.y = y;
     }
 
     let p1 = new Point() in {
+        p1.setX(5);
+        p1.setY(6);
         let p2 = new Point() in {
-            p2.x = 3;
-            p2.y = 4;
-            print(p1.distance(p2)); 
+            p2.setX(3);
+            p2.setY(4);
+            let dx = p1.x - p2.x in {
+                let dy = p1.y - p2.y in {
+                    print(sqrt(dx * dx + dy * dy));
+                };
+            };
         };
     };  
 }
@@ -254,7 +256,7 @@ Este manual proporciona la información básica para utilizar el compilador y co
 
 \section{Implementaciones Alternativas}
 
-Durante el desarrollo del proyecto, se implementaron versiones propias del analizador léxico y sintáctico como ejercicios educativos y para un control más granular del proceso de compilación. Aunque finalmente se optó por utilizar Flex y Bison en la versión principal del compilador debido a su robustez y eficiencia, estas implementaciones alternativas siguen siendo parte del proyecto y pueden ser utilizadas para fines académicos o experimentales.
+Durante el desarrollo del proyecto, se implementaron versiones propias del analizador léxico y sintáctico para un control más granular del proceso de compilación. Aunque finalmente se optó por utilizar Flex y Bison en la versión principal del compilador debido a su robustez y eficiencia, estas implementaciones alternativas siguen siendo parte del proyecto y pueden ser utilizadas para fines académicos o experimentales.
 
 \subsection{Lexer Personalizado}
 
@@ -498,11 +500,11 @@ member_access_expr:
 La gramática del lenguaje HULK se ha diseñado con varias características importantes:
 
 \begin{itemize}
-    \item \textbf{Soporte para programación funcional}: Con construcciones como expresiones `let-in` y funciones anónimas.
+    \item \textbf{Soporte para programación funcional}: Con construcciones como expresiones `let-in' y funciones anónimas.
     \item \textbf{Soporte para programación orientada a objetos}: Con definiciones de tipos (clases), herencia y acceso a miembros.
-    \item \textbf{Expresiones condicionales}: Estructuras `if-else` y `if-elif-else` para control de flujo.
-    \item \textbf{Bucles}: Construcciones `while` para iteración.
-    \item \textbf{Operadores sobrecargados}: Para operaciones aritméticas, lógicas y de concatenación (`@` y `@@`).
+    \item \textbf{Expresiones condicionales}: Estructuras `if-else' y `if-elif-else' para control de flujo.
+    \item \textbf{Bucles}: Construcciones `while' para iteración.
+    \item \textbf{Operadores sobrecargados}: Para operaciones aritméticas, lógicas y de concatenación (`@' y `@@').
 \end{itemize}
 
 Las acciones semánticas (código entre llaves) son responsables de construir el AST mientras se analiza la estructura sintáctica del programa.
