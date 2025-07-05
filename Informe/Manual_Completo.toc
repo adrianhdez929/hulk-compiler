@@ -1,0 +1,39 @@
+\contentsline {section}{\numberline {1}Introducción}{3}{section.1}%
+\contentsline {section}{\numberline {2}Instalación y Compilación}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Requisitos Previos}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Comandos del Makefile}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Compilar y Ejecutar un Programa HULK}{3}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Sintaxis del Lenguaje HULK}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Estructura General}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Tipos de Datos}{4}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Arquitectura del Compilador}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Análisis Léxico con Flex}{4}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Funcionamiento de Flex}{4}{subsubsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.2}Análisis Sintáctico con Bison}{4}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Funcionamiento de Bison}{4}{subsubsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.3}Árbol de Sintaxis Abstracta (AST)}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Análisis Semántico}{5}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Recolector de Tipos}{5}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Recolector de Símbolos}{5}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Verificador Semántico}{5}{subsubsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.5}Generación de Código}{5}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}LLVM y JIT}{5}{subsubsection.4.5.1}%
+\contentsline {section}{\numberline {5}Ejemplos de Código}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Hola Mundo}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Declaración de Variables y Expresiones}{6}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Definición de Funciones}{6}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Estructuras Condicionales}{6}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Definición de Tipos}{6}{subsection.5.5}%
+\contentsline {section}{\numberline {6}Resolución de Problemas}{6}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Errores Comunes}{6}{subsection.6.1}%
+\contentsline {section}{\numberline {7}Conclusión}{7}{section.7}%
+\contentsline {section}{\numberline {8}Implementaciones Alternativas}{7}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Lexer Personalizado}{7}{subsection.8.1}%
+\contentsline {subsubsection}{\numberline {8.1.1}Características Principales}{7}{subsubsection.8.1.1}%
+\contentsline {subsubsection}{\numberline {8.1.2}Implementación}{7}{subsubsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.2}Parser SLR1 Personalizado}{8}{subsection.8.2}%
+\contentsline {subsubsection}{\numberline {8.2.1}Características Principales}{8}{subsubsection.8.2.1}%
+\contentsline {subsubsection}{\numberline {8.2.2}Implementación}{8}{subsubsection.8.2.2}%
+\contentsline {subsubsection}{\numberline {8.2.3}Estado Actual de la Implementación}{8}{subsubsection.8.2.3}%
+\contentsline {section}{\numberline {A}Gramática Completa de HULK en Bison}{9}{appendix.A}%
+\contentsline {section}{\numberline {B}Notas sobre la Gramática}{12}{appendix.B}%

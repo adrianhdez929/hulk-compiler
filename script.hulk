@@ -1,28 +1,24 @@
-
 {
-    type A {
-        test() => "A";
+    type Point {
+        x = 0;
+        y = 0;
+
+        setX(x: Number) => self.x = x;
+        setY(y: Number) => self.y = y;
     }
 
-    type B inherits A {
-        test() => "B";
-    }
-
-    type C inherits B {
-        test() => "C";
-    }
-
-    function foo(x: Number): A {
-        if (x==0) {
-            let a = new A() in a;
-        } elif (x==1) {
-            let a = new B() in a;
-        } else {
-            let a = new C() in a;
+    let p1 = new Point() in {
+        p1.setX(5);
+        p1.setY(6);
+        let p2 = new Point() in {
+            p2.setX(3);
+            p2.setY(4);
+            let dx = p1.x - p2.x in {
+                let dy = p1.y - p2.y in {
+                    print(sqrt(dx * dx + dy * dy));
+                };
+            };
         };
-    };
-
-    let x: A = foo(1) in {
-        print(x.test());
-    };
+    };  
 }
+
