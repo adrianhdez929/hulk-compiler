@@ -2967,8 +2967,16 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
     llvm::Function* parentFunction = Builder->GetInsertBlock()->getParent();
     llvm::BasicBlock* endBB = llvm::BasicBlock::Create(*TheContext, "end_virtual_call", parentFunction);
     
-    // Create a PHI node to collect the results from different branches
-    llvm::Type* returnType = llvm::Type::getInt8PtrTy(*TheContext); // Assuming methods return strings
+    // Determine the return type by looking at any available method implementation
+    llvm::Type* returnType = llvm::Type::getInt8PtrTy(*TheContext); // Default to pointer
+    for (const auto& vtablePair : typeVTableMap) {
+        std::string methodKey = vtablePair.first + "_" + methodName;
+        auto funcIt = methodFunctionMap.find(methodKey);
+        if (funcIt != methodFunctionMap.end()) {
+            returnType = funcIt->second->getReturnType();
+            break; // All implementations should have the same return type
+        }
+    }
     
     std::vector<std::pair<llvm::Value*, llvm::BasicBlock*>> phiIncoming;
     llvm::BasicBlock* currentBB = Builder->GetInsertBlock();
@@ -3030,8 +3038,15 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
             cout << "DEBUG: Generated conditional call for " << methodKey << endl;
         } else {
             // If method not found for this type, create a null return or default
-            llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-            phiIncoming.push_back({nullResult, typeBB});
+            llvm::Value* defaultResult;
+            if (returnType->isDoubleTy()) {
+                defaultResult = llvm::ConstantFP::get(returnType, 0.0);
+            } else if (returnType->isIntegerTy()) {
+                defaultResult = llvm::ConstantInt::get(returnType, 0);
+            } else {
+                defaultResult = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(returnType));
+            }
+            phiIncoming.push_back({defaultResult, typeBB});
             Builder->CreateBr(endBB);
         }
         
@@ -3042,18 +3057,32 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
             
             // If this is the default case (last iteration), handle unmatched vtables
             if (i == typeOrder.size() - 1) {
-                // Default case: return null or throw error
-                llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-                phiIncoming.push_back({nullResult, nextBB});
+                // Default case: return default value based on return type
+                llvm::Value* defaultResult;
+                if (returnType->isDoubleTy()) {
+                    defaultResult = llvm::ConstantFP::get(returnType, 0.0);
+                } else if (returnType->isIntegerTy()) {
+                    defaultResult = llvm::ConstantInt::get(returnType, 0);
+                } else {
+                    defaultResult = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(returnType));
+                }
+                phiIncoming.push_back({defaultResult, nextBB});
                 Builder->CreateBr(endBB);
             }
         }
     }
     
-    // Ensure any remaining unhandled case branches to endBB with a null result
+    // Ensure any remaining unhandled case branches to endBB with a default result
     if (Builder->GetInsertBlock() != endBB && !Builder->GetInsertBlock()->getTerminator()) {
-        llvm::Value* nullResult = llvm::ConstantPointerNull::get(llvm::PointerType::get(llvm::Type::getInt8Ty(*TheContext), 0));
-        phiIncoming.push_back({nullResult, Builder->GetInsertBlock()});
+        llvm::Value* defaultResult;
+        if (returnType->isDoubleTy()) {
+            defaultResult = llvm::ConstantFP::get(returnType, 0.0);
+        } else if (returnType->isIntegerTy()) {
+            defaultResult = llvm::ConstantInt::get(returnType, 0);
+        } else {
+            defaultResult = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(returnType));
+        }
+        phiIncoming.push_back({defaultResult, Builder->GetInsertBlock()});
         Builder->CreateBr(endBB);
     }
     
