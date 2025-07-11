@@ -1805,7 +1805,7 @@ void CodegenVisitor::visit(TypeDeclNode* node, Context* context) {
                                 
                                 if (parentDefault.type == DefaultValue::DOUBLE && fieldType->isDoubleTy()) {
                                     defaultVal = llvm::ConstantFP::get(fieldType, llvm::APFloat(parentDefault.doubleVal));
-                                } else if (parentDefault.type == DefaultValue::STRING && fieldType->isPointerTy()) {
+                                } else if (parentDefault.type == DefaultValue::STRING_ && fieldType->isPointerTy()) {
                                     llvm::Constant* strConstant = llvm::ConstantDataArray::getString(*TheContext, parentDefault.stringVal);
                                     llvm::GlobalVariable* globalStr = new llvm::GlobalVariable(
                                         *TheModule,

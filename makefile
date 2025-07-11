@@ -42,19 +42,19 @@ ARTIFACTS_SRC = $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp $(SRC_DIR
                 $(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
                 $(SRC_DIR)/Ast/ast.cpp
 
-compile: $(BUILDDIR)/libstandard.so create_artifacts $(BUILDDIR)/$(PROGRAM)
+compile: $(BUILDDIR)/libstandard.so  $(BUILDDIR)/$(PROGRAM)
 
-create_artifacts: | $(BUILDDIR)
-	$(CC) $(CFLAGS) -o $(SRC_DIR)/create_artifacts $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp \
-		$(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
-		$(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
-		$(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
-		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
-		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
-		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
-		$(SRC_DIR)/Logger/Logger.cpp \
-		$(SRC_DIR)/Ast/ast.cpp
-	$(SRC_DIR)/create_artifacts
+#create_artifacts: | $(BUILDDIR)
+#	$(CC) $(CFLAGS) -o $(SRC_DIR)/create_artifacts $(SRC_DIR)/create_artifacts.cpp $(SRC_DIR)/execute.cpp \
+#		$(SRC_DIR)/Grammar/grammar.cpp $(SRC_DIR)/Grammar/production.cpp \
+#		$(SRC_DIR)/Grammar/symbol.cpp $(SRC_DIR)/Grammar/sentence.cpp \
+#		$(SRC_DIR)/Automata/dfa.cpp $(SRC_DIR)/Automata/nfa.cpp \
+#		$(SRC_DIR)/Automata/utils/ContainerSet.cpp $(SRC_DIR)/Automata/utils/aut_manipulation.cpp \
+#		$(SRC_DIR)/Automata/operations/operations.cpp $(SRC_DIR)/Automata/state.cpp \
+#		$(SRC_DIR)/Parser/Item.cpp $(SRC_DIR)/Parser/LALR1Parser.cpp \
+#		$(SRC_DIR)/Logger/Logger.cpp \
+#		$(SRC_DIR)/Ast/ast.cpp
+#	$(SRC_DIR)/create_artifacts
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -65,8 +65,8 @@ $(BUILDDIR)/libstandard.so: $(SRC_DIR)/codegen/standard.cpp | $(BUILDDIR)
 $(BUILDDIR)/$(PROGRAM): $(OBJS) $(BUILDDIR)/libstandard.so
 	$(CC) $(CFLAGS) $(OBJS) -o $(BUILDDIR)/$(PROGRAM) -lfl -L$(BUILDDIR) -lstandard $(LDFLAGS)
 
-$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.tab.h: $(SRC_DIR)/parser.y | $(BUILDDIR)
-	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
+#$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.tab.h: $(SRC_DIR)/parser.y | $(BUILDDIR)
+#	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
 
 $(BUILDDIR)/lex.yy.c: $(SRC_DIR)/lexer.l $(BUILDDIR)/parser.tab.h
 	$(LEX) -o $(BUILDDIR)/lex.yy.c $(SRC_DIR)/lexer.l

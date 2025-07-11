@@ -77,12 +77,12 @@ class CodegenVisitor : public Visitor {
     // Map to store default values for each attribute in each type
     // Store raw values instead of LLVM Values to avoid context issues
     struct DefaultValue {
-        enum Type { DOUBLE, STRING } type;
+        enum Type { DOUBLE, STRING_ } type;
         double doubleVal;
         std::string stringVal;
         DefaultValue() : type(DOUBLE), doubleVal(0.0) {} // Default constructor
         DefaultValue(double val) : type(DOUBLE), doubleVal(val) {}
-        DefaultValue(const std::string& val) : type(STRING), stringVal(val) {}
+        DefaultValue(const std::string& val) : type(STRING_), stringVal(val) {}
     };
     std::map<std::string, std::map<std::string, DefaultValue>> typeDefaultValuesMap;
     

@@ -1,502 +1,505 @@
-2025-06-27 03:33:52.303 [INFO] ========== HULK COMPILER LOGGING SESSION ===========
-2025-06-27 03:33:52.303 [INFO] Log file: hulk_artifacts.log
-2025-06-27 03:33:52.303 [INFO] Log level: DEBUG
-2025-06-27 03:33:52.303 [INFO] Initialized by component: Artifact Creator
-2025-06-27 03:33:52.303 [INFO] ==================================================
-2025-06-27 03:33:52.303 [INFO] === HULK Artifact Creator Starting ===
-2025-06-27 03:33:52.303 [INFO] Obteniendo la gramática de Hulk
-2025-06-27 03:33:52.303 [INFO] Gramática obtenida con 92 producciones
-2025-06-27 03:33:52.303 [DEBUG] Producción con epsilon: lines -> epsilon 
-2025-06-27 03:33:52.303 [DEBUG] Producción con epsilon: args_list -> epsilon 
-2025-06-27 03:33:52.304 [DEBUG] Producción con epsilon: expr_list -> epsilon 
-2025-06-27 03:33:52.304 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
-2025-06-27 03:33:52.304 [INFO] Se encontraron 4 producciones con epsilon
-2025-06-27 03:33:52.304 [INFO] Comenzando la creación de artefactos
-2025-06-27 03:33:52.304 [INFO] Iniciando creación de artefactos del compilador
-2025-06-27 03:33:52.304 [DEBUG] Contador de producciones reiniciado
-2025-06-27 03:33:52.304 [DEBUG] Directorio 'hulk' ya existe
-2025-06-27 03:33:52.304 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
-2025-06-27 03:33:52.305 [INFO] Gramática del lexer analizada con éxito (18 producciones)
-2025-06-27 03:33:52.305 [INFO] Creando parser LALR1 para la gramática del lexer
-2025-06-27 03:33:52.305 [INFO] Inicializando parser LALR1 con gramática de 18 producciones
-2025-06-27 03:33:52.305 [DEBUG] Detalle de la gramática:
-2025-06-27 03:33:52.305 [DEBUG]   E -> T  (ID: 0)
-2025-06-27 03:33:52.305 [DEBUG]   E -> E | T  (ID: 1)
-2025-06-27 03:33:52.305 [DEBUG]   T -> F  (ID: 2)
-2025-06-27 03:33:52.305 [DEBUG]   T -> T F  (ID: 3)
-2025-06-27 03:33:52.305 [DEBUG]   F -> A  (ID: 4)
-2025-06-27 03:33:52.305 [DEBUG]   F -> A *  (ID: 5)
-2025-06-27 03:33:52.305 [DEBUG]   F -> A ?  (ID: 6)
-2025-06-27 03:33:52.305 [DEBUG]   F -> A +  (ID: 7)
-2025-06-27 03:33:52.305 [DEBUG]   A -> P  (ID: 8)
-2025-06-27 03:33:52.305 [DEBUG]   A -> epsilon  (ID: 9)
-2025-06-27 03:33:52.305 [DEBUG]   A -> ( E )  (ID: 10)
-2025-06-27 03:33:52.305 [DEBUG]   A -> [ S ]  (ID: 11)
-2025-06-27 03:33:52.305 [DEBUG]   P -> symbol  (ID: 12)
-2025-06-27 03:33:52.305 [DEBUG]   S -> P  (ID: 13)
-2025-06-27 03:33:52.305 [DEBUG]   S -> S P  (ID: 14)
-2025-06-27 03:33:52.305 [DEBUG]   S -> R  (ID: 15)
-2025-06-27 03:33:52.305 [DEBUG]   S -> S R  (ID: 16)
-2025-06-27 03:33:52.305 [DEBUG]   R -> P - P  (ID: 17)
-2025-06-27 03:33:52.305 [INFO] Construyendo tabla de análisis sintáctico LALR1
-2025-06-27 03:33:52.305 [DEBUG] Gramática aumentada correctamente
-2025-06-27 03:33:52.305 [DEBUG] Símbolo inicial: SS
-2025-06-27 03:33:52.305 [DEBUG] Calculando conjuntos FIRST para construcción de autómata LALR1
-2025-06-27 03:33:52.306 [DEBUG] === CONJUNTOS FIRST CALCULADOS ===
-2025-06-27 03:33:52.306 [DEBUG] FIRST(*) = {*}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(() = {(}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(( E )) = {(, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST()) = {)}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(symbol) = {symbol, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST([) = {[}
-2025-06-27 03:33:52.306 [DEBUG] FIRST([ S ]) = {[, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(]) = {]}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(?) = {?}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(-) = {-}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(A) = {symbol, [, (, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(A *) = {symbol, [, *, (, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(A ?) = {symbol, [, (, ?, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(A +) = {symbol, [, +, (, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(epsilon) = {ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(|) = {|}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(+) = {+}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(F) = {symbol, ?, +, *, [, (, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(E) = {symbol, ?, +, *, [, (, |, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(E | T) = {symbol, ?, +, *, [, (, |, ε}
-2025-06-27 03:33:52.306 [DEBUG] FIRST(S) = {-, symbol}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(S P) = {-, symbol}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(S R) = {-, symbol}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(T) = {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(T F) = {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(P) = {symbol, ε}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(P - P) = {symbol, -, ε}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(R) = {symbol, -, ε}
-2025-06-27 03:33:52.307 [DEBUG] FIRST(SS) = {symbol, ?, +, *, [, (, |}
-2025-06-27 03:33:52.307 [DEBUG] Construyendo autómata LALR1
-2025-06-27 03:33:52.334 [DEBUG] Autómata LALR1 construido con 26 estados
-2025-06-27 03:33:52.334 [DEBUG] Generando tablas ACTION y GOTO a partir del autómata
-2025-06-27 03:33:52.334 [DEBUG] Procesando estado 0 con 14 items
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> ( E )  (• antes de ()
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> P  (• antes de P)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> [ S ]  (• antes de [)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.334 [DEBUG]   Item: E -> E | T  (• antes de E)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {|}
-2025-06-27 03:33:52.334 [DEBUG]   Item: E -> T  (• antes de T)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {|}
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A *  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A +  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A ?  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.334 [DEBUG]   Item: SS -> E  (• antes de E)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {EOF}
-2025-06-27 03:33:52.334 [DEBUG]   Item: T -> F  (• antes de F)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.334 [DEBUG]   Item: T -> T F  (• antes de T)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.334 [DEBUG] ACTION[0, (] = SHIFT 1
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: SHIFT con ( al estado 1
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, P] = 5
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con P al estado 5
-2025-06-27 03:33:52.334 [DEBUG] ACTION[0, [] = SHIFT 7
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: SHIFT con [ al estado 7
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, E] = 3
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con E al estado 3
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, T] = 6
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con T al estado 6
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] ACTION[0, symbol] = SHIFT 9
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, E] = 3
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con E al estado 3
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, F] = 4
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con F al estado 4
-2025-06-27 03:33:52.334 [DEBUG] GOTO[0, T] = 6
-2025-06-27 03:33:52.334 [DEBUG] Estado 0: GOTO con T al estado 6
-2025-06-27 03:33:52.334 [DEBUG] Procesando estado 1 con 14 items
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> ( E )  (• antes de ()
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> ( E )  (• antes de E)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> P  (• antes de P)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> [ S ]  (• antes de [)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.334 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.334 [DEBUG]   Item: E -> E | T  (• antes de E)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.334 [DEBUG]   Item: E -> T  (• antes de T)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A *  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A +  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A ?  (• antes de A)
-2025-06-27 03:33:52.334 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.334 [DEBUG]   Item: T -> F  (• antes de F)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.334 [DEBUG]   Item: T -> T F  (• antes de T)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.334 [DEBUG] ACTION[1, (] = SHIFT 1
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: SHIFT con ( al estado 1
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, E] = 24
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con E al estado 24
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, P] = 5
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con P al estado 5
-2025-06-27 03:33:52.334 [DEBUG] ACTION[1, [] = SHIFT 7
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: SHIFT con [ al estado 7
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, E] = 24
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con E al estado 24
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, T] = 6
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con T al estado 6
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, A] = 2
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con A al estado 2
-2025-06-27 03:33:52.334 [DEBUG] ACTION[1, symbol] = SHIFT 9
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, F] = 4
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con F al estado 4
-2025-06-27 03:33:52.334 [DEBUG] GOTO[1, T] = 6
-2025-06-27 03:33:52.334 [DEBUG] Estado 1: GOTO con T al estado 6
-2025-06-27 03:33:52.334 [DEBUG] Procesando estado 2 con 4 items
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A  (• al final)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A *  (• antes de *)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A +  (• antes de +)
-2025-06-27 03:33:52.334 [DEBUG]   Item: F -> A ?  (• antes de ?)
-2025-06-27 03:33:52.334 [DEBUG] ACTION[2, *] = SHIFT 21
-2025-06-27 03:33:52.334 [DEBUG] Estado 2: SHIFT con * al estado 21
-2025-06-27 03:33:52.334 [DEBUG] ACTION[2, +] = SHIFT 22
-2025-06-27 03:33:52.334 [DEBUG] Estado 2: SHIFT con + al estado 22
-2025-06-27 03:33:52.334 [DEBUG] ACTION[2, ?] = SHIFT 23
-2025-06-27 03:33:52.334 [DEBUG] Estado 2: SHIFT con ? al estado 23
-2025-06-27 03:33:52.334 [DEBUG] Procesando estado 3 con 2 items
-2025-06-27 03:33:52.334 [DEBUG]   Item: E -> E | T  (• antes de |)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {|}
-2025-06-27 03:33:52.334 [DEBUG]   Item: SS -> E  (• al final)
-2025-06-27 03:33:52.334 [DEBUG]     Lookaheads: {EOF}
-2025-06-27 03:33:52.334 [DEBUG] ACTION[3, |] = SHIFT 19
-2025-06-27 03:33:52.335 [DEBUG] Estado 3: SHIFT con | al estado 19
-2025-06-27 03:33:52.335 [DEBUG] ACTION[3, EOF] = ACCEPT
-2025-06-27 03:33:52.335 [DEBUG] Estado 3: ACCEPT con EOF
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 4 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: T -> F  (• al final)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.335 [DEBUG] Estado 4: REDUCE por T -> F  con lookaheads: 6
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, symbol] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, ?] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, +] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, *] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, [] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[4, (] = REDUCE by T -> F  (ID: 2)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 5 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> P  (• al final)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.335 [DEBUG] Estado 5: REDUCE por A -> P  con lookaheads: 3
-2025-06-27 03:33:52.335 [DEBUG] ACTION[5, *] = REDUCE by A -> P  (ID: 8)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[5, +] = REDUCE by A -> P  (ID: 8)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[5, ?] = REDUCE by A -> P  (ID: 8)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 6 con 11 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> ( E )  (• antes de ()
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> P  (• antes de P)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> [ S ]  (• antes de [)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.335 [DEBUG]   Item: E -> T  (• al final)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A *  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A +  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A ?  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.335 [DEBUG]   Item: T -> T F  (• antes de F)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.335 [DEBUG] ACTION[6, (] = SHIFT 1
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: SHIFT con ( al estado 1
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, P] = 5
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con P al estado 5
-2025-06-27 03:33:52.335 [DEBUG] ACTION[6, [] = SHIFT 7
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: SHIFT con [ al estado 7
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: REDUCE por E -> T  con lookaheads: 2
-2025-06-27 03:33:52.335 [DEBUG] ACTION[6, )] = REDUCE by E -> T  (ID: 0)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[6, |] = REDUCE by E -> T  (ID: 0)
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, A] = 2
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con A al estado 2
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, A] = 2
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con A al estado 2
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, A] = 2
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con A al estado 2
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, A] = 2
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con A al estado 2
-2025-06-27 03:33:52.335 [DEBUG] ACTION[6, symbol] = SHIFT 9
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.335 [DEBUG] GOTO[6, F] = 18
-2025-06-27 03:33:52.335 [DEBUG] Estado 6: GOTO con F al estado 18
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 7 con 7 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> [ S ]  (• antes de S)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.335 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {-}
-2025-06-27 03:33:52.335 [DEBUG]   Item: R -> P - P  (• antes de P)
-2025-06-27 03:33:52.335 [DEBUG]   Item: S -> P  (• antes de P)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {-, symbol, ]}
-2025-06-27 03:33:52.335 [DEBUG]   Item: S -> R  (• antes de R)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {], symbol, -}
-2025-06-27 03:33:52.335 [DEBUG]   Item: S -> S P  (• antes de S)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {], -, symbol}
-2025-06-27 03:33:52.335 [DEBUG]   Item: S -> S R  (• antes de S)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {-, symbol, ]}
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, S] = 12
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con S al estado 12
-2025-06-27 03:33:52.335 [DEBUG] ACTION[7, symbol] = SHIFT 9
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, P] = 10
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con P al estado 10
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, P] = 10
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con P al estado 10
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, R] = 11
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con R al estado 11
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, S] = 12
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con S al estado 12
-2025-06-27 03:33:52.335 [DEBUG] GOTO[7, S] = 12
-2025-06-27 03:33:52.335 [DEBUG] Estado 7: GOTO con S al estado 12
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 8 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> epsilon  (• al final)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.335 [DEBUG] Estado 8: REDUCE por A -> epsilon  con lookaheads: 3
-2025-06-27 03:33:52.335 [DEBUG] ACTION[8, ?] = REDUCE by A -> epsilon  (ID: 9)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[8, +] = REDUCE by A -> epsilon  (ID: 9)
-2025-06-27 03:33:52.335 [DEBUG] ACTION[8, *] = REDUCE by A -> epsilon  (ID: 9)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 9 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: P -> symbol  (• al final)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {-}
-2025-06-27 03:33:52.335 [DEBUG] Estado 9: REDUCE por P -> symbol  con lookaheads: 1
-2025-06-27 03:33:52.335 [DEBUG] ACTION[9, -] = REDUCE by P -> symbol  (ID: 12)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 24 con 2 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> ( E )  (• antes de ))
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.335 [DEBUG]   Item: E -> E | T  (• antes de |)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.335 [DEBUG] ACTION[24, )] = SHIFT 25
-2025-06-27 03:33:52.335 [DEBUG] Estado 24: SHIFT con ) al estado 25
-2025-06-27 03:33:52.335 [DEBUG] ACTION[24, |] = SHIFT 19
-2025-06-27 03:33:52.335 [DEBUG] Estado 24: SHIFT con | al estado 19
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 21 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A *  (• al final)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 22 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A +  (• al final)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 23 con 1 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A ?  (• al final)
-2025-06-27 03:33:52.335 [DEBUG] Procesando estado 19 con 12 items
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> ( E )  (• antes de ()
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> P  (• antes de P)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {+, *, ?}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> [ S ]  (• antes de [)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.335 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.335 [DEBUG]   Item: E -> E | T  (• antes de T)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A *  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A +  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: F -> A ?  (• antes de A)
-2025-06-27 03:33:52.335 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.335 [DEBUG]   Item: T -> F  (• antes de F)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
-2025-06-27 03:33:52.335 [DEBUG]   Item: T -> T F  (• antes de T)
-2025-06-27 03:33:52.335 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
-2025-06-27 03:33:52.335 [DEBUG] ACTION[19, (] = SHIFT 1
-2025-06-27 03:33:52.335 [DEBUG] Estado 19: SHIFT con ( al estado 1
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, P] = 5
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con P al estado 5
-2025-06-27 03:33:52.336 [DEBUG] ACTION[19, [] = SHIFT 7
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: SHIFT con [ al estado 7
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, T] = 20
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con T al estado 20
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] ACTION[19, symbol] = SHIFT 9
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, F] = 4
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con F al estado 4
-2025-06-27 03:33:52.336 [DEBUG] GOTO[19, T] = 20
-2025-06-27 03:33:52.336 [DEBUG] Estado 19: GOTO con T al estado 20
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 18 con 1 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: T -> T F  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
-2025-06-27 03:33:52.336 [DEBUG] Estado 18: REDUCE por T -> T F  con lookaheads: 6
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, symbol] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, ?] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, +] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, *] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, [] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[18, (] = REDUCE by T -> T F  (ID: 3)
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 10 con 2 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: R -> P - P  (• antes de -)
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> P  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {-, symbol, ]}
-2025-06-27 03:33:52.336 [DEBUG] ACTION[10, -] = SHIFT 16
-2025-06-27 03:33:52.336 [DEBUG] Estado 10: SHIFT con - al estado 16
-2025-06-27 03:33:52.336 [DEBUG] Estado 10: REDUCE por S -> P  con lookaheads: 3
-2025-06-27 03:33:52.336 [DEBUG] ACTION[10, -] = REDUCE by S -> P  (ID: 13)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[10, symbol] = REDUCE by S -> P  (ID: 13)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[10, ]] = REDUCE by S -> P  (ID: 13)
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 11 con 1 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> R  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {], symbol, -}
-2025-06-27 03:33:52.336 [DEBUG] Estado 11: REDUCE por S -> R  con lookaheads: 3
-2025-06-27 03:33:52.336 [DEBUG] ACTION[11, ]] = REDUCE by S -> R  (ID: 15)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[11, symbol] = REDUCE by S -> R  (ID: 15)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[11, -] = REDUCE by S -> R  (ID: 15)
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 12 con 5 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> [ S ]  (• antes de ])
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.336 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {-}
-2025-06-27 03:33:52.336 [DEBUG]   Item: R -> P - P  (• antes de P)
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> S P  (• antes de P)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {], -, symbol}
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> S R  (• antes de R)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {-, symbol, ]}
-2025-06-27 03:33:52.336 [DEBUG] ACTION[12, ]] = SHIFT 15
-2025-06-27 03:33:52.336 [DEBUG] Estado 12: SHIFT con ] al estado 15
-2025-06-27 03:33:52.336 [DEBUG] ACTION[12, symbol] = SHIFT 9
-2025-06-27 03:33:52.336 [DEBUG] Estado 12: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.336 [DEBUG] GOTO[12, P] = 13
-2025-06-27 03:33:52.336 [DEBUG] Estado 12: GOTO con P al estado 13
-2025-06-27 03:33:52.336 [DEBUG] GOTO[12, P] = 13
-2025-06-27 03:33:52.336 [DEBUG] Estado 12: GOTO con P al estado 13
-2025-06-27 03:33:52.336 [DEBUG] GOTO[12, R] = 14
-2025-06-27 03:33:52.336 [DEBUG] Estado 12: GOTO con R al estado 14
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 25 con 1 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> ( E )  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.336 [DEBUG] Estado 25: REDUCE por A -> ( E )  con lookaheads: 3
-2025-06-27 03:33:52.336 [DEBUG] ACTION[25, ?] = REDUCE by A -> ( E )  (ID: 10)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[25, *] = REDUCE by A -> ( E )  (ID: 10)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[25, +] = REDUCE by A -> ( E )  (ID: 10)
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 20 con 11 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> ( E )  (• antes de ()
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {?, +, *}
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> P  (• antes de P)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {?, *, +}
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> [ S ]  (• antes de [)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {+, *, ?}
-2025-06-27 03:33:52.336 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {+, *, ?}
-2025-06-27 03:33:52.336 [DEBUG]   Item: E -> E | T  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {), |}
-2025-06-27 03:33:52.336 [DEBUG]   Item: F -> A  (• antes de A)
-2025-06-27 03:33:52.336 [DEBUG]   Item: F -> A *  (• antes de A)
-2025-06-27 03:33:52.336 [DEBUG]   Item: F -> A +  (• antes de A)
-2025-06-27 03:33:52.336 [DEBUG]   Item: F -> A ?  (• antes de A)
-2025-06-27 03:33:52.336 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.336 [DEBUG]   Item: T -> T F  (• antes de F)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
-2025-06-27 03:33:52.336 [DEBUG] ACTION[20, (] = SHIFT 1
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: SHIFT con ( al estado 1
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, P] = 5
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con P al estado 5
-2025-06-27 03:33:52.336 [DEBUG] ACTION[20, [] = SHIFT 7
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: SHIFT con [ al estado 7
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: REDUCE por E -> E | T  con lookaheads: 2
-2025-06-27 03:33:52.336 [DEBUG] ACTION[20, )] = REDUCE by E -> E | T  (ID: 1)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[20, |] = REDUCE by E -> E | T  (ID: 1)
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, A] = 2
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con A al estado 2
-2025-06-27 03:33:52.336 [DEBUG] ACTION[20, symbol] = SHIFT 9
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.336 [DEBUG] GOTO[20, F] = 18
-2025-06-27 03:33:52.336 [DEBUG] Estado 20: GOTO con F al estado 18
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 16 con 2 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: P -> symbol  (• antes de symbol)
-2025-06-27 03:33:52.336 [DEBUG]   Item: R -> P - P  (• antes de P)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[16, symbol] = SHIFT 9
-2025-06-27 03:33:52.336 [DEBUG] Estado 16: SHIFT con symbol al estado 9
-2025-06-27 03:33:52.336 [DEBUG] GOTO[16, P] = 17
-2025-06-27 03:33:52.336 [DEBUG] Estado 16: GOTO con P al estado 17
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 13 con 2 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: R -> P - P  (• antes de -)
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> S P  (• al final)
-2025-06-27 03:33:52.336 [DEBUG]     Lookaheads: {], -, symbol}
-2025-06-27 03:33:52.336 [DEBUG] ACTION[13, -] = SHIFT 16
-2025-06-27 03:33:52.336 [DEBUG] Estado 13: SHIFT con - al estado 16
-2025-06-27 03:33:52.336 [DEBUG] Estado 13: REDUCE por S -> S P  con lookaheads: 3
-2025-06-27 03:33:52.336 [DEBUG] ACTION[13, ]] = REDUCE by S -> S P  (ID: 14)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[13, -] = REDUCE by S -> S P  (ID: 14)
-2025-06-27 03:33:52.336 [DEBUG] ACTION[13, symbol] = REDUCE by S -> S P  (ID: 14)
-2025-06-27 03:33:52.336 [DEBUG] Procesando estado 14 con 1 items
-2025-06-27 03:33:52.336 [DEBUG]   Item: S -> S R  (• al final)
-2025-06-27 03:33:52.337 [DEBUG]     Lookaheads: {-, symbol, ]}
-2025-06-27 03:33:52.337 [DEBUG] Estado 14: REDUCE por S -> S R  con lookaheads: 3
-2025-06-27 03:33:52.337 [DEBUG] ACTION[14, -] = REDUCE by S -> S R  (ID: 16)
-2025-06-27 03:33:52.337 [DEBUG] ACTION[14, symbol] = REDUCE by S -> S R  (ID: 16)
-2025-06-27 03:33:52.337 [DEBUG] ACTION[14, ]] = REDUCE by S -> S R  (ID: 16)
-2025-06-27 03:33:52.337 [DEBUG] Procesando estado 15 con 1 items
-2025-06-27 03:33:52.337 [DEBUG]   Item: A -> [ S ]  (• al final)
-2025-06-27 03:33:52.337 [DEBUG]     Lookaheads: {*, +, ?}
-2025-06-27 03:33:52.337 [DEBUG] Estado 15: REDUCE por A -> [ S ]  con lookaheads: 3
-2025-06-27 03:33:52.337 [DEBUG] ACTION[15, *] = REDUCE by A -> [ S ]  (ID: 11)
-2025-06-27 03:33:52.337 [DEBUG] ACTION[15, +] = REDUCE by A -> [ S ]  (ID: 11)
-2025-06-27 03:33:52.337 [DEBUG] ACTION[15, ?] = REDUCE by A -> [ S ]  (ID: 11)
-2025-06-27 03:33:52.337 [DEBUG] Procesando estado 17 con 1 items
-2025-06-27 03:33:52.337 [DEBUG]   Item: R -> P - P  (• al final)
-2025-06-27 03:33:52.337 [INFO] Tablas de análisis LALR1 creadas: 67 entradas en ACTION, 26 entradas en GOTO
-2025-06-27 03:33:52.337 [DEBUG] Parser LALR1 para el lexer creado
-2025-06-27 03:33:52.337 [INFO] Serializando parser en hulk/parser.p
-2025-06-27 03:33:52.337 [INFO] Parser serializado exitosamente en hulk/parser.p
-2025-06-27 03:33:52.337 [INFO] Creando tabla de tokens para el lexer (48 tokens definidos)
-2025-06-27 03:33:52.337 [INFO] Creando lexer con la tabla de tokens y gramática
-2025-06-27 03:33:52.337 [INFO] Iniciando análisis sintáctico LALR1 con 16 tokens
-2025-06-27 03:33:52.337 [DEBUG] Lista de tokens recibidos por el parser LALR1:
-2025-06-27 03:33:52.337 [DEBUG] [0] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [1] Token string: |
-2025-06-27 03:33:52.337 [DEBUG] [2] Token string: (
-2025-06-27 03:33:52.337 [DEBUG] [3] Token string: [
-2025-06-27 03:33:52.337 [DEBUG] [4] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [5] Token string: -
-2025-06-27 03:33:52.337 [DEBUG] [6] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [7] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [8] Token string: -
-2025-06-27 03:33:52.337 [DEBUG] [9] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [10] Token string: ]
-2025-06-27 03:33:52.337 [DEBUG] [11] Token string: )
-2025-06-27 03:33:52.337 [DEBUG] [12] Token string: *
-2025-06-27 03:33:52.337 [DEBUG] [13] Token string: |
-2025-06-27 03:33:52.337 [DEBUG] [14] Token string: symbol
-2025-06-27 03:33:52.337 [DEBUG] [15] Token string: EOF
-2025-06-27 03:33:52.337 [ERROR] Error sintáctico en estado 9: token inesperado '|'
-2025-06-27 03:33:52.337 [DEBUG] Tokens esperados: '-'
+2025-07-11 12:37:19.195 [INFO] ========== HULK COMPILER LOGGING SESSION ===========
+2025-07-11 12:37:19.195 [INFO] Log file: hulk_artifacts.log
+2025-07-11 12:37:19.195 [INFO] Log level: DEBUG
+2025-07-11 12:37:19.195 [INFO] Initialized by component: Artifact Creator
+2025-07-11 12:37:19.195 [INFO] ==================================================
+2025-07-11 12:37:19.195 [INFO] === HULK Artifact Creator Starting ===
+2025-07-11 12:37:19.195 [INFO] Obteniendo la gramática de Hulk
+2025-07-11 12:37:19.196 [INFO] Gramática obtenida con 109 producciones
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: decl_list -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: lines -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: args_list -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: expr_list -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: type_body_elements -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: attributes -> epsilon 
+2025-07-11 12:37:19.196 [DEBUG] Producción con epsilon: method_list -> epsilon 
+2025-07-11 12:37:19.196 [INFO] Se encontraron 7 producciones con epsilon
+2025-07-11 12:37:19.196 [INFO] Comenzando la creación de artefactos
+2025-07-11 12:37:19.196 [INFO] Iniciando creación de artefactos del compilador
+2025-07-11 12:37:19.196 [DEBUG] Contador de producciones reiniciado
+2025-07-11 12:37:19.196 [DEBUG] Directorio 'hulk' ya existe
+2025-07-11 12:37:19.196 [INFO] Analizando gramática del lexer desde Lexer/grammar.txt
+2025-07-11 12:37:19.196 [INFO] Gramática del lexer analizada con éxito (18 producciones)
+2025-07-11 12:37:19.196 [INFO] Creando parser LALR1 para la gramática del lexer
+2025-07-11 12:37:19.196 [INFO] Inicializando parser LALR1 con gramática de 18 producciones
+2025-07-11 12:37:19.196 [DEBUG] Detalle de la gramática:
+2025-07-11 12:37:19.196 [DEBUG]   E -> T  (ID: 0)
+2025-07-11 12:37:19.196 [DEBUG]   E -> E | T  (ID: 1)
+2025-07-11 12:37:19.196 [DEBUG]   T -> F  (ID: 2)
+2025-07-11 12:37:19.196 [DEBUG]   T -> T F  (ID: 3)
+2025-07-11 12:37:19.196 [DEBUG]   F -> A  (ID: 4)
+2025-07-11 12:37:19.196 [DEBUG]   F -> A *  (ID: 5)
+2025-07-11 12:37:19.196 [DEBUG]   F -> A ?  (ID: 6)
+2025-07-11 12:37:19.196 [DEBUG]   F -> A +  (ID: 7)
+2025-07-11 12:37:19.196 [DEBUG]   A -> P  (ID: 8)
+2025-07-11 12:37:19.196 [DEBUG]   A -> epsilon  (ID: 9)
+2025-07-11 12:37:19.196 [DEBUG]   A -> ( E )  (ID: 10)
+2025-07-11 12:37:19.196 [DEBUG]   A -> [ S ]  (ID: 11)
+2025-07-11 12:37:19.196 [DEBUG]   P -> symbol  (ID: 12)
+2025-07-11 12:37:19.196 [DEBUG]   S -> P  (ID: 13)
+2025-07-11 12:37:19.196 [DEBUG]   S -> S P  (ID: 14)
+2025-07-11 12:37:19.196 [DEBUG]   S -> R  (ID: 15)
+2025-07-11 12:37:19.196 [DEBUG]   S -> S R  (ID: 16)
+2025-07-11 12:37:19.196 [DEBUG]   R -> P - P  (ID: 17)
+2025-07-11 12:37:19.196 [INFO] Construyendo tabla de análisis sintáctico LALR1
+2025-07-11 12:37:19.196 [DEBUG] Gramática aumentada correctamente
+2025-07-11 12:37:19.196 [DEBUG] Símbolo inicial: SS
+2025-07-11 12:37:19.196 [DEBUG] Calculando conjuntos FIRST para construcción de autómata LALR1
+2025-07-11 12:37:19.198 [DEBUG] === CONJUNTOS FIRST CALCULADOS ===
+2025-07-11 12:37:19.198 [DEBUG] FIRST(*) = {*}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(() = {(}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(( E )) = {(, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST()) = {)}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(symbol) = {symbol, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST([) = {[}
+2025-07-11 12:37:19.198 [DEBUG] FIRST([ S ]) = {[, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(]) = {]}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(?) = {?}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(-) = {-}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(A) = {symbol, [, (, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(A *) = {symbol, [, *, (, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(A ?) = {symbol, [, (, ?, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(A +) = {symbol, [, +, (, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(P) = {symbol, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(P - P) = {symbol, -, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(epsilon) = {ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(F) = {symbol, ?, +, *, [, (, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(E) = {symbol, ?, +, *, [, (, |, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(E | T) = {symbol, ?, +, *, [, (, |, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(S) = {-, symbol}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(S P) = {-, symbol}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(S R) = {-, symbol}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(|) = {|}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(+) = {+}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(T) = {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(T F) = {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(R) = {symbol, -, ε}
+2025-07-11 12:37:19.198 [DEBUG] FIRST(SS) = {symbol, ?, +, *, [, (, |}
+2025-07-11 12:37:19.198 [DEBUG] Construyendo autómata LALR1
+2025-07-11 12:37:19.251 [DEBUG] Autómata LALR1 construido con 26 estados
+2025-07-11 12:37:19.251 [DEBUG] Generando tablas ACTION y GOTO a partir del autómata
+2025-07-11 12:37:19.251 [DEBUG] Procesando estado 0 con 14 items
+2025-07-11 12:37:19.251 [DEBUG]   Item: A -> ( E )  (• antes de ()
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.251 [DEBUG]   Item: A -> P  (• antes de P)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.251 [DEBUG]   Item: A -> [ S ]  (• antes de [)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.251 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.251 [DEBUG]   Item: E -> E | T  (• antes de E)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {|}
+2025-07-11 12:37:19.251 [DEBUG]   Item: E -> T  (• antes de T)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {|}
+2025-07-11 12:37:19.251 [DEBUG]   Item: F -> A  (• antes de A)
+2025-07-11 12:37:19.251 [DEBUG]   Item: F -> A *  (• antes de A)
+2025-07-11 12:37:19.251 [DEBUG]   Item: F -> A +  (• antes de A)
+2025-07-11 12:37:19.251 [DEBUG]   Item: F -> A ?  (• antes de A)
+2025-07-11 12:37:19.251 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.251 [DEBUG]   Item: SS -> E  (• antes de E)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {EOF}
+2025-07-11 12:37:19.251 [DEBUG]   Item: T -> F  (• antes de F)
+2025-07-11 12:37:19.251 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.251 [DEBUG]   Item: T -> T F  (• antes de T)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.252 [DEBUG] ACTION[0, (] = SHIFT 1
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: SHIFT con ( al estado 1
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, P] = 5
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con P al estado 5
+2025-07-11 12:37:19.252 [DEBUG] ACTION[0, [] = SHIFT 7
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: SHIFT con [ al estado 7
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, E] = 3
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con E al estado 3
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, T] = 6
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con T al estado 6
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] ACTION[0, symbol] = SHIFT 9
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, E] = 3
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con E al estado 3
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, F] = 4
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con F al estado 4
+2025-07-11 12:37:19.252 [DEBUG] GOTO[0, T] = 6
+2025-07-11 12:37:19.252 [DEBUG] Estado 0: GOTO con T al estado 6
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 1 con 14 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> ( E )  (• antes de ()
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> ( E )  (• antes de E)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> P  (• antes de P)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> [ S ]  (• antes de [)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {?, *, +}
+2025-07-11 12:37:19.252 [DEBUG]   Item: E -> E | T  (• antes de E)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.252 [DEBUG]   Item: E -> T  (• antes de T)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A *  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A +  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A ?  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.252 [DEBUG]   Item: T -> F  (• antes de F)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.252 [DEBUG]   Item: T -> T F  (• antes de T)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.252 [DEBUG] ACTION[1, (] = SHIFT 1
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: SHIFT con ( al estado 1
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, E] = 24
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con E al estado 24
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, P] = 5
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con P al estado 5
+2025-07-11 12:37:19.252 [DEBUG] ACTION[1, [] = SHIFT 7
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: SHIFT con [ al estado 7
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, E] = 24
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con E al estado 24
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, T] = 6
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con T al estado 6
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] ACTION[1, symbol] = SHIFT 9
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, F] = 4
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con F al estado 4
+2025-07-11 12:37:19.252 [DEBUG] GOTO[1, T] = 6
+2025-07-11 12:37:19.252 [DEBUG] Estado 1: GOTO con T al estado 6
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 2 con 4 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A  (• al final)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A *  (• antes de *)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A +  (• antes de +)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A ?  (• antes de ?)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[2, *] = SHIFT 21
+2025-07-11 12:37:19.252 [DEBUG] Estado 2: SHIFT con * al estado 21
+2025-07-11 12:37:19.252 [DEBUG] ACTION[2, +] = SHIFT 22
+2025-07-11 12:37:19.252 [DEBUG] Estado 2: SHIFT con + al estado 22
+2025-07-11 12:37:19.252 [DEBUG] ACTION[2, ?] = SHIFT 23
+2025-07-11 12:37:19.252 [DEBUG] Estado 2: SHIFT con ? al estado 23
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 3 con 2 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: E -> E | T  (• antes de |)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {|}
+2025-07-11 12:37:19.252 [DEBUG]   Item: SS -> E  (• al final)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {EOF}
+2025-07-11 12:37:19.252 [DEBUG] ACTION[3, |] = SHIFT 19
+2025-07-11 12:37:19.252 [DEBUG] Estado 3: SHIFT con | al estado 19
+2025-07-11 12:37:19.252 [DEBUG] ACTION[3, EOF] = ACCEPT
+2025-07-11 12:37:19.252 [DEBUG] Estado 3: ACCEPT con EOF
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 4 con 1 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: T -> F  (• al final)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.252 [DEBUG] Estado 4: REDUCE por T -> F  con lookaheads: 6
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, symbol] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, ?] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, +] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, *] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, [] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[4, (] = REDUCE by T -> F  (ID: 2)
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 5 con 1 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> P  (• al final)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.252 [DEBUG] Estado 5: REDUCE por A -> P  con lookaheads: 3
+2025-07-11 12:37:19.252 [DEBUG] ACTION[5, ?] = REDUCE by A -> P  (ID: 8)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[5, +] = REDUCE by A -> P  (ID: 8)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[5, *] = REDUCE by A -> P  (ID: 8)
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 6 con 11 items
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> ( E )  (• antes de ()
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> P  (• antes de P)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {?, *, +}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> [ S ]  (• antes de [)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.252 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.252 [DEBUG]   Item: E -> T  (• al final)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A *  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A +  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: F -> A ?  (• antes de A)
+2025-07-11 12:37:19.252 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.252 [DEBUG]   Item: T -> T F  (• antes de F)
+2025-07-11 12:37:19.252 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.252 [DEBUG] ACTION[6, (] = SHIFT 1
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: SHIFT con ( al estado 1
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, P] = 5
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con P al estado 5
+2025-07-11 12:37:19.252 [DEBUG] ACTION[6, [] = SHIFT 7
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: SHIFT con [ al estado 7
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: REDUCE por E -> T  con lookaheads: 2
+2025-07-11 12:37:19.252 [DEBUG] ACTION[6, )] = REDUCE by E -> T  (ID: 0)
+2025-07-11 12:37:19.252 [DEBUG] ACTION[6, |] = REDUCE by E -> T  (ID: 0)
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, A] = 2
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con A al estado 2
+2025-07-11 12:37:19.252 [DEBUG] ACTION[6, symbol] = SHIFT 9
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.252 [DEBUG] GOTO[6, F] = 18
+2025-07-11 12:37:19.252 [DEBUG] Estado 6: GOTO con F al estado 18
+2025-07-11 12:37:19.252 [DEBUG] Procesando estado 7 con 7 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> [ S ]  (• antes de S)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.253 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {-}
+2025-07-11 12:37:19.253 [DEBUG]   Item: R -> P - P  (• antes de P)
+2025-07-11 12:37:19.253 [DEBUG]   Item: S -> P  (• antes de P)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.253 [DEBUG]   Item: S -> R  (• antes de R)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.253 [DEBUG]   Item: S -> S P  (• antes de S)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.253 [DEBUG]   Item: S -> S R  (• antes de S)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {], symbol, -}
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, S] = 12
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con S al estado 12
+2025-07-11 12:37:19.253 [DEBUG] ACTION[7, symbol] = SHIFT 9
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, P] = 10
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con P al estado 10
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, P] = 10
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con P al estado 10
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, R] = 11
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con R al estado 11
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, S] = 12
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con S al estado 12
+2025-07-11 12:37:19.253 [DEBUG] GOTO[7, S] = 12
+2025-07-11 12:37:19.253 [DEBUG] Estado 7: GOTO con S al estado 12
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 8 con 1 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> epsilon  (• al final)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.253 [DEBUG] Estado 8: REDUCE por A -> epsilon  con lookaheads: 3
+2025-07-11 12:37:19.253 [DEBUG] ACTION[8, ?] = REDUCE by A -> epsilon  (ID: 9)
+2025-07-11 12:37:19.253 [DEBUG] ACTION[8, +] = REDUCE by A -> epsilon  (ID: 9)
+2025-07-11 12:37:19.253 [DEBUG] ACTION[8, *] = REDUCE by A -> epsilon  (ID: 9)
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 9 con 1 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: P -> symbol  (• al final)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {-}
+2025-07-11 12:37:19.253 [DEBUG] Estado 9: REDUCE por P -> symbol  con lookaheads: 1
+2025-07-11 12:37:19.253 [DEBUG] ACTION[9, -] = REDUCE by P -> symbol  (ID: 12)
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 24 con 2 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> ( E )  (• antes de ))
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.253 [DEBUG]   Item: E -> E | T  (• antes de |)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.253 [DEBUG] ACTION[24, )] = SHIFT 25
+2025-07-11 12:37:19.253 [DEBUG] Estado 24: SHIFT con ) al estado 25
+2025-07-11 12:37:19.253 [DEBUG] ACTION[24, |] = SHIFT 19
+2025-07-11 12:37:19.253 [DEBUG] Estado 24: SHIFT con | al estado 19
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 21 con 1 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A *  (• al final)
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 22 con 1 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A +  (• al final)
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 23 con 1 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A ?  (• al final)
+2025-07-11 12:37:19.253 [DEBUG] Procesando estado 19 con 12 items
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> ( E )  (• antes de ()
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {?, *, +}
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> P  (• antes de P)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> [ S ]  (• antes de [)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.253 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.253 [DEBUG]   Item: E -> E | T  (• antes de T)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A  (• antes de A)
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A *  (• antes de A)
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A +  (• antes de A)
+2025-07-11 12:37:19.253 [DEBUG]   Item: F -> A ?  (• antes de A)
+2025-07-11 12:37:19.253 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.253 [DEBUG]   Item: T -> F  (• antes de F)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
+2025-07-11 12:37:19.253 [DEBUG]   Item: T -> T F  (• antes de T)
+2025-07-11 12:37:19.253 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
+2025-07-11 12:37:19.253 [DEBUG] ACTION[19, (] = SHIFT 1
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: SHIFT con ( al estado 1
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, P] = 5
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con P al estado 5
+2025-07-11 12:37:19.253 [DEBUG] ACTION[19, [] = SHIFT 7
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: SHIFT con [ al estado 7
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, T] = 20
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con T al estado 20
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, A] = 2
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con A al estado 2
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, A] = 2
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con A al estado 2
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, A] = 2
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con A al estado 2
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, A] = 2
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con A al estado 2
+2025-07-11 12:37:19.253 [DEBUG] ACTION[19, symbol] = SHIFT 9
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.253 [DEBUG] GOTO[19, F] = 4
+2025-07-11 12:37:19.253 [DEBUG] Estado 19: GOTO con F al estado 4
+2025-07-11 12:37:19.254 [DEBUG] GOTO[19, T] = 20
+2025-07-11 12:37:19.254 [DEBUG] Estado 19: GOTO con T al estado 20
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 18 con 1 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: T -> T F  (• al final)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {symbol, ?, +, *, [, (}
+2025-07-11 12:37:19.254 [DEBUG] Estado 18: REDUCE por T -> T F  con lookaheads: 6
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, symbol] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, ?] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, +] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, *] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, [] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[18, (] = REDUCE by T -> T F  (ID: 3)
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 10 con 2 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: R -> P - P  (• antes de -)
+2025-07-11 12:37:19.254 [DEBUG]   Item: S -> P  (• al final)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.254 [DEBUG] ACTION[10, -] = SHIFT 16
+2025-07-11 12:37:19.254 [DEBUG] Estado 10: SHIFT con - al estado 16
+2025-07-11 12:37:19.254 [DEBUG] Estado 10: REDUCE por S -> P  con lookaheads: 3
+2025-07-11 12:37:19.254 [DEBUG] ACTION[10, -] = REDUCE by S -> P  (ID: 13)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[10, symbol] = REDUCE by S -> P  (ID: 13)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[10, ]] = REDUCE by S -> P  (ID: 13)
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 11 con 1 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: S -> R  (• al final)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.254 [DEBUG] Estado 11: REDUCE por S -> R  con lookaheads: 3
+2025-07-11 12:37:19.254 [DEBUG] ACTION[11, -] = REDUCE by S -> R  (ID: 15)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[11, symbol] = REDUCE by S -> R  (ID: 15)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[11, ]] = REDUCE by S -> R  (ID: 15)
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 12 con 5 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> [ S ]  (• antes de ])
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.254 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {-}
+2025-07-11 12:37:19.254 [DEBUG]   Item: R -> P - P  (• antes de P)
+2025-07-11 12:37:19.254 [DEBUG]   Item: S -> S P  (• antes de P)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.254 [DEBUG]   Item: S -> S R  (• antes de R)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {], symbol, -}
+2025-07-11 12:37:19.254 [DEBUG] ACTION[12, ]] = SHIFT 15
+2025-07-11 12:37:19.254 [DEBUG] Estado 12: SHIFT con ] al estado 15
+2025-07-11 12:37:19.254 [DEBUG] ACTION[12, symbol] = SHIFT 9
+2025-07-11 12:37:19.254 [DEBUG] Estado 12: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.254 [DEBUG] GOTO[12, P] = 13
+2025-07-11 12:37:19.254 [DEBUG] Estado 12: GOTO con P al estado 13
+2025-07-11 12:37:19.254 [DEBUG] GOTO[12, P] = 13
+2025-07-11 12:37:19.254 [DEBUG] Estado 12: GOTO con P al estado 13
+2025-07-11 12:37:19.254 [DEBUG] GOTO[12, R] = 14
+2025-07-11 12:37:19.254 [DEBUG] Estado 12: GOTO con R al estado 14
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 25 con 1 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> ( E )  (• al final)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.254 [DEBUG] Estado 25: REDUCE por A -> ( E )  con lookaheads: 3
+2025-07-11 12:37:19.254 [DEBUG] ACTION[25, +] = REDUCE by A -> ( E )  (ID: 10)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[25, *] = REDUCE by A -> ( E )  (ID: 10)
+2025-07-11 12:37:19.254 [DEBUG] ACTION[25, ?] = REDUCE by A -> ( E )  (ID: 10)
+2025-07-11 12:37:19.254 [DEBUG] Procesando estado 20 con 11 items
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> ( E )  (• antes de ()
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {?, *, +}
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> P  (• antes de P)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> [ S ]  (• antes de [)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {?, +, *}
+2025-07-11 12:37:19.254 [DEBUG]   Item: A -> epsilon  (• antes de epsilon)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {+, *, ?}
+2025-07-11 12:37:19.254 [DEBUG]   Item: E -> E | T  (• al final)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {), |}
+2025-07-11 12:37:19.254 [DEBUG]   Item: F -> A  (• antes de A)
+2025-07-11 12:37:19.254 [DEBUG]   Item: F -> A *  (• antes de A)
+2025-07-11 12:37:19.254 [DEBUG]   Item: F -> A +  (• antes de A)
+2025-07-11 12:37:19.254 [DEBUG]   Item: F -> A ?  (• antes de A)
+2025-07-11 12:37:19.254 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.254 [DEBUG]   Item: T -> T F  (• antes de F)
+2025-07-11 12:37:19.254 [DEBUG]     Lookaheads: {(, [, *, +, ?, symbol}
+2025-07-11 12:37:19.255 [DEBUG] ACTION[20, (] = SHIFT 1
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: SHIFT con ( al estado 1
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, P] = 5
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con P al estado 5
+2025-07-11 12:37:19.255 [DEBUG] ACTION[20, [] = SHIFT 7
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: SHIFT con [ al estado 7
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: REDUCE por E -> E | T  con lookaheads: 2
+2025-07-11 12:37:19.255 [DEBUG] ACTION[20, )] = REDUCE by E -> E | T  (ID: 1)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[20, |] = REDUCE by E -> E | T  (ID: 1)
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, A] = 2
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con A al estado 2
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, A] = 2
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con A al estado 2
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, A] = 2
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con A al estado 2
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, A] = 2
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con A al estado 2
+2025-07-11 12:37:19.255 [DEBUG] ACTION[20, symbol] = SHIFT 9
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.255 [DEBUG] GOTO[20, F] = 18
+2025-07-11 12:37:19.255 [DEBUG] Estado 20: GOTO con F al estado 18
+2025-07-11 12:37:19.255 [DEBUG] Procesando estado 16 con 2 items
+2025-07-11 12:37:19.255 [DEBUG]   Item: P -> symbol  (• antes de symbol)
+2025-07-11 12:37:19.255 [DEBUG]   Item: R -> P - P  (• antes de P)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[16, symbol] = SHIFT 9
+2025-07-11 12:37:19.255 [DEBUG] Estado 16: SHIFT con symbol al estado 9
+2025-07-11 12:37:19.255 [DEBUG] GOTO[16, P] = 17
+2025-07-11 12:37:19.255 [DEBUG] Estado 16: GOTO con P al estado 17
+2025-07-11 12:37:19.255 [DEBUG] Procesando estado 13 con 2 items
+2025-07-11 12:37:19.255 [DEBUG]   Item: R -> P - P  (• antes de -)
+2025-07-11 12:37:19.255 [DEBUG]   Item: S -> S P  (• al final)
+2025-07-11 12:37:19.255 [DEBUG]     Lookaheads: {-, symbol, ]}
+2025-07-11 12:37:19.255 [DEBUG] ACTION[13, -] = SHIFT 16
+2025-07-11 12:37:19.255 [DEBUG] Estado 13: SHIFT con - al estado 16
+2025-07-11 12:37:19.255 [DEBUG] Estado 13: REDUCE por S -> S P  con lookaheads: 3
+2025-07-11 12:37:19.255 [DEBUG] ACTION[13, -] = REDUCE by S -> S P  (ID: 14)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[13, symbol] = REDUCE by S -> S P  (ID: 14)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[13, ]] = REDUCE by S -> S P  (ID: 14)
+2025-07-11 12:37:19.255 [DEBUG] Procesando estado 14 con 1 items
+2025-07-11 12:37:19.255 [DEBUG]   Item: S -> S R  (• al final)
+2025-07-11 12:37:19.255 [DEBUG]     Lookaheads: {], symbol, -}
+2025-07-11 12:37:19.255 [DEBUG] Estado 14: REDUCE por S -> S R  con lookaheads: 3
+2025-07-11 12:37:19.255 [DEBUG] ACTION[14, ]] = REDUCE by S -> S R  (ID: 16)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[14, symbol] = REDUCE by S -> S R  (ID: 16)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[14, -] = REDUCE by S -> S R  (ID: 16)
+2025-07-11 12:37:19.255 [DEBUG] Procesando estado 15 con 1 items
+2025-07-11 12:37:19.255 [DEBUG]   Item: A -> [ S ]  (• al final)
+2025-07-11 12:37:19.255 [DEBUG]     Lookaheads: {*, +, ?}
+2025-07-11 12:37:19.255 [DEBUG] Estado 15: REDUCE por A -> [ S ]  con lookaheads: 3
+2025-07-11 12:37:19.255 [DEBUG] ACTION[15, *] = REDUCE by A -> [ S ]  (ID: 11)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[15, +] = REDUCE by A -> [ S ]  (ID: 11)
+2025-07-11 12:37:19.255 [DEBUG] ACTION[15, ?] = REDUCE by A -> [ S ]  (ID: 11)
+2025-07-11 12:37:19.255 [DEBUG] Procesando estado 17 con 1 items
+2025-07-11 12:37:19.255 [DEBUG]   Item: R -> P - P  (• al final)
+2025-07-11 12:37:19.255 [INFO] Tablas de análisis LALR1 creadas: 67 entradas en ACTION, 26 entradas en GOTO
+2025-07-11 12:37:19.255 [DEBUG] Parser LALR1 para el lexer creado
+2025-07-11 12:37:19.255 [INFO] Serializando parser en hulk/parser.p
+2025-07-11 12:37:19.255 [INFO] Parser serializado exitosamente en hulk/parser.p
+2025-07-11 12:37:19.255 [INFO] Creando tabla de tokens para el lexer (48 tokens definidos)
+2025-07-11 12:37:19.255 [INFO] Creando lexer con la tabla de tokens y gramática
+2025-07-11 12:37:19.255 [INFO] Iniciando análisis sintáctico LALR1 con 16 tokens
+2025-07-11 12:37:19.256 [DEBUG] Lista de tokens recibidos por el parser LALR1:
+2025-07-11 12:37:19.256 [DEBUG] [0] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [1] Token string: |
+2025-07-11 12:37:19.256 [DEBUG] [2] Token string: (
+2025-07-11 12:37:19.256 [DEBUG] [3] Token string: [
+2025-07-11 12:37:19.256 [DEBUG] [4] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [5] Token string: -
+2025-07-11 12:37:19.256 [DEBUG] [6] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [7] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [8] Token string: -
+2025-07-11 12:37:19.256 [DEBUG] [9] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [10] Token string: ]
+2025-07-11 12:37:19.256 [DEBUG] [11] Token string: )
+2025-07-11 12:37:19.256 [DEBUG] [12] Token string: *
+2025-07-11 12:37:19.256 [DEBUG] [13] Token string: |
+2025-07-11 12:37:19.256 [DEBUG] [14] Token string: symbol
+2025-07-11 12:37:19.256 [DEBUG] [15] Token string: EOF
+2025-07-11 12:37:19.256 [ERROR] Error sintáctico en estado 9: token inesperado '|'
+2025-07-11 12:37:19.256 [DEBUG] Tokens esperados: '-'
