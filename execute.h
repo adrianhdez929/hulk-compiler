@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Lexer/Lexer.h"
-#include "Parser/LALR1Parser.h"
+#include "Parser/SLR1Parser.h"
 #include "Grammar/grammar.h"
 #include "Ast/ast.hpp"
 #include "Logger/Logger.h"
@@ -65,7 +65,7 @@ std::vector<Token> tokenize_source(const std::string& source_code, Lexer* lexer,
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Puntero al AST generado, o nullptr si hubo errores
  */
-ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, LALR1Parser* parser, 
+ASTNode* build_ast_from_tokens(const std::vector<Token>& tokens, SLR1Parser* parser, 
                              Grammar& hulk_grammar, std::string& error_message, bool verbose = false);
 
 /**

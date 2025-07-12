@@ -65,8 +65,8 @@ $(BUILDDIR)/libstandard.so: $(SRC_DIR)/codegen/standard.cpp | $(BUILDDIR)
 $(BUILDDIR)/$(PROGRAM): $(OBJS) $(BUILDDIR)/libstandard.so
 	$(CC) $(CFLAGS) $(OBJS) -o $(BUILDDIR)/$(PROGRAM) -lfl -L$(BUILDDIR) -lstandard $(LDFLAGS)
 
-#$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.tab.h: $(SRC_DIR)/parser.y | $(BUILDDIR)
-#	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
+$(BUILDDIR)/parser.tab.c $(BUILDDIR)/parser.tab.h: $(SRC_DIR)/parser.y | $(BUILDDIR)
+	$(YACC) -d -o $(BUILDDIR)/parser.tab.c $(SRC_DIR)/parser.y
 
 $(BUILDDIR)/lex.yy.c: $(SRC_DIR)/lexer.l $(BUILDDIR)/parser.tab.h
 	$(LEX) -o $(BUILDDIR)/lex.yy.c $(SRC_DIR)/lexer.l

@@ -29,37 +29,37 @@ CodegenVisitor* codegenVisitor = new CodegenVisitor();
 
 int main(int argc, char* argv[]) {
     // Inicializar el sistema de registro
-    Logger::initialize("hulk_compiler.log", LogLevel::DEBUG, "Main Compiler");
-    LogInfo("=== HULK Compiler Starting ===");
+    // Logger::initialize("hulk_compiler.log", LogLevel::DEBUG, "Main Compiler");
+    // LogInfo("=== HULK Compiler Starting ===");
 
-    std::string file_path = "script.hulk"; // Default file path
+    // std::string file_path = "script.hulk"; // Default file path
     
-    // Si se proporciona un argumento, utilizarlo como ruta del archivo
-    if (argc > 1) {
-        file_path = argv[1];
-        LogInfo("Usando archivo: " + std::string(argv[1]));
-    } else {
-        LogInfo("Usando archivo por defecto: " + file_path);
-    }
+    // // Si se proporciona un argumento, utilizarlo como ruta del archivo
+    // if (argc > 1) {
+    //     file_path = argv[1];
+    //     LogInfo("Usando archivo: " + std::string(argv[1]));
+    // } else {
+    //     LogInfo("Usando archivo por defecto: " + file_path);
+    // }
 
-    LogInfo("Cargando gramática de HULK");
-    Grammar hulk_grammar = getHulkGrammar();
-    LogInfo("Gramática HULK cargada con " + std::to_string(hulk_grammar.Productions().size()) + " producciones");
+    // LogInfo("Cargando gramática de HULK");
+    // Grammar hulk_grammar = getHulkGrammar();
+    // LogInfo("Gramática HULK cargada con " + std::to_string(hulk_grammar.Productions().size()) + " producciones");
 
-    std::string error_message;
-    std::string script_content = read_source_file(file_path, error_message);
-    if (script_content.empty()) {
-        std::cerr << "Error: " << error_message << std::endl;
-        return 1;
-    }
+    // std::string error_message;
+    // std::string script_content = read_source_file(file_path, error_message);
+    // if (script_content.empty()) {
+    //     std::cerr << "Error: " << error_message << std::endl;
+    //     return 1;
+    // }
 
-    root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
+    // root = compile_hulk(script_content, error_message, hulk_grammar, false); // false for no verbose output
 
-    if (!root) {
-        std::cerr << "Error al compilar el script: " << error_message << std::endl;
-        return 1;
-    }
-    root->print();
+    // if (!root) {
+    //     std::cerr << "Error al compilar el script: " << error_message << std::endl;
+    //     return 1;
+    // }
+    // root->print();
 
     // Simple test to avoid segfaults
     
@@ -91,26 +91,26 @@ int main(int argc, char* argv[]) {
     // return 0;
 
     // //region: Flex/Bison setup
-    // const char* filename = "script.hulk"; //default
-    // if (argc > 1) {
-	// 	filename = argv[1];
-    // }
-	// yyin = fopen(filename, "r");
-	// if (!yyin) {
-	// 	std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
-	// 	return 1;
-	// }
-    // yyparse();
-    // // //endregion
+    const char* filename = "script.hulk"; //default
+    if (argc > 1) {
+		filename = argv[1];
+    }
+	yyin = fopen(filename, "r");
+	if (!yyin) {
+		std::cerr << "Error: No se pudo abrir el archivo " << std::endl;
+		return 1;
+	}
+    yyparse();
+    // //endregion
 
-    // if (!root) {
-    //     std::cerr << "Error: No se pudo construir el AST" << std::endl;
-    //     return 1;
-    // }
+    if (!root) {
+        std::cerr << "Error: No se pudo construir el AST" << std::endl;
+        return 1;
+    }
 
-    // std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
-    // root->print();
-    //     std::cout << "\n=== Starting Two-Pass Semantic Analysis ===" << std::endl;
+    std::cout << "Arbol de Sintaxis Abstracta:" << std::endl; 
+    root->print();
+        std::cout << "\n=== Starting Two-Pass Semantic Analysis ===" << std::endl;
         
     //     // Create a global context for semantic analysis (with null parent for root context)
     Context* globalContext = new Context(nullptr);
