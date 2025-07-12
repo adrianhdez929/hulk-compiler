@@ -43,7 +43,7 @@ ASTNode* compile_hulk_file(const std::string& file_path, std::string& error_mess
  * @param verbose Si es true, imprime mensajes informativos durante el proceso
  * @return Par con el lexer y parser cargados, o nullptr si hubo errores
  */
-std::pair<Lexer*, LALR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose = false);
+std::pair<Lexer*, SLR1Parser*> load_compiler_artifacts(std::string& error_message, Grammar& parser_grammar, bool verbose = false);
 
 /**
  * @brief Tokeniza un código fuente Hulk
