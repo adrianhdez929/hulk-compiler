@@ -3026,8 +3026,30 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
         Builder->SetInsertPoint(typeBB);
         std::string methodKey = typeName + "_" + methodName;
         auto funcIt = methodFunctionMap.find(methodKey);
+        
+        // If method not found in current type, search inheritance chain
+        llvm::Function* methodFunc = nullptr;
+        std::string resolvedMethodKey = methodKey;
+        
         if (funcIt != methodFunctionMap.end()) {
-            llvm::Function* methodFunc = funcIt->second;
+            methodFunc = funcIt->second;
+        } else {
+            // Search inheritance chain for the method
+            std::string currentType = typeName;
+            while (!methodFunc && typeInheritanceMap.find(currentType) != typeInheritanceMap.end()) {
+                std::string parentType = typeInheritanceMap[currentType];
+                std::string parentMethodKey = parentType + "_" + methodName;
+                auto parentFuncIt = methodFunctionMap.find(parentMethodKey);
+                if (parentFuncIt != methodFunctionMap.end()) {
+                    methodFunc = parentFuncIt->second;
+                    resolvedMethodKey = parentMethodKey;
+                    break;
+                }
+                currentType = parentType;
+            }
+        }
+        
+        if (methodFunc) {
             std::vector<llvm::Value*> callArgs = {objectPtr};
             callArgs.insert(callArgs.end(), args.begin(), args.end());
             
@@ -3035,9 +3057,9 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
             phiIncoming.push_back({result, typeBB});
             Builder->CreateBr(endBB);
             
-            cout << "DEBUG: Generated conditional call for " << methodKey << endl;
+            cout << "DEBUG: Generated conditional call for " << resolvedMethodKey << endl;
         } else {
-            // If method not found for this type, create a null return or default
+            // If method not found even in inheritance chain, create a default return
             llvm::Value* defaultResult;
             if (returnType->isDoubleTy()) {
                 defaultResult = llvm::ConstantFP::get(returnType, 0.0);
@@ -3048,6 +3070,8 @@ llvm::Value* CodegenVisitor::callVirtualMethodWithVTableLookup(llvm::Value* obje
             }
             phiIncoming.push_back({defaultResult, typeBB});
             Builder->CreateBr(endBB);
+            
+            cout << "DEBUG: Method " << methodName << " not found for type " << typeName << " or its parents, using default value" << endl;
         }
         
         // Move to next check
